@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "news-trend"
+version = "0.1.0"
+description = "Daily US news ingestion & dedup for trend analysis"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{name="you", email="you@example.com"}]
+dependencies = [
+    "requests>=2.32",
+    "feedparser>=6.0",
+    "python-dateutil>=2.9",
+    "python-dotenv>=1.0",
+]
+
+[project.scripts]
+newscli = "news_trend.cli:main"
