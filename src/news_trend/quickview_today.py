@@ -2,7 +2,7 @@
 from __future__ import annotations
 from datetime import datetime, timezone
 from pathlib import Path
-from news_trend.quickview import quickview  # 앞서 만든 quickview.py를 사용
+from news_trend.quickview import quickview
 
 ROOT = Path(__file__).resolve().parents[2]
 INDIR = ROOT / "data"

@@ -1,13 +1,9 @@
-# src/news_trend/quickview.py
 from __future__ import annotations
-import os, re, json, shutil
+import re, json, shutil
 from pathlib import Path
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import argparse
-
-ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_INDIR = ROOT / "data"
 
 EN_STOPWORDS = {
     "the","a","an","and","or","of","to","in","on","for","with","at","by","from","as",
@@ -29,7 +25,8 @@ def _load_jsonl(path: Path):
                 yield json.loads(line)
 
 def tokenize(text: str, min_len: int, stopwords: set[str]) -> list[str]:
-    if not text: return []
+    if not text:
+        return []
     toks = [t.lower() for t in TOKEN_RE.findall(text)]
     return [t for t in toks if len(t) >= min_len and t not in stopwords and not t.startswith("'")]
 
@@ -38,7 +35,12 @@ def print_section(title: str):
     bar = "—" * min(width, max(20, len(title) + 4))
     print(f"\n{title}\n{bar}")
 
-def fmt_table(rows: list[tuple], headers: tuple[str, ...], col_widths: tuple[int, ...] | None = None, max_rows: int | None = None):
+def fmt_table(
+    rows: list[tuple],
+    headers: tuple[str, ...],
+    col_widths: tuple[int, ...] | None = None,
+    max_rows: int | None = None
+):
     if max_rows is not None:
         rows = rows[:max_rows]
     if col_widths is None:
@@ -54,7 +56,16 @@ def fmt_table(rows: list[tuple], headers: tuple[str, ...], col_widths: tuple[int
     for r in rows:
         print("  ".join(_cut(v, w) for v, w in zip(r, col_widths)))
 
-def quickview(date_str: str, kind: str, indir: Path, top: int, sample: int, min_len: int, include_content: bool, extra_stopwords: list[str]):
+def quickview(
+    date_str: str,
+    kind: str,
+    indir: Path,
+    top: int,
+    sample: int,
+    min_len: int,
+    include_content: bool,
+    extra_stopwords: list[str]
+):
     inpath = indir / kind / f"{date_str}.jsonl"
     if not inpath.exists():
         raise FileNotFoundError(f"input not found: {inpath}")
@@ -67,9 +78,10 @@ def quickview(date_str: str, kind: str, indir: Path, top: int, sample: int, min_
     stop = set(EN_STOPWORDS) | {w.strip().lower() for w in extra_stopwords if w.strip()}
     uni, bi = Counter(), Counter()
     for r in rows:
-        text = (r.get("title") or "")
+        parts = [(r.get("title") or ""), (r.get("description") or "")]
         if include_content:
-            text += " " + (r.get("content") or "")
+            parts.append(r.get("content") or "")
+        text = " ".join(parts)
         toks = tokenize(text, min_len=min_len, stopwords=stop)
         uni.update(toks)
         for a, b in zip(toks, toks[1:]):
@@ -81,33 +93,60 @@ def quickview(date_str: str, kind: str, indir: Path, top: int, sample: int, min_
     print("Distinct pubs  :", len(by_pub))
 
     print_section("Top Publishers")
-    fmt_table([(pub, c) for pub, c in by_pub.most_common(top)], headers=("Publisher", "Count"), col_widths=(40, 10))
+    fmt_table([(pub, c) for pub, c in by_pub.most_common(top)],
+              headers=("Publisher", "Count"), col_widths=(40, 10))
 
     print_section(f"Top Words (min_len={min_len}, content={'on' if include_content else 'off'})")
-    fmt_table([(w, c) for w, c in uni.most_common(top)], headers=("Word", "Count"), col_widths=(20, 10))
+    fmt_table([(w, c) for w, c in uni.most_common(top)],
+              headers=("Word", "Count"), col_widths=(20, 10))
 
     print_section("Top Bigrams")
-    fmt_table([(" ".join(k), c) for k, c in bi.most_common(top)], headers=("Bigram", "Count"), col_widths=(28, 10))
+    fmt_table([(" ".join(k), c) for k, c in bi.most_common(top)],
+              headers=("Bigram", "Count"), col_widths=(28, 10))
 
     print_section("Sample Articles")
     sample_rows = []
     for r in rows[:sample]:
-        sample_rows.append((r.get("publisher","")[:36], r.get("raw_source",""), (r.get("title") or "")[:80]))
-    fmt_table(sample_rows, headers=("Publisher", "Src", "Title"), col_widths=(36, 6, 80))
+        sample_rows.append((
+            (r.get("publisher") or "")[:36],
+            r.get("raw_source", ""),
+            (r.get("title") or "")[:80],
+        ))
+    fmt_table(sample_rows, headers=("Publisher", "Src", "Title"),
+              col_widths=(36, 6, 80))
+
+def _resolve_date(s: str) -> str:
+    """Return ISO date for 'today'/'yesterday'/'+N'/'-N' or a literal YYYY-MM-DD."""
+    s = (s or "").strip().lower()
+    today = datetime.now(timezone.utc).date()
+    if s in ("", "today"):
+        return today.isoformat()
+    if s == "yesterday":
+        return (today - timedelta(days=1)).isoformat()
+    if s.startswith(("+", "-")):
+        try:
+            n = int(s)
+            return (today + timedelta(days=n)).isoformat()
+        except ValueError:
+            pass
+    return s  # assume YYYY-MM-DD
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser(description="Console quick view of daily news file (no HTML)")
-    ap.add_argument("--date", default="today", help='"YYYY-MM-DD" or "today" (UTC)')
-    ap.add_argument("--kind", choices=["raw","silver"], default="silver")
-    ap.add_argument("--indir", default=str(DEFAULT_INDIR))
-    ap.add_argument("--top", type=int, default=20, help="top-N for publishers/words/bigrams")
-    ap.add_argument("--sample", type=int, default=10, help="sample article rows to show")
-    ap.add_argument("--min-len", type=int, default=3, help="min token length")
-    ap.add_argument("--no-content", action="store_true", help="use title only (ignore content)")
-    ap.add_argument("--extra-stopwords", default="", help="comma-separated extra stopwords")
+    ap = argparse.ArgumentParser(description="Quick view of a daily news dataset")
+    ap.add_argument("--date", default="today", help='"YYYY-MM-DD", "today", "yesterday", or +/-N days')
+    ap.add_argument("--kind", default="raw",
+                    help="subfolder under --indir (e.g., raw, silver, raw_newsapi, raw_gov)")
+    ap.add_argument("--indir", default="data", help="input root directory")
+    ap.add_argument("--top", type=int, default=25, help="number of top terms to show")
+    ap.add_argument("--sample", type=int, default=10, help="number of sample rows to display")
+    ap.add_argument("--min-len", type=int, default=3, help="minimum token length")
+    ap.add_argument("--no-content", action="store_true",
+                    help="ignore article content; use titles/description only")
+    ap.add_argument("--extra-stopwords", default="",
+                    help="comma-separated extra stopwords (e.g., release,statement,office)")
     args = ap.parse_args()
 
-    d = datetime.now(timezone.utc).date().isoformat() if args.date == "today" else args.date
+    d = _resolve_date(args.date)
     extra = [s for s in args.extra_stopwords.split(",") if s]
     quickview(
         date_str=d,
@@ -117,5 +156,5 @@ if __name__ == "__main__":
         sample=args.sample,
         min_len=args.min_len,
         include_content=not args.no_content,
-        extra_stopwords=extra
+        extra_stopwords=extra,
     )
