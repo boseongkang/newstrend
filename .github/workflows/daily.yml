@@ -24,13 +24,15 @@ jobs:
           pip install -r requirements.txt
           pip install -e .
 
-      - name: Ingest (yesterday) via NewsAPI
+      - name: Compute date
+        id: when
+        run: echo "date=$(date -u -d 'yesterday' +%F || date -u -v-1d +%F)" >> "$GITHUB_OUTPUT"
+
+      - name: Ingest via NewsAPI (yesterday)
         if: ${{ secrets.NEWSAPI_KEY != '' }}
         env:
           NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
-        run: |
-          mkdir -p data/raw data/raw_newsapi reports
-          newscli ingest --newsapi --date yesterday
+        run: newscli ingest --newsapi --date "${{ steps.when.outputs.date }}"
 
       - name: Skip ingest (no NEWSAPI_KEY)
         if: ${{ secrets.NEWSAPI_KEY == '' }}
