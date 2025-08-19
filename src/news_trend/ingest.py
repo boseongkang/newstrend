@@ -4,14 +4,23 @@ import datetime
 import requests
 from dotenv import load_dotenv
 from pathlib import Path
+from datetime import datetime, timedelta, timezone, date as dtdate
 
 load_dotenv()
 API_KEY = os.getenv("NEWSAPI_KEY")
 BASE_URL = "https://newsapi.org/v2/everything"
 
+def _parse_date_arg(d: str | None) -> dtdate:
+    t = datetime.now(timezone.utc).date()
+    if not d or d.lower() == "today":
+        return t
+    if d.lower() == "yesterday":
+        return t - timedelta(days=1)
+    return dtdate.fromisoformat(d)
+
 def fetch_newsapi(query="*", hours_split=2, max_pages=8, outdir="data/raw", date=None):
     today = datetime.date.today()
-    target_date = today - datetime.timedelta(days=1) if date is None else datetime.date.fromisoformat(date)
+    target_date = _parse_date_arg(date)
     start = datetime.datetime.combine(target_date, datetime.time(0,0,0))
     end = start + datetime.timedelta(days=1)
     delta = datetime.timedelta(hours=hours_split)
