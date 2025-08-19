@@ -13,6 +13,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -35,20 +38,14 @@ jobs:
           echo "INGEST_DATE=$D"
 
       - name: Ingest via NewsAPI
-        if: ${{ secrets.NEWSAPI_KEY != '' }}
-        env:
-          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+        if: env.NEWSAPI_KEY != ''
         run: |
-          echo "Running: newscli ingest --newsapi --date '${{ steps.when.outputs.date }}'"
+          echo "Using NEWSAPI_KEY (set)"; \
           newscli ingest --newsapi --date "${{ steps.when.outputs.date }}"
 
-      - name: Debug ingest module
-        run: |
-          python - <<'PY'
-          import news_trend.ingest as m, inspect, datetime
-          print("INGEST_FILE:", m.__file__)
-          print("PARSE_TEST:", m._parse_date_arg("yesterday"))
-          PY
+      - name: Skip ingest when no key
+        if: env.NEWSAPI_KEY == ''
+        run: echo "NEWSAPI_KEY is not set; skipping NewsAPI ingest."
 
       - name: Normalize filename for report
         run: |
@@ -90,16 +87,6 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
-      - name: Debug ingest module
-        run: |
-          python - <<'PY'
-          import inspect, textwrap
-          import news_trend.ingest as m
-          print("INGEST_FILE:", m.__file__)
-          print("PARSE_TEST:", m._parse_date_arg("yesterday"))
-          print("HEAD_SNIPPET:")
-          print("\n".join(open(m.__file__, encoding="utf-8").read().splitlines()[:30]))
-          PY
 
   deploy:
     needs: build
