@@ -1,23 +1,25 @@
-import argparse, os
+import argparse
+import os
 from datetime import datetime
 from .config import settings
-from .ingest import fetch_rss, fetch_newsapi
+from .ingest import fetch_newsapi
+# from .ingest import fetch_rss, fetch_newsapi
 from .utils import save_jsonl, load_jsonl
 from .dedup import dedup_rows
 
 def cmd_ingest(args):
     rows = []
     if args.rss:
-        rows += fetch_rss()
+        rows.extend(fetch_rss(country=args.country))
     if args.newsapi:
-        rows += fetch_newsapi(country=args.country)
-    if not rows and not args.rss:
-        rows += fetch_rss()
-
-    d = datetime.utcnow().date().isoformat() if args.date == "today" else args.date
-    out = os.path.join(args.outdir, f"{d}.jsonl")
-    save_jsonl(out, rows)
-    print(f"[OK] saved {len(rows)} rows -> {out}")
+        outfile = fetch_newsapi(outdir=args.outdir, date=args.date)
+        print(f"Saved newsapi data to {outfile}")
+        return
+    if rows:
+        d = datetime.utcnow().date().isoformat() if args.date == "today" else args.date
+        out = os.path.join(args.outdir, f"{d}.jsonl")
+        save_jsonl(out, rows)
+        print(f"[OK] saved {len(rows)} rows -> {out}")
 
 def cmd_dedup(args):
     d = datetime.utcnow().date().isoformat() if args.date == "today" else args.date

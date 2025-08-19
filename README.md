@@ -58,3 +58,20 @@ This will show:
 
 ## 4. Generate report from deduplicated (silver) data
 `python src/news_trend/report.py --date today --indir data --kind silver_newsapi --outdir reports`
+
+
+## 08/19 update
+- Time-sliced NewsAPI ingest
+- Daily HTML report
+
+
+## Commands (daily pipeline)
+
+```bash
+# 1) Ingest (yesterday, time-sliced inside newscli / or your ingest script)
+newscli ingest --newsapi --date yesterday
+
+# 2) Report 
+python src/news_trend/report.py --date yesterday --indir data --kind raw --outdir reports --top 30
+# python src/news_trend/report.py --date yesterday --indir data --kind silver_newsapi --outdir reports --top 30
+
