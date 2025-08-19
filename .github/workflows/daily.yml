@@ -1,7 +1,7 @@
 name: daily-news
 on:
   schedule:
-    - cron: "00 9 * * *"
+    - cron: "0 9 * * *"
   workflow_dispatch: {}
 permissions:
   contents: write
@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -25,15 +26,17 @@ jobs:
 
       - name: Compute ISO date for yesterday
         id: when
+        shell: bash
         run: echo "date=$(date -u -d 'yesterday' +%F || date -u -v-1d +%F)" >> "$GITHUB_OUTPUT"
+
+      - name: Show date chosen
+        run: echo "INGEST_DATE=${{ steps.when.outputs.date }}"
 
       - name: Ingest via NewsAPI
         if: ${{ secrets.NEWSAPI_KEY != '' }}
         env:
           NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
-        run: |
-          echo "INGEST_DATE=${{ steps.when.outputs.date }}"
-          newscli ingest --newsapi --date "${{ steps.when.outputs.date }}"
+        run: newscli ingest --newsapi --date "${{ steps.when.outputs.date }}"
 
       - name: Normalize filename for report
         run: |
