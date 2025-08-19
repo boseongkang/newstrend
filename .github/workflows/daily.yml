@@ -1,9 +1,8 @@
 name: daily-news
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "0 9 * * *"
-
+    - cron: "00 9 * * *"
+  workflow_dispatch: {}
 permissions:
   contents: write
   pages: write
@@ -14,7 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -25,46 +23,49 @@ jobs:
           pip install -r requirements.txt
           pip install -e .
 
-      - name: Compute date
+      - name: Compute ISO date for yesterday
         id: when
-        shell: bash
         run: echo "date=$(date -u -d 'yesterday' +%F || date -u -v-1d +%F)" >> "$GITHUB_OUTPUT"
 
-      - name: Ingest newsapi
-        if: ${{ secrets.NEWSAPI_KEY }}
+      - name: Ingest via NewsAPI
+        if: ${{ secrets.NEWSAPI_KEY != '' }}
         env:
           NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
-        run: newscli ingest --newsapi --date "${{ steps.when.outputs.date }}"
-
-      - name: Normalize for report
         run: |
-          D="${{ steps.when.outputs.date }}"
+          echo "INGEST_DATE=${{ steps.when.outputs.date }}"
+          newscli ingest --newsapi --date "${{ steps.when.outputs.date }}"
+
+      - name: Normalize filename for report
+        run: |
+          D=${{ steps.when.outputs.date }}
           mkdir -p data/raw_newsapi
           if [ -f "data/raw/newsapi_${D}.jsonl" ]; then
             cp "data/raw/newsapi_${D}.jsonl" "data/raw_newsapi/${D}.jsonl"
           fi
+          ls -lh data/raw* || true
 
       - name: Generate report
         run: |
-          D="${{ steps.when.outputs.date }}"
-          python src/news_trend/report.py \
-            --date "$D" --indir data --kind raw_newsapi --outdir reports --top 30
+          D=${{ steps.when.outputs.date }}
+          python src/news_trend/report.py --date "$D" --indir data --kind raw_newsapi --outdir reports --top 30
 
-      - name: Commit reports
+      - name: Commit reports if changed
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "auto: daily report ${{ steps.when.outputs.date }}" || echo "no changes"
-          git push
+          git add reports
+          git status --porcelain
+          git commit -m "auto: daily report $(date -u +%F)" || echo "no changes"
+          git push || true
 
       - name: Prepare site
         run: |
           rm -rf site && mkdir -p site
-          cp reports/latest.html site/index.html
+          cp reports/latest.html site/index.html || true
           cp -r reports/* site/ || true
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
