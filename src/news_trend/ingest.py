@@ -2,7 +2,7 @@ import os, json, time
 from pathlib import Path
 import requests
 from datetime import datetime, date as ddate, time as dtime, timedelta, timezone
-
+ 
 API_KEY = os.getenv("NEWSAPI_KEY")
 BASE_URL = "https://newsapi.org/v2/everything"
 PAGE_SIZE = 100
