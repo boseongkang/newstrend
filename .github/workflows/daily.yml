@@ -1,0 +1,91 @@
+name: daily-news
+on:
+  schedule:
+    - cron: "00 9 * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+      - name: Ingest
+        env:
+          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+        run: newscli ingest --newsapi --date yesterday
+      - name: Normalize filename for report
+        run: |
+          DATE=$(date -u -d 'yesterday' +%F || date -u -v-1d +%F)
+          SRC="data/raw/newsapi_${DATE}.jsonl"
+          DST="data/raw/${DATE}.jsonl"
+          if [ -f "$SRC" ]; then cp "$SRC" "$DST"; else exit 1; fi
+      - name: Generate report
+        run: |
+          python src/news_trend/report.py \
+            --date $(date -u -d 'yesterday' +%F || date -u -v-1d +%F) \
+            --indir data --kind raw --outdir reports --top 30
+      - name: Detect changes
+        id: diff
+        run: |
+          git add -A
+          if git status --porcelain | grep -q .; then echo "changed=true" >> $GITHUB_OUTPUT; else echo "changed=false" >> $GITHUB_OUTPUT; fi
+          echo "### Changed files" >> $GITHUB_STEP_SUMMARY
+          git status -s >> $GITHUB_STEP_SUMMARY || true
+      - name: Commit and push
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          CHANGED=$(git status --porcelain | wc -l | tr -d ' ')
+          git commit -m "auto: daily ingest/report $(date -u +%F) (${CHANGED} files)"
+          git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+          git push
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-${{ github.run_id }}
+          path: |
+            reports/**/*.html
+            reports/**/*.csv
+            reports/**/*.json
+            data/**/*.jsonl
+          retention-days: 7
+      - name: Append summary
+        run: |
+          DATE=$(date -u -d 'yesterday' +%F || date -u -v-1d +%F)
+          {
+            echo "### Daily run summary"
+            echo "- Date (UTC): ${DATE}"
+            echo "- Reports dir: \`reports/${DATE}/\`"
+            echo "- Latest: \`reports/latest.html\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Prepare site
+        run: |
+          rm -rf site && mkdir -p site
+          cp reports/latest.html site/index.html
+          cp -r reports/* site/ || true
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
