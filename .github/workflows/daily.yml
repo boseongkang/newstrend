@@ -27,12 +27,23 @@ jobs:
           pip install -r requirements.txt
           pip install -e .
 
-      - name: Compute ISO date (yesterday, cross-platform)
+      - name: Compute ISO date (yesterday)
         id: when
         run: echo "date=$(date -u -d 'yesterday' +%F 2>/dev/null || date -u -v-1d +%F)" >> "$GITHUB_OUTPUT"
 
-      - name: Ingest via NewsAPI (guarded by secret)
-        if: ${{ secrets.NEWSAPI_KEY && secrets.NEWSAPI_KEY != '' }}
+      - name: Check NEWSAPI_KEY presence
+        id: key
+        env:
+          KEY: ${{ secrets.NEWSAPI_KEY }}
+        run: |
+          if [ -n "$KEY" ]; then
+            echo "has=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Ingest via NewsAPI
+        if: ${{ steps.key.outputs.has == 'true' }}
         env:
           NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
         run: |
@@ -40,18 +51,17 @@ jobs:
           D="${{ steps.when.outputs.date }}"
           echo "INGEST_DATE=$D"
           newscli ingest --date "$D"
-          # 시간대 수집/집계/분석을 쓰고 싶다면 위 대신:
+          # 또는 시간대 파이프라인:
           # newscli pipeline-day --date "$D" --hours-split 2 --query "news"
 
       - name: Skip ingest (no NEWSAPI_KEY)
-        if: ${{ !secrets.NEWSAPI_KEY || secrets.NEWSAPI_KEY == '' }}
+        if: ${{ steps.key.outputs.has != 'true' }}
         run: echo "NEWSAPI_KEY not set; skipping NewsAPI ingest."
 
-      - name: Generate daily report (silver 기준이 있으면 silver, 없으면 raw_newsapi)
+      - name: Generate daily report
         run: |
           set -e
           D="${{ steps.when.outputs.date }}"
-          # 우선순위: silver -> raw_newsapi -> raw
           if [ -f "data/silver_newsapi/${D}.jsonl" ]; then
             K="silver_newsapi"
           elif [ -f "data/raw_newsapi/${D}.jsonl" ]; then
@@ -69,12 +79,11 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add reports
-          git status --porcelain
           git commit -m "auto: daily report $(date -u +%F)" || echo "no changes"
           git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
           git push || true
 
-      - name: Prepare site (Pages)
+      - name: Prepare site
         run: |
           set -e
           rm -rf site && mkdir -p site
