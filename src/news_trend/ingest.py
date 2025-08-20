@@ -26,7 +26,8 @@ def fetch_newsapi(query: str | None = None,
                   outdir: str = "data/raw",
                   date=None,
                   pause: float = 0.25) -> Path:
-    assert API_KEY, "NEWSAPI_KEY missing"
+    if not API_KEY:
+        raise SystemExit("NEWSAPI_KEY missing")
     target_day = parse_date(date)
     start = datetime.combine(target_day, dtime(0, 0, tzinfo=timezone.utc))
     end = start + timedelta(days=1)

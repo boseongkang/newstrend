@@ -1,5 +1,4 @@
 name: daily-news
-
 on:
   schedule:
     - cron: "00 9 * * *"
@@ -13,9 +12,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
-
     steps:
       - uses: actions/checkout@v4
 
@@ -26,56 +22,43 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip uninstall -y newstrend || true
           pip install -r requirements.txt
           pip install -e .
 
-      - name: Compute ISO date for yesterday
-        id: when
-        shell: bash
+      - name: Compute YDATE (ISO, cross-platform)
         run: |
-          D=$(date -u -d 'yesterday' +%F 2>/dev/null || date -u -v-1d +%F)
-          echo "date=$D" >> "$GITHUB_OUTPUT"
-          echo "INGEST_DATE=$D"
+          echo "YDATE=$(date -u -d 'yesterday' +%F 2>/dev/null || date -u -v-1d +%F)" >> $GITHUB_ENV
 
       - name: Ingest via NewsAPI
-        if: env.NEWSAPI_KEY != ''
+        env:
+          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
         run: |
-          echo "Using NEWSAPI_KEY (set)"; \
-          newscli ingest --newsapi --date "${{ steps.when.outputs.date }}"
+          if [ -z "${NEWSAPI_KEY}" ]; then
+            echo "NEWSAPI_KEY not set; skipping ingest."
+            exit 0
+          fi
+          python -m news_trend.cli ingest --newsapi --date "${YDATE}"
 
-      - name: Skip ingest when no key
-        if: env.NEWSAPI_KEY == ''
-        run: echo "NEWSAPI_KEY is not set; skipping NewsAPI ingest."
-
-      - name: Normalize filename for report
+      - name: Normalize for report
         run: |
-          D=${{ steps.when.outputs.date }}
           mkdir -p data/raw_newsapi
-          if [ -f "data/raw/newsapi_${D}.jsonl" ]; then
-            cp "data/raw/newsapi_${D}.jsonl" "data/raw_newsapi/${D}.jsonl"
-          elif [ -f "data/raw/${D}.jsonl" ]; then
-            cp "data/raw/${D}.jsonl" "data/raw_newsapi/${D}.jsonl"
+          if [ -f "data/raw/newsapi_${YDATE}.jsonl" ]; then
+            cp "data/raw/newsapi_${YDATE}.jsonl" "data/raw_newsapi/${YDATE}.jsonl"
           fi
           ls -lh data/raw* || true
 
       - name: Generate report
         run: |
-          D=${{ steps.when.outputs.date }}
           python src/news_trend/report.py \
-            --date "$D" \
-            --indir data \
-            --kind raw_newsapi \
-            --outdir reports \
-            --top 30
+            --date "${YDATE}" \
+            --indir data --kind raw_newsapi --outdir reports --top 30
 
-      - name: Commit reports if changed
+      - name: Commit reports
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add reports
-          git status --porcelain
-          git commit -m "auto: daily report $(date -u +%F)" || echo "no changes"
+          git commit -m "auto: daily report ${YDATE}" || echo "no changes"
           git push || true
 
       - name: Prepare site

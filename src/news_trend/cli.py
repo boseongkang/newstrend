@@ -1,11 +1,9 @@
 from __future__ import annotations
 import argparse
 from pathlib import Path
-from datetime import datetime, timezone, timedelta
 from .ingest import fetch_newsapi, parse_date
 from .utils import save_jsonl, load_jsonl
 from .dedup import dedup_rows
-
 
 def _locate_input(indir: str, in_kind: str, date_iso: str) -> Path:
     candidates = [
@@ -18,7 +16,6 @@ def _locate_input(indir: str, in_kind: str, date_iso: str) -> Path:
         if p.exists():
             return p
     return candidates[0]
-
 
 def cmd_ingest(args):
     d = parse_date(args.date)
@@ -36,7 +33,6 @@ def cmd_ingest(args):
     else:
         raise SystemExit("no source selected")
 
-
 def cmd_dedup(args):
     d = parse_date(args.date)
     iso = d.isoformat()
@@ -50,7 +46,6 @@ def cmd_dedup(args):
     outpath = outdir / f"{iso}.jsonl"
     save_jsonl(outpath, cleaned)
     print(f"[OK] {len(rows)} -> {len(cleaned)} after dedup -> {outpath}")
-
 
 def build_parser():
     p = argparse.ArgumentParser(prog="newscli", description="News ingestion and dedup CLI")
@@ -75,7 +70,6 @@ def build_parser():
     pd.set_defaults(func=cmd_dedup)
 
     return p
-
 
 def main():
     parser = build_parser()
