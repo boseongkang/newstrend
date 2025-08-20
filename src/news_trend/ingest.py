@@ -1,38 +1,40 @@
 import os, json, time
 from pathlib import Path
-from datetime import datetime, date as ddate, time as dtime, timedelta, timezone
 import requests
+from datetime import datetime, date as ddate, time as dtime, timedelta, timezone
 
 API_KEY = os.getenv("NEWSAPI_KEY")
 BASE_URL = "https://newsapi.org/v2/everything"
 PAGE_SIZE = 100
 
-def parse_date(d):
-    today = datetime.now(timezone.utc).date()
-    if d is None or d == "" or (isinstance(d, str) and d.lower() == "today"):
-        return today
-    if isinstance(d, str) and d.lower() == "yesterday":
-        return today - timedelta(days=1)
-    if isinstance(d, ddate):
-        return d
-    return ddate.fromisoformat(str(d))
+def parse_date(d: str | None) -> ddate:
+    t = datetime.now(timezone.utc).date()
+    if not d or d.lower() == "today":
+        return t
+    if d.lower() == "yesterday":
+        return t - timedelta(days=1)
+    return ddate.fromisoformat(d)
 
-def _iso_utc(dt: datetime) -> str:
+def iso_utc(dt: datetime) -> str:
     return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
-def fetch_newsapi(query: str | None = None,
-                  hours_split: int = 2,
-                  max_pages_per_window: int = 8,
-                  outdir: str = "data/raw",
-                  date=None,
-                  pause: float = 0.25) -> Path:
-    assert API_KEY, "NEWSAPI_KEY missing"
+def fetch_newsapi(
+    query: str | None = None,
+    hours_split: int = 2,
+    max_pages_per_window: int = 8,
+    outdir: str = "data/raw",
+    date: str | None = None,
+    pause: float = 0.25,
+) -> Path:
+    if not API_KEY:
+        raise RuntimeError("NEWSAPI_KEY is missing")
     target_day = parse_date(date)
-    start = datetime.combine(target_day, dtime(0, 0, tzinfo=timezone.utc))
+    start = datetime.combine(target_day, dtime(0, 0, 0, tzinfo=timezone.utc))
     end = start + timedelta(days=1)
     delta = timedelta(hours=hours_split)
 
-    outdir_p = Path(outdir); outdir_p.mkdir(parents=True, exist_ok=True)
+    outdir_p = Path(outdir)
+    outdir_p.mkdir(parents=True, exist_ok=True)
     outfile = outdir_p / f"newsapi_{target_day.isoformat()}.jsonl"
 
     rows = 0
@@ -42,8 +44,8 @@ def fetch_newsapi(query: str | None = None,
             w2 = min(w + delta, end)
             for page in range(1, max_pages_per_window + 1):
                 params = {
-                    "from": _iso_utc(w),
-                    "to": _iso_utc(w2),
+                    "from": iso_utc(w),
+                    "to": iso_utc(w2),
                     "pageSize": PAGE_SIZE,
                     "page": page,
                     "apiKey": API_KEY,
@@ -52,24 +54,29 @@ def fetch_newsapi(query: str | None = None,
                     "q": (query or "news"),
                 }
                 r = requests.get(BASE_URL, params=params, timeout=40)
-                try:
-                    r.raise_for_status()
-                except requests.HTTPError:
+                if not r.ok:
                     break
-                arts = (r.json() or {}).get("articles") or []
+                data = r.json() or {}
+                arts = data.get("articles") or []
                 if not arts:
                     break
                 for a in arts:
-                    f.write(json.dumps({
-                        "article_id": f"newsapi:{a.get('url')}",
-                        "title": a.get("title"),
-                        "url": a.get("url"),
-                        "publisher": (a.get("source") or {}).get("name"),
-                        "published_at": a.get("publishedAt"),
-                        "description": a.get("description"),
-                        "content": a.get("content"),
-                        "raw_source": "newsapi",
-                    }, ensure_ascii=False) + "\n")
+                    f.write(
+                        json.dumps(
+                            {
+                                "article_id": f"newsapi:{a.get('url')}",
+                                "title": a.get("title"),
+                                "url": a.get("url"),
+                                "publisher": (a.get("source") or {}).get("name"),
+                                "published_at": a.get("publishedAt"),
+                                "description": a.get("description"),
+                                "content": a.get("content"),
+                                "raw_source": "newsapi",
+                            },
+                            ensure_ascii=False,
+                        )
+                        + "\n"
+                    )
                     rows += 1
                 if len(arts) < PAGE_SIZE:
                     break
