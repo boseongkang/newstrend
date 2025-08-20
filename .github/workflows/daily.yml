@@ -1,61 +1,134 @@
 name: daily-news
+
 on:
   schedule:
-    - cron: "00 9 * * *"
+    - cron: "5 9 * * *"
   workflow_dispatch: {}
+
 permissions:
   contents: write
   pages: write
   id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -e .
-      - name: Compute ISO date for yesterday
+
+      - name: Compute date (yesterday, UTC)
         id: when
         run: echo "date=$(date -u -d 'yesterday' +%F || date -u -v-1d +%F)" >> "$GITHUB_OUTPUT"
-      - name: Ingest via NewsAPI
+
+      - name: Pipeline day (ingest→aggregate→analyze)
+        if: ${{ secrets.NEWSAPI_KEY != '' }}
         env:
           NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
         run: |
-          echo "DATE=${{ steps.when.outputs.date }}"
-          newscli ingest --newsapi --date "${{ steps.when.outputs.date }}"
-      - name: Normalize filename for report
-        run: |
+          set -e
           D=${{ steps.when.outputs.date }}
-          mkdir -p data/raw_newsapi
-          if [ -f "data/raw/newsapi_${D}.jsonl" ]; then
-            cp "data/raw/newsapi_${D}.jsonl" "data/raw_newsapi/${D}.jsonl"
+          echo "Starting pipeline for $D"
+          newscli pipeline-day \
+            --date "$D" \
+            --hours-split 2 \
+            --query "news" \
+            --max-pages 8 \
+            --save-metrics \
+            --metrics-dir data/metrics \
+            --metrics-indir data \
+            --metrics-from raw_newsapi
+
+      - name: Skip pipeline (no NEWSAPI_KEY)
+        if: ${{ secrets.NEWSAPI_KEY == '' }}
+        run: |
+          mkdir -p data/metrics
+          D=${{ steps.when.outputs.date }}
+          ts=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          echo "NEWSAPI_KEY not set; skipping pipeline for $D" | tee -a data/metrics/ingest_run.log
+          if [ ! -f data/metrics/ingest_log.csv ]; then
+            echo "date,raw_newsapi_rows,silver_rows,run_id,commit_sha,timestamp,status" > data/metrics/ingest_log.csv
           fi
-      - name: Generate report
+          echo "$D,0,0,${{ github.run_id }},${{ github.sha }},$ts,SKIPPED" >> data/metrics/ingest_log.csv
+
+      - name: Count rows and append logs
         run: |
+          set -e
           D=${{ steps.when.outputs.date }}
-          python src/news_trend/report.py --date "$D" --indir data --kind raw_newsapi --outdir reports --top 30
-      - name: Commit reports
+          mkdir -p data/metrics
+          RAW="data/raw_newsapi/$D.jsonl"
+          SIL="data/silver_newsapi/$D.jsonl"
+          raw_rows=0
+          silver_rows=0
+          [ -f "$RAW" ] && raw_rows=$(wc -l < "$RAW" || echo 0)
+          [ -f "$SIL" ] && silver_rows=$(wc -l < "$SIL" || echo 0)
+          ts=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          if [ ! -f data/metrics/ingest_log.csv ]; then
+            echo "date,raw_newsapi_rows,silver_rows,run_id,commit_sha,timestamp,status" > data/metrics/ingest_log.csv
+          fi
+          status="OK"; [ "$raw_rows" = "0" ] && status="NO_RAW"
+          echo "$D,$raw_rows,$silver_rows,${{ github.run_id }},${{ github.sha }},$ts,$status" >> data/metrics/ingest_log.csv
+          echo "[$ts] $D raw=$raw_rows silver=$silver_rows status=$status" | tee -a data/metrics/ingest_run.log
+          {
+            echo "## Daily Ingest Summary ($D)"
+            echo
+            echo "| Metric | Value |"
+            echo "|---|---:|"
+            echo "| Raw rows | $raw_rows |"
+            echo "| Silver rows | $silver_rows |"
+            echo "| Run ID | ${{ github.run_id }} |"
+            echo "| Commit | ${{ github.sha }} |"
+            echo "| Status | $status |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit reports and data
         run: |
-          git config user.name "github-actions[bot]"
+          git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reports
-          git commit -m "auto: daily report $(date -u +%F)" || echo "no changes"
-          git push
+          git add reports data/raw_newsapi data/silver_newsapi data/metrics || true
+          git status --porcelain
+          git commit -m "auto: report+data ${{ steps.when.outputs.date }} (run ${{ github.run_id }})" || echo "no changes"
+          git push || true
+
       - name: Prepare site
         run: |
           rm -rf site && mkdir -p site
-          cp reports/latest.html site/index.html || true
-          cp -r reports/* site/ || true
+          [ -f reports/latest.html ] && cp reports/latest.html site/index.html || true
+          [ -d reports/hourly ] && cp -r reports/hourly site/ || true
+          [ -d reports ] && find reports -maxdepth 1 -mindepth 1 -type d -exec cp -r {} site/ \; || true
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
+
+      - name: Upload data artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-${{ steps.when.outputs.date }}
+          path: |
+            data/raw_newsapi/${{ steps.when.outputs.date }}.jsonl
+            data/silver_newsapi/${{ steps.when.outputs.date }}.jsonl
+            data/metrics/ingest_log.csv
+            data/metrics/ingest_run.log
+            reports/**
+          retention-days: 30
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
