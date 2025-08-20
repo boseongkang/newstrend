@@ -11,6 +11,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -30,19 +32,19 @@ jobs:
           D=$(date -u -d 'yesterday' +%F 2>/dev/null || date -u -v-1d +%F)
           echo "date=$D" >> "$GITHUB_OUTPUT"
 
-      - name: Ingest via NewsAPI
-        if: ${{ secrets.NEWSAPI_KEY != '' }}
-        env:
-          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+      - name: Ingest NewsAPI or skip
+        shell: bash
         run: |
-          newscli ingest --newsapi --date "${{ steps.when.outputs.date }}"
+          if [ -n "${NEWSAPI_KEY}" ]; then
+            echo "Using NEWSAPI_KEY"
+            newscli ingest --newsapi --date "${{ steps.when.outputs.date }}"
+          else
+            echo "NEWSAPI_KEY not set; skipping ingest."
+          fi
 
-      - name: Skip ingest (no NEWSAPI_KEY)
-        if: ${{ secrets.NEWSAPI_KEY == '' }}
-        run: echo "NEWSAPI_KEY not set; skipping NewsAPI ingest."
-
-      - name: Ensure input exists (normalize to raw_newsapi)
+      - name: Ensure input exists
         id: in
+        shell: bash
         run: |
           set -e
           D=${{ steps.when.outputs.date }}
@@ -56,8 +58,10 @@ jobs:
               cp "$IN" "data/raw_newsapi/${D}.jsonl"
             fi
             echo "in=data/raw_newsapi/${D}.jsonl" >> "$GITHUB_OUTPUT"
+            echo "Input: data/raw_newsapi/${D}.jsonl"
           else
             echo "in=" >> "$GITHUB_OUTPUT"
+            echo "No input found for $D"
           fi
 
       - name: Generate daily report
@@ -79,7 +83,7 @@ jobs:
           git commit -m "auto: daily report ${{ steps.when.outputs.date }}" || true
           git push || true
 
-      - name: Summary
+      - name: Append summary
         if: ${{ steps.in.outputs.in != '' }}
         run: |
           D=${{ steps.when.outputs.date }}
