@@ -37,7 +37,7 @@ jobs:
         run: |
           if [ -n "${NEWSAPI_KEY}" ]; then
             echo "Using NEWSAPI_KEY"
-            newscli ingest --newsapi --date "${{ steps.when.outputs.date }}"
+            newscli ingest --date "${{ steps.when.outputs.date }}"
           else
             echo "NEWSAPI_KEY not set; skipping ingest."
           fi
