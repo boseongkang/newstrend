@@ -1,10 +1,8 @@
 name: daily-news
-
 on:
   schedule:
     - cron: "00 9 * * *"
   workflow_dispatch: {}
-
 permissions:
   contents: write
   pages: write
@@ -15,82 +13,92 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install deps
         run: |
-          set -e
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -e .
 
       - name: Compute ISO date (yesterday)
         id: when
-        run: echo "date=$(date -u -d 'yesterday' +%F 2>/dev/null || date -u -v-1d +%F)" >> "$GITHUB_OUTPUT"
-
-      - name: Check NEWSAPI_KEY presence
-        id: key
-        env:
-          KEY: ${{ secrets.NEWSAPI_KEY }}
+        shell: bash
         run: |
-          if [ -n "$KEY" ]; then
-            echo "has=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has=false" >> "$GITHUB_OUTPUT"
-          fi
+          D=$(date -u -d 'yesterday' +%F 2>/dev/null || date -u -v-1d +%F)
+          echo "date=$D" >> "$GITHUB_OUTPUT"
 
       - name: Ingest via NewsAPI
-        if: ${{ steps.key.outputs.has == 'true' }}
+        if: ${{ secrets.NEWSAPI_KEY != '' }}
         env:
           NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
         run: |
-          set -e
-          D="${{ steps.when.outputs.date }}"
-          echo "INGEST_DATE=$D"
-          newscli ingest --date "$D"
-          # 또는 시간대 파이프라인:
-          # newscli pipeline-day --date "$D" --hours-split 2 --query "news"
+          newscli ingest --newsapi --date "${{ steps.when.outputs.date }}"
 
       - name: Skip ingest (no NEWSAPI_KEY)
-        if: ${{ steps.key.outputs.has != 'true' }}
+        if: ${{ secrets.NEWSAPI_KEY == '' }}
         run: echo "NEWSAPI_KEY not set; skipping NewsAPI ingest."
 
-      - name: Generate daily report
+      - name: Ensure input exists (normalize to raw_newsapi)
+        id: in
         run: |
           set -e
-          D="${{ steps.when.outputs.date }}"
-          if [ -f "data/silver_newsapi/${D}.jsonl" ]; then
-            K="silver_newsapi"
-          elif [ -f "data/raw_newsapi/${D}.jsonl" ]; then
-            K="raw_newsapi"
+          D=${{ steps.when.outputs.date }}
+          IN=""
+          if [ -f "data/raw_newsapi/${D}.jsonl" ]; then IN="data/raw_newsapi/${D}.jsonl"; fi
+          if [ -z "$IN" ] && [ -f "data/raw/newsapi_${D}.jsonl" ]; then IN="data/raw/newsapi_${D}.jsonl"; fi
+          if [ -z "$IN" ] && [ -f "data/raw/${D}.jsonl" ]; then IN="data/raw/${D}.jsonl"; fi
+          if [ -n "$IN" ]; then
+            mkdir -p data/raw_newsapi
+            if [ "$IN" != "data/raw_newsapi/${D}.jsonl" ]; then
+              cp "$IN" "data/raw_newsapi/${D}.jsonl"
+            fi
+            echo "in=data/raw_newsapi/${D}.jsonl" >> "$GITHUB_OUTPUT"
           else
-            K="raw"
+            echo "in=" >> "$GITHUB_OUTPUT"
           fi
-          echo "Report kind: $K for $D"
-          python src/news_trend/report.py \
-            --date "$D" --indir data --kind "$K" --outdir reports --top 30
 
-      - name: Commit reports (with rebase)
+      - name: Generate daily report
+        if: ${{ steps.in.outputs.in != '' }}
         run: |
-          set -e
+          python src/news_trend/report.py \
+            --date "${{ steps.when.outputs.date }}" \
+            --indir data \
+            --kind raw_newsapi \
+            --outdir reports \
+            --top 30
+
+      - name: Commit reports
+        if: ${{ steps.in.outputs.in != '' }}
+        run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add reports
-          git commit -m "auto: daily report $(date -u +%F)" || echo "no changes"
-          git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+          git commit -m "auto: daily report ${{ steps.when.outputs.date }}" || true
           git push || true
 
-      - name: Prepare site
+      - name: Summary
+        if: ${{ steps.in.outputs.in != '' }}
         run: |
-          set -e
+          D=${{ steps.when.outputs.date }}
+          {
+            echo "### Daily run"
+            echo "- Date (UTC): $D"
+            echo "- Input: ${{ steps.in.outputs.in }}"
+            echo "- Latest: \`reports/latest.html\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prepare site
+        if: ${{ steps.in.outputs.in != '' }}
+        run: |
           rm -rf site && mkdir -p site
           cp reports/latest.html site/index.html || true
           cp -r reports/* site/ || true
 
       - name: Upload Pages artifact
+        if: ${{ steps.in.outputs.in != '' }}
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
