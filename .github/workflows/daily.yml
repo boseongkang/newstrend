@@ -13,8 +13,12 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -22,38 +26,44 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
+          pip uninstall -y newstrend || true
           pip install -r requirements.txt
           pip install -e .
 
       - name: Compute ISO date for yesterday
+        id: when
+        shell: bash
         run: |
           D=$(date -u -d 'yesterday' +%F 2>/dev/null || date -u -v-1d +%F)
-          echo "INGEST_DATE=$D" >> $GITHUB_ENV
+          echo "date=$D" >> "$GITHUB_OUTPUT"
           echo "INGEST_DATE=$D"
 
       - name: Ingest via NewsAPI
-        env:
-          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+        if: env.NEWSAPI_KEY != ''
         run: |
-          if [ -n "$NEWSAPI_KEY" ]; then
-            echo "Using NEWSAPI_KEY (set)";
-            newscli ingest --newsapi --date "$INGEST_DATE"
-          else
-            echo "NEWSAPI_KEY not set; skipping NewsAPI ingest."
-          fi
+          echo "Using NEWSAPI_KEY (set)"; \
+          newscli ingest --newsapi --date "${{ steps.when.outputs.date }}"
+
+      - name: Skip ingest when no key
+        if: env.NEWSAPI_KEY == ''
+        run: echo "NEWSAPI_KEY is not set; skipping NewsAPI ingest."
 
       - name: Normalize filename for report
         run: |
+          D=${{ steps.when.outputs.date }}
           mkdir -p data/raw_newsapi
-          if [ -f "data/raw/newsapi_${INGEST_DATE}.jsonl" ]; then
-            cp "data/raw/newsapi_${INGEST_DATE}.jsonl" "data/raw_newsapi/${INGEST_DATE}.jsonl"
+          if [ -f "data/raw/newsapi_${D}.jsonl" ]; then
+            cp "data/raw/newsapi_${D}.jsonl" "data/raw_newsapi/${D}.jsonl"
+          elif [ -f "data/raw/${D}.jsonl" ]; then
+            cp "data/raw/${D}.jsonl" "data/raw_newsapi/${D}.jsonl"
           fi
           ls -lh data/raw* || true
 
       - name: Generate report
         run: |
+          D=${{ steps.when.outputs.date }}
           python src/news_trend/report.py \
-            --date "$INGEST_DATE" \
+            --date "$D" \
             --indir data \
             --kind raw_newsapi \
             --outdir reports \

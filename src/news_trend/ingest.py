@@ -1,19 +1,21 @@
 import os, json, time
 from pathlib import Path
+from datetime import datetime, date as ddate, time as dtime, timedelta, timezone
 import requests
-from datetime import datetime, timezone, timedelta, date as dtdate, time as dtime
 
 API_KEY = os.getenv("NEWSAPI_KEY")
 BASE_URL = "https://newsapi.org/v2/everything"
 PAGE_SIZE = 100
 
-def _parse_date_arg(d: str | None) -> dtdate:
-    t = datetime.now(timezone.utc).date()
-    if d is None or d.lower() == "today":
-        return t
-    if d.lower() == "yesterday":
-        return t - timedelta(days=1)
-    return dtdate.fromisoformat(d)
+def parse_date(d):
+    today = datetime.now(timezone.utc).date()
+    if d is None or d == "" or (isinstance(d, str) and d.lower() == "today"):
+        return today
+    if isinstance(d, str) and d.lower() == "yesterday":
+        return today - timedelta(days=1)
+    if isinstance(d, ddate):
+        return d
+    return ddate.fromisoformat(str(d))
 
 def _iso_utc(dt: datetime) -> str:
     return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -22,11 +24,11 @@ def fetch_newsapi(query: str | None = None,
                   hours_split: int = 2,
                   max_pages_per_window: int = 8,
                   outdir: str = "data/raw",
-                  date: str | None = None,
+                  date=None,
                   pause: float = 0.25) -> Path:
     assert API_KEY, "NEWSAPI_KEY missing"
-    target_day = _parse_date_arg(date)
-    start = datetime.combine(target_day, dtime(0, 0, 0, tzinfo=timezone.utc))
+    target_day = parse_date(date)
+    start = datetime.combine(target_day, dtime(0, 0, tzinfo=timezone.utc))
     end = start + timedelta(days=1)
     delta = timedelta(hours=hours_split)
 
@@ -40,16 +42,15 @@ def fetch_newsapi(query: str | None = None,
             w2 = min(w + delta, end)
             for page in range(1, max_pages_per_window + 1):
                 params = {
+                    "from": _iso_utc(w),
+                    "to": _iso_utc(w2),
+                    "pageSize": PAGE_SIZE,
+                    "page": page,
                     "apiKey": API_KEY,
                     "language": "en",
                     "sortBy": "publishedAt",
-                    "pageSize": PAGE_SIZE,
-                    "page": page,
-                    "from": _iso_utc(w),
-                    "to": _iso_utc(w2),
+                    "q": (query or "news"),
                 }
-                if query:
-                    params["q"] = query
                 r = requests.get(BASE_URL, params=params, timeout=40)
                 try:
                     r.raise_for_status()
