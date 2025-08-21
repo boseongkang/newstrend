@@ -1,15 +1,17 @@
 from __future__ import annotations
-import os, json, time, re
+import os, json, time
 from pathlib import Path
 from typing import List, Tuple
 import requests
 from datetime import datetime, date as ddate, time as dtime, timedelta, timezone
 from dotenv import load_dotenv
+
 load_dotenv()
 
 API_KEY = os.getenv("NEWSAPI_KEY")
 BASE_URL = "https://newsapi.org/v2/everything"
 PAGE_SIZE = 100
+
 
 def _parse_date_arg(d: str | None) -> ddate:
     t = datetime.now(timezone.utc).date()
@@ -19,8 +21,10 @@ def _parse_date_arg(d: str | None) -> ddate:
         return t - timedelta(days=1)
     return ddate.fromisoformat(d)
 
+
 def _iso_utc(dt: datetime) -> str:
     return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
 
 def ingest_newsapi_hourly(
     query: str | None = None,
@@ -94,3 +98,61 @@ def ingest_newsapi_hourly(
             w = w2
     print(f"[OK] hourly ingest -> {outdir} ({written} rows)")
     return outdir
+
+
+def ingest_newsapi_recent(
+    query: str = "news",
+    max_pages: int = 3,
+    outdir: str = "data/live_newsapi",
+    page_size: int = PAGE_SIZE,
+    pause: float = 0.25,
+) -> Path:
+    assert API_KEY, "NEWSAPI_KEY is missing"
+    now = datetime.now(timezone.utc)
+    start = now - timedelta(hours=2)
+
+    outdir_p = Path(outdir)
+    outdir_p.mkdir(parents=True, exist_ok=True)
+    ts = now.strftime("%Y-%m-%dT%H-%MZ")
+    outpath = outdir_p / f"{ts}.jsonl"
+
+    rows = 0
+    with outpath.open("w", encoding="utf-8") as f:
+        for page in range(1, max_pages + 1):
+            params = {
+                "q": (query or "news").strip(),
+                "from": _iso_utc(start),
+                "to": _iso_utc(now),
+                "language": "en",
+                "sortBy": "publishedAt",
+                "page": page,
+                "pageSize": page_size,
+                "apiKey": API_KEY,
+            }
+            r = requests.get(BASE_URL, params=params, timeout=40)
+            try:
+                r.raise_for_status()
+            except requests.HTTPError:
+                break
+            data = r.json() or {}
+            arts = data.get("articles") or []
+            if not arts:
+                break
+            for a in arts:
+                f.write(json.dumps({
+                    "article_id": f"newsapi:{a.get('url')}",
+                    "title": a.get("title"),
+                    "url": a.get("url"),
+                    "publisher": (a.get("source") or {}).get("name"),
+                    "published_at": a.get("publishedAt"),
+                    "description": a.get("description"),
+                    "content": a.get("content"),
+                    "raw_source": "newsapi",
+                }, ensure_ascii=False) + "\n")
+                rows += 1
+            if len(arts) < page_size:
+                break
+            time.sleep(pause)
+
+    print(f"[LIVE] NewsAPI -> {outpath} ({rows} rows)")
+    return outpath

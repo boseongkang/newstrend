@@ -6,10 +6,9 @@ from .ingest import fetch_newsapi
 from .utils import save_jsonl, load_jsonl
 from .dedup import dedup_rows
 from .report import write_report
-from .hourly import ingest_newsapi_hourly
 from .aggregate import aggregate_windows
 from .analyze_hourly import analyze_hourly
-from .live_collect import ingest_newsapi_recent
+from .hourly import ingest_newsapi_hourly, ingest_newsapi_recent
 
 
 def _resolve_date_arg(s: str | None) -> str:
@@ -21,20 +20,23 @@ def _resolve_date_arg(s: str | None) -> str:
     return ddate.fromisoformat(s).isoformat()
 
 
+def _find_input_path(indir: Path, iso: str) -> Path:
+    candidates = [
+        indir / f"{iso}.jsonl",
+        indir / f"newsapi_{iso}.jsonl",
+    ]
+    for p in candidates:
+        if p.exists():
+            return p
+    raise SystemExit(f"raw file not found in {indir}: tried {', '.join(str(c) for c in candidates)}")
+
+
 def cmd_ingest(args: argparse.Namespace) -> None:
     iso = _resolve_date_arg(args.date)
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
     outfile = fetch_newsapi(outdir=str(outdir), date=iso)
-    print(str(outfile))
-
-
-def _find_input_path(indir: Path, iso: str) -> Path:
-    cands = [indir / f"{iso}.jsonl", indir / f"newsapi_{iso}.jsonl"]
-    for p in cands:
-        if p.exists():
-            return p
-    raise SystemExit(f"input not found: {cands[0]} or {cands[1]}")
+    print(f"Saved newsapi data to {outfile}")
 
 
 def cmd_dedup(args: argparse.Namespace) -> None:
@@ -47,12 +49,18 @@ def cmd_dedup(args: argparse.Namespace) -> None:
     outdir.mkdir(parents=True, exist_ok=True)
     out = outdir / f"{iso}.jsonl"
     save_jsonl(str(out), cleaned)
-    print(str(out))
+    print(f"[OK] {len(rows)} -> {len(cleaned)} -> {out}")
 
 
 def cmd_report(args: argparse.Namespace) -> None:
     iso = _resolve_date_arg(args.date)
-    write_report(iso, kind=args.kind, indir=args.indir, outdir=args.outdir, sample_limit=args.top)
+    write_report(
+        iso,
+        kind=args.kind,
+        indir=args.indir,
+        outdir=args.outdir,
+        sample_limit=args.top,
+    )
 
 
 def cmd_ingest_hourly(args: argparse.Namespace) -> None:
@@ -94,28 +102,28 @@ def cmd_pipeline_day(args: argparse.Namespace) -> None:
 def cmd_collect_live(args: argparse.Namespace) -> None:
     ingest_newsapi_recent(
         query=args.query,
-        recent_minutes=args.recent_minutes,
-        pages=args.pages,
+        max_pages=args.pages,
         outdir=args.outdir,
+        page_size=args.page_size,
     )
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="newscli")
+    p = argparse.ArgumentParser(prog="newscli", description="News ingestion & reports (NewsAPI)")
     sub = p.add_subparsers(dest="command", required=True)
 
-    pi = sub.add_parser("ingest")
+    pi = sub.add_parser("ingest", help="Ingest daily with NewsAPI (single file)")
     pi.add_argument("--outdir", default="data/raw")
     pi.add_argument("--date", default="today")
     pi.set_defaults(func=cmd_ingest)
 
-    pdp = sub.add_parser("dedup")
+    pdp = sub.add_parser("dedup", help="Deduplicate a daily file")
     pdp.add_argument("--date", default="today")
     pdp.add_argument("--indir", default="data/raw_newsapi")
     pdp.add_argument("--outdir", default="data/silver_newsapi")
     pdp.set_defaults(func=cmd_dedup)
 
-    pr = sub.add_parser("report")
+    pr = sub.add_parser("report", help="Generate HTML report")
     pr.add_argument("--date", required=True)
     pr.add_argument("--indir", default="data")
     pr.add_argument("--kind", default="silver_newsapi", choices=["raw", "raw_newsapi", "silver_newsapi"])
@@ -123,7 +131,7 @@ def build_parser() -> argparse.ArgumentParser:
     pr.add_argument("--top", type=int, default=30)
     pr.set_defaults(func=cmd_report)
 
-    ph = sub.add_parser("ingest-hourly")
+    ph = sub.add_parser("ingest-hourly", help="Ingest NewsAPI by time windows")
     ph.add_argument("--date", default="yesterday")
     ph.add_argument("--hours-split", type=int, default=2)
     ph.add_argument("--outroot", default="data/raw_windows")
@@ -131,14 +139,14 @@ def build_parser() -> argparse.ArgumentParser:
     ph.add_argument("--query", default="news")
     ph.set_defaults(func=cmd_ingest_hourly)
 
-    pa = sub.add_parser("aggregate")
+    pa = sub.add_parser("aggregate", help="Merge hourly windows to daily raw/silver")
     pa.add_argument("--date", required=True)
     pa.add_argument("--inroot", default="data/raw_windows")
     pa.add_argument("--daily-outdir", default="data/raw_newsapi")
     pa.add_argument("--silver-outdir", default="data/silver_newsapi")
     pa.set_defaults(func=cmd_aggregate)
 
-    pan = sub.add_parser("analyze-hourly")
+    pan = sub.add_parser("analyze-hourly", help="Analyze silver file and build hourly report")
     pan.add_argument("--date", required=True)
     pan.add_argument("--indir", default="data/silver_newsapi")
     pan.add_argument("--outdir", default="reports/hourly")
@@ -146,17 +154,17 @@ def build_parser() -> argparse.ArgumentParser:
     pan.add_argument("--top-words", type=int, default=30)
     pan.set_defaults(func=cmd_analyze_hourly)
 
-    pp = sub.add_parser("pipeline-day")
+    pp = sub.add_parser("pipeline-day", help="Run ingest-hourly -> aggregate -> analyze")
     pp.add_argument("--date", default="yesterday")
     pp.add_argument("--hours-split", type=int, default=2)
     pp.add_argument("--query", default="news")
     pp.set_defaults(func=cmd_pipeline_day)
 
-    pcl = sub.add_parser("collect-live")
-    pcl.add_argument("--recent-minutes", type=int, default=30)
-    pcl.add_argument("--pages", type=int, default=2)
+    pcl = sub.add_parser("collect-live", help="Collect latest window (for scheduled continuous run)")
     pcl.add_argument("--query", default="news")
-    pcl.add_argument("--outdir", default="data/raw_newsapi")
+    pcl.add_argument("--pages", type=int, default=3)
+    pcl.add_argument("--page-size", type=int, default=100)
+    pcl.add_argument("--outdir", default="data/live_newsapi")
     pcl.set_defaults(func=cmd_collect_live)
 
     return p
