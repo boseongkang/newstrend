@@ -9,7 +9,7 @@ from .report import write_report
 from .hourly import ingest_newsapi_hourly
 from .aggregate import aggregate_windows
 from .analyze_hourly import analyze_hourly
-from .metrics import append_metrics
+from .live_collect import ingest_newsapi_recent
 
 
 def _resolve_date_arg(s: str | None) -> str:
@@ -21,20 +21,20 @@ def _resolve_date_arg(s: str | None) -> str:
     return ddate.fromisoformat(s).isoformat()
 
 
-def _find_input_path(indir: Path, iso: str) -> Path:
-    candidates = [indir / f"{iso}.jsonl", indir / f"newsapi_{iso}.jsonl"]
-    for p in candidates:
-        if p.exists():
-            return p
-    raise SystemExit(f"raw file not found in {indir}: tried {', '.join(str(c) for c in candidates)}")
-
-
 def cmd_ingest(args: argparse.Namespace) -> None:
     iso = _resolve_date_arg(args.date)
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
     outfile = fetch_newsapi(outdir=str(outdir), date=iso)
-    print(f"Saved newsapi data to {outfile}")
+    print(str(outfile))
+
+
+def _find_input_path(indir: Path, iso: str) -> Path:
+    cands = [indir / f"{iso}.jsonl", indir / f"newsapi_{iso}.jsonl"]
+    for p in cands:
+        if p.exists():
+            return p
+    raise SystemExit(f"input not found: {cands[0]} or {cands[1]}")
 
 
 def cmd_dedup(args: argparse.Namespace) -> None:
@@ -47,7 +47,7 @@ def cmd_dedup(args: argparse.Namespace) -> None:
     outdir.mkdir(parents=True, exist_ok=True)
     out = outdir / f"{iso}.jsonl"
     save_jsonl(str(out), cleaned)
-    print(f"[OK] {len(rows)} -> {len(cleaned)} -> {out}")
+    print(str(out))
 
 
 def cmd_report(args: argparse.Namespace) -> None:
@@ -86,28 +86,22 @@ def cmd_analyze_hourly(args: argparse.Namespace) -> None:
 
 def cmd_pipeline_day(args: argparse.Namespace) -> None:
     d = _resolve_date_arg(args.date)
-    ingest_newsapi_hourly(
+    ingest_newsapi_hourly(query=args.query, hours_split=args.hours_split, date=d)
+    aggregate_windows(date=d)
+    analyze_hourly(date=d)
+
+
+def cmd_collect_live(args: argparse.Namespace) -> None:
+    ingest_newsapi_recent(
         query=args.query,
-        hours_split=args.hours_split,
-        max_pages_per_window=args.max_pages,
-        outroot=args.inroot,
-        date=d,
+        recent_minutes=args.recent_minutes,
+        pages=args.pages,
+        outdir=args.outdir,
     )
-    aggregate_windows(date=d, inroot=args.inroot, daily_outdir=args.daily_outdir, silver_outdir=args.silver_outdir)
-    analyze_hourly(
-        date=d,
-        indir=args.silver_outdir,
-        outdir=args.report_outdir,
-        top_k_publishers=args.top_publishers,
-        top_k_words=args.top_words,
-    )
-    if args.save_metrics:
-        append_metrics(date=d, indir=args.metrics_indir, kind=args.metrics_from, metrics_dir=args.metrics_dir)
-        print(f"[OK] metrics appended into {args.metrics_dir}")
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="newscli", description="News ingestion, processing, and reports (NewsAPI-only)")
+    p = argparse.ArgumentParser(prog="newscli")
     sub = p.add_subparsers(dest="command", required=True)
 
     pi = sub.add_parser("ingest")
@@ -156,18 +150,14 @@ def build_parser() -> argparse.ArgumentParser:
     pp.add_argument("--date", default="yesterday")
     pp.add_argument("--hours-split", type=int, default=2)
     pp.add_argument("--query", default="news")
-    pp.add_argument("--max-pages", type=int, default=8)
-    pp.add_argument("--inroot", default="data/raw_windows")
-    pp.add_argument("--daily-outdir", default="data/raw_newsapi")
-    pp.add_argument("--silver-outdir", default="data/silver_newsapi")
-    pp.add_argument("--report-outdir", default="reports/hourly")
-    pp.add_argument("--top-publishers", type=int, default=10)
-    pp.add_argument("--top-words", type=int, default=30)
-    pp.add_argument("--save-metrics", action="store_true")
-    pp.add_argument("--metrics-dir", default="data/metrics")
-    pp.add_argument("--metrics-indir", default="data")
-    pp.add_argument("--metrics-from", choices=["raw_newsapi", "silver_newsapi"], default="raw_newsapi")
     pp.set_defaults(func=cmd_pipeline_day)
+
+    pcl = sub.add_parser("collect-live")
+    pcl.add_argument("--recent-minutes", type=int, default=30)
+    pcl.add_argument("--pages", type=int, default=2)
+    pcl.add_argument("--query", default="news")
+    pcl.add_argument("--outdir", default="data/raw_newsapi")
+    pcl.set_defaults(func=cmd_collect_live)
 
     return p
 
