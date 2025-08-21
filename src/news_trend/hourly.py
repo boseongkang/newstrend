@@ -1,9 +1,11 @@
 from __future__ import annotations
-import os, json, time
+import os
+import json
+import time
 from pathlib import Path
-from typing import List, Tuple
-import requests
 from datetime import datetime, date as ddate, time as dtime, timedelta, timezone
+from typing import Optional
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,7 +15,7 @@ BASE_URL = "https://newsapi.org/v2/everything"
 PAGE_SIZE = 100
 
 
-def _parse_date_arg(d: str | None) -> ddate:
+def _parse_date_arg(d: Optional[str]) -> ddate:
     t = datetime.now(timezone.utc).date()
     if not d or d.lower() == "today":
         return t
@@ -27,11 +29,11 @@ def _iso_utc(dt: datetime) -> str:
 
 
 def ingest_newsapi_hourly(
-    query: str | None = None,
+    query: Optional[str] = None,
     hours_split: int = 2,
     max_pages_per_window: int = 8,
     outroot: str = "data/raw_windows",
-    date: str | None = None,
+    date: Optional[str] = None,
     pause: float = 0.25,
 ) -> Path:
     assert API_KEY, "NEWSAPI_KEY is missing"
@@ -74,60 +76,72 @@ def ingest_newsapi_hourly(
                     if not arts:
                         break
                     for a in arts:
-                        f.write(json.dumps({
-                            "article_id": f"newsapi:{a.get('url')}",
-                            "title": a.get("title"),
-                            "url": a.get("url"),
-                            "publisher": (a.get("source") or {}).get("name"),
-                            "published_at": a.get("publishedAt"),
-                            "description": a.get("description"),
-                            "content": a.get("content"),
-                            "raw_source": "newsapi",
-                        }, ensure_ascii=False) + "\n")
+                        f.write(
+                            json.dumps(
+                                {
+                                    "article_id": f"newsapi:{a.get('url')}",
+                                    "title": a.get("title"),
+                                    "url": a.get("url"),
+                                    "publisher": (a.get("source") or {}).get("name"),
+                                    "published_at": a.get("publishedAt"),
+                                    "description": a.get("description"),
+                                    "content": a.get("content"),
+                                    "raw_source": "newsapi",
+                                },
+                                ensure_ascii=False,
+                            )
+                            + "\n"
+                        )
                         n += 1
                     if len(arts) < PAGE_SIZE:
                         break
                     time.sleep(pause)
-            idx.write(json.dumps({
-                "window_start": w.isoformat(),
-                "window_end": w2.isoformat(),
-                "rows": n,
-                "path": str(fpath)
-            }) + "\n")
+            idx.write(
+                json.dumps(
+                    {
+                        "window_start": w.isoformat(),
+                        "window_end": w2.isoformat(),
+                        "rows": n,
+                        "path": str(fpath),
+                    }
+                )
+                + "\n"
+            )
             written += n
             w = w2
+
     print(f"[OK] hourly ingest -> {outdir} ({written} rows)")
     return outdir
 
 
 def ingest_newsapi_recent(
-    query: str = "news",
-    max_pages: int = 3,
+    query: Optional[str] = None,
+    recent_minutes: int = 30,
+    pages: int = 3,
     outdir: str = "data/live_newsapi",
-    page_size: int = PAGE_SIZE,
-    pause: float = 0.25,
+    pause: float = 0.2,
 ) -> Path:
     assert API_KEY, "NEWSAPI_KEY is missing"
     now = datetime.now(timezone.utc)
-    start = now - timedelta(hours=2)
+    start = now - timedelta(minutes=recent_minutes)
 
-    outdir_p = Path(outdir)
-    outdir_p.mkdir(parents=True, exist_ok=True)
-    ts = now.strftime("%Y-%m-%dT%H-%MZ")
-    outpath = outdir_p / f"{ts}.jsonl"
+    outp = Path(outdir)
+    outp.mkdir(parents=True, exist_ok=True)
+    fname = now.strftime("%Y-%m-%dT%H-%MZ") + ".jsonl"
+    fpath = outp / fname
 
     rows = 0
-    with outpath.open("w", encoding="utf-8") as f:
-        for page in range(1, max_pages + 1):
+    with fpath.open("w", encoding="utf-8") as f:
+        for page in range(1, int(pages) + 1):
             params = {
-                "q": (query or "news").strip(),
                 "from": _iso_utc(start),
                 "to": _iso_utc(now),
+                "pageSize": PAGE_SIZE,
+                "page": page,
+                "apiKey": API_KEY,
                 "language": "en",
                 "sortBy": "publishedAt",
-                "page": page,
-                "pageSize": page_size,
-                "apiKey": API_KEY,
+                "q": (query or "news").strip(),
             }
             r = requests.get(BASE_URL, params=params, timeout=40)
             try:
@@ -139,20 +153,26 @@ def ingest_newsapi_recent(
             if not arts:
                 break
             for a in arts:
-                f.write(json.dumps({
-                    "article_id": f"newsapi:{a.get('url')}",
-                    "title": a.get("title"),
-                    "url": a.get("url"),
-                    "publisher": (a.get("source") or {}).get("name"),
-                    "published_at": a.get("publishedAt"),
-                    "description": a.get("description"),
-                    "content": a.get("content"),
-                    "raw_source": "newsapi",
-                }, ensure_ascii=False) + "\n")
+                f.write(
+                    json.dumps(
+                        {
+                            "article_id": f"newsapi:{a.get('url')}",
+                            "title": a.get("title"),
+                            "url": a.get("url"),
+                            "publisher": (a.get("source") or {}).get("name"),
+                            "published_at": a.get("publishedAt"),
+                            "description": a.get("description"),
+                            "content": a.get("content"),
+                            "raw_source": "newsapi",
+                        },
+                        ensure_ascii=False,
+                    )
+                    + "\n"
+                )
                 rows += 1
-            if len(arts) < page_size:
+            if len(arts) < PAGE_SIZE:
                 break
             time.sleep(pause)
 
-    print(f"[LIVE] NewsAPI -> {outpath} ({rows} rows)")
-    return outpath
+    print(f"[LIVE] NewsAPI -> {fpath} ({rows} rows)")
+    return fpath
