@@ -37,19 +37,13 @@ jobs:
           mkdir -p data/live_newsapi
           touch data/live_newsapi/.gitkeep
       
-      - name: Probe NewsAPI (debug)
-        if: env.NEWSAPI_KEY != ''
-        run: |
-          echo "Probing everything endpoint..."
-          curl -s "https://newsapi.org/v2/everything?q=news&pageSize=1&apiKey=${NEWSAPI_KEY}" | head -c 600 || true
-
 
       - name: Collect live (NewsAPI)
         id: collect
-        if: env.NEWSAPI_KEY != ''
+        if: ${{ env.NEWSAPI_KEY != ''}}
         run: |
           set -e
-          newscli collect-live --recent-minutes 180 --pages 3 --query "news OR market OR tech OR economy" --outdir data/live_newsapi
+          newscli collect-live --recent-minutes 180 --pages 2 --query "news OR market OR tech OR economy" --outdir data/live_newsapi
           OUT=$(ls -1t data/live_newsapi/*.jsonl 2>/dev/null | head -n1 || echo "")
           BYTES=0
           if [ -n "$OUT" ]; then BYTES=$(wc -c < "$OUT" || echo 0); fi
@@ -58,11 +52,11 @@ jobs:
           echo "[collect-live] $OUT ($BYTES bytes)"
 
       - name: Skip collect (no NEWSAPI_KEY)
-        if: env.NEWSAPI_KEY == ''
+        if: ${{ env.NEWSAPI_KEY == '' }}
         run: echo "::warning::NEWSAPI_KEY is not set; skipping collect."
 
       - name: Upload artifact
-        if: steps.collect.outputs.outfile != ''
+        if: ${{ steps.collect.outputs.outfile != ''}}
         uses: actions/upload-artifact@v4
         with:
           name: live-jsonl-${{ github.run_id }}
@@ -70,7 +64,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Commit & push
-        if: steps.collect.outputs.bytes != '' && fromJSON(steps.collect.outputs.bytes) > 0
+        if: ${{ steps.collect.outputs.bytes != '' && fromJSON(steps.collect.outputs.bytes) > 0 }}
         run: |
           set -e
           git config user.name  "github-actions[bot]"
