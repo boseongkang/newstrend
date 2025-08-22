@@ -36,6 +36,13 @@ jobs:
         run: |
           mkdir -p data/live_newsapi
           touch data/live_newsapi/.gitkeep
+      
+      - name: Probe NewsAPI (debug)
+        if: env.NEWSAPI_KEY != ''
+        run: |
+          echo "Probing everything endpoint..."
+          curl -s "https://newsapi.org/v2/everything?q=news&pageSize=1&apiKey=${NEWSAPI_KEY}" | head -c 600 || true
+
 
       - name: Collect live (NewsAPI)
         id: collect
