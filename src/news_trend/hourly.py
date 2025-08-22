@@ -119,16 +119,21 @@ def ingest_newsapi_recent(
     recent_minutes: int = 30,
     pages: int = 3,
     outdir: str = "data/live_newsapi",
+    outfile: Optional[Path] = None,
     pause: float = 0.2,
 ) -> Path:
     assert API_KEY, "NEWSAPI_KEY is missing"
     now = datetime.now(timezone.utc)
     start = now - timedelta(minutes=recent_minutes)
 
-    outp = Path(outdir)
-    outp.mkdir(parents=True, exist_ok=True)
-    fname = now.strftime("%Y-%m-%dT%H-%MZ") + ".jsonl"
-    fpath = outp / fname
+    if outfile is not None:
+        fpath = Path(outfile)
+        fpath.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        outp = Path(outdir)
+        outp.mkdir(parents=True, exist_ok=True)
+        fname = now.strftime("%Y-%m-%dT%H-%MZ") + ".jsonl"
+        fpath = outp / fname
 
     rows = 0
     with fpath.open("w", encoding="utf-8") as f:

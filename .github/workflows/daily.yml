@@ -107,6 +107,22 @@ jobs:
         with:
           path: site
 
+     - name: Commit data and reports
+        if: always()
+        run: |
+          set -e
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data reports || true
+
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+        else
+          git commit -m "daily: ${INGEST_DATE:-$(date -u +%F)} data+report"
+          git push
+          echo "Committed data/reports."
+        fi
+
   deploy:
     needs: build
     runs-on: ubuntu-latest

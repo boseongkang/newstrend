@@ -3,7 +3,6 @@ import argparse
 from pathlib import Path
 from datetime import datetime, timedelta, timezone, date as ddate
 from typing import Optional
-
 from .hourly import ingest_newsapi_hourly, ingest_newsapi_recent
 
 
@@ -94,11 +93,13 @@ def cmd_pipeline_day(args: argparse.Namespace) -> None:
 
 
 def cmd_collect_live(args: argparse.Namespace) -> None:
+    outfile = Path(args.outfile) if args.outfile else None
     ingest_newsapi_recent(
         query=args.query,
         recent_minutes=args.recent_minutes,
         pages=args.pages,
         outdir=args.outdir,
+        outfile=outfile,
     )
 
 
@@ -161,6 +162,7 @@ def build_parser() -> argparse.ArgumentParser:
     pc.add_argument("--recent-minutes", type=int, default=30)
     pc.add_argument("--pages", type=int, default=3)
     pc.add_argument("--outdir", default="data/live_newsapi")
+    pc.add_argument("--outfile", default="")
     pc.set_defaults(func=cmd_collect_live)
 
     return p
