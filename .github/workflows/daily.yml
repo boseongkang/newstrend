@@ -1,8 +1,10 @@
 name: daily-news
+
 on:
   schedule:
     - cron: "00 9 * * *"
   workflow_dispatch: {}
+
 permissions:
   contents: write
   pages: write
@@ -14,51 +16,52 @@ jobs:
     env:
       NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
           pip install -e .
 
-      - name: Compute ISO date (yesterday)
+      - name: Compute ISO (yesterday)
         id: when
         shell: bash
         run: |
-          D=$(date -u -d 'yesterday' +%F 2>/dev/null || date -u -v-1d +%F)
-          echo "date=$D" >> "$GITHUB_OUTPUT"
-
-      - name: Ingest NewsAPI or skip
-        shell: bash
-        run: |
-          if [ -n "${NEWSAPI_KEY}" ]; then
-            echo "Using NEWSAPI_KEY"
-            newscli ingest --date "${{ steps.when.outputs.date }}"
+          if date -u -d yesterday +%F >/dev/null 2>&1; then
+            echo "date=$(date -u -d yesterday +%F)" >> "$GITHUB_OUTPUT"
           else
-            echo "NEWSAPI_KEY not set; skipping ingest."
+            echo "date=$(date -u -v-1d +%F)" >> "$GITHUB_OUTPUT"
           fi
+          echo "INGEST_DATE=$(
+            grep -Eo 'date=.*' "$GITHUB_OUTPUT" 2>/dev/null | head -1 | cut -d= -f2
+          )" >> "$GITHUB_ENV"
 
-      - name: Ensure input exists
-        id: in
-        shell: bash
+      - name: Ingest hourly (NewsAPI)
+        if: ${{ env.NEWSAPI_KEY != '' }}
         run: |
-          set -e
-          D=${{ steps.when.outputs.date }}
-          IN=""
-          if [ -f "data/raw_newsapi/${D}.jsonl" ]; then IN="data/raw_newsapi/${D}.jsonl"; fi
-          if [ -z "$IN" ] && [ -f "data/raw/newsapi_${D}.jsonl" ]; then IN="data/raw/newsapi_${D}.jsonl"; fi
-          if [ -z "$IN" ] && [ -f "data/raw/${D}.jsonl" ]; then IN="data/raw/${D}.jsonl"; fi
-          if [ -n "$IN" ]; then
-            mkdir -p data/raw_newsapi
-            if [ "$IN" != "data/raw_newsapi/${D}.jsonl" ]; then
-              cp "$IN" "data/raw_newsapi/${D}.jsonl"
-            fi
-            echo "in=data/raw_newsapi/${D}.jsonl" >> "$GITHUB_OUTPUT"
-            echo "Input: data/raw_newsapi/${D}.jsonl"
+          newscli ingest-hourly --date "${{ steps.when.outputs.date }}" --hours-split 2 --query "news"
+
+      - name: Aggregate day
+        if: ${{ env.NEWSAPI_KEY != '' }}
+        run: |
+          newscli aggregate --date "${{ steps.when.outputs.date }}"
+
+      - name: Find input for report
+        id: in
+        run: |
+          D="${{ steps.when.outputs.date }}"
+          if [ -f "data/raw_newsapi/$D.jsonl" ]; then
+            echo "in=data/raw_newsapi/$D.jsonl" >> "$GITHUB_OUTPUT"
+          elif [ -f "data/silver_newsapi/$D.jsonl" ]; then
+            echo "in=data/silver_newsapi/$D.jsonl" >> "$GITHUB_OUTPUT"
           else
             echo "in=" >> "$GITHUB_OUTPUT"
             echo "No input found for $D"
@@ -107,21 +110,20 @@ jobs:
         with:
           path: site
 
-     - name: Commit data and reports
+      - name: Commit data and reports
         if: always()
         run: |
           set -e
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A data reports || true
-
           if git diff --cached --quiet; then
             echo "Nothing to commit."
-        else
-          git commit -m "daily: ${INGEST_DATE:-$(date -u +%F)} data+report"
-          git push
-          echo "Committed data/reports."
-        fi
+          else
+            git commit -m "daily: ${INGEST_DATE:-$(date -u +%F)} data+report"
+            git push
+            echo "Committed data/reports."
+          fi
 
   deploy:
     needs: build
