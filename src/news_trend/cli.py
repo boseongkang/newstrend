@@ -158,7 +158,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     pc = sub.add_parser("collect-live", help="Collect recent minutes window (live)")
     pc.add_argument("--query", default="news")
-    pc.add_argument("--recent-minutes", type=int, default=30)  
+    pc.add_argument("--recent-minutes", type=int, default=30)
     pc.add_argument("--pages", type=int, default=3)
     pc.add_argument("--outdir", default="data/live_newsapi")
     pc.set_defaults(func=cmd_collect_live)
