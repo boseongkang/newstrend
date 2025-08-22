@@ -74,4 +74,14 @@ newscli ingest --newsapi --date yesterday
 # 2) Report 
 python src/news_trend/report.py --date yesterday --indir data --kind raw --outdir reports --top 30
 # python src/news_trend/report.py --date yesterday --indir data --kind silver_newsapi --outdir reports --top 30
+```
 
+## 08/22 update 
+### Continuous live collection using GitHub Actions (NEWSAPI)
+This repo includes a 30-minute interval workflow that collects news data and commits them to the repo as newline-delimited JSON.<br>
+Files are written under data/live_newsapi/ with names like YYYY-MM-DDTHH-MMZ.jsonl.
+
+### Verify
+'Actions' - 'collect-live' - click recent workflow <br>
+The results are as follows <br>
+[LIVE] NewsAPI -> data/live_newsapi/2025-08-22T21-39Z.jsonl (n rows)
