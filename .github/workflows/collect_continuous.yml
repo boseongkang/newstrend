@@ -15,6 +15,9 @@ concurrency:
 jobs:
   collect:
     runs-on: ubuntu-latest
+    env:
+      NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,24 +41,22 @@ jobs:
 
       - name: Collect live (NewsAPI)
         id: collect
-        if: ${{ secrets.NEWSAPI_KEY != '' }}
-        env:
-          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+        if: ${{ env.NEWSAPI_KEY != '' }}
         run: |
           set -e
           OUT="data/live_newsapi/$(date -u +%FT%H-%MZ).jsonl"
-          echo "OUT=$OUT"
           newscli collect-live --recent-minutes 180 --query "news OR market OR tech OR economy" --outfile "$OUT" || true
           BYTES=$(wc -c < "$OUT" 2>/dev/null || echo 0)
           echo "outfile=$OUT" >> "$GITHUB_OUTPUT"
           echo "bytes=$BYTES"  >> "$GITHUB_OUTPUT"
           echo "[collect-live] wrote $BYTES bytes to $OUT"
-          if [ "$BYTES" -eq 0 ]; then
-            echo "::warning::0-byte file created."
-            echo "::notice::Increase --recent-minutes or broaden --query."
-          fi
+
+      - name: Skip collect (no NEWSAPI_KEY)
+        if: ${{ env.NEWSAPI_KEY == '' }}
+        run: echo "::warning::NEWSAPI_KEY is not set; skipping collect."
 
       - name: Upload artifact
+        if: ${{ steps.collect.outputs.outfile != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: live-jsonl-${{ github.run_id }}
@@ -65,22 +66,18 @@ jobs:
       - name: Git status before commit
         run: |
           git status -s || true
-          ls -l ${{ steps.collect.outputs.outfile }} || true
+          if [ -n "${{ steps.collect.outputs.outfile }}" ]; then ls -l "${{ steps.collect.outputs.outfile }}" || true; fi
           echo "bytes=${{ steps.collect.outputs.bytes }}"
 
       - name: Commit & push
+        if: ${{ steps.collect.outputs.bytes != '' && fromJSON(steps.collect.outputs.bytes) > 0 }}
         run: |
           set -e
           OUT="${{ steps.collect.outputs.outfile }}"
           BYTES="${{ steps.collect.outputs.bytes }}"
-          if [ -n "$OUT" ] && [ -s "$OUT" ]; then
-            git config user.name  "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -A
-            git commit -m "live: add $(basename "$OUT") bytes=$BYTES" || echo "no changes"
-            git push || true
-            echo "Committed $OUT ($BYTES bytes)."
-          else
-            echo "Skip commit: OUT is empty or 0 bytes."
-          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "live: add $(basename "$OUT") bytes=$BYTES" || echo "no changes"
+          git push || true
 
