@@ -19,13 +19,11 @@ jobs:
       NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -41,43 +39,36 @@ jobs:
 
       - name: Collect live (NewsAPI)
         id: collect
-        if: ${{ env.NEWSAPI_KEY != '' }}
+        if: env.NEWSAPI_KEY != ''
         run: |
           set -e
-          OUT="data/live_newsapi/$(date -u +%FT%H-%MZ).jsonl"
-          newscli collect-live --recent-minutes 180 --query "news OR market OR tech OR economy" --outfile "$OUT" || true
-          BYTES=$(wc -c < "$OUT" 2>/dev/null || echo 0)
+          newscli collect-live --recent-minutes 180 --pages 3 --query "news OR market OR tech OR economy" --outdir data/live_newsapi
+          OUT=$(ls -1t data/live_newsapi/*.jsonl 2>/dev/null | head -n1 || echo "")
+          BYTES=0
+          if [ -n "$OUT" ]; then BYTES=$(wc -c < "$OUT" || echo 0); fi
           echo "outfile=$OUT" >> "$GITHUB_OUTPUT"
           echo "bytes=$BYTES"  >> "$GITHUB_OUTPUT"
-          echo "[collect-live] wrote $BYTES bytes to $OUT"
+          echo "[collect-live] $OUT ($BYTES bytes)"
 
       - name: Skip collect (no NEWSAPI_KEY)
-        if: ${{ env.NEWSAPI_KEY == '' }}
+        if: env.NEWSAPI_KEY == ''
         run: echo "::warning::NEWSAPI_KEY is not set; skipping collect."
 
       - name: Upload artifact
-        if: ${{ steps.collect.outputs.outfile != '' }}
+        if: steps.collect.outputs.outfile != ''
         uses: actions/upload-artifact@v4
         with:
           name: live-jsonl-${{ github.run_id }}
           path: ${{ steps.collect.outputs.outfile }}
           if-no-files-found: warn
 
-      - name: Git status before commit
-        run: |
-          git status -s || true
-          if [ -n "${{ steps.collect.outputs.outfile }}" ]; then ls -l "${{ steps.collect.outputs.outfile }}" || true; fi
-          echo "bytes=${{ steps.collect.outputs.bytes }}"
-
       - name: Commit & push
-        if: ${{ steps.collect.outputs.bytes != '' && fromJSON(steps.collect.outputs.bytes) > 0 }}
+        if: steps.collect.outputs.bytes != '' && fromJSON(steps.collect.outputs.bytes) > 0
         run: |
           set -e
-          OUT="${{ steps.collect.outputs.outfile }}"
-          BYTES="${{ steps.collect.outputs.bytes }}"
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "live: add $(basename "$OUT") bytes=$BYTES" || echo "no changes"
+          git add -A data/live_newsapi
+          git commit -m "live: add $(basename '${{ steps.collect.outputs.outfile }}') bytes=${{ steps.collect.outputs.bytes }}" || echo "no changes"
           git push || true
 
