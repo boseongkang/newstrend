@@ -1,0 +1,39 @@
+name: update-warehouse
+
+on:
+  schedule:
+    - cron: "*/35 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-warehouse
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Update corpus
+        run: |
+          python scripts/update_corpus.py
+      - name: Commit warehouse
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data/warehouse data/metrics || true
+          git commit -m "warehouse: update $(date -u +%FT%TZ)" || echo "no changes"
+          git push || true
+
