@@ -1,7 +1,5 @@
 # news trend  
 
-08/24 Jetbrain student license renwel not working -> cant work
-
 
 A Python-first, package-style starter to *ingest daily US news, deduplicate them, and analyze trends*.  
 Now also includes **quick view & daily report generation**.
