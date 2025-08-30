@@ -1,17 +1,16 @@
 from __future__ import annotations
-import os, json, time, requests
+import os, json, time
 from pathlib import Path
-from datetime import datetime, timedelta, timezone, date as ddate, time as dtime
 from typing import Optional
+import requests
+from datetime import datetime, date as ddate, time as dtime, timedelta, timezone
+from dotenv import load_dotenv
 
+load_dotenv()
+
+API_KEY = os.getenv("NEWSAPI_KEY")
 BASE_URL = "https://newsapi.org/v2/everything"
 PAGE_SIZE = 100
-
-def _get_key() -> str:
-    k = os.getenv("NEWSAPI_KEY") or ""
-    if not k:
-        raise AssertionError("NEWSAPI_KEY is missing")
-    return k
 
 def _parse_date_arg(d: Optional[str]) -> ddate:
     t = datetime.now(timezone.utc).date()
@@ -22,7 +21,7 @@ def _parse_date_arg(d: Optional[str]) -> ddate:
     return ddate.fromisoformat(d)
 
 def _iso_utc(dt: datetime) -> str:
-    return dt.replace(microsecond=0).astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 def ingest_newsapi_hourly(
     query: Optional[str] = None,
@@ -32,7 +31,7 @@ def ingest_newsapi_hourly(
     date: Optional[str] = None,
     pause: float = 0.25,
 ) -> Path:
-    _get_key()
+    assert API_KEY, "NEWSAPI_KEY is missing"
     day = _parse_date_arg(date)
     start = datetime.combine(day, dtime(0, 0, 0, tzinfo=timezone.utc))
     end = start + timedelta(days=1)
@@ -52,10 +51,10 @@ def ingest_newsapi_hourly(
                 for page in range(1, max_pages_per_window + 1):
                     params = {
                         "from": _iso_utc(w),
-                        "to": _iso_utc(w2 - timedelta(seconds=60)),
+                        "to": _iso_utc(w2),
                         "pageSize": PAGE_SIZE,
                         "page": page,
-                        "apiKey": _get_key(),
+                        "apiKey": API_KEY,
                         "language": "en",
                         "sortBy": "publishedAt",
                         "q": (query or "news").strip(),
@@ -67,17 +66,6 @@ def ingest_newsapi_hourly(
                         break
                     data = r.json() or {}
                     arts = data.get("articles") or []
-                    if not arts and page == 1:
-                        p2 = dict(params)
-                        p2.pop("from", None)
-                        p2.pop("to", None)
-                        r2 = requests.get(BASE_URL, params=p2, timeout=40)
-                        try:
-                            r2.raise_for_status()
-                        except requests.HTTPError:
-                            break
-                        data = r2.json() or {}
-                        arts = data.get("articles") or []
                     if not arts:
                         break
                     for a in arts:
@@ -95,7 +83,12 @@ def ingest_newsapi_hourly(
                     if len(arts) < PAGE_SIZE:
                         break
                     time.sleep(pause)
-            idx.write(json.dumps({"window_start": w.isoformat(),"window_end": w2.isoformat(),"rows": n,"path": str(fpath)}) + "\n")
+            idx.write(json.dumps({
+                "window_start": w.isoformat(),
+                "window_end": w2.isoformat(),
+                "rows": n,
+                "path": str(fpath)
+            }) + "\n")
             written += n
             w = w2
     print(f"[OK] hourly ingest -> {outdir} ({written} rows)")
@@ -108,10 +101,10 @@ def ingest_newsapi_recent(
     outdir: str = "data/live_newsapi",
     pause: float = 0.2,
 ) -> Path:
-    _get_key()
-    now = datetime.now(timezone.utc).replace(microsecond=0) - timedelta(seconds=60)
+    assert API_KEY, "NEWSAPI_KEY is missing"
+    now = datetime.now(timezone.utc)
     start = now - timedelta(minutes=recent_minutes)
-    outp = Path(outdir)
+    outp = Path(outdir) / now.strftime("%Y-%m-%d")
     outp.mkdir(parents=True, exist_ok=True)
     fname = now.strftime("%Y-%m-%dT%H-%MZ") + ".jsonl"
     fpath = outp / fname
@@ -123,7 +116,7 @@ def ingest_newsapi_recent(
                 "to": _iso_utc(now),
                 "pageSize": PAGE_SIZE,
                 "page": page,
-                "apiKey": _get_key(),
+                "apiKey": API_KEY,
                 "language": "en",
                 "sortBy": "publishedAt",
                 "q": (query or "news").strip(),
@@ -135,17 +128,6 @@ def ingest_newsapi_recent(
                 break
             data = r.json() or {}
             arts = data.get("articles") or []
-            if not arts and page == 1:
-                p2 = dict(params)
-                p2.pop("from", None)
-                p2.pop("to", None)
-                r2 = requests.get(BASE_URL, params=p2, timeout=40)
-                try:
-                    r2.raise_for_status()
-                except requests.HTTPError:
-                    break
-                data = r2.json() or {}
-                arts = data.get("articles") or []
             if not arts:
                 break
             for a in arts:

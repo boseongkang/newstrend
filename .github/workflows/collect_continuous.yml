@@ -36,15 +36,14 @@ jobs:
         run: |
           mkdir -p data/live_newsapi
           touch data/live_newsapi/.gitkeep
-      
 
       - name: Collect live (NewsAPI)
         id: collect
-        if: ${{ env.NEWSAPI_KEY != ''}}
+        if: ${{ env.NEWSAPI_KEY != '' }}
         run: |
           set -e
           newscli collect-live --recent-minutes 180 --pages 2 --query "news OR market OR tech OR economy" --outdir data/live_newsapi
-          OUT=$(ls -1t data/live_newsapi/*.jsonl 2>/dev/null | head -n1 || echo "")
+          OUT=$(find data/live_newsapi -type f -name "*.jsonl" -printf "%T@ %p\n" | sort -n | tail -1 | cut -d" " -f2- || echo "")
           BYTES=0
           if [ -n "$OUT" ]; then BYTES=$(wc -c < "$OUT" || echo 0); fi
           echo "outfile=$OUT" >> "$GITHUB_OUTPUT"
@@ -56,7 +55,7 @@ jobs:
         run: echo "::warning::NEWSAPI_KEY is not set; skipping collect."
 
       - name: Upload artifact
-        if: ${{ steps.collect.outputs.outfile != ''}}
+        if: ${{ steps.collect.outputs.outfile != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: live-jsonl-${{ github.run_id }}
