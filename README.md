@@ -88,3 +88,34 @@ Files are written under data/live_newsapi/ with names like YYYY-MM-DDTHH-MMZ.jso
 'Actions' - 'collect-live' - click recent workflow <br>
 The results are as follows <br>
 [LIVE] NewsAPI -> data/live_newsapi/2025-08-22T21-39Z.jsonl (n rows)
+
+## 08/30 update
+## Word Trends (cumulative)
+Generate “top words” and 14-day trends from the deduplicated warehouse:
+
+```
+python scripts/viz_words.py \
+  --master data/warehouse/master.jsonl \
+  --outdir reports/words \
+  --top 30 \
+  --days 14 \
+  --min-len 3 \
+  --drop-content \
+  --extra-stop "chars,nbsp,amp,apos,mdash,ndash,inc,com,report,reports,shares"
+```
+
+## What the command does
+
+- **Input**: data/warehouse/master.jsonl (all deduped articles).
+- **Window**: keeps only the most recent --days (default: 14).
+- **Text selection**: with --drop-content, only title + description are used (article body is ignored).
+- This reduces boilerplate/noise that appears in bodies and surfaces headline topics.
+- **Normalization**: lowercasing, basic cleaning, tokenization.
+- **Filtering**:
+- --min-len: drop tokens shorter than N characters (e.g., 3).
+- Stopwords = built-in list plus --extra-stop (comma-separated, case-insensitive).
+- **Outputs** (written to --outdir, e.g., reports/words/):
+- top_words.png – bar chart of the overall top N words.
+- top_words_trend.png – line chart of daily counts for those words over the last N days.
+- top_words.csv – total counts.
+- top_words_trend.csv – daily counts per word.
