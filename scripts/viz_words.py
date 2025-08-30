@@ -1,185 +1,203 @@
-from __future__ import annotations
-import argparse, json, re, os
+#!/usr/bin/env python3
+import argparse, json, re
 from pathlib import Path
+from datetime import datetime, timezone, timedelta
 from collections import Counter, defaultdict
-from datetime import datetime, timedelta, timezone
-import math
-
 import pandas as pd
 import matplotlib.pyplot as plt
 
-TOKEN_RE = re.compile(r"[a-z][a-z']+")
-
-DEFAULT_STOP = {
-    "a","about","above","after","again","against","all","am","an","and","any","are","aren't","as","at","be","because","been","before","being","below","between","both","but","by","can","can't","cannot","could","couldn't","did","didn't","do","does","doesn't","doing","don't","down","during","each","few","for","from","further","had","hadn't","has","hasn't","have","haven't","having","he","he'd","he'll","he's","her","here","here's","hers","herself","him","himself","his","how","how's","i","i'd","i'll","i'm","i've","if","in","into","is","isn't","it","it's","its","itself","let's","me","more","most","mustn't","my","myself","no","nor","not","of","off","on","once","only","or","other","ought","our","ours","ourselves","out","over","own","same","shan't","she","she'd","she'll","she's","should","shouldn't","so","some","such","than","that","that's","the","their","theirs","them","themselves","then","there","there's","these","they","they'd","they'll","they're","they've","this","those","through","to","too","under","until","up","very","was","wasn't","we","we'd","we'll","we're","we've","were","weren't","what","what's","when","when's","where","where's","which","while","who","who's","whom","why","why's","with","won't","would","wouldn't","you","you'd","you'll","you're","you've","your","yours","yourself","yourselves",
-    "say","says","said","will","new","news","time","year","years","week","today","yesterday","tomorrow","one","two","three","mr","ms","us","u.s","u.s.","—","–"
-}
-
-def iso_to_date(iso: str) -> datetime.date:
-    s = iso.replace("Z","+00:00")
-    return datetime.fromisoformat(s).astimezone(timezone.utc).date()
-
-def iter_jsonl(path: Path):
-    with path.open("r", encoding="utf-8") as f:
+def load_jsonl(path):
+    with open(path, "r", encoding="utf-8") as f:
         for line in f:
-            line=line.strip()
+            line = line.strip()
             if not line:
                 continue
-            try:
-                yield json.loads(line)
-            except Exception:
-                continue
+            yield json.loads(line)
 
-def gather_sources(source: str, last_days: int|None) -> list[Path]:
-    p = Path(source)
-    if p.is_file():
-        return [p]
-    if p.is_dir():
-        return sorted(p.glob("*.jsonl"))
-    return [Path(x) for x in sorted(Path().glob(source))]
+def load_rows(master_path=None, inputs=None):
+    if master_path:
+        for row in load_jsonl(master_path):
+            yield row
+    if inputs:
+        from glob import glob
+        for pat in inputs:
+            for fp in sorted(glob(pat)):
+                for row in load_jsonl(fp):
+                    yield row
 
-def normalize_text(s: str) -> str:
+_ws = re.compile(r"\s+")
+_url = re.compile(r"https?://\S+")
+_punct = re.compile(r"[^\w\s]")
+
+def normalize_text(s):
     s = s.lower()
-    s = re.sub(r"http[s]?://\S+"," ",s)
-    s = re.sub(r"[\d\W_]+"," ",s)
+    s = _url.sub(" ", s)
+    s = _punct.sub(" ", s)
+    s = _ws.sub(" ", s).strip()
     return s
 
-def tokenize(txt: str, min_len: int, stop: set[str]) -> list[str]:
-    txt = normalize_text(txt)
-    toks = [t for t in TOKEN_RE.findall(txt) if len(t)>=min_len and t not in stop]
-    return toks
+def safe_join(parts):
+    out = []
+    for x in parts:
+        if x is None:
+            continue
+        if isinstance(x, (int, float)):
+            x = str(x)
+        elif not isinstance(x, str):
+            continue
+        if x:
+            out.append(x)
+    return " ".join(out)
 
-def topn_df(counter: Counter, top: int) -> pd.DataFrame:
-    items = counter.most_common(top)
-    total = sum(counter.values()) or 1
-    df = pd.DataFrame(items, columns=["token","count"])
-    df["share"] = df["count"]/total
-    return df
+def tokenize(text):
+    return [t for t in text.split(" ") if t]
 
-def plot_bar(df: pd.DataFrame, title: str, outpath: Path):
-    plt.figure(figsize=(10,6))
-    ax = plt.gca()
-    ax.barh(df["token"][::-1], df["count"][::-1])
-    ax.set_title(title)
-    ax.set_xlabel("count")
+def parse_date(s):
+    if not s or not isinstance(s, str):
+        return datetime.now(timezone.utc).date()
+    s = s.replace("Z", "+00:00")
+    try:
+        return datetime.fromisoformat(s).astimezone(timezone.utc).date()
+    except Exception:
+        return datetime.now(timezone.utc).date()
+
+def build_stopwords(extra=None, min_len=3):
+    base = {
+        "the","a","an","and","or","of","to","in","on","for","by","with","as","at","from",
+        "that","this","it","its","is","are","was","were","be","been","being",
+        "he","she","they","we","you","i","his","her","their","our","your","them",
+        "will","would","can","could","should","may","might","must","do","did","does","done",
+        "not","no","yes","but","if","than","then","there","here","about","over","under",
+        "more","most","less","least","very","much","many","new","news","latest","today",
+        "say","says","said","according","via","source","mr","ms","dr","u","us","uk",
+        "nbsp","amp","apos","mdash","ndash"
+    }
+    if extra:
+        for t in extra.split(","):
+            t = t.strip().lower()
+            if t:
+                base.add(t)
+    return base, min_len
+
+def top_words(rows, stopwords, min_len=3, drop_content=False):
+    total = Counter()
+    daily = defaultdict(Counter)
+    for r in rows:
+        title = r.get("title")
+        desc = r.get("description")
+        content = r.get("content")
+        text = safe_join([title, desc] if drop_content else [title, desc, content])
+        text = normalize_text(text)
+        if not text:
+            continue
+        toks = tokenize(text)
+        toks = [t for t in toks if len(t) >= min_len and t not in stopwords and not t.isdigit()]
+        if not toks:
+            continue
+        d = parse_date(r.get("published_at") or r.get("published") or r.get("date"))
+        total.update(toks)
+        daily[d.isoformat()].update(toks)
+    return total, daily
+
+def save_bar_chart(df, out_png, title):
+    plt.figure(figsize=(12,6))
+    plt.barh(df["token"], df["count"])
+    plt.gca().invert_yaxis()
+    plt.title(title)
+    plt.xlabel("count")
     plt.tight_layout()
-    outpath.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(outpath, dpi=140)
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(out_png, dpi=150)
     plt.close()
 
-def plot_trend(trend_df: pd.DataFrame, title: str, outpath: Path):
-    plt.figure(figsize=(11,6))
-    ax = plt.gca()
-    for tok, sub in trend_df.groupby("token"):
-        ax.plot(sub["date"], sub["count"], label=tok, marker="o", linewidth=2)
-    ax.set_title(title)
-    ax.set_xlabel("date (UTC)")
-    ax.set_ylabel("count")
-    ax.legend(ncol=2, fontsize=9)
+def save_trend_chart(df, out_png, days):
+    pivot = df.pivot_table(index="date", columns="token", values="count", fill_value=0)
+    last_dates = sorted(pivot.index)[-days:] if days else sorted(pivot.index)
+    pivot = pivot.loc[last_dates]
+    plt.figure(figsize=(16,8))
+    for col in pivot.columns[:30]:
+        plt.plot(pivot.index, pivot[col], label=col)
+    plt.title(f"Top words trend (last {len(last_dates)} days)")
+    plt.xlabel("date (UTC)")
+    plt.ylabel("count")
+    plt.legend(bbox_to_anchor=(1.02, 1), loc="upper left", fontsize=9)
     plt.tight_layout()
-    outpath.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(outpath, dpi=140)
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(out_png, dpi=150)
     plt.close()
+
+def write_html(out_html, title, imgs):
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    html = [
+        "<!doctype html><meta charset='utf-8'>",
+        f"<title>{title}</title>",
+        f"<h1>{title}</h1>",
+        f"<p>Updated: {ts}</p>",
+    ]
+    for src, caption in imgs:
+        html.append(f"<h2>{caption}</h2>")
+        html.append(f"<img src='{src}' style='max-width:100%;height:auto'/>")
+    out_html.parent.mkdir(parents=True, exist_ok=True)
+    out_html.write_text("\n".join(html), encoding="utf-8")
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--source", default="data/warehouse/master.jsonl")
-    ap.add_argument("--fields", default="title,description,content")
-    ap.add_argument("--min-len", type=int, default=3)
-    ap.add_argument("--top", type=int, default=30)
-    ap.add_argument("--last-days", type=int, default=14)
-    ap.add_argument("--outdir", default="reports/words")
-    ap.add_argument("--bigrams", action="store_true")
-    ap.add_argument("--extra-stop", default="")
-    ap.add_argument("--max-docs", type=int, default=0)
-    args = ap.parse_args()
+    p = argparse.ArgumentParser()
+    p.add_argument("--master")
+    p.add_argument("--inputs", nargs="*", default=None)
+    p.add_argument("--outdir", default="reports/words")
+    p.add_argument("--top", type=int, default=30)
+    p.add_argument("--days", type=int, default=14)
+    p.add_argument("--min-len", type=int, default=3)
+    p.add_argument("--extra-stop", default="")
+    p.add_argument("--drop-content", action="store_true")
+    args = p.parse_args()
 
-    stop = set(DEFAULT_STOP)
-    if args.extra_stop:
-        for t in args.extra_stop.split(","):
-            t=t.strip().lower()
-            if t:
-                stop.add(t)
+    rows = list(load_rows(args.master, args.inputs))
+    stop, _ = build_stopwords(args.extra_stop, args.min_len)
 
-    fields = [x.strip() for x in args.fields.split(",") if x.strip()]
-    since_date = None
-    if args.last_days and args.last_days>0:
-        since_date = (datetime.now(timezone.utc) - timedelta(days=args.last_days)).date()
+    total, daily = top_words(rows, stop, args.min_len, args.drop_content)
 
-    files = gather_sources(args.source, args.last_days)
-    unigrams = Counter()
-    bigrams = Counter()
-    per_day = defaultdict(Counter)
-
-    seen = 0
-    for fp in files:
-        for row in iter_jsonl(fp):
-            d = None
-            if "published_at" in row and row["published_at"]:
-                try:
-                    d = iso_to_date(row["published_at"])
-                except Exception:
-                    d = None
-            if since_date and d and d < since_date:
-                continue
-            txts = []
-            for f in fields:
-                v = row.get(f)
-                if isinstance(v,str) and v:
-                    txts.append(v)
-            if not txts:
-                continue
-            tokens = tokenize(" ".join(txts), args.min_len, stop)
-            if not tokens:
-                continue
-            unigrams.update(tokens)
-            if args.bigrams and len(tokens)>1:
-                bigrams.update([" ".join(pair) for pair in zip(tokens,tokens[1:]) if pair[0] not in stop and pair[1] not in stop])
-            if d:
-                per_day[d].update(tokens)
-            seen += 1
-            if args.max_docs and seen>=args.max_docs:
-                break
-        if args.max_docs and seen>=args.max_docs:
-            break
-
+    top_df = pd.DataFrame(total.most_common(args.top), columns=["token","count"])
     outdir = Path(args.outdir)
-    outdir.mkdir(parents=True, exist_ok=True)
+    top_csv = outdir / "top_words.csv"
+    top_png = outdir / "top_words.png"
+    top_df.to_csv(top_csv, index=False)
+    save_bar_chart(top_df, top_png, "Top words")
 
-    top_uni = topn_df(unigrams, args.top)
-    top_uni.to_csv(outdir/"unigrams_top.csv", index=False)
-    plot_bar(top_uni, f"Top {args.top} words", outdir/"top_words.png")
+    daily_rows = []
+    for d, cnt in daily.items():
+        for tok, c in cnt.items():
+            daily_rows.append({"date": d, "token": tok, "count": c})
+    trend_df = pd.DataFrame(daily_rows)
+    if not trend_df.empty:
+        trend_csv = outdir / "top_words_trend.csv"
+        trend_png = outdir / "top_words_trend.png"
+        trend_df.to_csv(trend_csv, index=False)
+        trend_top = top_df["token"].tolist()
+        trend_df = trend_df[trend_df["token"].isin(trend_top)]
+        save_trend_chart(trend_df, trend_png, args.days)
 
-    if args.bigrams and bigrams:
-        top_bi = topn_df(bigrams, args.top)
-        top_bi.to_csv(outdir/"bigrams_top.csv", index=False)
-        plot_bar(top_bi, f"Top {args.top} bigrams", outdir/"top_bigrams.png")
-
-    if per_day:
-        top_tokens = list(top_uni["token"])
-        recs = []
-        for d, ctr in per_day.items():
-            for t in top_tokens:
-                c = ctr.get(t,0)
-                if c>0:
-                    recs.append((d,t,c))
-        if recs:
-            trend = pd.DataFrame(recs, columns=["date","token","count"]).sort_values(["date","token"])
-            trend.to_csv(outdir/"top_words_trend.csv", index=False)
-            plot_trend(trend, f"Top words trend (last {args.last_days} days)", outdir/"top_words_trend.png")
+    uni_csv = outdir / "unigrams_top.csv"
+    pd.DataFrame(total.most_common(), columns=["token","count"]).to_csv(uni_csv, index=False)
 
     summary = {
-        "source": args.source,
-        "files": len(files),
-        "docs_seen": seen,
-        "unique_words": len(unigrams),
-        "updated_at": datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "inputs": args.inputs or [args.master],
+        "rows": len(rows),
+        "unique_tokens": len(total),
         "top": args.top,
-        "last_days": args.last_days,
-        "min_len": args.min_len
+        "days": args.days,
+        "min_len": args.min_len,
+        "extra_stop": args.extra_stop,
+        "drop_content": args.drop_content,
     }
-    with (outdir/"summary.json").open("w", encoding="utf-8") as f:
-        json.dump(summary, f, ensure_ascii=False, indent=2)
+    (outdir / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    imgs = []
+    if top_png.exists(): imgs.append((top_png.name, "Top words"))
+    trend_png = outdir / "top_words_trend.png"
+    if trend_png.exists(): imgs.append((trend_png.name, "Top words trend"))
+    write_html(outdir / "latest_words.html", "Top Words", imgs)
 
 if __name__ == "__main__":
     main()
