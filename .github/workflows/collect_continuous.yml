@@ -17,6 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+      QUERY: "news OR market OR tech OR economy"
+      RECENT_MINUTES: "180"
+      SHIFT_MINUTES: "1440"
+      MAX_PAGES: "2"
 
     steps:
       - uses: actions/checkout@v4
@@ -27,48 +31,89 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .
-
       - name: Ensure dirs
         run: |
           mkdir -p data/live_newsapi
-          touch data/live_newsapi/.gitkeep
 
-      - name: Collect live
+      - name: Collect shifted window
         id: collect
-        if: ${{ env.NEWSAPI_KEY != '' }}
+        if: env.NEWSAPI_KEY != ''
         run: |
           set -euo pipefail
-          OUTDIR="data/live_newsapi/$(date -u +%Y/%m/%d)"
-          mkdir -p "$OUTDIR"
-          newscli collect-live --recent-minutes 180 --pages 2 --query "news OR market OR tech OR economy" --outdir "$OUTDIR" || true
-          OUT=$(ls -1t "$OUTDIR"/*.jsonl 2>/dev/null | head -n1 || echo "")
-          BYTES=0
-          if [ -n "$OUT" ] && [ -f "$OUT" ]; then BYTES=$(wc -c < "$OUT" || echo 0); fi
-          echo "outfile=$OUT" >> "$GITHUB_OUTPUT"
-          echo "bytes=$BYTES"  >> "$GITHUB_OUTPUT"
+          TO_EPOCH=$(date -u -d "${SHIFT_MINUTES} minutes ago" +%s)
+          FROM_EPOCH=$(( TO_EPOCH - ${RECENT_MINUTES}*60 ))
+          FROM=$(date -u -d "@${FROM_EPOCH}" +%FT%TZ)
+          TO=$(date -u -d "@${TO_EPOCH}" +%FT%TZ)
+          YEAR=$(date -u -d "@${TO_EPOCH}" +%Y)
+          MONTH=$(date -u -d "@${TO_EPOCH}" +%m)
+          DAY=$(date -u -d "@${TO_EPOCH}" +%d)
+          STAMP=$(date -u -d "@${TO_EPOCH}" +%Y-%m-%dT%H-%MZ)
+          OUTDIR="data/live_newsapi/${YEAR}/${MONTH}/${DAY}"
+          mkdir -p "${OUTDIR}"
+          OUT="${OUTDIR}/${STAMP}.jsonl"
+          TMP="${OUT}.tmp"
+          python - <<'PY'
+import os, sys, json, urllib.parse, urllib.request, time
+key=os.environ["NEWSAPI_KEY"]
+q=os.environ["QUERY"]
+frm=os.environ["FROM"]
+to=os.environ["TO"]
+pages=int(os.environ["MAX_PAGES"])
+tmp=os.environ["TMP"]
+base="https://newsapi.org/v2/everything"
+total=0
+with open(tmp,"w",encoding="utf-8") as f:
+    for p in range(1,pages+1):
+        params=dict(q=q,from_=frm,to=to,sortBy="publishedAt",pageSize="100",page=str(p),apiKey=key)
+        params["from"]=params.pop("from_")
+        url=base+"?"+urllib.parse.urlencode(params)
+        req=urllib.request.Request(url,headers={"User-Agent":"gh-actions"})
+        try:
+            with urllib.request.urlopen(req,timeout=40) as r:
+                data=json.loads(r.read().decode("utf-8"))
+        except Exception:
+            break
+        if data.get("status")!="ok":
+            break
+        arts=data.get("articles") or []
+        if not arts:
+            break
+        for a in arts:
+            f.write(json.dumps(a, ensure_ascii=False)+"\n")
+            total+=1
+        time.sleep(0.3)
+print(total)
+PY
+          ROWS=$(tail -n1 <<<"$(cat "${TMP}" 2>/dev/null | wc -l)")
+          if [ -f "${TMP}" ]; then
+            BYTES=$(wc -c < "${TMP}" || echo 0)
+          else
+            BYTES=0
+          fi
+          if [ "${BYTES}" -gt 0 ]; then
+            mv "${TMP}" "${OUT}"
+            echo "outfile=${OUT}" >> "$GITHUB_OUTPUT"
+            echo "bytes=${BYTES}"  >> "$GITHUB_OUTPUT"
+          else
+            rm -f "${TMP}"
+            echo "outfile=" >> "$GITHUB_OUTPUT"
+            echo "bytes=0"  >> "$GITHUB_OUTPUT"
 
-      - uses: actions/upload-artifact@v4
-        if: ${{ steps.collect.outputs.outfile != '' }}
+      - name: Upload artifact
+        if: steps.collect.outputs.outfile != ''
+        uses: actions/upload-artifact@v4
         with:
           name: live-jsonl-${{ github.run_id }}
           path: ${{ steps.collect.outputs.outfile }}
           if-no-files-found: warn
 
       - name: Commit & push
-        if: ${{ steps.collect.outputs.bytes != '' && fromJSON(steps.collect.outputs.bytes) > 0 }}
+        if: steps.collect.outputs.bytes != '' && fromJSON(steps.collect.outputs.bytes) > 0
         run: |
           set -e
-          git config user.name "github-actions[bot]"
+          git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A data/live_newsapi
-          git commit -m "live: add $(basename '${{ steps.collect.outputs.outfile }}') bytes=${{ steps.collect.outputs.bytes }}"
+          git commit -m "live: add ${{ steps.collect.outputs.outfile }} bytes=${{ steps.collect.outputs.bytes }}"
           git push
-
-      - name: Skip collect
-        if: ${{ env.NEWSAPI_KEY == '' }}
-        run: echo "::warning::NEWSAPI_KEY is not set; skipping collect."
 
