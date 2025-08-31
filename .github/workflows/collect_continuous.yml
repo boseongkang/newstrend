@@ -2,7 +2,7 @@ name: collect-live
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "*/30 * * * *"   # every 30 minutes (UTC)
   workflow_dispatch: {}
 
 permissions:
@@ -19,11 +19,13 @@ jobs:
       NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
@@ -33,19 +35,39 @@ jobs:
           pip install -e .
 
       - name: Ensure data dirs
+        id: ensure
         run: |
-          mkdir -p data/live_newsapi
-          touch data/live_newsapi/.gitkeep
+          set -e
+          D=$(date -u +%F)                          # e.g. 2025-08-31 (UTC)
+          mkdir -p "data/live_newsapi/$D"
+          touch "data/live_newsapi/$D/.gitkeep"
+          echo "date=$D" >> "$GITHUB_OUTPUT"
+
+      # --- Optional debug probe: shows what NewsAPI is returning right now
+      - name: Probe NewsAPI (debug)
+        if: ${{ env.NEWSAPI_KEY != '' }}
+        run: |
+          FROM=$(date -u -d '180 minutes ago' +%FT%TZ)
+          TO=$(date -u +%FT%TZ)
+          echo "Window: $FROM .. $TO"
+          curl -sS "https://newsapi.org/v2/everything?language=en&sortBy=publishedAt&pageSize=1&q=news%20OR%20market%20OR%20tech%20OR%20economy&from=$FROM&to=$TO&apiKey=${NEWSAPI_KEY}" | head -c 800 || true
 
       - name: Collect live (NewsAPI)
         id: collect
         if: ${{ env.NEWSAPI_KEY != '' }}
         run: |
           set -e
-          newscli collect-live --recent-minutes 180 --pages 2 --query "news OR market OR tech OR economy" --outdir data/live_newsapi
-          OUT=$(find data/live_newsapi -type f -name "*.jsonl" -printf "%T@ %p\n" | sort -n | tail -1 | cut -d" " -f2- || echo "")
+          OUTDIR="data/live_newsapi/${{ steps.ensure.outputs.date }}"
+          # widen the window a bit to avoid empty windows; dedup happens later
+          newscli collect-live \
+            --recent-minutes 360 \
+            --pages 3 \
+            --query "news OR market OR tech OR economy" \
+            --outdir "$OUTDIR" || true
+
+          OUT=$(ls -1t "$OUTDIR"/*.jsonl 2>/dev/null | head -n1 || echo "")
           BYTES=0
-          if [ -n "$OUT" ]; then BYTES=$(wc -c < "$OUT" || echo 0); fi
+          if [ -n "$OUT" ]; then BYTES=$(wc -c < "$OUT" 2>/dev/null || echo 0); fi
           echo "outfile=$OUT" >> "$GITHUB_OUTPUT"
           echo "bytes=$BYTES"  >> "$GITHUB_OUTPUT"
           echo "[collect-live] $OUT ($BYTES bytes)"
@@ -68,7 +90,7 @@ jobs:
           set -e
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A data/live_newsapi
+          git add -A "data/live_newsapi/${{ steps.ensure.outputs.date }}"
           git commit -m "live: add $(basename '${{ steps.collect.outputs.outfile }}') bytes=${{ steps.collect.outputs.bytes }}" || echo "no changes"
           git push || true
 
