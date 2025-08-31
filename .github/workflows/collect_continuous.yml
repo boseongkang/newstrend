@@ -19,80 +19,56 @@ jobs:
       NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install package
+      - name: Install
         run: |
           python -m pip install --upgrade pip
           pip install -e .
 
-      - name: Ensure live dirs
+      - name: Ensure dirs
         run: |
           mkdir -p data/live_newsapi
           touch data/live_newsapi/.gitkeep
 
-      - name: Probe NewsAPI (debug)
-        if: ${{ env.NEWSAPI_KEY != '' }}
-        run: |
-          FROM=$(date -u -d '180 minutes ago' +%FT%TZ)
-          TO=$(date -u +%FT%TZ)
-          echo "Window: $FROM .. $TO"
-          curl -fsS "https://newsapi.org/v2/everything?q=news&from=$FROM&to=$TO&sortBy=publishedAt&pageSize=1&apiKey=${NEWSAPI_KEY}" \
-            | head -c 800 || true
-
-      - name: Collect live (NewsAPI) into day folder
+      - name: Collect live
         id: collect
         if: ${{ env.NEWSAPI_KEY != '' }}
         run: |
           set -euo pipefail
-          DAY=$(date -u +%F)
-          OUTDIR="data/live_newsapi/$DAY"
+          OUTDIR="data/live_newsapi/$(date -u +%Y/%m/%d)"
           mkdir -p "$OUTDIR"
-          echo "[LIVE] output folder => $OUTDIR"
-
-          newscli collect-live \
-            --recent-minutes 180 \
-            --pages 3 \
-            --query "news OR market OR tech OR economy" \
-            --outdir "$OUTDIR" || true
-
+          newscli collect-live --recent-minutes 180 --pages 2 --query "news OR market OR tech OR economy" --outdir "$OUTDIR" || true
           OUT=$(ls -1t "$OUTDIR"/*.jsonl 2>/dev/null | head -n1 || echo "")
           BYTES=0
-          if [ -n "$OUT" ] && [ -f "$OUT" ]; then
-            BYTES=$(wc -c < "$OUT" || echo 0)
-          fi
-
+          if [ -n "$OUT" ] && [ -f "$OUT" ]; then BYTES=$(wc -c < "$OUT" || echo 0); fi
           echo "outfile=$OUT" >> "$GITHUB_OUTPUT"
           echo "bytes=$BYTES"  >> "$GITHUB_OUTPUT"
-          echo "[collect-live] $(basename "$OUT") ($BYTES bytes) in $OUTDIR"
 
-      - name: Upload artifact
+      - uses: actions/upload-artifact@v4
         if: ${{ steps.collect.outputs.outfile != '' }}
-        uses: actions/upload-artifact@v4
         with:
           name: live-jsonl-${{ github.run_id }}
           path: ${{ steps.collect.outputs.outfile }}
           if-no-files-found: warn
 
-      - name: Commit & push (only when we really got data)
+      - name: Commit & push
         if: ${{ steps.collect.outputs.bytes != '' && fromJSON(steps.collect.outputs.bytes) > 0 }}
         run: |
           set -e
-          git config user.name  "github-actions[bot]"
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A data/live_newsapi
-          git commit -m "live: add ${{ steps.collect.outputs.outfile }} bytes=${{ steps.collect.outputs.bytes }}" || echo "no changes"
-          git push || true
+          git commit -m "live: add $(basename '${{ steps.collect.outputs.outfile }}') bytes=${{ steps.collect.outputs.bytes }}"
+          git push
 
-      - name: Skip collect (no NEWSAPI_KEY)
+      - name: Skip collect
         if: ${{ env.NEWSAPI_KEY == '' }}
         run: echo "::warning::NEWSAPI_KEY is not set; skipping collect."
 
