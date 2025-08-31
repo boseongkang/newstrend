@@ -2,7 +2,7 @@ name: collect-live
 
 on:
   schedule:
-    - cron: "*/30 * * * *"   # every 30 minutes (UTC)
+    - cron: "*/30 * * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -34,47 +34,45 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .
 
-      - name: Ensure data dirs
-        id: ensure
+      - name: Ensure live dirs
         run: |
-          set -e
-          D=$(date -u +%F)                          # e.g. 2025-08-31 (UTC)
-          mkdir -p "data/live_newsapi/$D"
-          touch "data/live_newsapi/$D/.gitkeep"
-          echo "date=$D" >> "$GITHUB_OUTPUT"
+          mkdir -p data/live_newsapi
+          touch data/live_newsapi/.gitkeep
 
-      # --- Optional debug probe: shows what NewsAPI is returning right now
       - name: Probe NewsAPI (debug)
         if: ${{ env.NEWSAPI_KEY != '' }}
         run: |
           FROM=$(date -u -d '180 minutes ago' +%FT%TZ)
           TO=$(date -u +%FT%TZ)
           echo "Window: $FROM .. $TO"
-          curl -sS "https://newsapi.org/v2/everything?language=en&sortBy=publishedAt&pageSize=1&q=news%20OR%20market%20OR%20tech%20OR%20economy&from=$FROM&to=$TO&apiKey=${NEWSAPI_KEY}" | head -c 800 || true
+          curl -fsS "https://newsapi.org/v2/everything?q=news&from=$FROM&to=$TO&sortBy=publishedAt&pageSize=1&apiKey=${NEWSAPI_KEY}" \
+            | head -c 800 || true
 
-      - name: Collect live (NewsAPI)
+      - name: Collect live (NewsAPI) into day folder
         id: collect
         if: ${{ env.NEWSAPI_KEY != '' }}
         run: |
-          set -e
-          OUTDIR="data/live_newsapi/${{ steps.ensure.outputs.date }}"
-          # widen the window a bit to avoid empty windows; dedup happens later
+          set -euo pipefail
+          DAY=$(date -u +%F)
+          OUTDIR="data/live_newsapi/$DAY"
+          mkdir -p "$OUTDIR"
+          echo "[LIVE] output folder => $OUTDIR"
+
           newscli collect-live \
-            --recent-minutes 360 \
+            --recent-minutes 180 \
             --pages 3 \
             --query "news OR market OR tech OR economy" \
             --outdir "$OUTDIR" || true
 
           OUT=$(ls -1t "$OUTDIR"/*.jsonl 2>/dev/null | head -n1 || echo "")
           BYTES=0
-          if [ -n "$OUT" ]; then BYTES=$(wc -c < "$OUT" 2>/dev/null || echo 0); fi
+          if [ -n "$OUT" ] && [ -f "$OUT" ]; then
+            BYTES=$(wc -c < "$OUT" || echo 0)
+          fi
+
           echo "outfile=$OUT" >> "$GITHUB_OUTPUT"
           echo "bytes=$BYTES"  >> "$GITHUB_OUTPUT"
-          echo "[collect-live] $OUT ($BYTES bytes)"
-
-      - name: Skip collect (no NEWSAPI_KEY)
-        if: ${{ env.NEWSAPI_KEY == '' }}
-        run: echo "::warning::NEWSAPI_KEY is not set; skipping collect."
+          echo "[collect-live] $(basename "$OUT") ($BYTES bytes) in $OUTDIR"
 
       - name: Upload artifact
         if: ${{ steps.collect.outputs.outfile != '' }}
@@ -84,13 +82,17 @@ jobs:
           path: ${{ steps.collect.outputs.outfile }}
           if-no-files-found: warn
 
-      - name: Commit & push
+      - name: Commit & push (only when we really got data)
         if: ${{ steps.collect.outputs.bytes != '' && fromJSON(steps.collect.outputs.bytes) > 0 }}
         run: |
           set -e
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A "data/live_newsapi/${{ steps.ensure.outputs.date }}"
-          git commit -m "live: add $(basename '${{ steps.collect.outputs.outfile }}') bytes=${{ steps.collect.outputs.bytes }}" || echo "no changes"
+          git add -A data/live_newsapi
+          git commit -m "live: add ${{ steps.collect.outputs.outfile }} bytes=${{ steps.collect.outputs.bytes }}" || echo "no changes"
           git push || true
+
+      - name: Skip collect (no NEWSAPI_KEY)
+        if: ${{ env.NEWSAPI_KEY == '' }}
+        run: echo "::warning::NEWSAPI_KEY is not set; skipping collect."
 
