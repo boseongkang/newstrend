@@ -2,37 +2,74 @@ name: entities-report
 
 on:
   schedule:
-    - cron: "20 9 * * *"
+    - cron: "15 * * * *"
   workflow_dispatch: {}
 
 permissions:
   contents: write
 
+concurrency:
+  group: repo-push
+  cancel-in-progress: false
+
 jobs:
-  run:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-      - run: |
-          python -m pip install --upgrade pip
-          pip install pandas numpy matplotlib spacy
-          python -m spacy download en_core_web_sm
-      - name: Build entities daily
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
         run: |
-          mkdir -p reports/entities config
-          python scripts/entities_extract.py --master data/warehouse/master.jsonl --outdir reports/entities --aliases config/entities_aliases.json --stopwords config/entities_stopwords.txt --model en_core_web_sm --min-len 3 --days 0
+          python -m pip install --upgrade pip
+          pip install -e .
+          python -m pip install spacy
+          python -m spacy download en_core_web_sm
+
+      - name: Ensure dirs
+        run: |
+          mkdir -p reports/entities
+          mkdir -p config
+          touch reports/entities/.gitkeep
+
+      - name: Extract entities
+        run: |
+          python scripts/entities_extract.py \
+            --master data/warehouse/master.jsonl \
+            --outdir reports/entities \
+            --aliases config/entities_aliases.json \
+            --stopwords config/entities_stopwords.txt \
+            --model en_core_web_sm \
+            --min-len 3
+
       - name: Render report
         run: |
-          python scripts/entities_report.py --daily-csv reports/entities/entities_daily.csv --outdir reports/entities --topk 30 --slope-days 30 --trend-days 60 --heat-top 20
-      - name: Commit & push
+          python scripts/entities_report.py \
+            --daily-csv reports/entities/entities_daily.csv \
+            --outdir reports/entities \
+            --topk 30 --slope-days 30 --trend-days 60 --heat-top 20
+
+      - name: Commit & push (rebase-safe)
         run: |
-          set -e
+          set -euo pipefail
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A reports/entities
-          git commit -m "entities: update report $(date -u +%F)" || echo "no changes"
-          git push
+          git add -A
+          git commit -m "entities: update report $(date -u +%F)" || echo "no changes to commit"
+          git -c rebase.autoStash=true pull --rebase origin main || true
+          for i in 1 2 3; do
+            if git push origin HEAD:main; then
+              break
+            fi
+            git fetch origin main
+            git -c rebase.autoStash=true rebase origin/main || git rebase --abort
+            sleep 5
+          done
 
