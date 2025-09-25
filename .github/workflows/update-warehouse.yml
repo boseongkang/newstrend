@@ -5,6 +5,7 @@ on:
   workflow_dispatch: {}
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: update-warehouse
   cancel-in-progress: false
@@ -23,10 +24,30 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
+      - name: Download latest live artifact
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: collect_continuous.yml
+          workflow_conclusion: success
+          branch: main
+          path: artifacts
+          if_no_artifact_found: warn
+      - name: Restore live jsonl
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data/live_newsapi
+          FOUND=$(find artifacts -type d -path "*/data/live_newsapi" | head -1 || true)
+          if [ -n "${FOUND:-}" ]; then
+            rsync -av "$FOUND/"/ "data/live_newsapi/"
+          fi
+          echo "Live files:"
+          find data/live_newsapi -type f -name "*.jsonl" | wc -l
       - name: Update corpus
         run: |
           python scripts/update_corpus.py
       - name: Upload warehouse artifact
+        if: ${{ hashFiles('data/warehouse/master.jsonl') != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: warehouse-${{ github.run_id }}
@@ -34,3 +55,8 @@ jobs:
             data/warehouse/**
             data/metrics/**
           retention-days: 14
+      - name: Fail if master missing
+        if: ${{ hashFiles('data/warehouse/master.jsonl') == '' }}
+        run: |
+          echo "master.jsonl not created. Check that collect-live produced inputs." >&2
+          exit 1

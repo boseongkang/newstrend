@@ -42,35 +42,48 @@ jobs:
           branch: main
           path: artifacts
           if_no_artifact_found: warn
-
       - name: List downloaded artifacts
         run: |
           echo "::group::Artifacts tree"
           ls -Rla artifacts || true
           echo "::endgroup::"
-
       - name: Restore warehouse from artifact
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p data/warehouse data/metrics
-
           FOUND=$(find artifacts -type f -path "*/data/warehouse/master.jsonl" | head -1 || true)
           if [ -z "${FOUND:-}" ]; then
             FOUND=$(find artifacts -type f -name "master.jsonl" | head -1 || true)
           fi
-
           if [ -n "${FOUND:-}" ]; then
             BASE=$(dirname "$FOUND")
-            rsync -av "$BASE/" data/warehouse/
+            rsync -av "$BASE/"/ "data/warehouse/"
             MET=$(find artifacts -type d -path "*/data/metrics" | head -1 || true)
-            if [ -n "${MET:-}" ]; then rsync -av "$MET/" data/metrics/; fi
+            [ -n "${MET:-}" ] && rsync -av "$MET/"/ "data/metrics/"
           fi
 
-          if [ ! -f data/warehouse/master.jsonl ]; then
-            echo "::error::No warehouse artifact found. Run 'update-warehouse' on branch 'main' and ensure it uploads data/warehouse/*."
-            exit 1
+      - name: Fallback: build warehouse from live artifact if missing
+        if: ${{ hashFiles('data/warehouse/master.jsonl') == '' }}
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: collect_continuous.yml
+          workflow_conclusion: success
+          branch: main
+          path: live_artifacts
+          if_no_artifact_found: warn
+      - name: Restore live and build warehouse (fallback)
+        if: ${{ hashFiles('data/warehouse/master.jsonl') == '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data/live_newsapi
+          FOUND_L=$(find live_artifacts -type d -path "*/data/live_newsapi" | head -1 || true)
+          if [ -n "${FOUND_L:-}" ]; then
+            rsync -av "$FOUND_L/"/ "data/live_newsapi/"
           fi
+          python scripts/update_corpus.py
+          test -f data/warehouse/master.jsonl
 
       - name: Extract entities
         run: |
@@ -81,14 +94,12 @@ jobs:
             --stopwords config/entities_stopwords.txt \
             --model en_core_web_sm \
             --min-len 3
-
       - name: Render report
         run: |
           python scripts/entities_report.py \
             --daily-csv reports/entities/entities_daily.csv \
             --outdir reports/entities \
             --topk 30 --slope-days 30 --trend-days 60 --heat-top 20
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
