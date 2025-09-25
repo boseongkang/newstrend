@@ -4,7 +4,7 @@ on:
     - cron: "*/30 * * * *"
   workflow_dispatch: {}
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: collect-live
   cancel-in-progress: false
@@ -27,7 +27,6 @@ jobs:
       - name: Ensure dirs
         run: |
           mkdir -p data/live_newsapi
-          touch data/live_newsapi/.gitkeep
       - name: Collect shifted window
         id: collect
         if: env.NEWSAPI_KEY != ''
@@ -54,9 +53,7 @@ jobs:
           export NEWSAPI_KEY="${NEWSAPI_KEY}"
           python scripts/collect_shifted.py
           BYTES=0
-          if [ -f "${TMP}" ]; then
-            BYTES=$(wc -c < "${TMP}" || echo 0)
-          fi
+          if [ -f "${TMP}" ]; then BYTES=$(wc -c < "${TMP}" || echo 0); fi
           if [ "${BYTES}" -gt 0 ]; then
             mv "${TMP}" "${OUT}"
             echo "outfile=${OUT}" >> "$GITHUB_OUTPUT"
@@ -70,7 +67,7 @@ jobs:
         if: ${{ steps.collect.outputs.outfile != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: live-jsonl-${{ github.run_id }}
+          name: live-jsonl
           path: ${{ steps.collect.outputs.outfile }}
-          retention-days: 7
           if-no-files-found: warn
+          retention-days: 2
