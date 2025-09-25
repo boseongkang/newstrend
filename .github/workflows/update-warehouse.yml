@@ -9,65 +9,99 @@ permissions:
 concurrency:
   group: update-warehouse
   cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        with: { fetch-depth: 0 }
+
       - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+        with: { python-version: "3.12" }
+
       - name: Install
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
+
       - name: Download latest live artifact
         uses: dawidd6/action-download-artifact@v3
         with:
           workflow: collect_continuous.yml
           workflow_conclusion: success
           branch: main
-          path: artifacts
+          path: artifacts_live
           if_no_artifact_found: warn
-      - name: List downloaded artifacts
-        run: |
-          ls -Rla artifacts || true
+
       - name: Restore live jsonl
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p data/live_newsapi data/warehouse data/metrics
-          FOUND_LN=$(find artifacts -type d -path "*/data/live_newsapi" | head -1 || true)
-          if [ -n "${FOUND_LN:-}" ]; then
-            rsync -av "$FOUND_LN/"/ "data/live_newsapi/"
+          mkdir -p data/live_newsapi/incoming
+          if find artifacts_live -type f -name "*.jsonl" | grep .; then
+            find artifacts_live -type f -name "*.jsonl" -print0 | xargs -0 -I{} cp -v "{}" data/live_newsapi/incoming/
+          else
+            echo "No live jsonl found" >&2
           fi
-          CNT_TOP=$(find data/live_newsapi -maxdepth 1 -type f -name "*.jsonl" | wc -l | tr -d ' ')
-          if [ "$CNT_TOP" = "0" ]; then
-            find artifacts -type f -name "*.jsonl" -print0 \
-              | xargs -0 -I{} bash -lc 'cp -v "{}" "data/live_newsapi/$(basename "{}")"'
-          fi
-          echo "Top-level jsonl count: $(find data/live_newsapi -maxdepth 1 -type f -name "*.jsonl" | wc -l | tr -d " ")"
-          echo "Samples:"; find data/live_newsapi -maxdepth 1 -type f -name "*.jsonl" | head -5
-      - name: Debug data tree
+
+      - name: Download latest warehouse artifact
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: update-warehouse.yml
+          workflow_conclusion: success
+          branch: main
+          path: artifacts_wh
+          if_no_artifact_found: warn
+
+      - name: Restore previous warehouse (if any)
+        shell: bash
         run: |
-          ls -Rla data | sed -n '1,200p'
+          set -euo pipefail
+          mkdir -p data/warehouse
+          if find artifacts_wh -type f -name "master.jsonl" | grep .; then
+            FOUND=$(find artifacts_wh -type f -name "master.jsonl" | head -1)
+            cp -v "$FOUND" data/warehouse/master.jsonl
+          fi
+          if find artifacts_wh -type f -name "*.jsonl" -path "*/daily/*" | grep .; then
+            mkdir -p data/warehouse/daily
+            find artifacts_wh -type f -name "*.jsonl" -path "*/daily/*" -print0 | xargs -0 -I{} cp -v "{}" data/warehouse/daily/
+          fi
+
       - name: Update corpus
         run: |
           python scripts/update_corpus.py
-      - name: Upload warehouse artifact
-        if: ${{ hashFiles('data/warehouse/master.jsonl') != '' }}
+
+      - name: Compute UTC date
+        id: when
+        run: echo "date=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if today's daily artifact exists
+        id: guard
+        env: { GH_TOKEN: ${{ github.token }} }
+        run: |
+          set -e
+          D="${{ steps.when.outputs.date }}"
+          FOUND=$(gh api repos/${{ github.repository }}/actions/artifacts \
+            --paginate -q '.artifacts[] | select(.name=="warehouse_daily_'$D'") | .id' | head -1 || true)
+          if [ -n "$FOUND" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload daily warehouse artifact
+        if: steps.guard.outputs.skip != 'true' && ${{ hashFiles('data/warehouse/master.jsonl') != '' }}
         uses: actions/upload-artifact@v4
         with:
-          name: warehouse-${{ github.run_id }}
+          name: warehouse_daily_${{ steps.when.outputs.date }}
           path: |
-            data/warehouse/**
+            data/warehouse/master.jsonl
+            data/warehouse/daily/${{ steps.when.outputs.date }}.jsonl
             data/metrics/**
           retention-days: 14
+
       - name: Fail if master missing
         if: ${{ hashFiles('data/warehouse/master.jsonl') == '' }}
         run: |
-          echo "master.jsonl not created. Check inputs from collect-live." >&2
+          echo "master.jsonl not created." >&2
           exit 1
