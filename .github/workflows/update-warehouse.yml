@@ -24,6 +24,7 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
+
       - name: Download latest live artifact
         uses: dawidd6/action-download-artifact@v3
         with:
@@ -32,20 +33,36 @@ jobs:
           branch: main
           path: artifacts
           if_no_artifact_found: warn
+
+      - name: List downloaded artifacts
+        run: |
+          echo "::group::Artifacts tree"
+          ls -Rla artifacts || true
+          echo "::endgroup::"
+
       - name: Restore live jsonl
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p data/live_newsapi
-          FOUND=$(find artifacts -type d -path "*/data/live_newsapi" | head -1 || true)
-          if [ -n "${FOUND:-}" ]; then
-            rsync -av "$FOUND/"/ "data/live_newsapi/"
+          mkdir -p data live_tmp data/live_newsapi/incoming
+
+          FOUND_DATA=$(find artifacts -type d -name data | head -1 || true)
+          if [ -n "${FOUND_DATA:-}" ]; then
+            rsync -av "${FOUND_DATA}/" "data/"
           fi
-          echo "Live files:"
-          find data/live_newsapi -type f -name "*.jsonl" | wc -l
+
+          CNT=$(find data -type f -name "*.jsonl" | wc -l | tr -d ' ')
+          if [ "$CNT" = "0" ]; then
+            find artifacts -type f -name "*.jsonl" -print0 | xargs -0 -I{} cp -v "{}" "data/live_newsapi/incoming/" || true
+          fi
+
+          echo "jsonl count in data/:"
+          find data -type f -name "*.jsonl" | wc -l
+
       - name: Update corpus
         run: |
           python scripts/update_corpus.py
+
       - name: Upload warehouse artifact
         if: ${{ hashFiles('data/warehouse/master.jsonl') != '' }}
         uses: actions/upload-artifact@v4
@@ -55,8 +72,10 @@ jobs:
             data/warehouse/**
             data/metrics/**
           retention-days: 14
+
       - name: Fail if master missing
         if: ${{ hashFiles('data/warehouse/master.jsonl') == '' }}
         run: |
           echo "master.jsonl not created. Check that collect-live produced inputs." >&2
+          echo "Tip: Open the 'Artifacts tree' log above to verify downloaded paths." >&2
           exit 1
