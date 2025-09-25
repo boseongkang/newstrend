@@ -13,9 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
+        with:
+          python-version: "3.12"
       - name: Install
         run: |
           python -m pip install --upgrade pip
@@ -24,19 +26,31 @@ jobs:
           pip install -e .
           python -m pip install spacy
           python -m spacy download en_core_web_sm
-
       - name: Ensure configs
         run: |
           mkdir -p config reports/entities
           [ -f config/entities_aliases.json ] || echo "{}" > config/entities_aliases.json
           [ -f config/entities_stopwords.txt ] || : > config/entities_stopwords.txt
           touch reports/entities/.gitkeep
-
-      - name: Update warehouse (inline)
+      - name: Download latest warehouse artifact
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: update-warehouse.yml
+          workflow_conclusion: success
+          path: artifacts
+      - name: Restore warehouse from artifact
+        shell: bash
         run: |
-          python scripts/update_corpus.py
-          test -f data/warehouse/master.jsonl || (echo "missing data/warehouse/master.jsonl" && exit 1)
-
+          set -euo pipefail
+          mkdir -p data/warehouse data/metrics
+          FOUND=$(ls -1 artifacts/**/data/warehouse/master.jsonl 2>/dev/null | head -1 || true)
+          if [ -n "$FOUND" ]; then
+            BASE=$(dirname "$FOUND")
+            rsync -av "$BASE/" data/warehouse/
+            MET=$(ls -1d artifacts/**/data/metrics 2>/dev/null | head -1 || true)
+            [ -n "$MET" ] && rsync -av "$MET/" data/metrics/
+          fi
+          test -f data/warehouse/master.jsonl || { echo "missing data/warehouse/master.jsonl"; exit 1; }
       - name: Extract entities
         run: |
           python scripts/entities_extract.py \
@@ -46,14 +60,12 @@ jobs:
             --stopwords config/entities_stopwords.txt \
             --model en_core_web_sm \
             --min-len 3
-
       - name: Render report
         run: |
           python scripts/entities_report.py \
             --daily-csv reports/entities/entities_daily.csv \
             --outdir reports/entities \
             --topk 30 --slope-days 30 --trend-days 60 --heat-top 20
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
