@@ -1,17 +1,13 @@
 name: collect-live
-
 on:
   schedule:
     - cron: "*/30 * * * *"
   workflow_dispatch: {}
-
 permissions:
-  contents: write
-
+  contents: read
 concurrency:
   group: collect-live
   cancel-in-progress: false
-
 jobs:
   collect:
     runs-on: ubuntu-latest
@@ -21,58 +17,46 @@ jobs:
       RECENT_MINUTES: 180
       MAX_PAGES: 3
       QUERY: news OR market OR tech OR economy
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Ensure dirs
         run: |
           mkdir -p data/live_newsapi
           touch data/live_newsapi/.gitkeep
-
       - name: Collect shifted window
         id: collect
         if: env.NEWSAPI_KEY != ''
         shell: bash
         run: |
           set -euo pipefail
-
           TO_EPOCH=$(date -u -d "${SHIFT_MINUTES} minutes ago" +%s)
           FROM_EPOCH=$(( TO_EPOCH - ${RECENT_MINUTES}*60 ))
-
           FROM=$(date -u -d "@${FROM_EPOCH}" +%FT%TZ)
           TO=$(date -u -d "@${TO_EPOCH}" +%FT%TZ)
-
           YEAR=$(date -u -d "@${TO_EPOCH}" +%Y)
           MONTH=$(date -u -d "@${TO_EPOCH}" +%m)
           DAY=$(date -u -d "@${TO_EPOCH}" +%d)
           STAMP=$(date -u -d "@${TO_EPOCH}" +%Y-%m-%dT%H-%MZ)
-
           OUTDIR="data/live_newsapi/${YEAR}/${MONTH}/${DAY}"
           mkdir -p "${OUTDIR}"
           OUT="${OUTDIR}/${STAMP}.jsonl"
           TMP="${OUT}.tmp"
-
           export FROM_ISO="${FROM}"
           export TO_ISO="${TO}"
           export OUTFILE_TMP="${TMP}"
           export QUERY="${QUERY}"
           export MAX_PAGES="${MAX_PAGES}"
           export NEWSAPI_KEY="${NEWSAPI_KEY}"
-
           python scripts/collect_shifted.py
-
           BYTES=0
           if [ -f "${TMP}" ]; then
             BYTES=$(wc -c < "${TMP}" || echo 0)
           fi
-
           if [ "${BYTES}" -gt 0 ]; then
             mv "${TMP}" "${OUT}"
             echo "outfile=${OUT}" >> "$GITHUB_OUTPUT"
@@ -82,22 +66,11 @@ jobs:
             echo "outfile=" >> "$GITHUB_OUTPUT"
             echo "bytes=0"  >> "$GITHUB_OUTPUT"
           fi
-
       - name: Upload artifact
         if: ${{ steps.collect.outputs.outfile != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: live-jsonl-${{ github.run_id }}
           path: ${{ steps.collect.outputs.outfile }}
+          retention-days: 7
           if-no-files-found: warn
-
-      - name: Commit & push
-        if: ${{ steps.collect.outputs.bytes != '' && fromJSON(steps.collect.outputs.bytes) > 0 }}
-        run: |
-          set -e
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A data/live_newsapi
-          git commit -m "live: add ${{ steps.collect.outputs.outfile }} bytes=${{ steps.collect.outputs.bytes }}" || echo "no changes"
-          git push || true
-

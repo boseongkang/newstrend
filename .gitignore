@@ -5,33 +5,22 @@ __pycache__/
 *.egg-info/
 build/
 dist/
-
 .DS_Store
 .idea/
 .vscode/
+.ipynb_checkpoints/
 
 .env
 !.env.example
 *.log
+*.tmp
 
-/data/*
-!/data/
+.streamlit/credentials.toml
+.streamlit/secrets.toml
+
+data/**
 !data/.gitkeep
+!data/README.md
 
-!data/live_newsapi/
-!data/live_newsapi/**
-
-!data/raw_newsapi/
-!data/raw_newsapi/**
-
-!data/silver_newsapi/
-!data/silver_newsapi/**
-
-!data/raw_windows/
-!data/raw_windows/**
-
-!data/metrics/
-!data/metrics/**
-
-!data/warehouse/
-!data/warehouse/**
+reports/**
+!reports/.gitkeep

@@ -1,0 +1,61 @@
+start: "2025-08-21"
+end:   "2025-09-23"
+outdir: "reports/auto_trends_existing"
+aggregate_dir: ""
+
+jobs:
+  - name: top_words_over_time_master
+    cmd: >
+      python scripts/viz_words.py
+      --master data/warehouse/master.jsonl
+      --outdir {outdir}/words
+      --top 80
+      --days 30
+      --min-len 4
+      --extra-stop {extra_stop}
+
+  - name: top_words_over_time_raw
+    cmd: >
+      python scripts/viz_words.py
+      --inputs {raw_inputs}
+      --outdir {outdir}/words_raw
+      --top 80
+      --days 30
+      --min-len 4
+      --extra-stop {extra_stop}
+
+  - name: ngrams_trend_master
+    cmd: >
+      python scripts/ngrams_trend.py
+      --master data/warehouse/master.jsonl
+      --outdir {outdir}/bigrams
+      --ngram-max 2
+      --min-df 25
+      --days 30
+
+  - name: generate_aggregate
+    cmd: >
+      python scripts/aggregate.py
+      --master data/warehouse/master.jsonl
+      --outdir {outdir}/aggregate
+      --start {start}
+      --end {end}
+
+  - name: clean_tokens_for_rising
+    cmd: >
+      python scripts/filter_tokens_csv.py
+      --in {outdir}/aggregate/tokens_by_day.csv
+      --stop-file config/extra_noise.txt
+      --min-len 4
+      --out {outdir}/tokens_by_day.cleaned.csv
+
+  - name: rising_from_csv
+    cmd: >
+      python scripts/rising_from_tokens_csv.py
+      --tokens-csv {outdir}/tokens_by_day.cleaned.csv
+      --start {start}
+      --end {end}
+      --window 7
+      --min-total 50
+      --topk 200
+      --outdir {outdir}/rising_csv
