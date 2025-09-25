@@ -24,7 +24,6 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
-
       - name: Download latest live artifact
         uses: dawidd6/action-download-artifact@v3
         with:
@@ -33,36 +32,31 @@ jobs:
           branch: main
           path: artifacts
           if_no_artifact_found: warn
-
       - name: List downloaded artifacts
         run: |
-          echo "::group::Artifacts tree"
           ls -Rla artifacts || true
-          echo "::endgroup::"
-
       - name: Restore live jsonl
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p data live_tmp data/live_newsapi/incoming
-
-          FOUND_DATA=$(find artifacts -type d -name data | head -1 || true)
-          if [ -n "${FOUND_DATA:-}" ]; then
-            rsync -av "${FOUND_DATA}/" "data/"
+          mkdir -p data/live_newsapi data/warehouse data/metrics
+          FOUND_LN=$(find artifacts -type d -path "*/data/live_newsapi" | head -1 || true)
+          if [ -n "${FOUND_LN:-}" ]; then
+            rsync -av "$FOUND_LN/"/ "data/live_newsapi/"
           fi
-
-          CNT=$(find data -type f -name "*.jsonl" | wc -l | tr -d ' ')
-          if [ "$CNT" = "0" ]; then
-            find artifacts -type f -name "*.jsonl" -print0 | xargs -0 -I{} cp -v "{}" "data/live_newsapi/incoming/" || true
+          CNT_TOP=$(find data/live_newsapi -maxdepth 1 -type f -name "*.jsonl" | wc -l | tr -d ' ')
+          if [ "$CNT_TOP" = "0" ]; then
+            find artifacts -type f -name "*.jsonl" -print0 \
+              | xargs -0 -I{} bash -lc 'cp -v "{}" "data/live_newsapi/$(basename "{}")"'
           fi
-
-          echo "jsonl count in data/:"
-          find data -type f -name "*.jsonl" | wc -l
-
+          echo "Top-level jsonl count: $(find data/live_newsapi -maxdepth 1 -type f -name "*.jsonl" | wc -l | tr -d " ")"
+          echo "Samples:"; find data/live_newsapi -maxdepth 1 -type f -name "*.jsonl" | head -5
+      - name: Debug data tree
+        run: |
+          ls -Rla data | sed -n '1,200p'
       - name: Update corpus
         run: |
           python scripts/update_corpus.py
-
       - name: Upload warehouse artifact
         if: ${{ hashFiles('data/warehouse/master.jsonl') != '' }}
         uses: actions/upload-artifact@v4
@@ -72,10 +66,8 @@ jobs:
             data/warehouse/**
             data/metrics/**
           retention-days: 14
-
       - name: Fail if master missing
         if: ${{ hashFiles('data/warehouse/master.jsonl') == '' }}
         run: |
-          echo "master.jsonl not created. Check that collect-live produced inputs." >&2
-          echo "Tip: Open the 'Artifacts tree' log above to verify downloaded paths." >&2
+          echo "master.jsonl not created. Check inputs from collect-live." >&2
           exit 1
