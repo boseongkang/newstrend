@@ -17,12 +17,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
@@ -31,14 +29,12 @@ jobs:
           pip install -e .
           python -m pip install spacy
           python -m spacy download en_core_web_sm
-
       - name: Ensure configs
         run: |
           mkdir -p config reports/entities
           if [ ! -f config/entities_aliases.json ]; then echo "{}" > config/entities_aliases.json; fi
           if [ ! -f config/entities_stopwords.txt ]; then : > config/entities_stopwords.txt; fi
           touch reports/entities/.gitkeep
-
       - name: Download latest warehouse artifact
         uses: dawidd6/action-download-artifact@v3
         with:
@@ -47,11 +43,9 @@ jobs:
           branch: main
           path: artifacts
           if_no_artifact_found: warn
-
       - name: List downloaded artifacts
         run: |
           ls -Rla artifacts || true
-
       - name: Restore warehouse from artifact
         shell: bash
         run: |
@@ -67,7 +61,6 @@ jobs:
             MET=$(find artifacts -type d -path "*/data/metrics" | head -1 || true)
             if [ -n "${MET:-}" ]; then rsync -av "$MET/"/ "data/metrics/"; fi
           fi
-
       - name: Download latest live artifact (fallback)
         if: ${{ hashFiles('data/warehouse/master.jsonl') == '' }}
         uses: dawidd6/action-download-artifact@v3
@@ -77,7 +70,6 @@ jobs:
           branch: main
           path: live_artifacts
           if_no_artifact_found: warn
-
       - name: Build warehouse from live (fallback)
         if: ${{ hashFiles('data/warehouse/master.jsonl') == '' }}
         shell: bash
@@ -88,9 +80,13 @@ jobs:
           if [ -n "${FOUND_L:-}" ]; then
             rsync -av "$FOUND_L/"/ "data/live_newsapi/"
           fi
+          CNT_TOP=$(find data/live_newsapi -maxdepth 1 -type f -name "*.jsonl" | wc -l | tr -d ' ')
+          if [ "$CNT_TOP" = "0" ]; then
+            find live_artifacts -type f -name "*.jsonl" -print0 \
+              | xargs -0 -I{} bash -lc 'cp -v "{}" "data/live_newsapi/$(basename "{}")"'
+          fi
           python scripts/update_corpus.py
           test -f data/warehouse/master.jsonl
-
       - name: Extract entities
         run: |
           python scripts/entities_extract.py \
@@ -100,14 +96,12 @@ jobs:
             --stopwords config/entities_stopwords.txt \
             --model en_core_web_sm \
             --min-len 3
-
       - name: Render report
         run: |
           python scripts/entities_report.py \
             --daily-csv reports/entities/entities_daily.csv \
             --outdir reports/entities \
             --topk 30 --slope-days 30 --trend-days 60 --heat-top 20
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
