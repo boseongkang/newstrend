@@ -4,129 +4,181 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-plt.rcParams["figure.dpi"]=150
+plt.rcParams["figure.dpi"] = 150
+
+def ensure_dirs(p):
+    p = Path(p)
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+def load_daily(csv_path):
+    df = pd.read_csv(csv_path)
+    if "date" not in df.columns or "entity" not in df.columns or "count" not in df.columns:
+        raise ValueError("CSV must have columns: date, entity, count")
+    df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None)
+    df["entity"] = df["entity"].astype(str)
+    df["count"] = pd.to_numeric(df["count"], errors="coerce").fillna(0).astype(int)
+    return df
+
+def safe_slope(series):
+    y = pd.to_numeric(series, errors="coerce").astype(float).to_numpy()
+    x = np.arange(len(y), dtype=float)
+    msk = np.isfinite(y) & np.isfinite(x)
+    x, y = x[msk], y[msk]
+    if x.size < 2:
+        return 0.0
+    if np.allclose(y, y[0], equal_nan=False):
+        return 0.0
+    try:
+        m = np.polyfit(x, y, 1)[0]
+        if not np.isfinite(m):
+            return 0.0
+        return float(m)
+    except Exception:
+        return 0.0
 
 def top_today(df, k):
-    day=df["date"].max()
-    t=df[df["date"]==day].groupby("entity")["count"].sum().sort_values(ascending=False).head(k).reset_index()
-    t["date"]=day
+    day = df["date"].max()
+    t = (
+        df[df["date"] == day]
+        .groupby("entity")["count"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(k)
+        .reset_index()
+    )
+    t["date"] = day
     return t
 
-def slopes(df, k_days, k_entities):
-    mx=pd.to_datetime(df["date"]).max()
-    base=df[pd.to_datetime(df["date"])>=mx-pd.Timedelta(days=k_days-1)]
-    grid=(base.groupby(["date","entity"])["count"].sum().reset_index()
-               .pivot(index="date", columns="entity", values="count").fillna(0))
-    xs=np.arange(len(grid.index))
-    res=[]
-    for ent in grid.columns:
-        y=grid[ent].values
-        if np.count_nonzero(y)==0:
+def build_matrix(df):
+    g = (
+        df.groupby(["date", "entity"])["count"]
+        .sum()
+        .reset_index()
+        .pivot(index="date", columns="entity", values="count")
+        .sort_index()
+        .fillna(0)
+    )
+    return g
+
+def slopes_table(df, days, topk):
+    mx = pd.to_datetime(df["date"]).max()
+    base = df[pd.to_datetime(df["date"]) >= mx - pd.Timedelta(days=days - 1)]
+    grid = build_matrix(base)
+    s = {c: safe_slope(grid[c]) for c in grid.columns}
+    out = (
+        pd.DataFrame({"entity": list(s.keys()), "norm_slope": list(s.values())})
+        .sort_values("norm_slope", ascending=False)
+        .head(topk)
+        .reset_index(drop=True)
+    )
+    last = grid.iloc[-1] if len(grid) else pd.Series(dtype=float)
+    out["last_count"] = last.reindex(out["entity"]).fillna(0).astype(int).to_list()
+    out["mean"] = grid.reindex(columns=out["entity"]).mean().fillna(0).to_list() if len(grid) else 0
+    return out, grid
+
+def trend_subset(grid, entities, days):
+    g = grid.tail(days).copy()
+    g = g.reindex(columns=[e for e in entities if e in g.columns]).fillna(0)
+    return g
+
+def plot_top_overall(df, out_png, topk, days):
+    mx = pd.to_datetime(df["date"]).max()
+    base = df[pd.to_datetime(df["date"]) >= mx - pd.Timedelta(days=days - 1)]
+    s = base.groupby("entity")["count"].sum().sort_values(ascending=False).head(topk)
+    plt.figure(figsize=(9, 5))
+    s[::-1].plot(kind="barh")
+    plt.title(f"Top entities by total count (last {days}d)")
+    plt.tight_layout()
+    plt.savefig(out_png)
+    plt.close()
+
+def plot_slopes(sl_df, out_png):
+    plt.figure(figsize=(9, 5))
+    s = sl_df.set_index("entity")["norm_slope"].iloc[::-1]
+    s.plot(kind="barh")
+    plt.title("Rising entities (slope)")
+    plt.tight_layout()
+    plt.savefig(out_png)
+    plt.close()
+
+def plot_trend(g, out_png):
+    plt.figure(figsize=(10, 5))
+    for c in g.columns:
+        y = g[c].to_numpy(dtype=float)
+        if y.size == 0:
             continue
-        m=np.polyfit(xs,y,1)[0]
-        res.append((ent,float(m)))
-    out=(pd.DataFrame(res, columns=["entity","slope"])
-           .sort_values("slope", ascending=False).head(k_entities))
-    return out
+        plt.plot(g.index, y, lw=1)
+        sma = pd.Series(y, index=g.index).rolling(7, min_periods=1).mean()
+        plt.plot(g.index, sma, lw=2, alpha=0.8)
+    plt.legend([f"{c}" for c in g.columns], fontsize=8, ncol=2, loc="upper left", frameon=False)
+    plt.title("Selected entities (daily counts, with 7d SMA)")
+    plt.tight_layout()
+    plt.savefig(out_png)
+    plt.close()
 
-def barh(df, x, y, title, path):
-    fig,ax=plt.subplots(figsize=(10,6))
-    ax.barh(df[y], df[x])
-    ax.set_title(title)
-    ax.invert_yaxis()
-    fig.tight_layout()
-    fig.savefig(path)
-    plt.close(fig)
+def plot_heat(g, out_png):
+    if g.empty:
+        Path(out_png).write_text("")
+        return
+    vals = g.to_numpy(dtype=float).T
+    plt.figure(figsize=(10, 6))
+    plt.imshow(vals, aspect="auto", interpolation="nearest")
+    plt.yticks(np.arange(len(g.columns)), g.columns)
+    plt.xticks(np.arange(len(g.index)), [d.strftime("%m-%d") for d in g.index], rotation=90)
+    plt.colorbar(label="count")
+    plt.title("Heatmap (entities x date)")
+    plt.tight_layout()
+    plt.savefig(out_png)
+    plt.close()
 
-def trend(df, ents, days, path):
-    mx=pd.to_datetime(df["date"]).max()
-    base=df[pd.to_datetime(df["date"])>=mx-pd.Timedelta(days=days-1)]
-    p=(base.groupby(["date","entity"])["count"].sum().reset_index()
-          .pivot(index="date", columns="entity", values="count").fillna(0))
-    keep=[e for e in ents if e in p.columns]
-    fig,ax=plt.subplots(figsize=(10,5))
-    p[keep].plot(ax=ax)
-    ax.set_title("Top entities — trend")
-    ax.set_ylabel("count")
-    fig.tight_layout()
-    fig.savefig(path)
-    plt.close(fig)
+def save_tables(outdir, today_df, slopes_df):
+    today_df.to_csv(outdir / "entities_top_today.csv", index=False)
+    slopes_df.to_csv(outdir / "entities_slopes.csv", index=False)
 
-def heatmap(df, entities, days, out_png):
-    import numpy as np
-    import matplotlib.pyplot as plt
-
-    start = pd.to_datetime(df["date"]).max() - pd.Timedelta(days=days)
-    dff = df[(pd.to_datetime(df["date"]) >= start) & (df["entity"].isin(entities))].copy()
-
-    p = dff.pivot_table(index="entity", columns="date", values="count", aggfunc="sum", fill_value=0)
-
-    cols_dt = pd.to_datetime(p.columns, errors="coerce")
-    order = np.argsort(cols_dt.values.astype("datetime64[ns]"))
-    p = p.iloc[:, order]
-    cols_dt = cols_dt[order]
-
-    fig, ax = plt.subplots(figsize=(12, 6))
-    im = ax.imshow(p.values.astype(float), aspect="auto", cmap="viridis", interpolation="nearest")
-
-    ax.set_yticks(np.arange(len(p.index)))
-    ax.set_yticklabels(p.index, fontsize=8)
-
-    ax.set_xticks(np.arange(len(cols_dt)))
-    ax.set_xticklabels([d.strftime("%m-%d") if not pd.isna(d) else "" for d in cols_dt], rotation=90, fontsize=8)
-
-    ax.set_xlabel("date")
-    ax.set_ylabel("entity")
-    cbar = fig.colorbar(im, ax=ax)
-    cbar.set_label("count")
-
-    fig.tight_layout()
-    out_png.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_png, dpi=150)
-    plt.close(fig)
-
-
-def make_html(outdir, meta, pngs, tables):
-    html=[f"<html><head><meta charset='utf-8'><title>Entities Report</title></head><body>"]
-    html.append(f"<h1>Entities Report</h1>")
-    html.append(f"<p>Articles: {meta['articles']:,} | Entities(rows): {meta['rows']:,} | Updated: {meta['updated']}</p>")
-    html.append("<table width='100%'><tr>")
-    html.append(f"<td width='50%'><img src='{pngs['top_overall']}' width='100%'></td>")
-    html.append(f"<td width='50%'><img src='{pngs['slopes']}' width='100%'></td>")
-    html.append("</tr><tr>")
-    html.append(f"<td width='50%'><img src='{pngs['trend']}' width='100%'></td>")
-    html.append(f"<td width='50%'><img src='{pngs['heat']}' width='100%'></td>")
-    html.append("</tr></table>")
-    html.append("<h3>Top today</h3>")
-    html.append(tables["today"].to_html(index=False))
-    html.append("<h3>Strongest positive slopes</h3>")
-    html.append(tables["slopes"].to_html(index=False))
-    html.append("</body></html>")
-    Path(outdir/"report.html").write_text("\n".join(html), encoding="utf-8")
+def make_html(outdir, meta, images, tables):
+    html = []
+    html.append("<html><head><meta charset='utf-8'><title>Entities report</title>")
+    html.append("<style>body{font-family:system-ui,Arial,sans-serif;background:#111;color:#d9d9d9} h2{margin-top:28px} table{border-collapse:collapse} td,th{border:1px solid #333;padding:6px 8px} a{color:#7ec8ff} .wrap{max-width:1100px;margin:20px auto;padding:8px}</style>")
+    html.append("</head><body><div class='wrap'>")
+    html.append(f"<h1>Entities report</h1>")
+    html.append(f"<p>generated_at: {pd.Timestamp.utcnow().strftime('%Y-%m-%d %H:%M:%SZ')}</p>")
+    html.append("<h2>Images</h2><ul>")
+    for k, rel in images.items():
+        if (outdir / rel).exists():
+            html.append(f"<li>{k}: <br><img src='{rel}' style='max-width:100%'></li>")
+    html.append("</ul>")
+    html.append("<h2>Tables</h2>")
+    for name, df in tables.items():
+        html.append(f"<h3>{name}</h3>")
+        html.append(df.to_html(index=False))
+    html.append("</div></body></html>")
+    (outdir / "report.html").write_text("\n".join(html), encoding="utf-8")
 
 def main(daily_csv, outdir, topk, slope_days, trend_days, heat_top):
-    outdir=Path(outdir); outdir.mkdir(parents=True, exist_ok=True)
-    df=pd.read_csv(daily_csv)
-    df=df.dropna(subset=["date","entity","count"])
-    df["date"]=pd.to_datetime(df["date"]).dt.date.astype(str)
-    meta={"articles": int(df["count"].sum()), "rows": int(len(df)), "updated": pd.Timestamp.utcnow().strftime("%Y-%m-%d %H:%M UTC")}
-    overall=(df.groupby("entity")["count"].sum().sort_values(ascending=False).head(topk).reset_index())
-    today=top_today(df, topk)
-    sl=slopes(df, slope_days, topk)
-    overall.to_csv(outdir/"entities_top_overall.csv", index=False)
-    today.to_csv(outdir/"entities_top_today.csv", index=False)
-    sl.to_csv(outdir/"entities_top_slopes.csv", index=False)
-    barh(overall, "count", "entity", "Top entities (overall)", outdir/"top_overall.png")
-    barh(sl, "slope", "entity", "Strongest positive slopes", outdir/"slopes.png")
-    trend(df, list(overall["entity"]), trend_days, outdir/"trend.png")
-    heatmap(df, list(overall["entity"].head(heat_top)), trend_days, outdir/"heat.png")
-    make_html(outdir, meta,
-              {"top_overall":"top_overall.png","slopes":"slopes.png","trend":"trend.png","heat":"heat.png"},
-              {"today":today, "slopes":sl})
-    print(f"png saved to: {outdir}")
+    outdir = ensure_dirs(outdir)
+    df = load_daily(daily_csv)
+    meta = {"rows": len(df), "min_date": str(df["date"].min().date()), "max_date": str(df["date"].max().date())}
+    today = top_today(df, topk)
+    sl, grid_all = slopes_table(df, slope_days, topk)
+    plot_top_overall(df, outdir / "top_overall.png", topk, trend_days)
+    plot_slopes(sl, outdir / "slopes.png")
+    sub_trend = trend_subset(grid_all, sl["entity"].tolist()[:min(10, len(sl))], trend_days)
+    plot_trend(sub_trend, outdir / "trend.png")
+    top_for_heat = grid_all.sum().sort_values(ascending=False).head(heat_top).index.tolist()
+    heat_g = trend_subset(grid_all, top_for_heat, trend_days)
+    plot_heat(heat_g, outdir / "heat.png")
+    save_tables(outdir, today, sl)
+    make_html(
+        outdir,
+        meta,
+        {"top_overall": "top_overall.png", "slopes": "slopes.png", "trend": "trend.png", "heat": "heat.png"},
+        {"today": today, "slopes": sl},
+    )
+    print(f"saved -> {outdir}")
 
-if __name__=="__main__":
-    ap=argparse.ArgumentParser()
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
     ap.add_argument("--daily-csv", default="reports/entities/entities_daily.csv")
     ap.add_argument("--outdir", default="reports/entities")
     ap.add_argument("--topk", type=int, default=30)
