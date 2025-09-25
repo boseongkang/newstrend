@@ -1,4 +1,5 @@
 name: archive-daily
+
 on:
   schedule:
     - cron: "20 0 * * *"
@@ -19,9 +20,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+      - name: Setup tools
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq
 
       - name: Download latest warehouse artifact
         uses: dawidd6/action-download-artifact@v3
@@ -38,12 +40,11 @@ jobs:
           set -euo pipefail
           mkdir -p data/warehouse/daily
           MASTER=$(find artifacts -type f -name master.jsonl | head -1)
-          cp -v "$MASTER" data/warehouse/master.jsonl
+          cp -v "$MASTER" data/warehouse/master.jsonl || exit 1
           find artifacts -type f -path "*/daily/*.jsonl" -print0 | xargs -0 -I{} cp -v "{}" data/warehouse/daily/ || true
 
       - name: Compute date (UTC yesterday)
         id: when
-        shell: bash
         run: |
           if date -u -d yesterday +%F >/dev/null 2>&1; then
             echo "date=$(date -u -d yesterday +%F)" >> "$GITHUB_OUTPUT"
@@ -52,7 +53,6 @@ jobs:
           fi
 
       - name: Build daily file
-        shell: bash
         env:
           D: ${{ steps.when.outputs.date }}
         run: |
@@ -62,25 +62,11 @@ jobs:
           if [ -f "$SRC" ]; then
             cp -v "$SRC" "$OUT"
           else
-            python - <<'PY'
-import os, json, sys, pathlib
-d=os.environ["D"]
-src=pathlib.Path("data/warehouse/master.jsonl")
-dst=pathlib.Path(f"data/warehouse/daily/news_{d}.jsonl")
-cnt=0
-with src.open("r", encoding="utf-8") as f, dst.open("w", encoding="utf-8") as out:
-    for line in f:
-        try:
-            o=json.loads(line)
-        except Exception:
-            continue
-        t=o.get("date") or o.get("publishedAt") or o.get("published_at") or ""
-        if isinstance(t,str) and t.startswith(d):
-            out.write(json.dumps(o, ensure_ascii=False)+"\n"); cnt+=1
-print(f"rows={cnt}")
-if cnt==0:
-    sys.exit(2)
-PY
+            jq -c --arg d "$D" 'select(((.date // .publishedAt // .published_at // "")|tostring) | startswith($d))' \
+              data/warehouse/master.jsonl > "$OUT"
+            ROWS=$(wc -l < "$OUT" | tr -d ' ')
+            echo "rows=$ROWS"
+            [ "${ROWS}" -gt 0 ] || exit 2
           fi
           gzip -9f "$OUT"
 
