@@ -1,0 +1,93 @@
+name: archive-daily
+
+on:
+  schedule:
+    - cron: "20 0 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+
+      - name: Install (optional)
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Download latest warehouse artifact
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: update-warehouse.yml
+          workflow_conclusion: success
+          branch: main
+          path: artifacts
+          if_no_artifact_found: fail
+
+      - name: Restore warehouse
+        run: |
+          mkdir -p data/warehouse
+          FOUND=$(find artifacts -type f -name "master.jsonl" | head -1)
+          cp -v "$FOUND" data/warehouse/master.jsonl || exit 1
+          if find artifacts -type f -path "*/daily/*.jsonl" | grep . >/dev/null 2>&1; then
+            mkdir -p data/warehouse/daily
+            find artifacts -type f -path "*/daily/*.jsonl" -print0 | xargs -0 -I{} cp -v "{}" data/warehouse/daily/
+          fi
+
+      - name: Compute target date (UTC yesterday)
+        id: when
+        shell: bash
+        run: |
+          if date -u -d yesterday +%F >/dev/null 2>&1; then
+            echo "date=$(date -u -d yesterday +%F)" >> "$GITHUB_OUTPUT"
+          else
+            echo "date=$(date -u -v-1d +%F)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build daily snapshot
+        env:
+          DATE: ${{ steps.when.outputs.date }}
+        run: |
+          mkdir -p snapshots
+          DAILY_PATH="data/warehouse/daily/${DATE}.jsonl"
+          OUT="snapshots/news_${DATE}.jsonl"
+          if [ -f "$DAILY_PATH" ]; then
+            cp -v "$DAILY_PATH" "$OUT"
+          else
+            python - <<'PY'
+import os, json, pathlib, sys
+date=os.environ["DATE"]
+src=pathlib.Path("data/warehouse/master.jsonl")
+dst=pathlib.Path(f"snapshots/news_{date}.jsonl")
+cnt=0
+with src.open("r", encoding="utf-8") as f, dst.open("w", encoding="utf-8") as out:
+    for line in f:
+        try:
+            o=json.loads(line)
+        except Exception:
+            continue
+        t=o.get("date") or o.get("publishedAt") or o.get("published_at") or ""
+        if isinstance(t,str) and t.startswith(date):
+            out.write(json.dumps(o, ensure_ascii=False)+"\n"); cnt+=1
+print(f"rows={cnt}")
+if cnt==0:
+    sys.exit(2)
+PY
+          fi
+          gzip -9f "snapshots/news_${DATE}.jsonl"
+
+      - name: Create or update release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: snap-${{ steps.when.outputs.date }}
+          name: snap-${{ steps.when.outputs.date }}
+          draft: false
+          prerelease: false
+          files: snapshots/news_${{ steps.when.outputs.date }}.jsonl.gz
