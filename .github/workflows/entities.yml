@@ -5,6 +5,7 @@ on:
   workflow_dispatch: {}
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: repo-push
   cancel-in-progress: false
@@ -38,8 +39,7 @@ jobs:
         with:
           workflow: update-warehouse.yml
           workflow_conclusion: success
-          name: ^warehouse-.*
-          name_is_regexp: true
+          branch: main
           path: artifacts
           if_no_artifact_found: warn
 
@@ -61,16 +61,14 @@ jobs:
           fi
 
           if [ -n "${FOUND:-}" ]; then
-            BASE=$(dirname "$FOUND")                # .../data/warehouse
+            BASE=$(dirname "$FOUND")
             rsync -av "$BASE/" data/warehouse/
             MET=$(find artifacts -type d -path "*/data/metrics" | head -1 || true)
-            if [ -n "${MET:-}" ]; then
-              rsync -av "$MET/" data/metrics/
-            fi
+            if [ -n "${MET:-}" ]; then rsync -av "$MET/" data/metrics/; fi
           fi
 
           if [ ! -f data/warehouse/master.jsonl ]; then
-            echo "::error::No warehouse artifact found. Run 'update-warehouse' workflow first."
+            echo "::error::No warehouse artifact found. Run 'update-warehouse' on branch 'main' and ensure it uploads data/warehouse/*."
             exit 1
           fi
 
