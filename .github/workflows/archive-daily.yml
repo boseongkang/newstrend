@@ -2,11 +2,12 @@ name: archive-daily
 
 on:
   schedule:
-    - cron: "20 0 * * *"
+    - cron: "8 0 * * *"
   workflow_dispatch: {}
 
 permissions:
   contents: write
+  actions: read
 
 concurrency:
   group: archive-daily
@@ -15,36 +16,18 @@ concurrency:
 jobs:
   archive:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup tools
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y jq
-
-      - name: Download latest warehouse artifact
-        uses: dawidd6/action-download-artifact@v3
+      - uses: actions/setup-python@v5
         with:
-          workflow: update-warehouse.yml
-          workflow_conclusion: success
-          branch: main
-          path: artifacts
-          if_no_artifact_found: fail
+          python-version: "3.12"
 
-      - name: Restore warehouse
+      - id: when
         shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p data/warehouse/daily
-          MASTER=$(find artifacts -type f -name master.jsonl | head -1)
-          cp -v "$MASTER" data/warehouse/master.jsonl || exit 1
-          find artifacts -type f -path "*/daily/*.jsonl" -print0 | xargs -0 -I{} cp -v "{}" data/warehouse/daily/ || true
-
-      - name: Compute date (UTC yesterday)
-        id: when
         run: |
           if date -u -d yesterday +%F >/dev/null 2>&1; then
             echo "date=$(date -u -d yesterday +%F)" >> "$GITHUB_OUTPUT"
@@ -52,27 +35,93 @@ jobs:
             echo "date=$(date -u -v-1d +%F)" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Build daily file
+      - name: Download latest warehouse artifact
+        id: dlwh
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: update-warehouse.yml
+          workflow_conclusion: success
+          branch: main
+          path: artifacts
+          if_no_artifact_found: warn
+
+      - id: find
+        shell: bash
+        run: |
+          set -euo pipefail
+          D="${{ steps.when.outputs.date }}"
+          mkdir -p out
+          FOUND=""
+          if [ -d artifacts ]; then
+            FOUND=$(find artifacts -type f -path "*/data/warehouse/daily/${D}.jsonl" -print -quit || true)
+          fi
+          if [ -n "$FOUND" ]; then
+            cp -v "$FOUND" "out/news_${D}.jsonl"
+            echo "from=warehouse" >> "$GITHUB_OUTPUT"
+            echo "path=out/news_${D}.jsonl" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download latest live artifact (fallback)
+        if: ${{ steps.find.outputs.from != 'warehouse' }}
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: collect_continuous.yml
+          workflow_conclusion: success
+          branch: main
+          path: live_art
+          if_no_artifact_found: warn
+
+      - name: Build daily from live (fallback)
+        if: ${{ steps.find.outputs.from != 'warehouse' }}
+        shell: bash
         env:
           D: ${{ steps.when.outputs.date }}
         run: |
           set -euo pipefail
-          SRC="data/warehouse/daily/${D}.jsonl"
-          OUT="data/warehouse/daily/news_${D}.jsonl"
-          if [ -f "$SRC" ]; then
-            cp -v "$SRC" "$OUT"
-          else
-            jq -c --arg d "$D" 'select(((.date // .publishedAt // .published_at // "")|tostring) | startswith($d))' \
-              data/warehouse/master.jsonl > "$OUT"
-            ROWS=$(wc -l < "$OUT" | tr -d ' ')
-            echo "rows=$ROWS"
-            [ "${ROWS}" -gt 0 ] || exit 2
-          fi
-          gzip -9f "$OUT"
+          mkdir -p out
+          python - << 'PY'
+          import os, glob, sys
+          D = os.environ["D"]
+          out = f"out/news_{D}.jsonl"
+          cnt = 0
+          with open(out, "w", encoding="utf-8") as w:
+            for p in sorted(glob.glob("live_art/**/*.jsonl", recursive=True)):
+              with open(p, "r", encoding="utf-8") as r:
+                for line in r:
+                  if line.strip():
+                    w.write(line)
+                    cnt += 1
+          print("written", cnt, "lines")
+          PY
 
-      - name: Release snapshot
+      - id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          D="${{ steps.when.outputs.date }}"
+          test -s "out/news_${D}.jsonl"
+
+      - name: Gzip
+        shell: bash
+        run: |
+          D="${{ steps.when.outputs.date }}"
+          gzip -9 -f "out/news_${D}.jsonl"
+          ls -lh out
+
+      - name: Release
         uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: snap-${{ steps.when.outputs.date }}
           name: snap-${{ steps.when.outputs.date }}
-          files: data/warehouse/daily/news_${{ steps.when.outputs.date }}.jsonl.gz
+          body: Daily snapshot (UTC) for ${{ steps.when.outputs.date }}.
+          files: |
+            out/news_${{ steps.when.outputs.date }}.jsonl.gz
+          draft: false
+          prerelease: false
+          make_latest: false
+          fail_on_unmatched_files: true
+          append_body: false
+          generate_release_notes: false
+          allowUpdates: true
