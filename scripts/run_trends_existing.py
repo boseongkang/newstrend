@@ -1,3 +1,4 @@
+from __future__ import annotations
 import argparse, subprocess, shlex, sys
 from pathlib import Path
 import datetime as dt
