@@ -1,6 +1,7 @@
 import argparse, json, re, html
 from pathlib import Path
 from collections import Counter, defaultdict
+from typing import Optional, Set
 import pandas as pd
 
 TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9\-']{1,}", re.I)
@@ -17,7 +18,7 @@ def norm(s: str) -> str:
     s = s.replace("…", " ").replace("—", "-").replace("–", "-")
     return WS_RE.sub(" ", s).strip()
 
-def tokenize(text: str, min_len: int = 3, stop: set[str] | None = None):
+def tokenize(text: str, min_len: int = 3, stop: Optional[Set[str]] = None):
     toks = []
     S = stop or set()
     for m in TOKEN_RE.finditer(text.lower()):
@@ -74,7 +75,7 @@ def main():
     ap.add_argument("--days", type=int, default=0)
     ap.add_argument("--weights", default="")
     ap.add_argument("--blacklist", default="")
-    ap.add_argument("--extra-stop", default="")
+    ap.add_argument("--extra_stop", default="")
     ap.add_argument("--daily-cap", type=int, default=0)
     args = ap.parse_args()
 
@@ -124,8 +125,8 @@ def main():
     blacklist_lc = {b.lower() for b in blacklist}
 
     stop_extra = set()
-    if args.extra-stop and Path(args.extra-stop).exists():
-        with open(args.extra-stop, "r") as f:
+    if args.extra_stop and Path(args.extra_stop).exists():
+        with open(args.extra_stop, "r") as f:
             stop_extra = {ln.strip().lower() for ln in f if ln.strip()}
 
     per_day_count = Counter()
@@ -140,7 +141,7 @@ def main():
         pub_clean = pub.strip()
         if pub_clean.lower() in blacklist_lc:
             continue
-        if args.daily-cap and args.daily_cap > 0:
+        if args.daily_cap and args.daily_cap > 0:
             k = (d, pub_clean)
             if seen_cap[k] >= args.daily_cap:
                 continue
@@ -153,7 +154,8 @@ def main():
         toks = tokenize(text, args.min_len, stop_extra)
         if toks:
             cnt = Counter(toks)
-            for t, c in (cnt.most_common(args.top) if args.top and args.top > 0 else cnt.items()):
+            it = cnt.most_common(args.top) if args.top and args.top > 0 else cnt.items()
+            for t, c in it:
                 per_day_tok[d][t] += w * c
 
     if not per_day_count:
