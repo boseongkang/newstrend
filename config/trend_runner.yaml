@@ -1,7 +1,9 @@
-start: "2025-08-21"
-end:   "2025-09-23"
 outdir: "reports/auto_trends_existing"
+master_path: "data/warehouse/master.jsonl"
 aggregate_dir: ""
+lookback_days: 7
+start: auto
+end: auto
 
 jobs:
   - name: top_words_over_time_master
@@ -12,7 +14,7 @@ jobs:
       --top 80
       --days 30
       --min-len 4
-      --extra-stop {extra_stop}
+      --extra-stop breaking,business,company,free,inc,market,nyse,report,shares,source
 
   - name: top_words_over_time_raw
     cmd: >
@@ -22,7 +24,7 @@ jobs:
       --top 80
       --days 30
       --min-len 4
-      --extra-stop {extra_stop}
+      --extra-stop breaking,business,company,free,inc,market,nyse,report,shares,source
 
   - name: ngrams_trend_master
     cmd: >
@@ -30,8 +32,8 @@ jobs:
       --master data/warehouse/master.jsonl
       --outdir {outdir}/bigrams
       --ngram-max 2
-      --min-df 25
-      --days 30
+      --min-df 5
+      --days 7
 
   - name: generate_aggregate
     cmd: >
