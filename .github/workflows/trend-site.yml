@@ -34,6 +34,7 @@ jobs:
 
       - name: Install
         run: |
+          set -euo pipefail
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
@@ -64,7 +65,7 @@ jobs:
           else
             echo "warehouse artifact payload not found"; exit 1
           fi
-          find data/warehouse -maxdepth 2 -type f -name '*.jsonl' -print
+          test -f data/warehouse/master.jsonl
 
       - name: Resolve START/END from daily jsonl
         id: rng
@@ -94,7 +95,7 @@ jobs:
             --start "${{ steps.rng.outputs.start }}" \
             --end   "${{ steps.rng.outputs.end }}" \
             --weights   config/publisher_weights.json \
-            --blacklist config/publisher_blacklist.json \
+            --blacklist config/publisher_blacklist.txt \
             --extra_stop config/extra_noise.txt \
             --daily-cap 500
           python scripts/filter_tokens_csv.py \
@@ -129,19 +130,15 @@ jobs:
           SRC="reports/auto_trends_existing/${RUNID}"
           DEST="site"
           mkdir -p "$DEST/run"
-          rsync -av "$SRC"/ "$DEST/run/"
-          python - <<'PY'
-import os, html
-root = "site/run"
-os.makedirs("site", exist_ok=True)
-with open("site/index.html","w",encoding="utf-8") as f:
-    f.write("<meta charset='utf-8'><h1>News Trends</h1><ul>")
-    for dp,_,fs in os.walk(root):
-        for fn in sorted(fs):
-            p = os.path.join(dp,fn).replace("site/","")
-            f.write(f"<li><a href='{p}'>{html.escape(p)}</a></li>")
-    f.write("</ul>")
-PY
+          rsync -av "$SRC"/ "$DEST/run/" || true
+          mkdir -p "$DEST"
+          {
+            echo "<meta charset='utf-8'><h1>News Trends</h1><ul>"
+            find "$DEST/run" -type f | sed 's#^site/##' | sort | while read -r p; do
+              printf "<li><a href='%s'>%s</a></li>\n" "$p" "$p"
+            done
+            echo "</ul>"
+          } > "$DEST/index.html"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
