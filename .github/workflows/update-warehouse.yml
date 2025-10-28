@@ -36,13 +36,13 @@ jobs:
         uses: dawidd6/action-download-artifact@v3
         with:
           repo: ${{ github.repository }}
-          workflow: collect-live.yml
+          workflow: collect-live
           workflow_conclusion: success
           branch: main
           name: live-jsonl
-          path: artifacts
-          allow_forks: true
+          search_artifacts: true
           if_no_artifact_found: warn
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore live jsonl
         id: restore
