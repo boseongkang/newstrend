@@ -67,7 +67,7 @@ jobs:
         run: python scripts/update_corpus.py
 
       - name: Upload warehouse artifact
-        if: steps.restore.outputs.count != '0' && hashFiles('data/warehouse/master.jsonl') != ''
+        if: hashFiles('data/warehouse/master.jsonl') != ''
         uses: actions/upload-artifact@v4
         with:
           name: warehouse
@@ -75,5 +75,6 @@ jobs:
             data/warehouse/master.jsonl
             data/warehouse/daily/*.jsonl
             data/metrics/**
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
+
