@@ -1,20 +1,14 @@
 name: trend-site
 
 on:
+  schedule:
+    - cron: "15 6 * * *"
   workflow_dispatch:
     inputs:
       lookback_days:
-        description: "Aggregate lookback (days)"
+        description: "How many recent days to include"
         required: false
         default: "30"
-      min_total:
-        description: "Rising min_total threshold"
-        required: false
-        default: "80"
-      window:
-        description: "Rising window"
-        required: false
-        default: "14"
 
 permissions:
   contents: read
@@ -30,16 +24,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
+        with:
+          python-version: "3.12"
 
-      - name: Install deps
+      - name: Install
         run: |
           python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
-          pip install pandas plotly yfinance
 
       - name: Download latest warehouse artifact
         uses: dawidd6/action-download-artifact@v3
@@ -48,96 +44,79 @@ jobs:
           workflow_conclusion: success
           branch: main
           path: artifacts
-          if_no_artifact_found: warn
+          if_no_artifact_found: ignore
 
-      - name: Restore data/ from artifact
-        shell: bash
+      - name: Restore warehouse
         run: |
           set -euo pipefail
           mkdir -p data
-          FOUND=$(find artifacts -type d -path "*/data/warehouse" -print -quit || true)
-          if [ -n "${FOUND:-}" ]; then
-            rsync -av "$(dirname "$FOUND")/"/ "data/"
-            echo "Restored warehouse:"
-            find data/warehouse -maxdepth 1 -type f -name '*.jsonl' | wc -l
-          else
-            echo "No warehouse artifact found" >&2
-            exit 1
-          fi
+          FOUND=$(find artifacts -type d -name data -print -quit || true)
+          if [ -n "${FOUND:-}" ]; then rsync -a "${FOUND}/" data/; fi
 
       - name: Resolve START/END from daily jsonl
         id: rng
         shell: bash
+        env:
+          LOOKBACK: ${{ inputs.lookback_days || '30' }}
         run: |
           set -euo pipefail
           START=$(python - <<'PY'
-import glob, os
-fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
-print(os.path.basename(fs[-int("${{ github.event.inputs.lookback_days || '30' }}")])[:-6] if len(fs) else "")
-PY
+          import glob, os
+          fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
+          n=int(os.environ.get("LOOKBACK","30"))
+          if not fs:
+              print("")
+          else:
+              i=max(0,len(fs)-n)
+              print(os.path.basename(fs[i])[:-6])
+          PY
           )
           END=$(python - <<'PY'
-import glob, os
-fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
-print(os.path.basename(fs[-1])[:-6] if len(fs) else "")
-PY
+          import glob, os
+          fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
+          print(os.path.basename(fs[-1])[:-6] if fs else "")
+          PY
           )
           echo "start=$START" >> "$GITHUB_OUTPUT"
-          echo "end=$END"     >> "$GITHUB_OUTPUT"
-          echo "USE_RANGE: $START -> $END"
+          echo "end=$END" >> "$GITHUB_OUTPUT"
 
-      - name: Build RUN
-        id: runid
-        shell: bash
+      - name: Aggregate and rising
+        env:
+          START: ${{ steps.rng.outputs.start }}
+          END: ${{ steps.rng.outputs.end }}
         run: |
           set -euo pipefail
-          RUN="reports/auto_trends_existing/$(date -u +%Y%m%d_%H%M%SZ)"
-          echo "run=$RUN" >> "$GITHUB_OUTPUT"
-          mkdir -p "$RUN"
+          OUT="reports/auto_trends_existing/$(date -u +%Y%m%d_%H%M%SZ)"
+          python scripts/aggregate.py --master data/warehouse/master.jsonl --outdir "$OUT/aggregate" --start "$START" --end "$END" --weights config/publisher_weights.json --blacklist config/publisher_blacklist.txt --extra_stop config/extra_noise.txt --daily-cap 500
+          python scripts/filter_tokens_csv.py --in "$OUT/aggregate/tokens_by_day.csv" --stop-file config/extra_noise.txt --min-len 4 --out "$OUT/tokens_by_day.cleaned.csv"
+          python scripts/rising_from_tokens_csv.py --tokens-csv "$OUT/tokens_by_day.cleaned.csv" --start "$START" --end "$END" --window 7 --min-total 20 --topk 500 --outdir "$OUT/rising_csv"
+          echo "OUT=$OUT"   >> "$GITHUB_ENV"
+          echo "START=$START" >> "$GITHUB_ENV"
+          echo "END=$END"     >> "$GITHUB_ENV"
 
-          python scripts/aggregate.py \
-            --master data/warehouse/master.jsonl \
-            --outdir "$RUN/aggregate" \
-            --start "${{ steps.rng.outputs.start }}" --end "${{ steps.rng.outputs.end }}" \
-            --weights   config/publisher_weights.json \
-            --blacklist config/publisher_blacklist.txt \
-            --extra_stop config/extra_noise.txt \
-            --daily-cap 1000
-
-          python scripts/filter_tokens_csv.py \
-            --in "$RUN/aggregate/tokens_by_day.csv" \
-            --stop-file config/extra_noise.txt \
-            --min-len 4 \
-            --out "$RUN/tokens_by_day.cleaned.csv"
-
-          python scripts/rising_from_tokens_csv.py \
-            --tokens-csv "$RUN/tokens_by_day.cleaned.csv" \
-            --start "${{ steps.rng.outputs.start }}" --end "${{ steps.rng.outputs.end }}" \
-            --window ${{ github.event.inputs.window || '14' }} \
-            --min-total ${{ github.event.inputs.min_total || '80' }} \
-            --topk 1000 \
-            --outdir "$RUN/rising_csv"
-
-          python scripts/join_prices.py \
-            --terms "$RUN/aggregate/tokens_by_day.csv" \
-            --map   "config/ticker_aliases.json" \
-            --start "${{ steps.rng.outputs.start }}" --end "${{ steps.rng.outputs.end }}" \
-            --min-days 3 \
-            --out   "$RUN/prices_join"
-
-      - name: Build site
+      - name: Join prices
         run: |
-          python scripts/site_from_run.py --run "${{ steps.runid.outputs.run }}" --out site
-          ls -Rla site | head -200
+          set -euo pipefail
+          python scripts/join_prices.py --terms "$OUT/aggregate/tokens_by_day.csv" --map config/ticker_aliases.json --start "$START" --end "$END" --out "$OUT/prices_join"
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Build site bundle
+        run: |
+          set -euo pipefail
+          SITE=site
+          rm -rf "$SITE"
+          mkdir -p "$SITE"
+          python scripts/build_site.py --run "$OUT" --out "$SITE"
+
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    environment: { name: github-pages }
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/deploy-pages@v4
+      - id: deploy
+        uses: actions/deploy-pages@v4
