@@ -4,11 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       lookback_days:
-        description: "How many recent days to include"
+        description: How many recent days to include
         required: false
         default: "30"
-  schedule:
-    - cron: "15 7 * * *"
 
 permissions:
   contents: read
@@ -25,18 +23,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Install
         run: |
-          set -euo pipefail
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
-
       - name: Download latest warehouse artifact
         uses: dawidd6/action-download-artifact@v3
         with:
@@ -45,157 +39,107 @@ jobs:
           branch: main
           path: artifacts
           if_no_artifact_found: warn
-
       - name: Restore warehouse
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p data/warehouse
-          W1=$(find artifacts -type d -path "*/data/warehouse" | head -1 || true)
-          if [ -n "${W1:-}" ]; then
-            rsync -av "$W1/" "data/warehouse/"
-          else
-            W2=$(find artifacts -type d -name data | head -1 || true)
-            if [ -n "${W2:-}" ]; then
-              rsync -av "$W2/warehouse/" "data/warehouse/" || true
-            fi
+          mkdir -p data data/warehouse data/warehouse/daily
+          FOUND=$(find artifacts -type d -name warehouse -print -quit || true)
+          if [ -n "${FOUND:-}" ]; then
+            rsync -av "$FOUND"/ "data/warehouse/"
           fi
-          echo "::group::Restored warehouse tree"
-          ls -Rla data/warehouse || true
-          echo "::endgroup::"
-
-      - name: Resolve START/END
+          find data/warehouse -maxdepth 2 -type f | head -n 20
+      - name: Resolve START/END from daily jsonl
         id: rng
         shell: bash
         env:
           LOOKBACK: ${{ inputs.lookback_days }}
         run: |
           set -euo pipefail
-          python - <<'PY' > rng.out
-          import os,glob,os.path,json,datetime
-          n=int(os.getenv("LOOKBACK") or "30")
-          daily=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
-          def from_master():
-              mx=None
-              p="data/warehouse/master.jsonl"
-              if not os.path.exists(p): return None,None
-              with open(p,"r",encoding="utf-8") as f:
-                  for ln in f:
-                      try:
-                          d=(json.loads(ln).get("date","") or "")[:10]
-                          if len(d)==10:
-                              mx=max(mx,d) if mx else d
-                      except Exception:
-                          pass
-              if not mx: return None,None
-              dt=datetime.date.fromisoformat(mx)
-              st=(dt-datetime.timedelta(days=n-1)).isoformat()
-              return st, mx
-          if daily:
-              end=os.path.basename(daily[-1])[:-6]
-              start=os.path.basename(daily[-min(n,len(daily))])[:-6]
-          else:
-              start,end=from_master()
-          if start and end:
-              print(start)
-              print(end)
-          PY
-          if [ -s rng.out ]; then
-            START=$(sed -n '1p' rng.out)
-            END=$(sed -n '2p' rng.out)
-            echo "START=$START" >> "$GITHUB_OUTPUT"
-            echo "END=$END" >> "$GITHUB_OUTPUT"
-            echo "range -> $START .. $END"
-          else
-            echo "No date range could be resolved."
-          fi
-
+          START=$(python - <<'PY'
+import glob, os
+fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
+n=int(os.getenv("LOOKBACK","30"))
+print(os.path.basename(fs[-n])[:-6] if fs and len(fs)>=n else (os.path.basename(fs[0])[:-6] if fs else ""))
+PY
+)
+          END=$(python - <<'PY'
+import glob, os
+fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
+print(os.path.basename(fs[-1])[:-6] if fs else "")
+PY
+)
+          echo "start=$START" >> "$GITHUB_OUTPUT"
+          echo "end=$END"   >> "$GITHUB_OUTPUT"
       - name: Aggregate and rising
-        id: agg
-        if: ${{ steps.rng.outputs.START != '' && steps.rng.outputs.END != '' }}
         shell: bash
         run: |
           set -euo pipefail
-          RUN="site/${{ steps.rng.outputs.START }}_${{ steps.rng.outputs.END }}"
-          mkdir -p "$RUN"
-          if [ -f data/warehouse/master.jsonl ]; then
-            python scripts/aggregate.py \
-              --master data/warehouse/master.jsonl \
-              --outdir "$RUN/aggregate" \
-              --start "${{ steps.rng.outputs.START }}" \
-              --end   "${{ steps.rng.outputs.END }}" \
-              --weights   config/publisher_weights.json \
-              --blacklist config/publisher_blacklist.txt \
-              --extra_stop config/extra_noise.txt \
-              --daily-cap 500
-          else
-            python scripts/aggregate.py \
-              --root data/warehouse/daily \
-              --pattern "*.jsonl" \
-              --outdir "$RUN/aggregate" \
-              --start "${{ steps.rng.outputs.START }}" \
-              --end   "${{ steps.rng.outputs.END }}" \
-              --weights   config/publisher_weights.json \
-              --blacklist config/publisher_blacklist.txt \
-              --extra_stop config/extra_noise.txt \
-              --daily-cap 500
-          fi
+          mkdir -p site_out
+          python scripts/aggregate.py \
+            --master data/warehouse/master.jsonl \
+            --outdir site_out/aggregate \
+            --start "${{ steps.rng.outputs.start }}" \
+            --end   "${{ steps.rng.outputs.end }}" \
+            --weights   config/publisher_weights.json \
+            --blacklist config/publisher_blacklist.txt \
+            --extra_stop config/extra_noise.txt \
+            --daily-cap 500
           python scripts/filter_tokens_csv.py \
-            --in "$RUN/aggregate/tokens_by_day.csv" \
+            --in site_out/aggregate/tokens_by_day.csv \
             --stop-file config/extra_noise.txt \
             --min-len 4 \
-            --out "$RUN/tokens_by_day.cleaned.csv"
+            --out site_out/tokens_by_day.cleaned.csv
           python scripts/rising_from_tokens_csv.py \
-            --tokens-csv "$RUN/tokens_by_day.cleaned.csv" \
-            --start "${{ steps.rng.outputs.START }}" \
-            --end   "${{ steps.rng.outputs.END }}" \
+            --tokens-csv site_out/tokens_by_day.cleaned.csv \
+            --start "${{ steps.rng.outputs.start }}" \
+            --end   "${{ steps.rng.outputs.end }}" \
             --window 7 --min-total 20 --topk 500 \
-            --outdir "$RUN/rising_csv"
-          echo "RUN=$RUN" >> "$GITHUB_OUTPUT"
-
+            --outdir site_out/rising_csv
       - name: Join prices
-        if: ${{ steps.agg.outputs.RUN != '' }}
         shell: bash
         run: |
           set -euo pipefail
-          RUN="${{ steps.agg.outputs.RUN }}"
-          mkdir -p "$RUN/prices_join"
           python scripts/join_prices.py \
-            --terms "$RUN/aggregate/tokens_by_day.csv" \
+            --terms site_out/aggregate/tokens_by_day.csv \
             --map   config/ticker_aliases.json \
-            --start "${{ steps.rng.outputs.START }}" \
-            --end   "${{ steps.rng.outputs.END }}" \
-            --out   "$RUN/prices_join" || true
-
+            --start "${{ steps.rng.outputs.start }}" \
+            --end   "${{ steps.rng.outputs.end }}" \
+            --out   site_out/prices_join
       - name: Build site bundle
-        if: ${{ steps.agg.outputs.RUN != '' }}
         shell: bash
         run: |
           set -euo pipefail
-          SITE="public"
-          RUN="${{ steps.agg.outputs.RUN }}"
-          mkdir -p "$SITE"
-          rsync -av "$RUN/" "$SITE/"
-
+          mkdir -p site_out
+          if [ -f reports/site/index.html ]; then
+            rsync -av reports/site/ site_out/
+          fi
+          if [ ! -f site_out/index.html ]; then
+            cat > site_out/index.html <<'HTML'
+<!doctype html><meta charset="utf-8"><title>News Trends</title><h1>News Trends</h1><ul>
+<li><a href="aggregate/articles_by_day.csv">articles_by_day.csv</a></li>
+<li><a href="aggregate/publisher_by_day.csv">publisher_by_day.csv</a></li>
+<li><a href="aggregate/tokens_by_day.csv">tokens_by_day.csv</a></li>
+<li><a href="tokens_by_day.cleaned.csv">tokens_by_day.cleaned.csv</a></li>
+<li><a href="rising_csv/">rising_csv/</a></li>
+<li><a href="prices_join/">prices_join/</a></li>
+</ul>
+HTML
+          fi
       - name: Upload artifact
-        if: ${{ hashFiles('public/**') != '' }}
         uses: actions/upload-pages-artifact@v3
         with:
-          path: public
+          path: site_out
 
-      - name: Deploy to GitHub Pages
-        if: ${{ hashFiles('public/**') != '' }}
-        id: deploy
-deploy:
-  needs: build
-  permissions:
-    pages: write
-    id-token: write
-  environment:
-    name: github-pages
-    url: ${{ steps.deployment.outputs.page_url }}
-  runs-on: ubuntu-latest
-  steps:
-    - id: deployment
-      uses: actions/deploy-pages@v4
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
         uses: actions/deploy-pages@v4
