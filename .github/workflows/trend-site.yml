@@ -5,28 +5,23 @@ on:
     inputs:
       lookback_days:
         description: "How many recent days to include"
+        required: false
         default: "30"
-        required: true
-  schedule:
-    - cron: "12 7 * * *"
 
 permissions:
   contents: read
-  actions: read
   pages: write
   id-token: write
-
-concurrency:
-  group: trend-site
-  cancel-in-progress: true
+  actions: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      page_url: ${{ steps.deploy_pages.outputs.page_url }}
+
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -34,121 +29,133 @@ jobs:
 
       - name: Install
         run: |
-          set -euo pipefail
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
 
-      - name: Download latest warehouse artifact
-        id: dl
+      - name: Download latest warehouse (from update-warehouse)
+        id: dl_wh
         uses: dawidd6/action-download-artifact@v3
         with:
           repo: ${{ github.repository }}
-          name: warehouse
-          branch: main
+          workflow: update-warehouse.yml
           workflow_conclusion: success
+          branch: main
+          name: warehouse
           search_artifacts: true
-          if_no_artifact_found: warn
           path: artifacts
-
-      - name: Check downloaded artifact
-        id: chk
-        shell: bash
-        run: |
-          set -euo pipefail
-          cnt=$(find artifacts -type f 2>/dev/null | wc -l | tr -d ' ')
-          echo "count=${cnt}" >> "$GITHUB_OUTPUT"
-          if [ "$cnt" = "0" ]; then
-            echo "::error::No warehouse artifact available yet (try rerun after update-warehouse uploads one)."
-            exit 1
-          fi          
+          if_no_artifact_found: warn
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore warehouse
+        id: restore_wh
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p data/warehouse
-          if [ -d artifacts/warehouse/data/warehouse ]; then
-            rsync -av artifacts/warehouse/data/warehouse/ data/warehouse/
-          elif [ -d artifacts/warehouse ]; then
-            rsync -av artifacts/warehouse/ data/warehouse/
-          else
-            echo "warehouse artifact payload not found"; exit 1
+          mkdir -p data/warehouse data/warehouse/daily data/metrics
+          ok=0
+          if compgen -G "artifacts/**/master.jsonl" > /dev/null; then
+            find artifacts -type f -name master.jsonl -exec cp -v {} data/warehouse/master.jsonl \;
+            ok=1
           fi
-          test -f data/warehouse/master.jsonl
+          if compgen -G "artifacts/**/daily/*.jsonl" > /dev/null; then
+            rsync -av artifacts/**/daily/ data/warehouse/daily/ || true
+          fi
+          echo "ok=$ok" >> "$GITHUB_OUTPUT"
 
-      - name: Resolve START/END from daily jsonl
+      - name: Download live artifact (fallback)
+        if: steps.restore_wh.outputs.ok != '1'
+        id: dl_live
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          repo: ${{ github.repository }}
+          workflow: collect_continuous.yml
+          workflow_conclusion: success
+          branch: main
+          name: live-jsonl
+          search_artifacts: true
+          path: artifacts_live
+          if_no_artifact_found: warn
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build warehouse from live (fallback)
+        if: steps.restore_wh.outputs.ok != '1'
+        run: |
+          set -euo pipefail
+          mkdir -p data/live_newsapi
+          cp -v artifacts_live/**/*.jsonl data/live_newsapi/ || true
+          python scripts/update_corpus.py
+
+      - name: Resolve START/END
         id: rng
+        shell: bash
         env:
           LOOKBACK: ${{ inputs.lookback_days }}
-        shell: bash
         run: |
           set -euo pipefail
-          mapfile -t FS < <(ls -1 data/warehouse/daily/*.jsonl 2>/dev/null | sort)
-          if [ ${#FS[@]} -eq 0 ]; then echo "no daily files"; exit 1; fi
-          N="${LOOKBACK:-30}"
-          LEN=${#FS[@]}
-          if [ "$LEN" -gt "$N" ]; then IDX=$((LEN-N)); else IDX=0; fi
-          START=$(basename "${FS[$IDX]}" .jsonl)
-          END=$(basename "${FS[$((LEN-1))]}" .jsonl)
-          echo "start=$START" >> "$GITHUB_OUTPUT"
-          echo "end=$END" >> "$GITHUB_OUTPUT"
+          python - <<'PY' | tee -a "$GITHUB_OUTPUT"
+          import glob, os
+          n = int(os.getenv("LOOKBACK","30"))
+          fs = sorted(glob.glob("data/warehouse/daily/*.jsonl"))
+          if fs:
+              start = os.path.basename(fs[-n])[:-6] if len(fs)>=n else os.path.basename(fs[0])[:-6]
+              end   = os.path.basename(fs[-1])[:-6]
+          else:
+              start = ""
+              end   = ""
+          print(f"start={start}")
+          print(f"end={end}")
+          PY
 
       - name: Aggregate and rising
-        shell: bash
         run: |
-          set -euo pipefail
-          OUT="reports/auto_trends_existing/${GITHUB_RUN_ID}"
           python scripts/aggregate.py \
             --master data/warehouse/master.jsonl \
-            --outdir "$OUT/aggregate" \
+            --outdir site/run/aggregate \
             --start "${{ steps.rng.outputs.start }}" \
             --end   "${{ steps.rng.outputs.end }}" \
             --weights   config/publisher_weights.json \
             --blacklist config/publisher_blacklist.txt \
             --extra_stop config/extra_noise.txt \
             --daily-cap 500
+
           python scripts/filter_tokens_csv.py \
-            --in "$OUT/aggregate/tokens_by_day.csv" \
+            --in site/run/aggregate/tokens_by_day.csv \
             --stop-file config/extra_noise.txt \
             --min-len 4 \
-            --out "$OUT/tokens_by_day.cleaned.csv"
+            --out site/run/tokens_by_day.cleaned.csv
+
           python scripts/rising_from_tokens_csv.py \
-            --tokens-csv "$OUT/tokens_by_day.cleaned.csv" \
+            --tokens-csv site/run/tokens_by_day.cleaned.csv \
             --start "${{ steps.rng.outputs.start }}" \
             --end   "${{ steps.rng.outputs.end }}" \
-            --window 7 --min-total 50 --topk 200 \
-            --outdir "$OUT/rising_csv"
+            --window 7 --min-total 30 --topk 300 \
+            --outdir site/run/rising_csv
 
       - name: Join prices
-        shell: bash
         run: |
-          set -euo pipefail
-          OUT="reports/auto_trends_existing/${GITHUB_RUN_ID}"
           python scripts/join_prices.py \
-            --terms "$OUT/aggregate/tokens_by_day.csv" \
+            --terms site/run/aggregate/tokens_by_day.csv \
             --map   config/ticker_aliases.json \
             --start "${{ steps.rng.outputs.start }}" \
             --end   "${{ steps.rng.outputs.end }}" \
-            --out   "$OUT/prices_join"
+            --out   site/run/prices_join
 
       - name: Build site bundle
-        shell: bash
         run: |
-          set -euo pipefail
-          RUNID="${GITHUB_RUN_ID}"
-          SRC="reports/auto_trends_existing/${RUNID}"
-          DEST="site"
-          mkdir -p "$DEST/run"
-          rsync -av "$SRC"/ "$DEST/run/" || true
-          mkdir -p "$DEST"
-          {
-            echo "<meta charset='utf-8'><h1>News Trends</h1><ul>"
-            find "$DEST/run" -type f | sed 's#^site/##' | sort | while read -r p; do
-              printf "<li><a href='%s'>%s</a></li>\n" "$p" "$p"
-            done
-            echo "</ul>"
-          } > "$DEST/index.html"
+          mkdir -p site/run
+          python - <<'PY'
+          import os, html
+          root = "site/run"
+          os.makedirs("site", exist_ok=True)
+          with open("site/index.html","w",encoding="utf-8") as f:
+              f.write("<meta charset='utf-8'><h1>News Trends</h1><ul>")
+              for dp,_,fs in os.walk(root):
+                  for fn in sorted(fs):
+                      p = os.path.join(dp,fn).replace("site/","")
+                      f.write(f"<li><a href='{html.escape(p)}'>{html.escape(p)}</a></li>")
+              f.write("</ul>")
+          PY
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -157,6 +164,9 @@ jobs:
 
   deploy:
     needs: build
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
