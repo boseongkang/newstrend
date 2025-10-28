@@ -186,4 +186,16 @@ jobs:
       - name: Deploy to GitHub Pages
         if: ${{ hashFiles('public/**') != '' }}
         id: deploy
+deploy:
+  needs: build
+  permissions:
+    pages: write
+    id-token: write
+  environment:
+    name: github-pages
+    url: ${{ steps.deployment.outputs.page_url }}
+  runs-on: ubuntu-latest
+  steps:
+    - id: deployment
+      uses: actions/deploy-pages@v4
         uses: actions/deploy-pages@v4
