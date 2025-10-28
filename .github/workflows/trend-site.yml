@@ -4,13 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       lookback_days:
-        description: How many recent days to include
+        description: "How many recent days to include"
         required: false
         default: "30"
 
 permissions:
   contents: read
-  actions: read
   pages: write
   id-token: write
 
@@ -23,14 +22,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
       - name: Install
         run: |
+          set -euo pipefail
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
+
       - name: Download latest warehouse artifact
         uses: dawidd6/action-download-artifact@v3
         with:
@@ -39,16 +42,18 @@ jobs:
           branch: main
           path: artifacts
           if_no_artifact_found: warn
+
       - name: Restore warehouse
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p data data/warehouse data/warehouse/daily
+          mkdir -p data/warehouse
           FOUND=$(find artifacts -type d -name warehouse -print -quit || true)
           if [ -n "${FOUND:-}" ]; then
-            rsync -av "$FOUND"/ "data/warehouse/"
+            rsync -av "${FOUND}/" "data/warehouse/"
           fi
-          find data/warehouse -maxdepth 2 -type f | head -n 20
+          find data/warehouse -maxdepth 2 -type f | head -n 20 || true
+
       - name: Resolve START/END from daily jsonl
         id: rng
         shell: bash
@@ -56,33 +61,30 @@ jobs:
           LOOKBACK: ${{ inputs.lookback_days }}
         run: |
           set -euo pipefail
-          START=$(python -c "import glob,os; fs=sorted(glob.glob('data/warehouse/daily/*.jsonl')); n=int(os.getenv('LOOKBACK','30')); print(os.path.basename(fs[-n])[:-6] if fs and len(fs)>=n else (os.path.basename(fs[0])[:-6] if fs else ''))")
-          END=$(python -c "import glob,os; fs=sorted(glob.glob('data/warehouse/daily/*.jsonl')); print(os.path.basename(fs[-1])[:-6] if fs else '')")
-          echo "start=$START" >> \"$GITHUB_OUTPUT\"
-          echo "end=$END"   >> \"$GITHUB_OUTPUT\"
-
+          START=$(python - <<'PY'
 import glob, os
-fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
-n=int(os.getenv("LOOKBACK","30"))
-print(os.path.basename(fs[-n])[:-6] if fs and len(fs)>=n else (os.path.basename(fs[0])[:-6] if fs else ""))
+fs = sorted(glob.glob('data/warehouse/daily/*.jsonl'))
+n = int(os.getenv('LOOKBACK','30'))
+print(os.path.basename(fs[-n])[:-6] if fs and len(fs) >= n else (os.path.basename(fs[0])[:-6] if fs else ''))
 PY
 )
           END=$(python - <<'PY'
 import glob, os
-fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
-print(os.path.basename(fs[-1])[:-6] if fs else "")
+fs = sorted(glob.glob('data/warehouse/daily/*.jsonl'))
+print(os.path.basename(fs[-1])[:-6] if fs else '')
 PY
 )
           echo "start=$START" >> "$GITHUB_OUTPUT"
-          echo "end=$END"   >> "$GITHUB_OUTPUT"
+          echo "end=$END" >> "$GITHUB_OUTPUT"
+
       - name: Aggregate and rising
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p site_out
+          OUT="site_run"
           python scripts/aggregate.py \
             --master data/warehouse/master.jsonl \
-            --outdir site_out/aggregate \
+            --outdir "$OUT/aggregate" \
             --start "${{ steps.rng.outputs.start }}" \
             --end   "${{ steps.rng.outputs.end }}" \
             --weights   config/publisher_weights.json \
@@ -90,60 +92,41 @@ PY
             --extra_stop config/extra_noise.txt \
             --daily-cap 500
           python scripts/filter_tokens_csv.py \
-            --in site_out/aggregate/tokens_by_day.csv \
+            --in "$OUT/aggregate/tokens_by_day.csv" \
             --stop-file config/extra_noise.txt \
             --min-len 4 \
-            --out site_out/tokens_by_day.cleaned.csv
+            --out "$OUT/tokens_by_day.cleaned.csv"
           python scripts/rising_from_tokens_csv.py \
-            --tokens-csv site_out/tokens_by_day.cleaned.csv \
+            --tokens-csv "$OUT/tokens_by_day.cleaned.csv" \
             --start "${{ steps.rng.outputs.start }}" \
             --end   "${{ steps.rng.outputs.end }}" \
             --window 7 --min-total 20 --topk 500 \
-            --outdir site_out/rising_csv
-      - name: Join prices
-        shell: bash
-        run: |
-          set -euo pipefail
+            --outdir "$OUT/rising_csv"
           python scripts/join_prices.py \
-            --terms site_out/aggregate/tokens_by_day.csv \
+            --terms "$OUT/aggregate/tokens_by_day.csv" \
             --map   config/ticker_aliases.json \
             --start "${{ steps.rng.outputs.start }}" \
             --end   "${{ steps.rng.outputs.end }}" \
-            --out   site_out/prices_join
+            --out   "$OUT/prices_join"
+
       - name: Build site bundle
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p site_out
-          if [ -f reports/site/index.html ]; then
-            rsync -av reports/site/ site_out/
-          fi
-          if [ ! -f site_out/index.html ]; then
-            cat > site_out/index.html <<'HTML'
-<!doctype html><meta charset="utf-8"><title>News Trends</title><h1>News Trends</h1><ul>
-<li><a href="aggregate/articles_by_day.csv">articles_by_day.csv</a></li>
-<li><a href="aggregate/publisher_by_day.csv">publisher_by_day.csv</a></li>
-<li><a href="aggregate/tokens_by_day.csv">tokens_by_day.csv</a></li>
-<li><a href="tokens_by_day.cleaned.csv">tokens_by_day.cleaned.csv</a></li>
-<li><a href="rising_csv/">rising_csv/</a></li>
-<li><a href="prices_join/">prices_join/</a></li>
-</ul>
-HTML
-          fi
+          mkdir -p public
+          python scripts/site_build.py --in site_run --out public
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: site_out
+          path: public
 
   deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
