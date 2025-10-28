@@ -51,20 +51,20 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p data/warehouse
-          WDIR=$(find artifacts -type d -path "*/data/warehouse" | head -1 || true)
-          if [ -n "${WDIR:-}" ]; then
-            rsync -av "$WDIR/" "data/warehouse/"
+          W1=$(find artifacts -type d -path "*/data/warehouse" | head -1 || true)
+          if [ -n "${W1:-}" ]; then
+            rsync -av "$W1/" "data/warehouse/"
           else
-            DDIR=$(find artifacts -type d -name data | head -1 || true)
-            if [ -n "${DDIR:-}" ]; then
-              rsync -av "$DDIR/warehouse/" "data/warehouse/" || true
+            W2=$(find artifacts -type d -name data | head -1 || true)
+            if [ -n "${W2:-}" ]; then
+              rsync -av "$W2/warehouse/" "data/warehouse/" || true
             fi
           fi
           echo "::group::Restored warehouse tree"
           ls -Rla data/warehouse || true
           echo "::endgroup::"
 
-      - name: Resolve START/END from daily jsonl
+      - name: Resolve START/END
         id: rng
         shell: bash
         env:
@@ -72,25 +72,47 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY' > rng.out
-          import glob, os, sys, os.path
-          n = int(os.getenv("LOOKBACK") or "30")
-          fs = sorted(glob.glob("data/warehouse/daily/*.jsonl"))
-          if not fs:
-              sys.exit(0)
-          end = os.path.basename(fs[-1])[:-6]
-          start = os.path.basename(fs[-min(n, len(fs))])[:-6]
-          print(start)
-          print(end)
+          import os,glob,os.path,json,datetime
+          n=int(os.getenv("LOOKBACK") or "30")
+          daily=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
+          def from_master():
+              mx=None
+              p="data/warehouse/master.jsonl"
+              if not os.path.exists(p): return None,None
+              with open(p,"r",encoding="utf-8") as f:
+                  for ln in f:
+                      try:
+                          d=(json.loads(ln).get("date","") or "")[:10]
+                          if len(d)==10:
+                              mx=max(mx,d) if mx else d
+                      except Exception:
+                          pass
+              if not mx: return None,None
+              dt=datetime.date.fromisoformat(mx)
+              st=(dt-datetime.timedelta(days=n-1)).isoformat()
+              return st, mx
+          if daily:
+              end=os.path.basename(daily[-1])[:-6]
+              start=os.path.basename(daily[-min(n,len(daily))])[:-6]
+          else:
+              start,end=from_master()
+          if start and end:
+              print(start)
+              print(end)
           PY
           if [ -s rng.out ]; then
             START=$(sed -n '1p' rng.out)
             END=$(sed -n '2p' rng.out)
             echo "START=$START" >> "$GITHUB_OUTPUT"
             echo "END=$END" >> "$GITHUB_OUTPUT"
+            echo "range -> $START .. $END"
+          else
+            echo "No date range could be resolved."
           fi
 
       - name: Aggregate and rising
-        if: ${{ steps.rng.outputs.START != '' }}
+        id: agg
+        if: ${{ steps.rng.outputs.START != '' && steps.rng.outputs.END != '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -132,11 +154,11 @@ jobs:
           echo "RUN=$RUN" >> "$GITHUB_OUTPUT"
 
       - name: Join prices
-        if: ${{ steps.rng.outputs.START != '' }}
+        if: ${{ steps.agg.outputs.RUN != '' }}
         shell: bash
         run: |
           set -euo pipefail
-          RUN="${{ steps.aggregate_and_rising.outputs.RUN || format('site/{0}_{1}', steps.rng.outputs.START, steps.rng.outputs.END) }}"
+          RUN="${{ steps.agg.outputs.RUN }}"
           mkdir -p "$RUN/prices_join"
           python scripts/join_prices.py \
             --terms "$RUN/aggregate/tokens_by_day.csv" \
@@ -146,20 +168,22 @@ jobs:
             --out   "$RUN/prices_join" || true
 
       - name: Build site bundle
-        if: ${{ steps.rng.outputs.START != '' }}
+        if: ${{ steps.agg.outputs.RUN != '' }}
         shell: bash
         run: |
           set -euo pipefail
           SITE="public"
-          RUN="site/${{ steps.rng.outputs.START }}_${{ steps.rng.outputs.END }}"
+          RUN="${{ steps.agg.outputs.RUN }}"
           mkdir -p "$SITE"
           rsync -av "$RUN/" "$SITE/"
 
       - name: Upload artifact
+        if: ${{ hashFiles('public/**') != '' }}
         uses: actions/upload-pages-artifact@v3
         with:
           path: public
 
       - name: Deploy to GitHub Pages
+        if: ${{ hashFiles('public/**') != '' }}
         id: deploy
         uses: actions/deploy-pages@v4
