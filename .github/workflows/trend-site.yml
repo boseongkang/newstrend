@@ -44,14 +44,24 @@ jobs:
         uses: dawidd6/action-download-artifact@v3
         with:
           repo: ${{ github.repository }}
-          workflow: update-warehouse.yml
-          workflow_conclusion: success
-          branch: main
           name: warehouse
-          path: artifacts
+          branch: main
+          workflow_conclusion: success
           search_artifacts: true
-          if_no_artifact_found: fail
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          if_no_artifact_found: warn
+          path: artifacts
+
+      - name: Check downloaded artifact
+        id: chk
+        shell: bash
+        run: |
+          set -euo pipefail
+          cnt=$(find artifacts -type f 2>/dev/null | wc -l | tr -d ' ')
+          echo "count=${cnt}" >> "$GITHUB_OUTPUT"
+          if [ "$cnt" = "0" ]; then
+            echo "::error::No warehouse artifact available yet (try rerun after update-warehouse uploads one)."
+            exit 1
+          fi          
 
       - name: Restore warehouse
         shell: bash
