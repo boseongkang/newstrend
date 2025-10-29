@@ -44,14 +44,33 @@ jobs:
           branch: main
           name: warehouse
           search_artifacts: true
+          path: artifacts
           if_no_artifact_found: warn
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify artifact
+        run: |
+          set -euo pipefail
+          if [ ! -d artifacts ]; then
+            echo "no artifacts dir"
+            exit 1
+          fi
+          cnt=$(find artifacts -type f | wc -l | tr -d ' ')
+          if [ "$cnt" = "0" ]; then
+            echo "artifact empty"
+            exit 1
+          fi
+          ls -Rla artifacts
 
       - name: Restore warehouse
         run: |
           set -euo pipefail
           mkdir -p data
-          if [ -d artifacts/data ]; then rsync -a artifacts/data/ ./data/; else rsync -a artifacts/ ./data/; fi
+          if [ -d artifacts/data ]; then
+            rsync -a artifacts/data/ ./data/
+          else
+            rsync -a artifacts/ ./data/
+          fi
           test -f data/warehouse/master.jsonl
 
       - name: Resolve START/END
