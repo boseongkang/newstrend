@@ -31,50 +31,61 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
 
-      - name: Download latest live artifact
-        id: dl
+      - name: Download previous warehouse
         uses: dawidd6/action-download-artifact@v3
         with:
           repo: ${{ github.repository }}
-          workflow: .github/workflows/collect_continuous.yml 
+          workflow: update-warehouse.yml
           workflow_conclusion: success
-          branch: main
-          name: live-jsonl
+          name: warehouse
+          path: seed
           search_artifacts: true
-          path: artifacts 
+          if_no_artifact_found: warn
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore previous warehouse
+        run: |
+          set -euo pipefail
+          if [ -d seed ]; then
+            mkdir -p data/warehouse
+            rsync -av seed/ data/warehouse/
+          fi
+
+      - name: Download latest live artifact
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          repo: ${{ github.repository }}
+          workflow: collect_continuous.yml
+          workflow_conclusion: success
+          name: live-jsonl
+          path: live_art
+          search_artifacts: true
           if_no_artifact_found: warn
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore live jsonl
-        id: restore
-        shell: bash
         run: |
           set -euo pipefail
           mkdir -p data/live_newsapi/incoming
-          cnt=0
-          if [ -d artifacts ]; then
-            find artifacts -type f -name '*.jsonl' -print0 | xargs -0 -I{} cp -v "{}" data/live_newsapi/incoming/ || true
-            cnt=$(find data/live_newsapi/incoming -type f -name '*.jsonl' | wc -l | tr -d ' ')
+          if [ -d live_art ]; then
+            find live_art -type f -name '*.jsonl' -print0 | xargs -0 -I{} cp -v "{}" data/live_newsapi/incoming/ || true
           fi
-          echo "count=${cnt}" >> "$GITHUB_OUTPUT"
-
-      - name: Stop if no inputs
-        if: steps.restore.outputs.count == '0'
-        run: echo "no inputs, skipping."
 
       - name: Update corpus
-        if: steps.restore.outputs.count != '0'
         run: python scripts/update_corpus.py
 
+      - name: List outputs
+        run: |
+          ls -l data/warehouse || true
+          ls -l data/warehouse/daily || true
+          ls -l data/metrics || true
+
       - name: Upload warehouse artifact
-        if: hashFiles('data/warehouse/master.jsonl') != ''
         uses: actions/upload-artifact@v4
         with:
           name: warehouse
           path: |
-            data/warehouse/master.jsonl
-            data/warehouse/daily/*.jsonl
+            data/warehouse/**
             data/metrics/**
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
-
