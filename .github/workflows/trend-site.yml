@@ -1,23 +1,18 @@
 name: trend-site
-
 on:
   workflow_dispatch:
     inputs:
       lookback_days:
-        description: How many recent days to include
         required: false
         default: "30"
-
 permissions:
   contents: read
   actions: read
   pages: write
   id-token: write
-
 concurrency:
   group: trend-site
   cancel-in-progress: false
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,94 +20,64 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Install
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
-
-      - name: Download latest warehouse
-        id: dl_wh
-        continue-on-error: true
+      - uses: actions/configure-pages@v5
+      - name: Download latest warehouse artifact
         uses: dawidd6/action-download-artifact@v3
         with:
           repo: ${{ github.repository }}
           workflow: update-warehouse.yml
           workflow_conclusion: success
-          branch: main
           name: warehouse
+          path: wh
           search_artifacts: true
-          path: artifacts
-          if_no_artifact_found: warn
+          if_no_artifact_found: error
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Restore warehouse files
-        id: has_wh
-        shell: bash
+      - name: Restore warehouse
         run: |
           set -euo pipefail
-          mkdir -p data/warehouse data/warehouse/daily data/metrics
-          ok=0
-          if compgen -G "artifacts/**/master.jsonl" > /dev/null; then
-            cp -v artifacts/**/master.jsonl data/warehouse/master.jsonl
-            rsync -av artifacts/**/daily/ data/warehouse/daily/ || true
-            ok=1
-          fi
-          echo "ok=$ok" >> "$GITHUB_OUTPUT"
-
-      - name: Fallback download live artifact
-        if: steps.has_wh.outputs.ok != '1'
-        id: dl_live
-        uses: dawidd6/action-download-artifact@v3
-        with:
-          repo: ${{ github.repository }}
-          workflow: collect_continuous.yml
-          workflow_conclusion: success
-          branch: main
-          name: live-jsonl
-          search_artifacts: true
-          path: artifacts_live
-          if_no_artifact_found: warn
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Fallback build warehouse from live
-        if: steps.has_wh.outputs.ok != '1'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p data/live_newsapi
-          compgen -G "artifacts_live/**/*.jsonl" > /dev/null && cp -v artifacts_live/**/*.jsonl data/live_newsapi/ || true
-          python scripts/update_corpus.py
-
-      - name: Resolve START/END from daily jsonl
+          mkdir -p data/warehouse
+          rsync -av wh/ data/warehouse/
+      - name: Resolve START/END
         id: rng
-        shell: bash
         env:
-          LOOKBACK: ${{ inputs.lookback_days || '30' }}
+          LOOKBACK: ${{ inputs.lookback_days }}
         run: |
           set -euo pipefail
-          START=$(python -c "import glob,os;fs=sorted(glob.glob('data/warehouse/daily/*.jsonl'));n=int(os.environ.get('LOOKBACK','30'));print(os.path.basename(fs[-n])[:-6] if fs and len(fs)>=n else (os.path.basename(fs[0])[:-6] if fs else ''))")
-          END=$(python -c "import glob,os;fs=sorted(glob.glob('data/warehouse/daily/*.jsonl'));print(os.path.basename(fs[-1])[:-6] if fs else '')")
+          START=$(python - <<'PY'
+          import glob, os
+          fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
+          n=int(os.getenv("LOOKBACK","30"))
+          if not fs: print(""); exit()
+          print((os.path.basename(fs[-n]) if len(fs)>=n else os.path.basename(fs[0]))[:-6])
+          PY
+          )
+          END=$(python - <<'PY'
+          import glob, os
+          fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
+          print(os.path.basename(fs[-1])[:-6] if fs else "")
+          PY
+          )
           echo "start=$START" >> "$GITHUB_OUTPUT"
-          echo "end=$END" >> "$GITHUB_OUTPUT"
-
+          echo "end=$END"   >> "$GITHUB_OUTPUT"
       - name: Aggregate and rising
-        if: hashFiles('data/warehouse/master.jsonl') != ''
-        shell: bash
+        env:
+          START: ${{ steps.rng.outputs.start }}
+          END:   ${{ steps.rng.outputs.end }}
         run: |
           set -euo pipefail
           OUT="reports/auto_trends_existing/${GITHUB_RUN_ID}"
-          mkdir -p "$OUT"
           python scripts/aggregate.py \
             --master data/warehouse/master.jsonl \
             --outdir "$OUT/aggregate" \
-            --start "${{ steps.rng.outputs.start }}" \
-            --end   "${{ steps.rng.outputs.end }}" \
+            --start "$START" --end "$END" \
             --weights   config/publisher_weights.json \
             --blacklist config/publisher_blacklist.txt \
             --extra_stop config/extra_noise.txt \
@@ -124,48 +89,41 @@ jobs:
             --out "$OUT/tokens_by_day.cleaned.csv"
           python scripts/rising_from_tokens_csv.py \
             --tokens-csv "$OUT/tokens_by_day.cleaned.csv" \
-            --start "${{ steps.rng.outputs.start }}" \
-            --end   "${{ steps.rng.outputs.end }}" \
+            --start "$START" --end "$END" \
             --window 7 --min-total 20 --topk 500 \
             --outdir "$OUT/rising_csv"
-
-      - name: Join prices
-        if: hashFiles('data/warehouse/master.jsonl') != ''
-        shell: bash
-        run: |
-          set -euo pipefail
-          OUT="reports/auto_trends_existing/${GITHUB_RUN_ID}"
-          python scripts/join_prices.py \
-            --terms "$OUT/aggregate/tokens_by_day.csv" \
-            --map   config/ticker_aliases.json \
-            --start "${{ steps.rng.outputs.start }}" \
-            --end   "${{ steps.rng.outputs.end }}" \
-            --out   "$OUT/prices_join"
-
-      - name: Build site bundle
-        shell: bash
+      - name: Build site
         run: |
           set -euo pipefail
           RUNID="${GITHUB_RUN_ID}"
           SRC="reports/auto_trends_existing/${RUNID}"
           DEST="site"
           mkdir -p "$DEST/run"
-          rsync -av "$SRC/" "$DEST/run/" || true
-          echo "<meta charset='utf-8'><h1>News Trends</h1><ul>" > "$DEST/index.html"
-          find "$DEST/run" -type f -printf "%P\n" | sort | \
-            awk '{printf "<li><a href='\''%s'\''>%s</a></li>\n",$0,$0}' >> "$DEST/index.html"
-          echo "</ul>" >> "$DEST/index.html"
-
+          rsync -av "$SRC"/ "$DEST/run/"
+          cat > "$DEST/index.html" <<'HTML'
+          <!doctype html><meta charset="utf-8"/><title>News Trends</title>
+          <style>body{font:16px/1.5 system-ui,Arial,sans-serif;padding:24px}a{color:#0366d6;text-decoration:none}li{margin:6px 0}</style>
+          <h1>News Trends</h1>
+          <ul>
+            <li><a href="run/aggregate/articles_by_day.csv">articles_by_day.csv</a></li>
+            <li><a href="run/aggregate/publisher_by_day.csv">publisher_by_day.csv</a></li>
+            <li><a href="run/aggregate/tokens_by_day.csv">tokens_by_day.csv</a></li>
+            <li><a href="run/tokens_by_day.cleaned.csv">tokens_by_day.cleaned.csv</a></li>
+            <li><a href="run/rising_csv/">rising_csv/</a></li>
+          </ul>
+          HTML
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4

@@ -1,18 +1,14 @@
 name: update-warehouse
-
 on:
   schedule:
     - cron: "5,35 * * * *"
   workflow_dispatch: {}
-
 permissions:
   contents: read
   actions: read
-
 concurrency:
   group: update-warehouse
   cancel-in-progress: false
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,17 +16,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Install
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
-
       - name: Download previous warehouse
         uses: dawidd6/action-download-artifact@v3
         with:
@@ -38,19 +31,15 @@ jobs:
           workflow: update-warehouse.yml
           workflow_conclusion: success
           name: warehouse
-          path: seed
+          path: prev
           search_artifacts: true
           if_no_artifact_found: warn
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Restore previous warehouse
         run: |
           set -euo pipefail
-          if [ -d seed ]; then
-            mkdir -p data/warehouse
-            rsync -av seed/ data/warehouse/
-          fi
-
+          mkdir -p data/warehouse
+          if [ -d prev ]; then rsync -av prev/ data/warehouse/; fi
       - name: Download latest live artifact
         uses: dawidd6/action-download-artifact@v3
         with:
@@ -62,30 +51,30 @@ jobs:
           search_artifacts: true
           if_no_artifact_found: warn
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Restore live jsonl
+      - name: Restore live inputs
+        id: restore
         run: |
           set -euo pipefail
           mkdir -p data/live_newsapi/incoming
+          cnt=0
           if [ -d live_art ]; then
             find live_art -type f -name '*.jsonl' -print0 | xargs -0 -I{} cp -v "{}" data/live_newsapi/incoming/ || true
+            cnt=$(find data/live_newsapi/incoming -type f -name '*.jsonl' | wc -l | tr -d ' ')
           fi
-
+          echo "count=${cnt}" >> "$GITHUB_OUTPUT"
       - name: Update corpus
+        if: steps.restore.outputs.count != '0'
         run: python scripts/update_corpus.py
-
-      - name: List outputs
+      - name: Ensure warehouse exists
         run: |
-          ls -l data/warehouse || true
-          ls -l data/warehouse/daily || true
-          ls -l data/metrics || true
-
+          test -f data/warehouse/master.jsonl || { echo "no master.jsonl"; exit 1; }
       - name: Upload warehouse artifact
         uses: actions/upload-artifact@v4
         with:
           name: warehouse
           path: |
-            data/warehouse/**
+            data/warehouse/master.jsonl
+            data/warehouse/daily/*.jsonl
             data/metrics/**
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 14
