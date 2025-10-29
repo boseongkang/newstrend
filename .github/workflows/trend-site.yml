@@ -1,78 +1,88 @@
 name: trend-site
+
 on:
   workflow_dispatch:
     inputs:
       lookback_days:
+        description: "How many recent days to include"
         required: false
         default: "30"
+
 permissions:
   contents: read
   actions: read
   pages: write
   id-token: write
+
 concurrency:
   group: trend-site
   cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        with: { fetch-depth: 0 }
+
       - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+        with: { python-version: "3.12" }
+
       - name: Install
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
-      - uses: actions/configure-pages@v5
-      - name: Download latest warehouse artifact
+
+      - name: Download latest warehouse
+        id: wh
         uses: dawidd6/action-download-artifact@v3
         with:
           repo: ${{ github.repository }}
           workflow: update-warehouse.yml
           workflow_conclusion: success
+          branch: main
           name: warehouse
-          path: wh
           search_artifacts: true
           if_no_artifact_found: error
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          path: warehouse_artifacts
+
       - name: Restore warehouse
         run: |
           set -euo pipefail
-          rsync -av wh/ ./ 
-      - name: Resolve START/END
+          mkdir -p data/warehouse data/metrics
+          rsync -av warehouse_artifacts/ ./ || true
+          rsync -av warehouse_artifacts/data/ ./ || true
+          test -f data/warehouse/master.jsonl
+
+      - name: Resolve START/END from daily jsonl
         id: rng
+        shell: bash
         env:
           LOOKBACK: ${{ inputs.lookback_days }}
         run: |
-          set -euo pipefail
-          START=$(python - <<'PY'
-          import glob, os
-          fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
-          n=int(os.getenv("LOOKBACK","30"))
-          if not fs: print(""); exit()
-          print((os.path.basename(fs[-n]) if len(fs)>=n else os.path.basename(fs[0]))[:-6])
+          python - <<'PY' > /tmp/range.txt
+          import glob, os, datetime as dt
+          fs = sorted(glob.glob("data/warehouse/daily/*.jsonl"))
+          n  = int(os.environ.get("LOOKBACK","30"))
+          if fs:
+              end = os.path.basename(fs[-1])[:-6]
+              start = os.path.basename(fs[-min(n,len(fs))])[:-6]
+          else:
+              end = start = ""
+          print(start); print(end)
           PY
-          )
-          END=$(python - <<'PY'
-          import glob, os
-          fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
-          print(os.path.basename(fs[-1])[:-6] if fs else "")
-          PY
-          )
+          START=$(sed -n '1p' /tmp/range.txt)
+          END=$(sed -n '2p' /tmp/range.txt)
           echo "start=$START" >> "$GITHUB_OUTPUT"
-          echo "end=$END"   >> "$GITHUB_OUTPUT"
+          echo "end=$END" >> "$GITHUB_OUTPUT"
+
       - name: Aggregate and rising
-        env:
-          START: ${{ steps.rng.outputs.start }}
-          END:   ${{ steps.rng.outputs.end }}
         run: |
           set -euo pipefail
           OUT="reports/auto_trends_existing/${GITHUB_RUN_ID}"
+          START="${{ steps.rng.outputs.start }}"
+          END="${{ steps.rng.outputs.end }}"
           python scripts/aggregate.py \
             --master data/warehouse/master.jsonl \
             --outdir "$OUT/aggregate" \
@@ -91,7 +101,8 @@ jobs:
             --start "$START" --end "$END" \
             --window 7 --min-total 20 --topk 500 \
             --outdir "$OUT/rising_csv"
-      - name: Build site
+
+      - name: Build site bundle
         run: |
           set -euo pipefail
           RUNID="${GITHUB_RUN_ID}"
@@ -99,30 +110,18 @@ jobs:
           DEST="site"
           mkdir -p "$DEST/run"
           rsync -av "$SRC"/ "$DEST/run/"
-          cat > "$DEST/index.html" <<'HTML'
-          <!doctype html><meta charset="utf-8"/><title>News Trends</title>
-          <style>body{font:16px/1.5 system-ui,Arial,sans-serif;padding:24px}a{color:#0366d6;text-decoration:none}li{margin:6px 0}</style>
-          <h1>News Trends</h1>
-          <ul>
-            <li><a href="run/aggregate/articles_by_day.csv">articles_by_day.csv</a></li>
-            <li><a href="run/aggregate/publisher_by_day.csv">publisher_by_day.csv</a></li>
-            <li><a href="run/aggregate/tokens_by_day.csv">tokens_by_day.csv</a></li>
-            <li><a href="run/tokens_by_day.cleaned.csv">tokens_by_day.cleaned.csv</a></li>
-            <li><a href="run/rising_csv/">rising_csv/</a></li>
-          </ul>
-          HTML
-      - uses: actions/upload-pages-artifact@v3
+
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: site
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    permissions:
-      pages: write
-      id-token: write
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
