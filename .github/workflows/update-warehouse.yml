@@ -18,10 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
+        with:
+          python-version: "3.12"
 
       - name: Install
         run: |
@@ -29,8 +31,8 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
 
-      - name: Download previous warehouse (optional)
-        id: prev
+      - name: Download previous warehouse artifact (optional)
+        id: dl_prev
         uses: dawidd6/action-download-artifact@v3
         with:
           repo: ${{ github.repository }}
@@ -38,21 +40,21 @@ jobs:
           workflow_conclusion: success
           branch: main
           name: warehouse
+          path: prev_warehouse
           search_artifacts: true
           if_no_artifact_found: warn
-          path: prev_warehouse
 
-      - name: Restore previous warehouse (if any)
+      - name: Restore previous warehouse
+        shell: bash
         run: |
           set -euo pipefail
           if [ -d prev_warehouse ]; then
-            mkdir -p data/warehouse data/metrics
-            rsync -av prev_warehouse/ ./ || true
-            rsync -av prev_warehouse/data/ ./ || true
+            mkdir -p data
+            rsync -a prev_warehouse/ data/ || true
           fi
 
       - name: Download latest live jsonl
-        id: live_dl
+        id: dl_live
         uses: dawidd6/action-download-artifact@v3
         with:
           repo: ${{ github.repository }}
@@ -60,42 +62,36 @@ jobs:
           workflow_conclusion: success
           branch: main
           name: live-jsonl
+          path: live_artifacts
           search_artifacts: true
           if_no_artifact_found: warn
-          path: live_artifacts
 
       - name: Restore live inputs
+        id: restore
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p data/live_newsapi
-          cnt=0
-          if [ -d artifacts ]; then
-            find artifacts -type f -name '*.jsonl' -print0 | xargs -0 -I{} cp -v "{}" data/live_newsapi/ || true
-            cnt=$(find data/live_newsapi -maxdepth 1 -type f -name '*.jsonl' | wc -l | tr -d ' ')
+          if [ -d live_artifacts ]; then
+            find live_artifacts -type f -name '*.jsonl' -print0 \
+              | xargs -0 -I{} cp -v "{}" data/live_newsapi/ || true
           fi
+          echo "==== data/live_newsapi ===="
+          ls -l data/live_newsapi || true
+          cnt=$(find data/live_newsapi -maxdepth 1 -type f -name '*.jsonl' | wc -l | tr -d ' ')
           echo "count=${cnt}" >> "$GITHUB_OUTPUT"
 
       - name: Update corpus
+        if: steps.restore.outputs.count != '0'
         run: python scripts/update_corpus.py
 
-      - name: Ensure warehouse exists (for first run)
-        run: |
-          set -euo pipefail
-          if [ ! -f data/warehouse/master.jsonl ]; then
-            echo "master.jsonl not found. Creating an empty skeleton so artifact is still produced."
-            mkdir -p data/warehouse/daily data/metrics
-            : > data/warehouse/master.jsonl
-          fi
-
-      - name: Upload warehouse
-        if: hashFiles('data/warehouse/master.jsonl') != ''
+      - name: Upload warehouse artifact
+        if: steps.restore.outputs.count != '0' && hashFiles('data/warehouse/master.jsonl') != ''
         uses: actions/upload-artifact@v4
         with:
           name: warehouse
           path: |
             data/warehouse/master.jsonl
             data/warehouse/daily/*.jsonl
-            data/metrics/**
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 14
