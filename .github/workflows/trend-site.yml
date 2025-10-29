@@ -51,27 +51,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p data/warehouse data/metrics
-          shopt -s nullglob
-          for a in artifacts/*.zip artifacts/*.tgz artifacts/*.tar.gz; do
-            case "$a" in
-              *.zip) unzip -q "$a" -d artifacts ;;
-              *)     tar -xzf "$a" -C artifacts ;;
-            esac
-          done
-          shopt -u nullglob
-          rsync -a artifacts/data/       data/               2>/dev/null || true
-          rsync -a artifacts/warehouse/  data/warehouse/     2>/dev/null || true
-          rsync -a artifacts/metrics/    data/metrics/       2>/dev/null || true
-          rsync -a warehouse/            data/warehouse/     2>/dev/null || true
-          rsync -a metrics/              data/metrics/       2>/dev/null || true
-          if [ ! -f data/warehouse/master.jsonl ]; then
-            f=$(find artifacts . -type f -name master.jsonl | head -1 || true)
-            if [ -n "${f:-}" ]; then
-              cp -f "$f" data/warehouse/master.jsonl
-            fi
+          mkdir -p data/warehouse/daily data/metrics
+          FOUND_MASTER="$(find artifacts -type f -name master.jsonl -print -quit || true)"
+          if [ -n "${FOUND_MASTER:-}" ]; then
+            cp -f "$FOUND_MASTER" data/warehouse/master.jsonl
           fi
-          test -f data/warehouse/master.jsonl || { echo "master.jsonl not restored"; find artifacts -maxdepth 4 -type f -print; exit 1; }
+          find artifacts -type f -path "*/daily/*.jsonl" -print0 | xargs -0 -I{} cp -f "{}" data/warehouse/daily/ || true
+          FOUND_METRICS_DIR="$(find artifacts -type d -name metrics -print -quit || true)"
+          if [ -n "${FOUND_METRICS_DIR:-}" ]; then
+            rsync -a "$FOUND_METRICS_DIR/"/ data/metrics/ || true
+          fi
+          if [ ! -f data/warehouse/master.jsonl ]; then
+            echo "master.jsonl not restored"; find artifacts -maxdepth 5 -type f | sed 's/^/ - /'; exit 1
+          fi
 
       - name: Resolve START/END from daily jsonl
         id: rng
@@ -80,12 +72,13 @@ jobs:
           LOOKBACK: ${{ inputs.lookback_days }}
         run: |
           set -euo pipefail
-          START=$(python -c "import glob, os; fs=sorted(glob.glob('data/warehouse/daily/*.jsonl')); n=int(os.getenv('LOOKBACK','30')); print(os.path.basename(fs[-n])[:-6] if fs and len(fs)>=n else (os.path.basename(fs[0])[:-6] if fs else ''))")
-          END=$(python -c "import glob, os; fs=sorted(glob.glob('data/warehouse/daily/*.jsonl')); print(os.path.basename(fs[-1])[:-6] if fs else '')")
+          START=$(python -c "import glob,os;fs=sorted(glob.glob('data/warehouse/daily/*.jsonl'));n=int(os.getenv('LOOKBACK','30'));print(os.path.basename(fs[-n])[:-6] if fs and len(fs)>=n else (os.path.basename(fs[0])[:-6] if fs else ''))")
+          END=$(python -c "import glob,os;fs=sorted(glob.glob('data/warehouse/daily/*.jsonl'));print(os.path.basename(fs[-1])[:-6] if fs else '')")
           echo "start=$START" >> "$GITHUB_OUTPUT"
           echo "end=$END" >> "$GITHUB_OUTPUT"
 
-      - name: Aggregate and rising
+      - name: Aggregate
+        id: agg
         shell: bash
         run: |
           set -euo pipefail
@@ -98,41 +91,49 @@ jobs:
             --weights   config/publisher_weights.json \
             --blacklist config/publisher_blacklist.txt \
             --extra_stop config/extra_noise.txt \
-            --daily-cap 500
+            --daily-cap 500 || true
+          if [ -s "$RUN/aggregate/tokens_by_day.csv" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "RUN=$RUN" >> "$GITHUB_ENV"
+
+      - name: Filter tokens
+        if: steps.agg.outputs.ok == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
           python scripts/filter_tokens_csv.py \
             --in "$RUN/aggregate/tokens_by_day.csv" \
             --stop-file config/extra_noise.txt \
             --min-len 4 \
             --out "$RUN/tokens_by_day.cleaned.csv"
+
+      - name: Rising terms
+        if: steps.agg.outputs.ok == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
           python scripts/rising_from_tokens_csv.py \
             --tokens-csv "$RUN/tokens_by_day.cleaned.csv" \
             --start "${{ steps.rng.outputs.start }}" --end "${{ steps.rng.outputs.end }}" \
             --window 7 --min-total 20 --topk 500 \
             --outdir "$RUN/rising_csv"
-          echo "RUN=$RUN" >> "$GITHUB_ENV"
 
       - name: Build site bundle
         shell: bash
         run: |
           set -euo pipefail
-          RUNID="${GITHUB_RUN_ID}"
-          SRC="reports/auto_trends_existing/${RUNID}"
           DEST="site"
-          mkdir -p "$DEST/run"
-          rsync -av "$SRC/" "$DEST/run/"
-          python - <<'PY'
-import os, html
-root = "site/run"
-os.makedirs("site", exist_ok=True)
-with open("site/index.html","w",encoding="utf-8") as f:
-    f.write("<meta charset='utf-8'><h1>News Trends</h1><ul>")
-    for dp,_,fs in os.walk(root):
-        fs=[x for x in fs if not x.startswith('.')]
-        for fn in sorted(fs):
-            rel=os.path.join(dp,fn).replace('site/','')
-            f.write(f"<li><a href='{rel}'>{html.escape(rel)}</a></li>")
-    f.write("</ul>")
-PY
+          mkdir -p "$DEST"
+          if [ -d "$RUN" ] && [ -s "$RUN/aggregate/tokens_by_day.csv" ]; then
+            mkdir -p "$DEST/run"
+            rsync -av "$RUN/"/ "$DEST/run/"
+            python -c "import os,html;root='site/run';os.makedirs('site',exist_ok=True);f=open('site/index.html','w',encoding='utf-8');f.write('<meta charset=\"utf-8\"><h1>News Trends</h1><ul>');import pathlib;[f.write(f\"<li><a href='{str(p).replace('site/','')}'>{str(p).replace('site/','')}</a></li>\") for p in sorted(pathlib.Path(root).rglob('*')) if p.is_file()];f.write('</ul>');f.close()"
+          else
+            echo "<meta charset='utf-8'><h1>No data yet</h1><p>Warehouse artifact missing or no documents in the selected window.</p>" > site/index.html
+          fi
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
