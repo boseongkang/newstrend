@@ -2,151 +2,52 @@ name: trend-site
 
 on:
   workflow_dispatch:
-    inputs:
-      lookback_days:
-        description: Recent days to include
-        required: false
-        default: "30"
 
 permissions:
   contents: read
-  actions: read
   pages: write
   id-token: write
-
-concurrency:
-  group: trend-site
-  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
 
-      - name: Install
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install -e .
-          python -c "import plotly, yfinance" || pip install plotly yfinance
+      - run: pip install -r requirements.txt
 
       - name: Download latest warehouse artifact
         uses: dawidd6/action-download-artifact@v3
         with:
           workflow: update-warehouse.yml
-          workflow_conclusion: success
-          branch: main
           name: warehouse
           path: artifacts
-          search_artifacts: true
-          if_no_artifact_found: error
+          allow_forks: true
 
       - name: Restore warehouse
-        shell: bash
         run: |
           set -euo pipefail
           mkdir -p data/warehouse/daily data/metrics
-          FOUND_MASTER="$(find artifacts -type f -name master.jsonl -print -quit || true)"
-          if [ -n "${FOUND_MASTER:-}" ]; then
-            cp -f "$FOUND_MASTER" data/warehouse/master.jsonl
-          fi
-          find artifacts -type f -path "*/daily/*.jsonl" -print0 | xargs -0 -I{} cp -f "{}" data/warehouse/daily/ || true
-          FOUND_METRICS_DIR="$(find artifacts -type d -name metrics -print -quit || true)"
-          if [ -n "${FOUND_METRICS_DIR:-}" ]; then
-            rsync -a "$FOUND_METRICS_DIR/"/ data/metrics/ || true
-          fi
-          test -f data/warehouse/master.jsonl || { echo "master.jsonl not restored"; exit 1; }
+          if [ -f artifacts/warehouse.zip ]; then unzip -o artifacts/warehouse.zip -d artifacts; fi
+          rsync -av --ignore-missing-args artifacts/data/warehouse/ data/warehouse/
+          rsync -av --ignore-missing-args artifacts/data/metrics/ data/metrics/
+          test -f data/warehouse/master.jsonl
 
-      - name: Resolve START/END
-        id: rng
-        shell: bash
-        env:
-          LOOKBACK: ${{ inputs.lookback_days }}
+      - name: Aggregate and rising
         run: |
           set -euo pipefail
-          START=$(python -c "import glob,os;fs=sorted(glob.glob('data/warehouse/daily/*.jsonl'));n=int(os.getenv('LOOKBACK','30'));print(os.path.basename(fs[-n])[:-6] if fs and len(fs)>=n else (os.path.basename(fs[0])[:-6] if fs else ''))")
-          END=$(python -c "import glob,os;fs=sorted(glob.glob('data/warehouse/daily/*.jsonl'));print(os.path.basename(fs[-1])[:-6] if fs else '')")
-          echo "start=$START" >> "$GITHUB_OUTPUT"
-          echo "end=$END" >> "$GITHUB_OUTPUT"
+          python scripts/aggregate_from_warehouse.py --warehouse data/warehouse/master.jsonl --out run
+          python scripts/rising_terms.py --tokens run/tokens_by_day.cleaned.csv --out run/rising_csv
 
-      - name: Aggregate
-        id: agg
-        shell: bash
+      - name: Build static site
         run: |
           set -euo pipefail
-          RUN="reports/auto_trends_existing/${GITHUB_RUN_ID}"
-          mkdir -p "$RUN"
-          python scripts/aggregate.py \
-            --master data/warehouse/master.jsonl \
-            --outdir "$RUN/aggregate" \
-            --start "${{ steps.rng.outputs.start }}" --end "${{ steps.rng.outputs.end }}" \
-            --weights   config/publisher_weights.json \
-            --blacklist config/publisher_blacklist.txt \
-            --extra_stop config/extra_noise.txt \
-            --daily-cap 500 || true
-          if [ -s "$RUN/aggregate/tokens_by_day.csv" ]; then
-            echo "ok=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "ok=false" >> "$GITHUB_OUTPUT"
-          fi
-          echo "RUN=$RUN" >> "$GITHUB_ENV"
-
-      - name: Filter tokens
-        if: steps.agg.outputs.ok == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/filter_tokens_csv.py \
-            --in "$RUN/aggregate/tokens_by_day.csv" \
-            --stop-file config/extra_noise.txt \
-            --min-len 4 \
-            --out "$RUN/tokens_by_day.cleaned.csv"
-
-      - name: Rising terms
-        if: steps.agg.outputs.ok == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/rising_from_tokens_csv.py \
-            --tokens-csv "$RUN/tokens_by_day.cleaned.csv" \
-            --start "${{ steps.rng.outputs.start }}" --end "${{ steps.rng.outputs.end }}" \
-            --window 7 --min-total 20 --topk 500 \
-            --outdir "$RUN/rising_csv"
-
-      - name: Join prices
-        if: steps.agg.outputs.ok == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ -f config/ticker_aliases.json ]; then
-            python scripts/join_prices.py \
-              --terms "$RUN/aggregate/tokens_by_day.csv" \
-              --map   "config/ticker_aliases.json" \
-              --start "${{ steps.rng.outputs.start }}" --end "${{ steps.rng.outputs.end }}" \
-              --out   "$RUN/prices_join" || true
-          fi
-
-      - name: Render site
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p site
-          if [ -d "$RUN" ] && [ -s "$RUN/aggregate/tokens_by_day.csv" ]; then
-            python scripts/render_trend_site.py \
-              --run "$RUN" \
-              --master data/warehouse/master.jsonl \
-              --outdir site \
-              --last-days ${{ inputs.lookback_days }}
-          else
-            echo "<meta charset='utf-8'><h1>No data yet</h1><p>Warehouse artifact missing or no documents in the selected window.</p>" > site/index.html
-          fi
+          python scripts/build_static_ui.py --run run --out site
+          echo "GITHUB_RUN_ID=${{ github.run_id }}" >> site/.env
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -156,9 +57,6 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
+      - id: deploy
         uses: actions/deploy-pages@v4
