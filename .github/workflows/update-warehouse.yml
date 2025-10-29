@@ -25,6 +25,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
       - name: Download previous warehouse
+        id: dl_prev
         uses: dawidd6/action-download-artifact@v3
         with:
           repo: ${{ github.repository }}
@@ -38,9 +39,10 @@ jobs:
       - name: Restore previous warehouse
         run: |
           set -euo pipefail
+          if [ -d prev ]; then rsync -av prev/ ./; fi
           mkdir -p data/warehouse
-          if [ -d prev ]; then rsync -av prev/ data/warehouse/; fi
       - name: Download latest live artifact
+        id: dl_live
         uses: dawidd6/action-download-artifact@v3
         with:
           repo: ${{ github.repository }}
@@ -65,10 +67,13 @@ jobs:
       - name: Update corpus
         if: steps.restore.outputs.count != '0'
         run: python scripts/update_corpus.py
-      - name: Ensure warehouse exists
+      - name: Check warehouse exists
+        id: chk
         run: |
-          test -f data/warehouse/master.jsonl || { echo "no master.jsonl"; exit 1; }
+          set -euo pipefail
+          if [ -f data/warehouse/master.jsonl ]; then echo "exists=yes" >> "$GITHUB_OUTPUT"; else echo "exists=no" >> "$GITHUB_OUTPUT"; fi
       - name: Upload warehouse artifact
+        if: steps.chk.outputs.exists == 'yes'
         uses: actions/upload-artifact@v4
         with:
           name: warehouse

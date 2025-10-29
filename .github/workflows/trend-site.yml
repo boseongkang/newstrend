@@ -43,8 +43,7 @@ jobs:
       - name: Restore warehouse
         run: |
           set -euo pipefail
-          mkdir -p data/warehouse
-          rsync -av wh/ data/warehouse/
+          rsync -av wh/ ./ 
       - name: Resolve START/END
         id: rng
         env:
