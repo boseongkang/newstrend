@@ -8,9 +8,13 @@ def ensure(p):
     p.mkdir(parents=True, exist_ok=True)
     return p
 
-def to_iso(idx):
-    s = pd.to_datetime(idx, utc=False).tz_localize(None)
-    return [x.strftime("%Y-%m-%d") for x in s]
+def to_iso(values):
+    idx = pd.DatetimeIndex(pd.to_datetime(values, errors="coerce"))
+    try:
+        idx = idx.tz_localize(None)
+    except TypeError:
+        idx = idx.tz_convert(None)
+    return [ts.strftime("%Y-%m-%d") for ts in idx]
 
 def nan_to_none(vals):
     out = []
@@ -101,7 +105,7 @@ def main(run_dir, out_dir):
     if Path(art_csv).exists():
         ad = pd.read_csv(art_csv)
         if "date" in ad.columns and "articles" in ad.columns:
-            ad["date"] = pd.to_datetime(ad["date"]).dt.tz_localize(None)
+            ad["date"] = pd.to_datetime(ad["date"])
             ad = ad.groupby("date")["articles"].sum().reset_index().sort_values("date")
             write_json({"dates": to_iso(ad["date"]), "articles": [int(x) for x in ad["articles"].to_numpy()]}, data / "articles.json")
 
