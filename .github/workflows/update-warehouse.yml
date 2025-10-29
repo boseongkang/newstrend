@@ -47,7 +47,6 @@ jobs:
           set -euo pipefail
           if [ -d prev_warehouse ]; then
             mkdir -p data/warehouse data/metrics
-            # zip이 풀려 내려오면 디렉토리 안쪽으로 한 단계 더 있음
             rsync -av prev_warehouse/ ./ || true
             rsync -av prev_warehouse/data/ ./ || true
           fi
@@ -66,15 +65,14 @@ jobs:
           path: live_artifacts
 
       - name: Restore live inputs
-        id: restore_live
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p data/live_newsapi/incoming
+          mkdir -p data/live_newsapi
           cnt=0
-          if [ -d live_artifacts ]; then
-            find live_artifacts -type f -name '*.jsonl' -print0 | xargs -0 -I{} cp -v "{}" data/live_newsapi/incoming/ || true
-            cnt=$(find data/live_newsapi/incoming -type f -name '*.jsonl' | wc -l | tr -d ' ')
+          if [ -d artifacts ]; then
+            find artifacts -type f -name '*.jsonl' -print0 | xargs -0 -I{} cp -v "{}" data/live_newsapi/ || true
+            cnt=$(find data/live_newsapi -maxdepth 1 -type f -name '*.jsonl' | wc -l | tr -d ' ')
           fi
           echo "count=${cnt}" >> "$GITHUB_OUTPUT"
 
