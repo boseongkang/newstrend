@@ -16,7 +16,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - run: pip install -r requirements.txt
 
@@ -52,13 +52,99 @@ jobs:
           fi
 
       - name: Aggregate and rising
+        shell: bash
         run: |
           set -euo pipefail
-          python scripts/aggregate_from_warehouse.py --warehouse data/warehouse/master.jsonl --out run || \
-          python scripts/aggregate_from_warehouse.py --warehouse-dir data/warehouse/daily --out run
-          python scripts/rising_terms.py --tokens run/tokens_by_day.cleaned.csv --out run/rising_csv
+          python - <<'PY'
+          import os, json, glob, re
+          from pathlib import Path
+          import pandas as pd
+          import numpy as np
+
+          run = Path("run"); (run/"aggregate").mkdir(parents=True, exist_ok=True); (run/"rising_csv").mkdir(parents=True, exist_ok=True)
+
+          daily = sorted(glob.glob("data/warehouse/daily/*.jsonl"))
+          master = "data/warehouse/master.jsonl"
+          files = daily if daily else ([master] if Path(master).exists() else [])
+          if not files:
+              Path(run/"aggregate"/"articles_by_day.csv").write_text("date,articles\n", encoding="utf-8")
+              Path(run/"tokens_by_day.cleaned.csv").write_text("date,term,count\n", encoding="utf-8")
+              Path(run/"rising_csv"/"rising_terms_top.csv").write_text("term,norm_slope,last_count,mean\n", encoding="utf-8")
+              raise SystemExit("no documents found")
+
+          stop = set("""
+          a an and are as at be by for from has have he her his i in is it its of on or our she that the their them they this to was were will with you your not into over under more most less very just than then when what which while where who why how after before during against among between without within about above below across again further few other same any each own both
+          """.split())
+
+          rx = re.compile(r"[^a-z ]+")
+          counts = {}
+          docs = {}
+          def add_count(day, term, n=1):
+              key = (day, term)
+              counts[key] = counts.get(key, 0) + n
+
+          for fp in files:
+              with open(fp, "r", encoding="utf-8") as f:
+                  for line in f:
+                      try:
+                          d = json.loads(line)
+                      except Exception:
+                          continue
+                      ts = None
+                      for k in ("published_at","publishedAt","date","datetime","created_at","createdAt"):
+                          if k in d and d[k]:
+                              ts = pd.to_datetime(d[k], errors="coerce"); break
+                      if ts is None or pd.isna(ts): 
+                          continue
+                      day = str(pd.to_datetime(ts).tz_localize(None).date())
+                      docs[day] = docs.get(day, 0) + 1
+                      text = " ".join(str(d.get(k,"")) for k in ("title","description","content"))
+                      text = rx.sub(" ", text.lower())
+                      for tok in text.split():
+                          if len(tok) < 3 or tok in stop: 
+                              continue
+                          add_count(day, tok, 1)
+
+          rows = [{"date": d, "term": t, "count": c} for (d,t), c in counts.items()]
+          df = pd.DataFrame(rows)
+          if df.empty:
+              Path(run/"tokens_by_day.cleaned.csv").write_text("date,term,count\n", encoding="utf-8")
+          else:
+              df = df.groupby(["date","term"])["count"].sum().reset_index().sort_values(["date","count"], ascending=[True, False])
+              df.to_csv(run/"tokens_by_day.cleaned.csv", index=False)
+
+          ad = pd.DataFrame({"date": list(docs.keys()), "articles": list(docs.values())})
+          ad["date"] = pd.to_datetime(ad["date"]).dt.tz_localize(None)
+          ad = ad.sort_values("date")
+          ad["date"] = ad["date"].dt.strftime("%Y-%m-%d")
+          ad.to_csv(run/"aggregate"/"articles_by_day.csv", index=False)
+
+          def safe_slope(s):
+              y = pd.to_numeric(s, errors="coerce").astype(float).to_numpy()
+              x = np.arange(len(y), dtype=float)
+              msk = np.isfinite(y)
+              y = y[msk]; x = x[msk]
+              if x.size < 2: return 0.0
+              try:
+                  m = np.polyfit(x, y, 1)[0]
+                  return float(m) if np.isfinite(m) else 0.0
+              except Exception:
+                  return 0.0
+
+          if not df.empty:
+              grid = df.pivot(index="date", columns="term", values="count").sort_index().fillna(0)
+              slopes = {c: safe_slope(grid[c]) for c in grid.columns}
+              out = pd.DataFrame({"term": list(slopes.keys()), "norm_slope": list(slopes.values())}).sort_values("norm_slope", ascending=False)
+              last = grid.iloc[-1] if len(grid) else pd.Series(dtype=float)
+              out["last_count"] = out["term"].map(lambda t: int(last.get(t, 0)))
+              out["mean"] = out["term"].map(lambda t: float(grid[t].mean()) if t in grid else 0.0)
+              out.head(100).to_csv(run/"rising_csv"/"rising_terms_top.csv", index=False)
+          else:
+              Path(run/"rising_csv"/"rising_terms_top.csv").write_text("term,norm_slope,last_count,mean\n", encoding="utf-8")
+          PY
 
       - name: Build static site
+        shell: bash
         run: |
           set -euo pipefail
           python scripts/build_static_ui.py --run run --out site
@@ -73,5 +159,4 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - id: deploy
-        uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v4
