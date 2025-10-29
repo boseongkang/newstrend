@@ -46,19 +46,33 @@ jobs:
           if_no_artifact_found: warn
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Restore warehouse
-        id: restore
-        run: |
-          set -euo pipefail
-          mkdir -p data
-          BASE="artifacts"
-          if [ -d "${BASE}/warehouse" ]; then BASE="${BASE}/warehouse"; fi
-          if [ -d "${BASE}" ]; then rsync -a "${BASE}/" ./ || true; fi
-          if [ -f data/warehouse/master.jsonl ]; then
-            echo "has_master=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_master=false" >> "$GITHUB_OUTPUT"
-          fi
+          - name: Restore warehouse
+            shell: bash
+            run: |
+              set -euo pipefail
+              mkdir -p data/warehouse data/metrics
+
+              if ls artifacts/*.tgz >/dev/null 2>&1; then
+                tar -xzf artifacts/*.tgz -C .
+              elif ls artifacts/*.tar.gz >/dev/null 2>&1; then
+                tar -xzf artifacts/*.tar.gz -C .
+              elif ls artifacts/*.zip >/dev/null 2>&1; then
+                unzip -q artifacts/*.zip -d artifacts
+              fi
+
+              if [ -d artifacts/data ]; then
+                rsync -a artifacts/data/ data/
+              else
+                [ -d artifacts/warehouse ] && rsync -a artifacts/warehouse/ data/warehouse/
+                [ -d artifacts/metrics   ] && rsync -a artifacts/metrics/   data/metrics/
+                [ -d warehouse ] && rsync -a warehouse/ data/warehouse/
+                [ -d metrics   ] && rsync -a metrics/   data/metrics/
+             fi
+
+            echo "----- sanity check -----"
+            test -f data/warehouse/master.jsonl || { echo "missing data/warehouse/master.jsonl"; exit 1; }
+            echo "daily files:"; ls -l data/warehouse/daily/*.jsonl 2>/dev/null | head
+
 
       - name: Resolve START/END
         id: rng
