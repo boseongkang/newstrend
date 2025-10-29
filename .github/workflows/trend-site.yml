@@ -48,11 +48,15 @@ jobs:
           path: warehouse_artifacts
 
       - name: Restore warehouse
+        shell: bash
         run: |
           set -euo pipefail
-          mkdir -p data/warehouse data/metrics
-          rsync -av warehouse_artifacts/ ./ || true
-          rsync -av warehouse_artifacts/data/ ./ || true
+          mkdir -p data
+          if [ -d warehouse_artifacts/data ]; then
+            rsync -a warehouse_artifacts/data/ ./data/
+          else
+            rsync -a warehouse_artifacts/      ./data/
+          fi
           test -f data/warehouse/master.jsonl
 
       - name: Resolve START/END from daily jsonl
