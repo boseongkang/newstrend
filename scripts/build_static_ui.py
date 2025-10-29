@@ -4,32 +4,32 @@ import argparse
 import pandas as pd
 import numpy as np
 
-def ensure(p): p.mkdir(parents=True, exist_ok=True); return p
+def ensure(p):
+    p.mkdir(parents=True, exist_ok=True)
+    return p
 
-def to_iso(d):
-    dt = pd.to_datetime(d, errors="coerce")
-    if isinstance(dt, pd.Series):
-        if hasattr(dt, "dt"):
-            try:
-                dt = dt.dt.tz_localize(None)
-            except TypeError:
-                dt = dt.dt.tz_convert(None)
-    elif isinstance(dt, pd.DatetimeIndex):
-        try:
-            dt = dt.tz_localize(None)
-        except TypeError:
-            dt = dt.tz_convert(None)
-    return [x.strftime("%Y-%m-%d") for x in dt]
+def to_iso(idx):
+    s = pd.to_datetime(idx, utc=False).tz_localize(None)
+    return [x.strftime("%Y-%m-%d") for x in s]
+
+def nan_to_none(vals):
+    out = []
+    for x in vals:
+        if pd.isna(x) or (isinstance(x, float) and (np.isnan(x) or np.isinf(x))):
+            out.append(None)
+        else:
+            out.append(float(x))
+    return out
 
 def load_terms_matrix(tokens_csv, top_terms_csv=None, keep_top=100):
     df = pd.read_csv(tokens_csv)
     df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None)
-    base = df.groupby(["date","term"])["count"].sum().reset_index()
+    base = df.groupby(["date", "term"])["count"].sum().reset_index()
+    tops = []
     if top_terms_csv and Path(top_terms_csv).exists():
-        tops = pd.read_csv(top_terms_csv)
-        tops = [str(x) for x in tops["term"].astype(str).tolist()[:50]]
-    else:
-        tops = []
+        t = pd.read_csv(top_terms_csv)
+        if "term" in t.columns:
+            tops = [str(x) for x in t["term"].astype(str).tolist()[:50]]
     totals = base.groupby("term")["count"].sum().sort_values(ascending=False)
     head = [str(x) for x in totals.head(keep_top).index.tolist()]
     want = list(dict.fromkeys(tops + head))
@@ -52,31 +52,23 @@ def load_prices(price_csv):
             if k in norm:
                 return norm[k]
         return None
-    date_col   = pick(["date", "datetime", "day"])
+    date_col = pick(["date", "datetime", "day"])
     ticker_col = pick(["ticker", "symbol"])
-    price_col  = pick(["close", "adj_close", "adj close", "adjclose",
-                       "price", "close_price", "closing_price"])
-
+    price_col = pick(["close", "adj_close", "adj close", "adjclose", "price", "close_price", "closing_price"])
     if not date_col or not ticker_col or not price_col:
-        raise ValueError(f"price csv columns not found. got={list(p.columns)} "
-                         f"need one of date:[date|datetime], ticker:[ticker|symbol], "
-                         f"price:[close|adj_close|price...]")
-
+        return None
     p[date_col] = pd.to_datetime(p[date_col]).dt.tz_localize(None)
-    g = (
-        p.groupby([date_col, ticker_col])[price_col]
-         .last()
-         .reset_index()
-    )
+    g = p.groupby([date_col, ticker_col])[price_col].last().reset_index()
     piv = (
         g.pivot(index=date_col, columns=ticker_col, values=price_col)
-         .sort_index()
-         .astype(float)
-         .ffill()
+        .sort_index()
+        .astype(float)
+        .ffill()
     )
     return piv
 
-def write_json(obj, path): Path(path).write_text(json.dumps(obj, ensure_ascii=False), encoding="utf-8")
+def write_json(obj, path):
+    Path(path).write_text(json.dumps(obj, ensure_ascii=False, allow_nan=False), encoding="utf-8")
 
 def main(run_dir, out_dir):
     run = Path(run_dir)
@@ -89,27 +81,29 @@ def main(run_dir, out_dir):
     art_csv = run / "aggregate" / "articles_by_day.csv"
 
     terms_mat = load_terms_matrix(tokens_csv, rising_top_csv, keep_top=120)
-    dates = to_iso(terms_mat.index)
-    series = {c: [float(x) for x in terms_mat[c].to_numpy()] for c in terms_mat.columns}
-    top_terms = list(terms_mat.sum().sort_values(ascending=False).head(20).index)
-
-    trends_json = {"dates": dates, "terms": list(terms_mat.columns), "series": series, "top": top_terms}
+    trends_json = {
+        "dates": to_iso(terms_mat.index),
+        "terms": list(terms_mat.columns),
+        "series": {c: [float(x) for x in terms_mat[c].to_numpy()] for c in terms_mat.columns},
+        "top": list(terms_mat.sum().sort_values(ascending=False).head(20).index),
+    }
     write_json(trends_json, data / "trends.json")
 
     prices_mat = load_prices(prices_csv)
-    if prices_mat is not None:
+    if prices_mat is not None and not prices_mat.empty:
         p_json = {
             "dates": to_iso(prices_mat.index),
             "tickers": list(prices_mat.columns),
-            "close": {c: [float(x) for x in prices_mat[c].to_numpy()] for c in prices_mat.columns},
+            "close": {c: nan_to_none(prices_mat[c].to_numpy()) for c in prices_mat.columns},
         }
         write_json(p_json, data / "prices.json")
 
     if Path(art_csv).exists():
         ad = pd.read_csv(art_csv)
-        ad["date"] = pd.to_datetime(ad["date"]).dt.tz_localize(None)
-        ad = ad.groupby("date")["articles"].sum().reset_index().sort_values("date")
-        write_json({"dates": to_iso(ad["date"]), "articles": [int(x) for x in ad["articles"].to_numpy()]}, data / "articles.json")
+        if "date" in ad.columns and "articles" in ad.columns:
+            ad["date"] = pd.to_datetime(ad["date"]).dt.tz_localize(None)
+            ad = ad.groupby("date")["articles"].sum().reset_index().sort_values("date")
+            write_json({"dates": to_iso(ad["date"]), "articles": [int(x) for x in ad["articles"].to_numpy()]}, data / "articles.json")
 
     html = (Path(__file__).parent / "static_dashboard.html").read_text(encoding="utf-8")
     (out / "index.html").write_text(html, encoding="utf-8")
