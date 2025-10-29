@@ -1,41 +1,35 @@
 name: trend-site
-
 on:
   workflow_dispatch:
     inputs:
       lookback_days:
-        description: "How many recent days to include"
+        description: "How many recent days"
         required: false
         default: "30"
-
 permissions:
   contents: read
-  actions: read
   pages: write
   id-token: write
-
 concurrency:
   group: trend-site
   cancel-in-progress: false
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-
+        with:
+          python-version: "3.12"
       - name: Install
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
-
-      - name: Download latest warehouse
-        id: wh
+      - name: Download latest warehouse artifact
+        id: dl
         uses: dawidd6/action-download-artifact@v3
         with:
           repo: ${{ github.repository }}
@@ -44,57 +38,78 @@ jobs:
           branch: main
           name: warehouse
           search_artifacts: true
-          if_no_artifact_found: error
-          path: warehouse_artifacts
-
+          if_no_artifact_found: warn
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Restore warehouse
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p data
-          if [ -d warehouse_artifacts/data ]; then
-            rsync -a warehouse_artifacts/data/ ./data/
+          if [ -d artifacts/data ]; then
+            rsync -a artifacts/data/ ./data/
           else
-            rsync -a warehouse_artifacts/      ./data/
+            rsync -a artifacts/ ./data/
           fi
           test -f data/warehouse/master.jsonl
-
       - name: Resolve START/END from daily jsonl
         id: rng
         shell: bash
         env:
-          LOOKBACK: ${{ inputs.lookback_days }}
-        run: |
-          python - <<'PY' > /tmp/range.txt
-          import glob, os, datetime as dt
-          fs = sorted(glob.glob("data/warehouse/daily/*.jsonl"))
-          n  = int(os.environ.get("LOOKBACK","30"))
-          if fs:
-              end = os.path.basename(fs[-1])[:-6]
-              start = os.path.basename(fs[-min(n,len(fs))])[:-6]
-          else:
-              end = start = ""
-          print(start); print(end)
-          PY
-          START=$(sed -n '1p' /tmp/range.txt)
-          END=$(sed -n '2p' /tmp/range.txt)
-          echo "start=$START" >> "$GITHUB_OUTPUT"
-          echo "end=$END" >> "$GITHUB_OUTPUT"
-
-      - name: Aggregate and rising
+          LOOKBACK: ${{ inputs.lookback_days || '30' }}
         run: |
           set -euo pipefail
-          OUT="reports/auto_trends_existing/${GITHUB_RUN_ID}"
-          START="${{ steps.rng.outputs.start }}"
-          END="${{ steps.rng.outputs.end }}"
-          python scripts/aggregate.py \
-            --master data/warehouse/master.jsonl \
-            --outdir "$OUT/aggregate" \
-            --start "$START" --end "$END" \
-            --weights   config/publisher_weights.json \
-            --blacklist config/publisher_blacklist.txt \
-            --extra_stop config/extra_noise.txt \
-            --daily-cap 500
+          have_daily=$(ls -1 data/warehouse/daily/*.jsonl 2>/dev/null | wc -l | tr -d ' ')
+          if [ "${have_daily}" -gt 0 ]; then
+            START=$(python - <<'PY'
+import glob, os
+fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
+print(os.path.basename(fs[-int(os.getenv("LOOKBACK","30"))])[:10] if fs else "")
+PY
+)
+            END=$(python - <<'PY'
+import glob, os
+fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
+print(os.path.basename(fs[-1])[:10] if fs else "")
+PY
+)
+          else
+            START=""
+            END=""
+          fi
+          echo "start=${START}" >> "$GITHUB_OUTPUT"
+          echo "end=${END}"   >> "$GITHUB_OUTPUT"
+      - name: Aggregate and rising
+        shell: bash
+        env:
+          RUNID: ${{ github.run_id }}
+          START: ${{ steps.rng.outputs.start }}
+          END:   ${{ steps.rng.outputs.end }}
+          LOOKBACK: ${{ inputs.lookback_days || '30' }}
+        run: |
+          set -euo pipefail
+          OUT="reports/auto_trends_existing/${RUNID}"
+          mkdir -p "$OUT"
+          if [ -n "${START}" ] && [ -n "${END}" ]; then
+            python scripts/aggregate.py \
+              --master data/warehouse/master.jsonl \
+              --outdir "$OUT/aggregate" \
+              --start "${START}" --end "${END}" \
+              --weights   config/publisher_weights.json \
+              --blacklist config/publisher_blacklist.txt \
+              --extra_stop config/extra_noise.txt \
+              --daily-cap 500 || true
+          fi
+          if [ ! -f "$OUT/aggregate/tokens_by_day.csv" ]; then
+            python scripts/aggregate.py \
+              --master data/warehouse/master.jsonl \
+              --outdir "$OUT/aggregate" \
+              --days "${LOOKBACK}" \
+              --weights   config/publisher_weights.json \
+              --blacklist config/publisher_blacklist.txt \
+              --extra_stop config/extra_noise.txt \
+              --daily-cap 500
+          fi
+          test -f "$OUT/aggregate/tokens_by_day.csv"
           python scripts/filter_tokens_csv.py \
             --in "$OUT/aggregate/tokens_by_day.csv" \
             --stop-file config/extra_noise.txt \
@@ -102,24 +117,35 @@ jobs:
             --out "$OUT/tokens_by_day.cleaned.csv"
           python scripts/rising_from_tokens_csv.py \
             --tokens-csv "$OUT/tokens_by_day.cleaned.csv" \
-            --start "$START" --end "$END" \
+            --start "${START:-}" --end "${END:-}" \
             --window 7 --min-total 20 --topk 500 \
             --outdir "$OUT/rising_csv"
-
       - name: Build site bundle
+        shell: bash
+        env:
+          RUNID: ${{ github.run_id }}
         run: |
           set -euo pipefail
-          RUNID="${GITHUB_RUN_ID}"
           SRC="reports/auto_trends_existing/${RUNID}"
           DEST="site"
           mkdir -p "$DEST/run"
           rsync -av "$SRC"/ "$DEST/run/"
-
+          python - <<'PY'
+import os, html
+root="site/run"
+os.makedirs("site", exist_ok=True)
+with open("site/index.html","w",encoding="utf-8") as f:
+    f.write("<meta charset='utf-8'><h1>News Trends</h1><ul>")
+    for dp,_,files in os.walk(root):
+        for fn in sorted(files):
+            p=os.path.join(dp,fn).replace("site/","")
+            f.write("<li><a href='%s'>%s</a></li>"%(html.escape(p),html.escape(p)))
+    f.write("</ul>")
+PY
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
