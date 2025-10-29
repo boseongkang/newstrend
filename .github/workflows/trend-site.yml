@@ -1,19 +1,21 @@
 name: trend-site
+
 on:
   workflow_dispatch:
     inputs:
       lookback_days:
-        description: How many recent days
+        description: How many recent days to include
         required: false
         default: "30"
 
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 
 concurrency:
-  group: trend-site
+  group: pages
   cancel-in-progress: false
 
 jobs:
@@ -21,10 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: {fetch-depth: 0}
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
-        with: {python-version: "3.12"}
+        with:
+          python-version: "3.12"
 
       - name: Install
         run: |
@@ -33,121 +37,114 @@ jobs:
           pip install -e .
 
       - name: Download latest warehouse artifact
-        id: dl
         uses: dawidd6/action-download-artifact@v3
         with:
-          repo: ${{ github.repository }}
           workflow: update-warehouse.yml
           workflow_conclusion: success
           branch: main
           name: warehouse
-          search_artifacts: true
           path: artifacts
-          if_no_artifact_found: warn
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          if_no_artifact_found: error
 
-          - name: Restore warehouse
-            shell: bash
-            run: |
-              set -euo pipefail
-              mkdir -p data/warehouse data/metrics
+      - name: Restore warehouse
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data/warehouse data/metrics
 
-              if ls artifacts/*.tgz >/dev/null 2>&1; then
-                tar -xzf artifacts/*.tgz -C .
-              elif ls artifacts/*.tar.gz >/dev/null 2>&1; then
-                tar -xzf artifacts/*.tar.gz -C .
-              elif ls artifacts/*.zip >/dev/null 2>&1; then
-                unzip -q artifacts/*.zip -d artifacts
-              fi
+          if ls artifacts/*.tgz >/dev/null 2>&1; then
+            tar -xzf artifacts/*.tgz -C .
+          elif ls artifacts/*.tar.gz >/dev/null 2>&1; then
+            tar -xzf artifacts/*.tar.gz -C .
+          elif ls artifacts/*.zip >/dev/null 2>&1; then
+            unzip -q artifacts/*.zip -d artifacts
+          fi
 
-              if [ -d artifacts/data ]; then
-                rsync -a artifacts/data/ data/
-              else
-                [ -d artifacts/warehouse ] && rsync -a artifacts/warehouse/ data/warehouse/
-                [ -d artifacts/metrics   ] && rsync -a artifacts/metrics/   data/metrics/
-                [ -d warehouse ] && rsync -a warehouse/ data/warehouse/
-                [ -d metrics   ] && rsync -a metrics/   data/metrics/
-             fi
+          if [ -d artifacts/data ]; then
+            rsync -a artifacts/data/ data/
+          else
+            [ -d artifacts/warehouse ] && rsync -a artifacts/warehouse/ data/warehouse/
+            [ -d artifacts/metrics   ] && rsync -a artifacts/metrics/   data/metrics/
+            [ -d warehouse ] && rsync -a warehouse/ data/warehouse/
+            [ -d metrics   ] && rsync -a metrics/   data/metrics/
+          fi
 
-            echo "----- sanity check -----"
-            test -f data/warehouse/master.jsonl || { echo "missing data/warehouse/master.jsonl"; exit 1; }
-            echo "daily files:"; ls -l data/warehouse/daily/*.jsonl 2>/dev/null | head
+          test -f data/warehouse/master.jsonl
 
-
-      - name: Resolve START/END
+      - name: Resolve START/END from daily jsonl
         id: rng
         env:
-          LOOKBACK: ${{ inputs.lookback_days || '30' }}
+          LOOKBACK: ${{ inputs.lookback_days }}
         run: |
-          set -euo pipefail
-          if [ "${{ steps.restore.outputs.has_master }}" != "true" ]; then
-            echo "start=" >> "$GITHUB_OUTPUT"
-            echo "end="   >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          list=$(ls -1 data/warehouse/daily/*.jsonl 2>/dev/null || true)
-          if [ -n "$list" ]; then
-            START=$(echo "$list" | tail -n "$LOOKBACK" | head -n 1 | sed -E 's#.*/([0-9]{4}-[0-9]{2}-[0-9]{2}).jsonl#\1#')
-            END=$(  echo "$list" | tail -n 1                 | sed -E 's#.*/([0-9]{4}-[0-9]{2}-[0-9]{2}).jsonl#\1#')
-          else
-            START=""
-            END=""
-          fi
-          echo "start=$START" >> "$GITHUB_OUTPUT"
-          echo "end=$END"     >> "$GITHUB_OUTPUT"
+          python - <<'PY'
+          import glob, os, sys
+          fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
+          if not fs:
+            print("::error::no daily jsonl files found"); sys.exit(1)
+          n=int(os.getenv("LOOKBACK","30"))
+          start=os.path.basename(fs[-min(n,len(fs))])[:-6]
+          end=os.path.basename(fs[-1])[:-6]
+          with open(os.environ["GITHUB_OUTPUT"],"a") as f:
+            f.write(f"START={start}\nEND={end}\n")
+          PY
 
       - name: Aggregate and rising
-        id: agg
         env:
-          RUNID: ${{ github.run_id }}
-          START: ${{ steps.rng.outputs.start }}
-          END:   ${{ steps.rng.outputs.end }}
-          LOOKBACK: ${{ inputs.lookback_days || '30' }}
+          OUT: reports/auto_trends_existing/${{ github.run_id }}
+          START: ${{ steps.rng.outputs.START }}
+          END: ${{ steps.rng.outputs.END }}
         run: |
           set -euo pipefail
-          OUT="reports/auto_trends_existing/${RUNID}"
-          mkdir -p "$OUT"
-          if [ "${{ steps.restore.outputs.has_master }}" != "true" ]; then
-            echo "created_tokens=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          set +e
-          if [ -n "${START}" ] && [ -n "${END}" ]; then
-            python scripts/aggregate.py --master data/warehouse/master.jsonl --outdir "$OUT/aggregate" --start "${START}" --end "${END}" --weights config/publisher_weights.json --blacklist config/publisher_blacklist.txt --extra_stop config/extra_noise.txt --daily-cap 500
-          fi
-          rc=$?
-          set -e
-          if [ ! -f "$OUT/aggregate/tokens_by_day.csv" ]; then
-            python scripts/aggregate.py --master data/warehouse/master.jsonl --outdir "$OUT/aggregate" --days "${LOOKBACK}" --weights config/publisher_weights.json --blacklist config/publisher_blacklist.txt --extra_stop config/extra_noise.txt --daily-cap 500 || true
-          fi
-          if [ -f "$OUT/aggregate/tokens_by_day.csv" ]; then
-            python scripts/filter_tokens_csv.py --in "$OUT/aggregate/tokens_by_day.csv" --stop-file config/extra_noise.txt --min-len 4 --out "$OUT/tokens_by_day.cleaned.csv" || true
-          fi
-          if [ -f "$OUT/tokens_by_day.cleaned.csv" ]; then
-            python scripts/rising_from_tokens_csv.py --tokens-csv "$OUT/tokens_by_day.cleaned.csv" --start "${START:-}" --end "${END:-}" --window 7 --min-total 20 --topk 500 --outdir "$OUT/rising_csv" || true
-            echo "created_tokens=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "created_tokens=false" >> "$GITHUB_OUTPUT"
-          fi
+          python scripts/aggregate.py \
+            --master data/warehouse/master.jsonl \
+            --outdir "$OUT/aggregate" \
+            --start "$START" --end "$END" \
+            --weights   config/publisher_weights.json \
+            --blacklist config/publisher_blacklist.txt \
+            --extra_stop config/extra_noise.txt \
+            --daily-cap 500
+          python scripts/filter_tokens_csv.py \
+            --in "$OUT/aggregate/tokens_by_day.csv" \
+            --stop-file config/extra_noise.txt \
+            --min-len 4 \
+            --out "$OUT/tokens_by_day.cleaned.csv"
+          python scripts/rising_from_tokens_csv.py \
+            --tokens-csv "$OUT/tokens_by_day.cleaned.csv" \
+            --start "$START" --end "$END" \
+            --window 7 --min-total 20 --topk 500 \
+            --outdir "$OUT/rising_csv"
 
       - name: Build site bundle
         env:
           RUNID: ${{ github.run_id }}
-          CREATED: ${{ steps.agg.outputs.created_tokens }}
         run: |
           set -euo pipefail
           SRC="reports/auto_trends_existing/${RUNID}"
           DEST="site"
           mkdir -p "$DEST/run"
-          if [ "${CREATED}" = "true" ] && [ -d "$SRC" ]; then
-            rsync -av "$SRC"/ "$DEST/run/"
-            printf '<meta charset="utf-8"><h1>News Trends</h1><ul>\n' > "$DEST/index.html"
-            find "$DEST/run" -type f | sort | sed -E 's#^site/##' | awk '{printf "<li><a href=\"%s\">%s</a></li>\n",$0,$0}' >> "$DEST/index.html"
-            printf '</ul>\n' >> "$DEST/index.html"
-          else
-            mkdir -p "$DEST"
-            printf '<meta charset="utf-8"><h1>No data yet</h1><p>Warehouse artifact missing or no documents in the selected window.</p>\n' > "$DEST/index.html"
-          fi
+          rsync -a "$SRC/" "$DEST/run/"
+
+          cat > "$DEST/index.html" <<'HTML'
+          <!doctype html>
+          <meta charset="utf-8">
+          <title>News Trends</title>
+          <style>
+            body{font-family:system-ui,Arial,sans-serif;background:#0f1115;color:#e5e7eb;margin:20px}
+            a{color:#93c5fd} .box{max-width:980px;margin:auto}
+            ul{line-height:1.8}
+            code{background:#1f2430;padding:2px 6px;border-radius:6px}
+          </style>
+          <div class="box">
+            <h1>News Trends</h1>
+            <p>Run: <code>${RUNID}</code></p>
+            <ul>
+              <li><a href="run/aggregate/articles_by_day.csv">aggregate/articles_by_day.csv</a></li>
+              <li><a href="run/aggregate/tokens_by_day.csv">aggregate/tokens_by_day.csv</a></li>
+              <li><a href="run/tokens_by_day.cleaned.csv">tokens_by_day.cleaned.csv</a></li>
+              <li><a href="run/rising_csv/rising_terms_top.csv">rising_csv/rising_terms_top.csv</a></li>
+            </ul>
+          </div>
+          HTML
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
