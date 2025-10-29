@@ -29,18 +29,33 @@ jobs:
           allow_forks: true
 
       - name: Restore warehouse
+        shell: bash
         run: |
           set -euo pipefail
           mkdir -p data/warehouse/daily data/metrics
           if [ -f artifacts/warehouse.zip ]; then unzip -o artifacts/warehouse.zip -d artifacts; fi
-          rsync -av --ignore-missing-args artifacts/data/warehouse/ data/warehouse/
-          rsync -av --ignore-missing-args artifacts/data/metrics/ data/metrics/
-          test -f data/warehouse/master.jsonl
+          ROOT=""
+          for cand in artifacts/data/warehouse artifacts/warehouse artifacts; do
+            if [ -f "$cand/master.jsonl" ] || [ -f "$cand/master.jsonl.gz" ] || ls "$cand"/daily/*.jsonl >/dev/null 2>&1; then
+              ROOT="$cand"; break
+            fi
+          done
+          if [ -z "$ROOT" ]; then
+            HIT=$(find artifacts -type f \( -name master.jsonl -o -name master.jsonl.gz -o -name '*.jsonl' \) | head -n1 || true)
+            if [ -n "$HIT" ]; then ROOT=$(dirname "$HIT"); fi
+          fi
+          if [ -z "$ROOT" ]; then echo "warehouse content not found"; ls -R artifacts; exit 1; fi
+          rsync -av "$ROOT/" data/warehouse/
+          if [ -d artifacts/data/metrics ]; then rsync -av artifacts/data/metrics/ data/metrics/; fi
+          if [ ! -f data/warehouse/master.jsonl ] && ! ls data/warehouse/daily/*.jsonl >/dev/null 2>&1; then
+            echo "warehouse files missing after restore"; exit 1
+          fi
 
       - name: Aggregate and rising
         run: |
           set -euo pipefail
-          python scripts/aggregate_from_warehouse.py --warehouse data/warehouse/master.jsonl --out run
+          python scripts/aggregate_from_warehouse.py --warehouse data/warehouse/master.jsonl --out run || \
+          python scripts/aggregate_from_warehouse.py --warehouse-dir data/warehouse/daily --out run
           python scripts/rising_terms.py --tokens run/tokens_by_day.cleaned.csv --out run/rising_csv
 
       - name: Build static site
