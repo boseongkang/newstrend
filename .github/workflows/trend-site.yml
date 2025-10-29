@@ -80,21 +80,10 @@ jobs:
           LOOKBACK: ${{ inputs.lookback_days }}
         run: |
           set -euo pipefail
-          START=$(python - <<'PY'
-import glob, os, pandas as pd
-fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
-n=int(os.getenv("LOOKBACK","30"))
-print(os.path.basename(fs[-n])[:-6] if fs and len(fs)>=n else (os.path.basename(fs[0])[:-6] if fs else ""))
-PY
-)
-          END=$(python - <<'PY'
-import glob, os
-fs=sorted(glob.glob("data/warehouse/daily/*.jsonl"))
-print(os.path.basename(fs[-1])[:-6] if fs else "")
-PY
-)
-          echo "start=${START}" >> "$GITHUB_OUTPUT"
-          echo "end=${END}"     >> "$GITHUB_OUTPUT"
+          START=$(python -c "import glob, os; fs=sorted(glob.glob('data/warehouse/daily/*.jsonl')); n=int(os.getenv('LOOKBACK','30')); print(os.path.basename(fs[-n])[:-6] if fs and len(fs)>=n else (os.path.basename(fs[0])[:-6] if fs else ''))")
+          END=$(python -c "import glob, os; fs=sorted(glob.glob('data/warehouse/daily/*.jsonl')); print(os.path.basename(fs[-1])[:-6] if fs else '')")
+          echo "start=$START" >> "$GITHUB_OUTPUT"
+          echo "end=$END" >> "$GITHUB_OUTPUT"
 
       - name: Aggregate and rising
         shell: bash
