@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>News & Prices Dashboard</title>
+<link rel="preconnect" href="https://cdn.plot.ly">
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<style>
+  :root { color-scheme: dark; }
+  body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:#0b0d12;color:#e8ebf0}
+  header{padding:16px 20px;border-bottom:1px solid #1b2230}
+  .wrap{max-width:1200px;margin:0 auto;padding:16px 20px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .card{background:#0f1420;border:1px solid #1b2230;border-radius:12px;padding:14px 16px;margin:12px 0}
+  select,button{background:#0f1420;color:#e8ebf0;border:1px solid #2a3448;border-radius:8px;padding:8px}
+  .pill{padding:6px 10px;border:1px solid #2a3448;border-radius:999px;margin:6px;display:inline-block}
+  .grid{display:grid;grid-template-columns:1fr;gap:14px}
+  @media(min-width:1000px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1 style="margin:0">News Trends Dashboard</h1></div></header>
+<div class="wrap">
+  <div class="card">
+    <div class="row">
+      <div>
+        <div style="font-size:12px;opacity:.8">Terms</div>
+        <select id="termSelect" multiple size="6" style="min-width:260px"></select>
+      </div>
+      <div>
+        <div style="font-size:12px;opacity:.8">Tickers</div>
+        <select id="tickerSelect" multiple size="6" style="min-width:180px"></select>
+      </div>
+      <div style="align-self:flex-end">
+        <button id="btnTop">Top terms</button>
+        <button id="btnClear">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><div id="trendPlot" style="height:420px"></div></div>
+    <div class="card"><div id="pricePlot" style="height:380px"></div></div>
+    <div class="card"><div id="articlesPlot" style="height:260px"></div></div>
+  </div>
+</div>
+
+<script>
+async function loadJSON(url){const r=await fetch(url,{cache:"no-store"}); if(!r.ok) return null; return await r.json();}
+
+let T=null, P=null, A=null;
+
+function setOptions(sel, arr){
+  sel.innerHTML = "";
+  arr.forEach(v=>{
+    const o=document.createElement("option"); o.value=o.text=v; sel.appendChild(o);
+  })
+}
+
+function sma(arr, w){
+  const out=[]; let s=0, q=[];
+  for(let i=0;i<arr.length;i++){
+    q.push(arr[i]); s+=arr[i];
+    if(q.length>w) s-=q.shift();
+    out.push(s/q.length);
+  }
+  return out;
+}
+
+function plotTrends(terms){
+  const x=T.dates;
+  const traces=[];
+  terms.forEach(t=>{
+    if(!T.series[t]) return;
+    const y=T.series[t].map(Number);
+    traces.push({x, y, name:t, mode:"lines", line:{width:1.5}});
+    traces.push({x, y:sma(y,7), name:t+"_sma7", mode:"lines", line:{width:2}});
+  });
+  Plotly.react("trendPlot", traces, {
+    margin:{l:50,r:10,t:20,b:40},
+    legend:{orientation:"h"},
+    xaxis:{type:"date"},
+    yaxis:{title:"mentions"}
+  },{displaylogo:false, responsive:true});
+}
+
+function plotPrices(tickers){
+  if(!P){ Plotly.react("pricePlot", [], {margin:{l:50,r:10,t:20,b:40},annotations:[{text:"No prices",xref:"paper",yref:"paper",x:.5,y:.5,showarrow:false}]}); return; }
+  const x=P.dates;
+  const traces=[];
+  tickers.forEach(k=>{
+    const y=P.close[k]; if(!y) return;
+    traces.push({x, y, name:k, mode:"lines", line:{width:2}});
+  });
+  Plotly.react("pricePlot", traces, {
+    margin:{l:50,r:10,t:20,b:40},
+    legend:{orientation:"h"},
+    xaxis:{type:"date"},
+    yaxis:{title:"close"}
+  },{displaylogo:false, responsive:true});
+}
+
+function plotArticles(){
+  if(!A){ Plotly.react("articlesPlot", [], {margin:{l:50,r:10,t:20,b:40},annotations:[{text:"No data",xref:"paper",yref:"paper",x:.5,y:.5,showarrow:false}]}); return; }
+  Plotly.react("articlesPlot", [{
+    x:A.dates, y:A.articles, type:"bar", marker:{opacity:.8}
+  }], {margin:{l:50,r:10,t:20,b:40}, xaxis:{type:"date"}, yaxis:{title:"articles"}}, {displaylogo:false, responsive:true});
+}
+
+async function init(){
+  T = await loadJSON("data/trends.json");
+  P = await loadJSON("data/prices.json");
+  A = await loadJSON("data/articles.json");
+
+  const termSel = document.getElementById("termSelect");
+  const tickSel = document.getElementById("tickerSelect");
+  setOptions(termSel, T.terms);
+  setOptions(tickSel, P ? P.tickers : []);
+
+  function selected(sel){ return Array.from(sel.selectedOptions).map(o=>o.value); }
+  termSel.addEventListener("change", ()=>plotTrends(selected(termSel)));
+  tickSel.addEventListener("change", ()=>plotPrices(selected(tickSel)));
+
+  document.getElementById("btnTop").onclick = ()=>{
+    Array.from(termSel.options).forEach(o=>o.selected=false);
+    (T.top||[]).slice(0,8).forEach(v=>{
+      const opt=[...termSel.options].find(o=>o.value===v); if(opt) opt.selected=true;
+    });
+    plotTrends(selected(termSel));
+  };
+  document.getElementById("btnClear").onclick = ()=>{
+    Array.from(termSel.options).forEach(o=>o.selected=false);
+    Array.from(tickSel.options).forEach(o=>o.selected=false);
+    plotTrends([]); plotPrices([]);
+  };
+
+  (T.top||T.terms.slice(0,6)).forEach(v=>{
+    const opt=[...termSel.options].find(o=>o.value===v); if(opt) opt.selected=true;
+  });
+  plotTrends(selected(termSel));
+  plotPrices([]);
+  plotArticles();
+}
+
+init();
+</script>
+</body>
+</html>
