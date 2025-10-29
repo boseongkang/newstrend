@@ -6,10 +6,12 @@ on:
         description: How many recent days
         required: false
         default: "30"
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
 concurrency:
   group: trend-site
   cancel-in-progress: false
@@ -19,14 +21,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: {fetch-depth: 0}
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-python@v5
-        with: {python-version: "3.12"}
+        with:
+          python-version: "3.12"
+
       - name: Install
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install -e .
+
       - name: Download latest warehouse artifact
         id: dl
         uses: dawidd6/action-download-artifact@v3
@@ -39,12 +46,14 @@ jobs:
           search_artifacts: true
           if_no_artifact_found: warn
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Restore warehouse
         run: |
           set -euo pipefail
           mkdir -p data
           if [ -d artifacts/data ]; then rsync -a artifacts/data/ ./data/; else rsync -a artifacts/ ./data/; fi
           test -f data/warehouse/master.jsonl
+
       - name: Resolve START/END
         id: rng
         env:
@@ -61,6 +70,7 @@ jobs:
           fi
           echo "start=$START" >> "$GITHUB_OUTPUT"
           echo "end=$END"     >> "$GITHUB_OUTPUT"
+
       - name: Aggregate and rising
         env:
           RUNID: ${{ github.run_id }}
@@ -72,36 +82,15 @@ jobs:
           OUT="reports/auto_trends_existing/${RUNID}"
           mkdir -p "$OUT"
           if [ -n "${START}" ] && [ -n "${END}" ]; then
-            python scripts/aggregate.py \
-              --master data/warehouse/master.jsonl \
-              --outdir "$OUT/aggregate" \
-              --start "${START}" --end "${END}" \
-              --weights   config/publisher_weights.json \
-              --blacklist config/publisher_blacklist.txt \
-              --extra_stop config/extra_noise.txt \
-              --daily-cap 500 || true
+            python scripts/aggregate.py --master data/warehouse/master.jsonl --outdir "$OUT/aggregate" --start "${START}" --end "${END}" --weights config/publisher_weights.json --blacklist config/publisher_blacklist.txt --extra_stop config/extra_noise.txt --daily-cap 500 || true
           fi
           if [ ! -f "$OUT/aggregate/tokens_by_day.csv" ]; then
-            python scripts/aggregate.py \
-              --master data/warehouse/master.jsonl \
-              --outdir "$OUT/aggregate" \
-              --days "${LOOKBACK}" \
-              --weights   config/publisher_weights.json \
-              --blacklist config/publisher_blacklist.txt \
-              --extra_stop config/extra_noise.txt \
-              --daily-cap 500
+            python scripts/aggregate.py --master data/warehouse/master.jsonl --outdir "$OUT/aggregate" --days "${LOOKBACK}" --weights config/publisher_weights.json --blacklist config/publisher_blacklist.txt --extra_stop config/extra_noise.txt --daily-cap 500
           fi
           test -f "$OUT/aggregate/tokens_by_day.csv"
-          python scripts/filter_tokens_csv.py \
-            --in "$OUT/aggregate/tokens_by_day.csv" \
-            --stop-file config/extra_noise.txt \
-            --min-len 4 \
-            --out "$OUT/tokens_by_day.cleaned.csv"
-          python scripts/rising_from_tokens_csv.py \
-            --tokens-csv "$OUT/tokens_by_day.cleaned.csv" \
-            --start "${START:-}" --end "${END:-}" \
-            --window 7 --min-total 20 --topk 500 \
-            --outdir "$OUT/rising_csv"
+          python scripts/filter_tokens_csv.py --in "$OUT/aggregate/tokens_by_day.csv" --stop-file config/extra_noise.txt --min-len 4 --out "$OUT/tokens_by_day.cleaned.csv"
+          python scripts/rising_from_tokens_csv.py --tokens-csv "$OUT/tokens_by_day.cleaned.csv" --start "${START:-}" --end "${END:-}" --window 7 --min-total 20 --topk 500 --outdir "$OUT/rising_csv"
+
       - name: Build site bundle
         env:
           RUNID: ${{ github.run_id }}
@@ -111,15 +100,15 @@ jobs:
           DEST="site"
           mkdir -p "$DEST/run"
           rsync -av "$SRC"/ "$DEST/run/"
-          mkdir -p site
-          python -c "import os,html;root='site/run';os.makedirs('site',exist_ok=True);f=open('site/index.html','w',encoding='utf-8');f.write('<meta charset=\\'utf-8\\'><h1>News Trends</h1><ul>'); \
-for dp,_,fs in os.walk(root): \
-  [f.write('<li><a href=%r>%s</a></li>'%(os.path.join(dp,fn).replace('site/',''),html.escape(os.path.join(dp,fn).replace('site/','')))) for fn in sorted(fs)]; \
-f.write('</ul>');f.close()"
+          printf '<meta charset="utf-8"><h1>News Trends</h1><ul>\n' > "$DEST/index.html"
+          find "$DEST/run" -type f | sort | sed -E 's#^site/##' | awk '{printf "<li><a href=\"%s\">%s</a></li>\n",$0,$0}' >> "$DEST/index.html"
+          printf '</ul>\n' >> "$DEST/index.html"
+
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
