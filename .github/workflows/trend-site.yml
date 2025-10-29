@@ -151,21 +151,10 @@ jobs:
           DEST="site"
           mkdir -p "$DEST/run"
           rsync -av "$SRC/" "$DEST/run/" || true
-          python - <<'PY'
-import os,html
-root="site/run"
-os.makedirs("site",exist_ok=True)
-with open("site/index.html","w",encoding="utf-8") as f:
-  f.write("<meta charset='utf-8'><h1>News Trends</h1><ul>")
-  files=[]
-  for dp,_,fs in os.walk(root):
-    for fn in fs:
-      p=os.path.join(dp,fn).replace("site/","")
-      files.append(p)
-  for p in sorted(files):
-    f.write(f"<li><a href='{html.escape(p)}'>{html.escape(p)}</a></li>")
-  f.write("</ul>")
-PY
+          echo "<meta charset='utf-8'><h1>News Trends</h1><ul>" > "$DEST/index.html"
+          find "$DEST/run" -type f -printf "%P\n" | sort | \
+            awk '{printf "<li><a href='\''%s'\''>%s</a></li>\n",$0,$0}' >> "$DEST/index.html"
+          echo "</ul>" >> "$DEST/index.html"
 
       - uses: actions/upload-pages-artifact@v3
         with:
