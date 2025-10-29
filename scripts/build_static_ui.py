@@ -16,14 +16,18 @@ def to_iso(values):
         idx = idx.tz_convert(None)
     return [ts.strftime("%Y-%m-%d") for ts in idx]
 
-def nan_to_none(vals):
-    out = []
-    for x in vals:
-        if pd.isna(x) or (isinstance(x, float) and (np.isnan(x) or np.isinf(x))):
-            out.append(None)
-        else:
-            out.append(float(x))
-    return out
+def sanitize(obj):
+    if isinstance(obj, dict):
+        return {k: sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [sanitize(v) for v in obj]
+    if isinstance(obj, (float, np.floating)):
+        if not np.isfinite(obj):
+            return None
+        return float(obj)
+    if pd.isna(obj):
+        return None
+    return obj
 
 def load_terms_matrix(tokens_csv, top_terms_csv=None, keep_top=100):
     df = pd.read_csv(tokens_csv)
@@ -56,22 +60,23 @@ def load_prices(price_csv):
             if k in norm:
                 return norm[k]
         return None
-    date_col = pick(["date", "datetime", "day"])
+    date_col   = pick(["date", "datetime", "day"])
     ticker_col = pick(["ticker", "symbol"])
-    price_col = pick(["close", "adj_close", "adj close", "adjclose", "price", "close_price", "closing_price"])
+    price_col  = pick(["close", "adj_close", "adj close", "adjclose", "price", "close_price", "closing_price"])
     if not date_col or not ticker_col or not price_col:
         return None
     p[date_col] = pd.to_datetime(p[date_col]).dt.tz_localize(None)
     g = p.groupby([date_col, ticker_col])[price_col].last().reset_index()
     piv = (
         g.pivot(index=date_col, columns=ticker_col, values=price_col)
-        .sort_index()
-        .astype(float)
-        .ffill()
+         .sort_index()
+         .astype(float)
+         .ffill()
     )
     return piv
 
 def write_json(obj, path):
+    obj = sanitize(obj)
     Path(path).write_text(json.dumps(obj, ensure_ascii=False, allow_nan=False), encoding="utf-8")
 
 def main(run_dir, out_dir):
@@ -98,7 +103,8 @@ def main(run_dir, out_dir):
         p_json = {
             "dates": to_iso(prices_mat.index),
             "tickers": list(prices_mat.columns),
-            "close": {c: nan_to_none(prices_mat[c].to_numpy()) for c in prices_mat.columns},
+            "close": {c: prices_mat[c].astype(float).where(np.isfinite(prices_mat[c]), np.nan).tolist()
+                      for c in prices_mat.columns},
         }
         write_json(p_json, data / "prices.json")
 
