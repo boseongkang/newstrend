@@ -1,111 +1,121 @@
 name: trend-site
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "15 7 * * *"
+    - cron: "10,40 * * * *"
+  workflow_dispatch: {}
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
 
 concurrency:
   group: trend-site
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install deps
+      - name: Install
         run: |
-          python -m pip install -U pip
+          python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install pandas numpy yfinance
+          pip install -e .
 
-      - name: Download latest warehouse artifact
+      - name: Download warehouse artifact
+        id: dl
         uses: dawidd6/action-download-artifact@v3
         with:
+          repo: ${{ github.repository }}
           workflow: update-warehouse.yml
           workflow_conclusion: success
           branch: main
           name: warehouse
-          path: _wh
-          if_no_artifact_found: fail
+          path: artifacts
+          search_artifacts: true
+          if_no_artifact_found: warn
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore warehouse
+        id: restore
+        shell: bash
         run: |
           set -euo pipefail
-          mkdir -p data/warehouse
-          if [ -f _wh/artifact.tar ]; then
-            tar -xf _wh/artifact.tar -C data/warehouse
-          else
-            cp -R _wh/* data/warehouse/ || true
+          mkdir -p data/warehouse/daily data/metrics
+          if [ -d artifacts ]; then
+            [ -f artifacts/master.jsonl ] && cp -v artifacts/master.jsonl data/warehouse/master.jsonl || true
+            [ -d artifacts/daily ] && cp -v artifacts/daily/*.jsonl data/warehouse/daily/ || true
+            [ -d artifacts/metrics ] && rsync -av artifacts/metrics/ data/metrics/ || true
           fi
-          if [ -d data/warehouse/warehouse ]; then
-            mv data/warehouse/warehouse/* data/warehouse/
-            rmdir data/warehouse/warehouse || true
-          fi
-          test -f data/warehouse/master.jsonl
-          test -d data/warehouse/daily
+          n=$(ls -1 data/warehouse/daily/*.jsonl 2>/dev/null | wc -l | tr -d ' ')
+          echo "count=${n}" >> "$GITHUB_OUTPUT"
 
-      - name: Aggregate and rising
-        run: |
-          set -euo pipefail
-          python scripts/aggregate_from_warehouse.py \
-            --warehouse data/warehouse/daily \
-            --out run \
-            --last-days 30 \
-            --min-len 4 \
-            --extra-stop config/extra_noise.txt
-          python scripts/filter_tokens_csv.py \
-            --in run/aggregate/tokens_by_day.csv \
-            --stop-file config/extra_noise.txt \
-            --min-len 4 \
-            --out run/tokens_by_day.cleaned.csv
-          START=$(python - <<'PY'
-import pandas as pd
-d=pd.read_csv("run/aggregate/articles_by_day.csv")["date"]
-print(pd.to_datetime(d).min().date())
-PY
-)
-          END=$(python - <<'PY'
-import pandas as pd
-d=pd.read_csv("run/aggregate/articles_by_day.csv")["date"]
-print(pd.to_datetime(d).max().date())
-PY
-)
-          python scripts/join_prices.py \
-            --terms run/aggregate/tokens_by_day.csv \
-            --map   config/ticker_aliases.json \
-            --start "$START" --end "$END" \
-            --out   run/prices_join
+      - name: Stop if no warehouse
+        if: steps.restore.outputs.count == '0'
+        run: echo "No warehouse files restored"
 
-      - name: Build static site
+      - name: Aggregate
+        if: steps.restore.outputs.count != '0'
         run: |
-          set -euo pipefail
+          python scripts/aggregate_from_warehouse.py --warehouse data/warehouse/daily --out run --last-days 30 --min-len 4 --extra-stop config/extra_noise.txt
+
+      - name: Make rising
+        if: steps.restore.outputs.count != '0'
+        run: |
+          python - <<'PY'
+          import pandas as pd, pathlib
+          p=pathlib.Path("run/aggregate/articles_by_day.csv")
+          df=pd.read_csv(p)
+          start=str(pd.to_datetime(df['date'].min()).date())
+          end=str(pd.to_datetime(df['date'].max()).date())
+          pathlib.Path("run").mkdir(exist_ok=True)
+          open("run/date_range.txt","w").write(start+" "+end)
+          PY
+          START=$(cut -d' ' -f1 run/date_range.txt)
+          END=$(cut -d' ' -f2 run/date_range.txt)
+          python scripts/rising_from_tokens_csv.py --tokens-csv run/tokens_by_day.cleaned.csv --start "$START" --end "$END" --window 7 --min-total 20 --topk 500 --outdir run/rising_csv
+
+      - name: Join prices
+        if: steps.restore.outputs.count != '0'
+        run: |
+          START=$(cut -d' ' -f1 run/date_range.txt)
+          END=$(cut -d' ' -f2 run/date_range.txt)
+          python scripts/join_prices.py --terms run/aggregate/tokens_by_day.csv --map config/ticker_aliases.json --start "$START" --end "$END" --out run/prices_join || true
+
+      - name: Build site
+        if: steps.restore.outputs.count != '0'
+        run: |
           python scripts/build_static_ui.py --run run --out site
-          test -s site/index.html
-          ls -l site/data
+          test -f site/index.html
+          test -f site/data/trends.json
 
       - name: Upload artifact
+        if: steps.restore.outputs.count != '0'
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
-      - name: Deploy to GitHub Pages
-        id: deploy
+  deploy:
+    if: needs.build.result == 'success'
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - id: deployment
         uses: actions/deploy-pages@v4
