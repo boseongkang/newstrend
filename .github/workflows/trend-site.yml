@@ -97,8 +97,46 @@ jobs:
         if: steps.restore.outputs.count != '0'
         run: |
           python scripts/build_static_ui.py --run run --out site
+          python - <<'PY'
+          import json, pathlib, pandas as pd, re
+          from collections import Counter
+          site=pathlib.Path("site"); (site/"data").mkdir(parents=True, exist_ok=True)
+          start,end=open('run/date_range.txt').read().strip().split()
+          import datetime as dt
+          s=pd.to_datetime(start).date(); e=pd.to_datetime(end).date()
+          terms=pd.read_csv('run/tokens_by_day.cleaned.csv')
+          terms['date']=pd.to_datetime(terms['date']).dt.date
+          m=(terms['date']>=s)&(terms['date']<=e)
+          top=terms[m].groupby('term')['count'].sum().sort_values(ascending=False).head(50)
+          json.dump({'labels':top.index.tolist(),'counts':[int(x) for x in top.values.tolist()]}, open(site/'data/words.json','w'))
+          pubs=Counter()
+          import json as J, pathlib as P
+          for f in sorted(P.Path('data/warehouse/daily').glob('*.jsonl')):
+              d=re.match(r'(\d{4}-\d{2}-\d{2})\.jsonl', f.name)
+              if not d: 
+                  continue
+              D=pd.to_datetime(d.group(1)).date()
+              if D<s or D>e: 
+                  continue
+              for line in open(f):
+                  try:
+                      o=J.loads(line)
+                  except Exception:
+                      continue
+                  v=o.get('publisher') or o.get('source') or o.get('source_name') or o.get('site') or o.get('domain') or ''
+                  if isinstance(v, dict): v=v.get('name') or v.get('id') or ''
+                  if isinstance(v, list): v=v[0] if v else ''
+                  v=str(v).strip()
+                  if v: pubs[v]+=1
+          top_pubs=pubs.most_common(50)
+          json.dump({'labels':[k for k,_ in top_pubs],'counts':[int(v) for _,v in top_pubs]}, open(site/'data/publishers.json','w'))
+          PY
+          cp scripts/report.html site/report.html
           test -f site/index.html
           test -f site/data/trends.json
+          test -f site/report.html
+          test -f site/data/publishers.json
+          test -f site/data/words.json
 
       - name: Upload artifact
         if: steps.restore.outputs.count != '0'
