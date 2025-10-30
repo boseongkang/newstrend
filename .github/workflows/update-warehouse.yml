@@ -31,10 +31,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p data/warehouse/daily
-          if [ -d prev_warehouse ]; then
-            rsync -a prev_warehouse/ data/warehouse/
-          fi
-          find data/warehouse -maxdepth 2 -type f | head -n 10
+          SRC=prev_warehouse
+          if [ -d prev_warehouse/warehouse ]; then SRC=prev_warehouse/warehouse; fi
+          if [ -d "$SRC" ]; then rsync -a "$SRC"/ data/warehouse/; fi
+          echo "restored days:" $(find data/warehouse/daily -name '*.jsonl' | wc -l)
 
       - name: Download latest live jsonl
         uses: dawidd6/action-download-artifact@v3
@@ -55,7 +55,7 @@ jobs:
           set -euo pipefail
           python scripts/update_corpus.py
 
-      - name: Upload warehouse artifact (cumulative)
+      - name: Upload warehouse artifact
         uses: actions/upload-artifact@v4
         with:
           name: warehouse
