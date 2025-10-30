@@ -1,63 +1,77 @@
-name: trend-site
+name: entities-report
+
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
+  schedule:
+    - cron: "25 7 * * *"
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: entities-report
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-      - run: pip install -r requirements.txt
+          python-version: "3.12"
 
-      - name: Build trends site
+      - name: Install deps
         run: |
-          python scripts/aggregate_from_warehouse.py --warehouse data/warehouse/daily --out run --last-days 30
-          python scripts/build_static_ui.py --run run --out site
+          python -m pip install -U pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pandas numpy matplotlib
 
-      - name: Pull report artifact (optional)
+      - name: Download latest warehouse artifact
         uses: dawidd6/action-download-artifact@v3
         with:
-          workflow: entities-report.yml
+          workflow: update-warehouse.yml
+          workflow_conclusion: success
           branch: main
-          name: entities-site
-          path: _report
-        continue-on-error: true
+          name: warehouse
+          path: _wh
+          if_no_artifact_found: fail
 
-      - name: Merge report into site
+      - name: Restore warehouse
         run: |
-          if [ -d _report ]; then
-            mkdir -p site/report
-            cp -r _report/* site/report/
+          set -euo pipefail
+          mkdir -p data/warehouse
+          if [ -f _wh/artifact.tar ]; then
+            tar -xf _wh/artifact.tar -C data/warehouse
+          else
+            cp -R _wh/* data/warehouse/ || true
           fi
+          if [ -d data/warehouse/warehouse ]; then
+            mv data/warehouse/warehouse/* data/warehouse/
+            rmdir data/warehouse/warehouse || true
+          fi
+          test -d data/warehouse/daily
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Build entities report
+        run: |
+          set -euo pipefail
+          python scripts/entities_report.py \
+            --warehouse data/warehouse/daily \
+            --outdir site/entities \
+            --topk 30 \
+            --slope-days 30 \
+            --trend-days 60 \
+            --heat-top 20
+          test -s site/entities/report.html
+
+      - name: Upload artifact (report only, no deploy)
+        uses: actions/upload-artifact@v4
         with:
-          path: site
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          name: entities-report
+          path: site/entities
+          if-no-files-found: error
+          retention-days: 7
