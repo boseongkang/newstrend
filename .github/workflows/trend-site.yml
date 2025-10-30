@@ -37,28 +37,26 @@ jobs:
           fi
           if [ -d artifacts/data/warehouse/daily ]; then
             rsync -av --delete artifacts/data/warehouse/daily/ data/warehouse/daily/
-            test -f artifacts/data/warehouse/master.jsonl && cp -f artifacts/data/warehouse/master.jsonl data/warehouse/master.jsonl || true
+            [ -f artifacts/data/warehouse/master.jsonl ] && cp -f artifacts/data/warehouse/master.jsonl data/warehouse/master.jsonl || true
           elif [ -d artifacts/warehouse/daily ]; then
             rsync -av --delete artifacts/warehouse/daily/ data/warehouse/daily/
-            test -f artifacts/warehouse/master.jsonl && cp -f artifacts/warehouse/master.jsonl data/warehouse/master.jsonl || true
+            [ -f artifacts/warehouse/master.jsonl ] && cp -f artifacts/warehouse/master.jsonl data/warehouse/master.jsonl || true
           elif [ -d artifacts/unpacked/data/warehouse/daily ]; then
             rsync -av --delete artifacts/unpacked/data/warehouse/daily/ data/warehouse/daily/
-            test -f artifacts/unpacked/data/warehouse/master.jsonl && cp -f artifacts/unpacked/data/warehouse/master.jsonl data/warehouse/master.jsonl || true
+            [ -f artifacts/unpacked/data/warehouse/master.jsonl ] && cp -f artifacts/unpacked/data/warehouse/master.jsonl data/warehouse/master.jsonl || true
           elif [ -d artifacts/unpacked/warehouse/daily ]; then
             rsync -av --delete artifacts/unpacked/warehouse/daily/ data/warehouse/daily/
-            test -f artifacts/unpacked/warehouse/master.jsonl && cp -f artifacts/unpacked/warehouse/master.jsonl data/warehouse/master.jsonl || true
+            [ -f artifacts/unpacked/warehouse/master.jsonl ] && cp -f artifacts/unpacked/warehouse/master.jsonl data/warehouse/master.jsonl || true
           elif [ -d artifacts/daily ]; then
             rsync -av --delete artifacts/daily/ data/warehouse/daily/
-            test -f artifacts/master.jsonl && cp -f artifacts/master.jsonl data/warehouse/master.jsonl || true
+            [ -f artifacts/master.jsonl ] && cp -f artifacts/master.jsonl data/warehouse/master.jsonl || true
           else
             echo "Warehouse layout not recognized"
             find artifacts -maxdepth 3 -print
             exit 23
           fi
-          ls -l data/warehouse | head
-          ls -l data/warehouse/daily | head
 
-      - name: Aggregate and rising
+      - name: Aggregate tokens
         run: |
           set -euo pipefail
           python scripts/aggregate_from_warehouse.py \
@@ -67,11 +65,14 @@ jobs:
             --last-days 30 \
             --min-len 4 \
             --extra-stop config/extra_noise.txt
-          python scripts/make_rising.py \
-            --tokens-csv run/tokens_by_day.cleaned.csv \
-            --out run/rising_csv --top 50
-          awk -F, 'NR>1{print $1}' run/aggregate/articles_by_day.csv | sort -u | wc -l
-          awk -F, 'NR>1{print $1}' run/tokens_by_day.cleaned.csv | sort -u | wc -l
+          python - "$PWD/run" <<'PY'
+import sys, pandas as pd, pathlib
+outdir = pathlib.Path(sys.argv[1]) / "rising_csv"
+outdir.mkdir(parents=True, exist_ok=True)
+tok = pd.read_csv(pathlib.Path(sys.argv[1])/"tokens_by_day.cleaned.csv")
+top = tok.groupby("term")["count"].sum().sort_values(ascending=False).head(50).reset_index()
+top.to_csv(outdir/"rising_terms_top.csv", index=False)
+PY
 
       - name: Build static site
         run: |
