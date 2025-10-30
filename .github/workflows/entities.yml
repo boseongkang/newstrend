@@ -1,110 +1,63 @@
-name: entities-report
+name: trend-site
 on:
-  schedule:
-    - cron: "15 * * * *"
-  workflow_dispatch: {}
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
 permissions:
   contents: read
-  actions: read
+  pages: write
+  id-token: write
+
 concurrency:
-  group: repo-push
-  cancel-in-progress: false
+  group: pages
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          fetch-depth: 0
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install deps
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+
+      - name: Build trends site
         run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install pandas matplotlib
-          pip install -e .
-          python -m pip install spacy
-          python -m spacy download en_core_web_sm
-      - name: Ensure configs
-        run: |
-          mkdir -p config reports/entities
-          if [ ! -f config/entities_aliases.json ]; then echo "{}" > config/entities_aliases.json; fi
-          if [ ! -f config/entities_stopwords.txt ]; then : > config/entities_stopwords.txt; fi
-          touch reports/entities/.gitkeep
-      - name: Download latest warehouse artifact
+          python scripts/aggregate_from_warehouse.py --warehouse data/warehouse/daily --out run --last-days 30
+          python scripts/build_static_ui.py --run run --out site
+
+      - name: Pull report artifact (optional)
         uses: dawidd6/action-download-artifact@v3
         with:
-          workflow: update-warehouse.yml
-          workflow_conclusion: success
+          workflow: entities-report.yml
           branch: main
-          path: artifacts
-          if_no_artifact_found: warn
-      - name: List downloaded artifacts
+          name: entities-site
+          path: _report
+        continue-on-error: true
+
+      - name: Merge report into site
         run: |
-          ls -Rla artifacts || true
-      - name: Restore warehouse from artifact
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p data/warehouse data/metrics
-          FOUND=$(find artifacts -type f -path "*/data/warehouse/master.jsonl" | head -1 || true)
-          if [ -z "${FOUND:-}" ]; then
-            FOUND=$(find artifacts -type f -name "master.jsonl" | head -1 || true)
+          if [ -d _report ]; then
+            mkdir -p site/report
+            cp -r _report/* site/report/
           fi
-          if [ -n "${FOUND:-}" ]; then
-            BASE=$(dirname "$FOUND")
-            rsync -av "$BASE/"/ "data/warehouse/"
-            MET=$(find artifacts -type d -path "*/data/metrics" | head -1 || true)
-            if [ -n "${MET:-}" ]; then rsync -av "$MET/"/ "data/metrics/"; fi
-          fi
-      - name: Download latest live artifact (fallback)
-        if: ${{ hashFiles('data/warehouse/master.jsonl') == '' }}
-        uses: dawidd6/action-download-artifact@v3
-        with:
-          workflow: collect_continuous.yml
-          workflow_conclusion: success
-          branch: main
-          path: live_artifacts
-          if_no_artifact_found: warn
-      - name: Build warehouse from live (fallback)
-        if: ${{ hashFiles('data/warehouse/master.jsonl') == '' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p data/live_newsapi
-          FOUND_L=$(find live_artifacts -type d -path "*/data/live_newsapi" | head -1 || true)
-          if [ -n "${FOUND_L:-}" ]; then
-            rsync -av "$FOUND_L/"/ "data/live_newsapi/"
-          fi
-          CNT_TOP=$(find data/live_newsapi -maxdepth 1 -type f -name "*.jsonl" | wc -l | tr -d ' ')
-          if [ "$CNT_TOP" = "0" ]; then
-            find live_artifacts -type f -name "*.jsonl" -print0 \
-              | xargs -0 -I{} bash -lc 'cp -v "{}" "data/live_newsapi/$(basename "{}")"'
-          fi
-          python scripts/update_corpus.py
-          test -f data/warehouse/master.jsonl
-      - name: Extract entities
-        run: |
-          python scripts/entities_extract.py \
-            --master data/warehouse/master.jsonl \
-            --outdir reports/entities \
-            --aliases config/entities_aliases.json \
-            --stopwords config/entities_stopwords.txt \
-            --model en_core_web_sm \
-            --min-len 3
-      - name: Render report
-        run: |
-          python scripts/entities_report.py \
-            --daily-csv reports/entities/entities_daily.csv \
-            --outdir reports/entities \
-            --topk 30 --slope-days 30 --trend-days 60 --heat-top 20
+
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: entities-${{ github.run_id }}
-          path: reports/entities/**
-          retention-days: 14
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
