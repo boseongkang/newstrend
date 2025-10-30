@@ -15,7 +15,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: true
 
 jobs:
@@ -38,18 +38,17 @@ jobs:
           workflow: update-warehouse.yml
           branch: main
           name: warehouse
-          path: warehouse
+          path: artifacts
 
-      - name: Aggregate and rising
+      - name: Aggregate
         run: |
           set -euo pipefail
           python scripts/aggregate_from_warehouse.py \
-            --warehouse warehouse/daily \
+            --warehouse artifacts/daily \
             --out run \
             --last-days 30 \
             --min-len 4 \
             --extra-stop config/extra_noise.txt
-          python scripts/make_rising.py --run run
 
       - name: Build site
         run: |
