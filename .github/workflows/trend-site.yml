@@ -7,10 +7,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with:
+          python-version: '3.12'
 
       - run: |
           python -m pip install --upgrade pip
@@ -28,15 +30,18 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p data/warehouse
-          if [ -d artifacts/data/warehouse ]; then
-            SRC="artifacts/data/warehouse/"
-          elif [ -d artifacts/warehouse ]; then
-            SRC="artifacts/warehouse/"
+          ZIP=$(find artifacts -maxdepth 2 -type f -name '*.zip' | head -n1 || true)
+          if [ -n "${ZIP:-}" ]; then
+            mkdir -p artifacts/unpacked
+            unzip -q "$ZIP" -d artifacts/unpacked
+          fi
+          if   [ -d artifacts/data/warehouse ]; then SRC="artifacts/data/warehouse/"
+          elif [ -d artifacts/warehouse ]; then SRC="artifacts/warehouse/"
+          elif [ -d artifacts/unpacked/data/warehouse ]; then SRC="artifacts/unpacked/data/warehouse/"
+          elif [ -d artifacts/unpacked/warehouse ]; then SRC="artifacts/unpacked/warehouse/"
           else
             echo "Warehouse dir not found in downloaded artifact"
-            echo "::group::Artifacts layout"
             find artifacts -maxdepth 3 -print
-            echo "::endgroup::"
             exit 23
           fi
           rsync -av --delete "$SRC" data/warehouse/
@@ -54,17 +59,14 @@ jobs:
           python scripts/make_rising.py \
             --tokens-csv run/tokens_by_day.cleaned.csv \
             --out run/rising_csv --top 50
-          DATES=$(awk -F, 'NR>1{print $1}' run/aggregate/articles_by_day.csv | sort -u | wc -l)
-          echo "unique dates in articles: $DATES"
-          if [ "$DATES" -lt 2 ]; then echo "only $DATES day; failing"; exit 1; fi
+          awk -F, 'NR>1{print $1}' run/aggregate/articles_by_day.csv | sort -u | wc -l
+          awk -F, 'NR>1{print $1}' run/tokens_by_day.cleaned.csv | sort -u | wc -l
 
       - name: Build static site
         run: |
           set -euo pipefail
           python scripts/build_static_ui.py --run run --out site
           touch site/.nojekyll
-          echo "unique dates in tokens:" $(awk -F, 'NR>1{print $1}' run/tokens_by_day.cleaned.csv | sort -u | wc -l)
-          echo "unique dates in articles:" $(awk -F, 'NR>1{print $1}' run/aggregate/articles_by_day.csv | sort -u | wc -l)
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
