@@ -3,23 +3,18 @@ name: entities-report
 on:
   workflow_dispatch:
   schedule:
-    - cron: '25 7 * * *'
-
-concurrency:
-  group: entities-report
-  cancel-in-progress: false
+    - cron: "25 7 * * *"
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
+
+concurrency:
+  group: entities-report
+  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout
@@ -28,26 +23,32 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install deps
         run: |
           python -m pip install -U pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install pandas numpy
+          pip install pandas numpy matplotlib
+
+      - name: Download latest warehouse artifact
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: update-warehouse.yml
+          workflow_conclusion: success
+          branch: main
+          name: warehouse
+          path: _wh
+          if_no_artifact_found: fail
 
       - name: Restore warehouse
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          RUN_ID=$(gh run list --workflow update-warehouse.yml --branch main --status success --limit 1 --json databaseId -q '.[0].databaseId')
-          mkdir -p _wh data/warehouse
-          gh run download "$RUN_ID" -n warehouse -D _wh
+          mkdir -p data/warehouse
           if [ -f _wh/artifact.tar ]; then
             tar -xf _wh/artifact.tar -C data/warehouse
-          elif [ -f _wh/warehouse.zip ]; then
-            unzip -o _wh/warehouse.zip -d data/warehouse >/dev/null
+          else
+            cp -R _wh/* data/warehouse/ || true
           fi
           if [ -d data/warehouse/warehouse ]; then
             mv data/warehouse/warehouse/* data/warehouse/
@@ -55,51 +56,22 @@ jobs:
           fi
           test -d data/warehouse/daily
 
-      - name: Build report.html
+      - name: Build entities report
         run: |
           set -euo pipefail
-          mkdir -p site
-          if [ -f scripts/make_report.py ]; then
-            python scripts/make_report.py --warehouse data/warehouse/daily --out site/report.html || true
-          fi
-          if [ ! -s site/report.html ] && [ -f scripts/entities_report.py ]; then
-            python scripts/entities_report.py --warehouse data/warehouse/daily --out site/report.html || true
-          fi
-          if [ ! -s site/report.html ]; then
-            python - <<'PY'
-import json, pathlib, pandas as pd, html
-root = pathlib.Path("data/warehouse/daily")
-files = sorted(root.glob("*.jsonl"))
-rows = []
-for fp in files:
-    for line in fp.read_text(encoding="utf-8").splitlines():
-        try:
-            j = json.loads(line)
-        except Exception:
-            continue
-        pub = str((j.get("source") or j.get("publisher") or "") or "")
-        rows.append({"date": fp.stem, "publisher": pub})
-df = pd.DataFrame(rows)
-if df.empty:
-    pathlib.Path("site/report.html").write_text("<h1>No data</h1>", encoding="utf-8")
-else:
-    pubs = df.groupby("publisher").size().sort_values(ascending=False).head(30).reset_index(name="count")
-    day = sorted(df["date"].unique())[-1]
-    head = f"<h1>News Report — {html.escape(day)}</h1>"
-    table = "<table border='1' cellpadding='6' cellspacing='0'><tr><th>#</th><th>Publisher</th><th>Count</th></tr>"
-    for i,(p,c) in enumerate(zip(pubs["publisher"], pubs["count"]), start=1):
-        table += f"<tr><td>{i}</td><td>{html.escape(str(p))}</td><td>{int(c)}</td></tr>"
-    table += "</table>"
-    pathlib.Path("site/report.html").write_text(head + table, encoding="utf-8")
-PY
-          fi
-          test -s site/report.html
+          python scripts/entities_report.py \
+            --warehouse data/warehouse/daily \
+            --outdir site/entities \
+            --topk 30 \
+            --slope-days 30 \
+            --trend-days 60 \
+            --heat-top 20
+          test -s site/entities/report.html
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload artifact (report only, no deploy)
+        uses: actions/upload-artifact@v4
         with:
-          path: site
-
-      - name: Deploy to Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          name: entities-report
+          path: site/entities
+          if-no-files-found: error
+          retention-days: 7
