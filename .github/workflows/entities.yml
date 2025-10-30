@@ -1,63 +1,105 @@
-name: trend-site
+name: entities-report
+
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
+  schedule:
+    - cron: '25 7 * * *'
+
+concurrency:
+  group: entities-report
+  cancel-in-progress: false
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install -r requirements.txt
 
-      - name: Build trends site
+      - name: Install deps
         run: |
-          python scripts/aggregate_from_warehouse.py --warehouse data/warehouse/daily --out run --last-days 30
-          python scripts/build_static_ui.py --run run --out site
+          python -m pip install -U pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pandas numpy
 
-      - name: Pull report artifact (optional)
-        uses: dawidd6/action-download-artifact@v3
-        with:
-          workflow: entities-report.yml
-          branch: main
-          name: entities-site
-          path: _report
-        continue-on-error: true
-
-      - name: Merge report into site
+      - name: Restore warehouse
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          if [ -d _report ]; then
-            mkdir -p site/report
-            cp -r _report/* site/report/
+          set -euo pipefail
+          RUN_ID=$(gh run list --workflow update-warehouse.yml --branch main --status success --limit 1 --json databaseId -q '.[0].databaseId')
+          mkdir -p _wh data/warehouse
+          gh run download "$RUN_ID" -n warehouse -D _wh
+          if [ -f _wh/artifact.tar ]; then
+            tar -xf _wh/artifact.tar -C data/warehouse
+          elif [ -f _wh/warehouse.zip ]; then
+            unzip -o _wh/warehouse.zip -d data/warehouse >/dev/null
           fi
+          if [ -d data/warehouse/warehouse ]; then
+            mv data/warehouse/warehouse/* data/warehouse/
+            rmdir data/warehouse/warehouse || true
+          fi
+          test -d data/warehouse/daily
+
+      - name: Build report.html
+        run: |
+          set -euo pipefail
+          mkdir -p site
+          if [ -f scripts/make_report.py ]; then
+            python scripts/make_report.py --warehouse data/warehouse/daily --out site/report.html || true
+          fi
+          if [ ! -s site/report.html ] && [ -f scripts/entities_report.py ]; then
+            python scripts/entities_report.py --warehouse data/warehouse/daily --out site/report.html || true
+          fi
+          if [ ! -s site/report.html ]; then
+            python - <<'PY'
+import json, pathlib, pandas as pd, html
+root = pathlib.Path("data/warehouse/daily")
+files = sorted(root.glob("*.jsonl"))
+rows = []
+for fp in files:
+    for line in fp.read_text(encoding="utf-8").splitlines():
+        try:
+            j = json.loads(line)
+        except Exception:
+            continue
+        pub = str((j.get("source") or j.get("publisher") or "") or "")
+        rows.append({"date": fp.stem, "publisher": pub})
+df = pd.DataFrame(rows)
+if df.empty:
+    pathlib.Path("site/report.html").write_text("<h1>No data</h1>", encoding="utf-8")
+else:
+    pubs = df.groupby("publisher").size().sort_values(ascending=False).head(30).reset_index(name="count")
+    day = sorted(df["date"].unique())[-1]
+    head = f"<h1>News Report — {html.escape(day)}</h1>"
+    table = "<table border='1' cellpadding='6' cellspacing='0'><tr><th>#</th><th>Publisher</th><th>Count</th></tr>"
+    for i,(p,c) in enumerate(zip(pubs["publisher"], pubs["count"]), start=1):
+        table += f"<tr><td>{i}</td><td>{html.escape(str(p))}</td><td>{int(c)}</td></tr>"
+    table += "</table>"
+    pathlib.Path("site/report.html").write_text(head + table, encoding="utf-8")
+PY
+          fi
+          test -s site/report.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
+      - name: Deploy to Pages
+        id: deployment
         uses: actions/deploy-pages@v4
