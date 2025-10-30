@@ -29,11 +29,20 @@ jobs:
           pip install -r requirements.txt
 
       - name: Download latest warehouse artifact
-        uses: dawidd6/action-download-artifact@v3
+
+      - uses: dawidd6/action-download-artifact@v3
         with:
-          workflow: update-warehouse.yml
-          name: warehouse
-          path: artifacts
+          workflow: entities-report.yml
+          branch: main
+          name: entities-site
+          path: report_art
+          allow_forks: true
+        continue-on-error: true
+
+      - name: Merge report into site
+        run: |
+          mkdir -p site/report
+          if [ -d report_art ]; then cp -r report_art/
 
       - name: Restore warehouse
         run: |
