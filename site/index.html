@@ -7,158 +7,127 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-body{margin:0;background:#0b0f18;color:#e6e8ec;font-family:system-ui,Segoe UI,Roboto,Arial}
-.wrap{max-width:1200px;margin:28px auto;padding:0 16px}
-h1{font-size:28px;margin:0 0 16px}
-.topbar{display:flex;gap:8px;align-items:center;margin-bottom:12px}
-.tab{background:#1a2234;border:1px solid #2b3952;color:#cfd6e4;border-radius:10px;padding:10px 14px;cursor:pointer}
-.tab.active{background:#253bff;border-color:#253bff;color:#fff}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.card{background:#121826;border:1px solid #1f2937;border-radius:12px;padding:12px}
-.row{display:flex;gap:8px;align-items:center;margin-bottom:12px}
-input{background:#0f1523;border:1px solid #243043;color:#e6e8ec;border-radius:10px;padding:10px 12px;min-width:220px}
-button{background:#253bff;color:#fff;border:0;border-radius:10px;padding:10px 14px;cursor:pointer}
-.hint{opacity:.7;font-size:12px;margin-top:6px}
-canvas{width:100%;height:360px}
-.hidden{display:none}
-iframe{width:100%;border:0;background:#fff;min-height:70vh;border-radius:12px}
+  body{margin:0;background:#0b0f18;color:#e6e8ec;font-family:system-ui,Segoe UI,Roboto,Arial}
+  .wrap{max-width:1200px;margin:28px auto;padding:0 16px}
+  h1{font-size:28px;margin:0 0 16px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{background:#121826;border:1px solid #1f2937;border-radius:12px;padding:12px}
+  .row{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+  input{background:#0f1523;border:1px solid #243043;color:#e6e8ec;border-radius:10px;padding:10px 12px;min-width:220px}
+  button{background:#253bff;color:#fff;border:0;border-radius:10px;padding:10px 14px;cursor:pointer}
+  .hint{opacity:.7;font-size:12px;margin-top:6px}
+  canvas{width:100%;height:360px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="topbar">
-    <div id="tab-trend" class="tab active">Trends</div>
-    <div id="tab-report" class="tab">News report</div>
+  <h1>News Trends Dashboard</h1>
+
+  <div class="row">
+    <input id="terms" placeholder="Terms (comma separated)">
+    <input id="tickers" placeholder="Tickers, e.g. AAPL,MSFT">
+    <button id="btnTop">Top terms</button>
+    <button id="btnClear">Clear</button>
   </div>
 
-  <div id="dashWrap">
-    <h1>News Trends Dashboard</h1>
-    <div class="row">
-      <input id="terms" placeholder="Terms (comma separated)">
-      <input id="tickers" placeholder="Tickers, e.g. AAPL,MSFT">
-      <button id="btnTop">Top terms</button>
-      <button id="btnClear">Clear</button>
-    </div>
-    <div class="grid">
-      <div class="card"><canvas id="termsChart"></canvas></div>
-      <div class="card"><canvas id="pricesChart"></canvas></div>
-    </div>
-    <div class="card" style="margin-top:16px">
-      <canvas id="articlesChart"></canvas>
-    </div>
-    <div class="hint">If nothing shows, hard-refresh your browser.</div>
+  <div class="grid">
+    <div class="card"><canvas id="termsChart"></canvas></div>
+    <div class="card"><canvas id="pricesChart"></canvas></div>
   </div>
 
-  <div id="reportWrap" class="hidden">
-    <h1>News Report</h1>
-    <div class="card">
-      <iframe id="reportFrame" src="report/index.html"></iframe>
-    </div>
+  <div class="card" style="margin-top:16px">
+    <canvas id="articlesChart"></canvas>
   </div>
+
+  <div class="hint">If nothing shows, hard-refresh your browser.</div>
 </div>
 
 <script>
-(function(){
-  const params=new URLSearchParams(location.search);
-  const view=params.get("view");
-  const tabTrend=document.getElementById("tab-trend");
-  const tabReport=document.getElementById("tab-report");
-  const dashWrap=document.getElementById("dashWrap");
-  const reportWrap=document.getElementById("reportWrap");
-  function setView(v){
-    if(v==="report"){
-      dashWrap.classList.add("hidden");
-      reportWrap.classList.remove("hidden");
-      tabTrend.classList.remove("active");
-      tabReport.classList.add("active");
-    }else{
-      reportWrap.classList.add("hidden");
-      dashWrap.classList.remove("hidden");
-      tabReport.classList.remove("active");
-      tabTrend.classList.add("active");
-    }
-    const p=new URLSearchParams(location.search);
-    v? p.set("view",v): p.delete("view");
-    history.replaceState(null,"",location.pathname+(p.toString()?"?"+p.toString():""));
-  }
-  tabTrend.onclick=()=>setView("trend");
-  tabReport.onclick=()=>setView("report");
-  setView(view==="report"?"report":"trend");
-})();
-</script>
-
-<script>
 (async function(){
-  const v=Date.now();
+  const v = Date.now();
   async function getJSON(p){
-    const res=await fetch('./data/'+p+'?v='+v,{cache:'no-store'});
+    const res = await fetch('./data/'+p+'?v='+v,{cache:'no-store'});
     if(!res.ok) throw new Error(p+' '+res.status);
     return await res.json();
   }
+
   let trends=null, prices=null, articles=null;
-  try{trends=await getJSON('trends.json');}catch(e){}
-  try{prices=await getJSON('prices.json');}catch(e){}
-  try{articles=await getJSON('articles.json');}catch(e){}
-  const termsInput=document.getElementById('terms');
-  const tickersInput=document.getElementById('tickers');
-  const btnTop=document.getElementById('btnTop');
-  const btnClear=document.getElementById('btnClear');
-  const tc=new Chart(document.getElementById('termsChart').getContext('2d'),{
+  try{ trends = await getJSON('trends.json'); }catch(e){ console.error(e); }
+  try{ prices = await getJSON('prices.json'); }catch(e){ console.warn('prices optional', e); }
+  try{ articles = await getJSON('articles.json'); }catch(e){ console.error(e); }
+
+  const termsInput = document.getElementById('terms');
+  const tickersInput = document.getElementById('tickers');
+  const btnTop = document.getElementById('btnTop');
+  const btnClear = document.getElementById('btnClear');
+
+  const tc = new Chart(document.getElementById('termsChart').getContext('2d'),{
     type:'line',
-    data:{labels:trends?trends.dates:[],datasets:[]},
+    data:{labels: trends? trends.dates: [], datasets:[]},
     options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
   });
-  const pc=new Chart(document.getElementById('pricesChart').getContext('2d'),{
+
+  const pc = new Chart(document.getElementById('pricesChart').getContext('2d'),{
     type:'line',
-    data:{labels:prices?prices.dates:[],datasets:[]},
+    data:{labels: prices? prices.dates: [], datasets:[]},
     options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
   });
-  const ac=new Chart(document.getElementById('articlesChart').getContext('2d'),{
+
+  const ac = new Chart(document.getElementById('articlesChart').getContext('2d'),{
     type:'bar',
-    data:{labels:articles?articles.dates:[],datasets:[{label:'articles',data:articles?articles.articles:[]}]},
+    data:{labels: articles? articles.dates: [], datasets:[{label:'articles', data: articles? articles.articles: []}]},
     options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
   });
+
   function updateTerms(sel){
     if(!trends) return;
-    const names=sel&&sel.length?sel:trends.top.slice(0,10);
-    const ds=names.filter(n=>trends.terms.includes(n)).map((t,i)=>{
-      const y=trends.series[t]||[];
-      return{label:t,data:y,borderWidth:2,pointRadius:0};
+    const names = sel && sel.length? sel: trends.top.slice(0,10);
+    const ds = names.filter(n => trends.terms.includes(n)).map((t,i)=>{
+      const y = trends.series[t] || [];
+      return {label:t,data:y,borderWidth:2,pointRadius:0};
     });
-    tc.data.labels=trends.dates;
-    tc.data.datasets=ds;
+    tc.data.labels = trends.dates;
+    tc.data.datasets = ds;
     tc.update();
   }
+
   function updatePrices(tickers){
     if(!prices) return;
-    const names=tickers&&tickers.length?tickers:[];
-    const ds=names.filter(n=>prices.tickers.includes(n)).map((t,i)=>{
-      const y=(prices.close[t]||[]).map(v=>v==null?null:Number(v));
-      return{label:t,data:y,borderWidth:2,pointRadius:0};
+    const names = tickers && tickers.length? tickers: [];
+    const ds = names.filter(n => prices.tickers.includes(n)).map((t,i)=>{
+      const y = prices.close[t].map(v => v===null? null: Number(v));
+      return {label:t,data:y,borderWidth:2,pointRadius:0};
     });
-    pc.data.labels=prices.dates;
-    pc.data.datasets=ds;
+    pc.data.labels = prices.dates;
+    pc.data.datasets = ds;
     pc.update();
   }
-  btnTop.onclick=()=>{
-    termsInput.value=(trends?trends.top.slice(0,10):[]).join(',');
+
+  btnTop.onclick = () => {
+    termsInput.value = (trends? trends.top.slice(0,10): []).join(',');
     updateTerms(termsInput.value.split(',').map(s=>s.trim()).filter(Boolean));
   };
-  btnClear.onclick=()=>{
-    termsInput.value='';tickersInput.value='';
-    updateTerms([]);updatePrices([]);
+  btnClear.onclick = () => {
+    termsInput.value = ''; tickersInput.value = '';
+    updateTerms([]); updatePrices([]);
   };
-  termsInput.addEventListener('change',()=>{
-    const sel=termsInput.value.split(',').map(s=>s.trim()).filter(Boolean);
+
+  termsInput.addEventListener('change', () => {
+    const sel = termsInput.value.split(',').map(s=>s.trim()).filter(Boolean);
     updateTerms(sel);
   });
-  tickersInput.addEventListener('change',()=>{
-    const sel=tickersInput.value.split(',').map(s=>s.trim()).filter(Boolean);
+  tickersInput.addEventListener('change', () => {
+    const sel = tickersInput.value.split(',').map(s=>s.trim()).filter(Boolean);
     updatePrices(sel);
   });
+
   updateTerms([]);
   updatePrices([]);
 })();
+
+fetch('data/trends.json?v=__STAMP__')
+fetch('data/prices.json?v=__STAMP__')
+fetch('data/articles.json?v=__STAMP__')
 </script>
 </body>
 </html>
