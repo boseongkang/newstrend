@@ -27,6 +27,7 @@ jobs:
           path: artifacts
 
       - name: Restore warehouse
+        shell: bash
         run: |
           set -euo pipefail
           mkdir -p data/warehouse/daily
@@ -36,27 +37,27 @@ jobs:
             unzip -q "$ZIP" -d artifacts/unpacked
           fi
           if [ -d artifacts/data/warehouse/daily ]; then
-            rsync -av --delete artifacts/data/warehouse/daily/ data/warehouse/daily/
+            rsync -av artifacts/data/warehouse/daily/ data/warehouse/daily/
             [ -f artifacts/data/warehouse/master.jsonl ] && cp -f artifacts/data/warehouse/master.jsonl data/warehouse/master.jsonl || true
           elif [ -d artifacts/warehouse/daily ]; then
-            rsync -av --delete artifacts/warehouse/daily/ data/warehouse/daily/
+            rsync -av artifacts/warehouse/daily/ data/warehouse/daily/
             [ -f artifacts/warehouse/master.jsonl ] && cp -f artifacts/warehouse/master.jsonl data/warehouse/master.jsonl || true
           elif [ -d artifacts/unpacked/data/warehouse/daily ]; then
-            rsync -av --delete artifacts/unpacked/data/warehouse/daily/ data/warehouse/daily/
+            rsync -av artifacts/unpacked/data/warehouse/daily/ data/warehouse/daily/
             [ -f artifacts/unpacked/data/warehouse/master.jsonl ] && cp -f artifacts/unpacked/data/warehouse/master.jsonl data/warehouse/master.jsonl || true
           elif [ -d artifacts/unpacked/warehouse/daily ]; then
-            rsync -av --delete artifacts/unpacked/warehouse/daily/ data/warehouse/daily/
+            rsync -av artifacts/unpacked/warehouse/daily/ data/warehouse/daily/
             [ -f artifacts/unpacked/warehouse/master.jsonl ] && cp -f artifacts/unpacked/warehouse/master.jsonl data/warehouse/master.jsonl || true
           elif [ -d artifacts/daily ]; then
-            rsync -av --delete artifacts/daily/ data/warehouse/daily/
+            rsync -av artifacts/daily/ data/warehouse/daily/
             [ -f artifacts/master.jsonl ] && cp -f artifacts/master.jsonl data/warehouse/master.jsonl || true
           else
-            echo "Warehouse layout not recognized"
+            echo "Warehouse dir not found in downloaded artifact"
             find artifacts -maxdepth 3 -print
             exit 23
           fi
 
-      - name: Aggregate tokens
+      - name: Aggregate
         run: |
           set -euo pipefail
           python scripts/aggregate_from_warehouse.py \
@@ -65,13 +66,20 @@ jobs:
             --last-days 30 \
             --min-len 4 \
             --extra-stop config/extra_noise.txt
-          python - "$PWD/run" <<'PY'
-import sys, pandas as pd, pathlib
-outdir = pathlib.Path(sys.argv[1]) / "rising_csv"
+
+      - name: Make rising top (inline)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+import pandas as pd, pathlib
+base = pathlib.Path("run")
+outdir = base/"rising_csv"
 outdir.mkdir(parents=True, exist_ok=True)
-tok = pd.read_csv(pathlib.Path(sys.argv[1])/"tokens_by_day.cleaned.csv")
+tok = pd.read_csv(base/"tokens_by_day.cleaned.csv")
 top = tok.groupby("term")["count"].sum().sort_values(ascending=False).head(50).reset_index()
-top.to_csv(outdir/"rising_terms_top.csv", index=False)
+(top.rename(columns={"count":"total"})).to_csv(outdir/"rising_terms_top.csv", index=False)
+print("saved", outdir/"rising_terms_top.csv")
 PY
 
       - name: Build static site
