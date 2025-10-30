@@ -1,9 +1,8 @@
 name: update-warehouse
-
 on:
   workflow_dispatch:
   schedule:
-    - cron: "15 * * * *"
+    - cron: "23 * * * *"
 
 jobs:
   build:
@@ -15,56 +14,51 @@ jobs:
         with:
           python-version: "3.12"
 
-      - run: |
-          python -m pip install --upgrade pip
+      - name: Install
+        run: |
+          python -m pip install -U pip
           pip install -r requirements.txt
 
-      - name: Download previous warehouse (optional)
+      - name: Download previous warehouse artifact (optional)
         uses: dawidd6/action-download-artifact@v3
         with:
           workflow: update-warehouse.yml
-          branch: main
           name: warehouse
           path: prev_warehouse
-          if_no_artifact_found: true
+          if_no_artifact_found: ignore
 
       - name: Restore previous warehouse
         run: |
           set -euo pipefail
           mkdir -p data/warehouse/daily
-          if [ -d prev_warehouse/daily ]; then
-            rsync -a prev_warehouse/daily/ data/warehouse/daily/
-          elif [ -d prev_warehouse/data/warehouse/daily ]; then
-            rsync -a prev_warehouse/data/warehouse/daily/ data/warehouse/daily/
+          if [ -d prev_warehouse ]; then
+            rsync -a prev_warehouse/ data/warehouse/
           fi
+          find data/warehouse -maxdepth 2 -type f | head -n 10
 
-      - name: Download latest live jsonl (optional)
+      - name: Download latest live jsonl
         uses: dawidd6/action-download-artifact@v3
         with:
           workflow: collect_continuous.yml
-          branch: main
           name: live-jsonl
           path: live_artifacts
-          if_no_artifact_found: true
 
       - name: Restore live inputs
         run: |
           set -euo pipefail
           mkdir -p data/live_newsapi
-          shopt -s nullglob
-          for f in live_artifacts/*.jsonl; do
-            bn=$(basename "$f")
-            cp -f "$f" "data/live_newsapi/$bn"
-          done
+          mv live_artifacts/*.jsonl data/live_newsapi/ || true
+          ls -l data/live_newsapi || true
 
       - name: Update corpus
         run: |
           set -euo pipefail
           python scripts/update_corpus.py
 
-      - name: Upload warehouse artifact
+      - name: Upload warehouse artifact (cumulative)
         uses: actions/upload-artifact@v4
         with:
           name: warehouse
-          path: data/warehouse
-          retention-days: 7
+          path: |
+            data/warehouse/master.jsonl
+            data/warehouse/daily
