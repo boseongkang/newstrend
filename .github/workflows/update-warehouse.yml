@@ -1,97 +1,73 @@
-name: update-warehouse
+name: trend-site
 
 on:
-  schedule:
-    - cron: "5,35 * * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/**"
+      - "config/**"
+      - ".github/workflows/trend-site.yml"
 
 permissions:
   contents: read
-  actions: read
+  pages: write
+  id-token: write
 
 concurrency:
-  group: update-warehouse
-  cancel-in-progress: false
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install
-        run: |
+      - run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install -e .
+          pip install -r requirements.txt
 
-      - name: Download previous warehouse artifact (optional)
-        id: dl_prev
+      - name: Download latest warehouse
         uses: dawidd6/action-download-artifact@v3
         with:
-          repo: ${{ github.repository }}
           workflow: update-warehouse.yml
-          workflow_conclusion: success
           branch: main
           name: warehouse
-          path: prev_warehouse
-          search_artifacts: true
-          if_no_artifact_found: warn
+          path: warehouse
 
-      - name: Restore previous warehouse
-        shell: bash
+      - name: Aggregate and rising
         run: |
           set -euo pipefail
-          if [ -d prev_warehouse ]; then
-            mkdir -p data
-            rsync -a prev_warehouse/ data/ || true
-          fi
+          python scripts/aggregate_from_warehouse.py \
+            --warehouse warehouse/daily \
+            --out run \
+            --last-days 30 \
+            --min-len 4 \
+            --extra-stop config/extra_noise.txt
+          python scripts/make_rising.py --run run
 
-      - name: Download latest live jsonl
-        id: dl_live
-        uses: dawidd6/action-download-artifact@v3
-        with:
-          repo: ${{ github.repository }}
-          workflow: collect_continuous.yml
-          workflow_conclusion: success
-          branch: main
-          name: live-jsonl
-          path: live_artifacts
-          search_artifacts: true
-          if_no_artifact_found: warn
-
-      - name: Restore live inputs
-        id: restore
-        shell: bash
+      - name: Build site
         run: |
           set -euo pipefail
-          mkdir -p data/live_newsapi
-          if [ -d live_artifacts ]; then
-            find live_artifacts -type f -name '*.jsonl' -print0 \
-              | xargs -0 -I{} cp -v "{}" data/live_newsapi/ || true
-          fi
-          echo "==== data/live_newsapi ===="
-          ls -l data/live_newsapi || true
-          cnt=$(find data/live_newsapi -maxdepth 1 -type f -name '*.jsonl' | wc -l | tr -d ' ')
-          echo "count=${cnt}" >> "$GITHUB_OUTPUT"
+          python scripts/build_static_ui.py --run run --out site
 
-      - name: Update corpus
-        if: steps.restore.outputs.count != '0'
-        run: python scripts/update_corpus.py
+      - uses: actions/configure-pages@v5
 
-      - name: Upload warehouse artifact
-        if: steps.restore.outputs.count != '0' && hashFiles('data/warehouse/master.jsonl') != ''
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-pages-artifact@v3
         with:
-          name: warehouse
-          path: |
-            data/warehouse/master.jsonl
-            data/warehouse/daily/*.jsonl
-          if-no-files-found: error
-          retention-days: 14
+          path: site
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
