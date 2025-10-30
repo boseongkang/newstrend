@@ -5,6 +5,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,8 +24,9 @@ jobs:
         uses: dawidd6/action-download-artifact@v3
         with:
           workflow: update-warehouse.yml
+          workflow_conclusion: success
           name: warehouse
-          allow_forks: true
+          search_artifacts: true
           path: artifacts
 
       - name: Restore warehouse
@@ -67,20 +70,22 @@ jobs:
             --min-len 4 \
             --extra-stop config/extra_noise.txt
 
-      - name: Make rising top (inline)
+      - name: Make rising top
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
+          cat > _mk_rising.py <<'PY'
 import pandas as pd, pathlib
 base = pathlib.Path("run")
 outdir = base/"rising_csv"
 outdir.mkdir(parents=True, exist_ok=True)
 tok = pd.read_csv(base/"tokens_by_day.cleaned.csv")
 top = tok.groupby("term")["count"].sum().sort_values(ascending=False).head(50).reset_index()
-(top.rename(columns={"count":"total"})).to_csv(outdir/"rising_terms_top.csv", index=False)
+top.rename(columns={"count":"total"}, inplace=True)
+(top).to_csv(outdir/"rising_terms_top.csv", index=False)
 print("saved", outdir/"rising_terms_top.csv")
 PY
+          python _mk_rising.py
 
       - name: Build static site
         run: |
@@ -95,9 +100,9 @@ PY
 
   deploy:
     needs: build
+    runs-on: ubuntu-latest
     permissions:
       pages: write
       id-token: write
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/deploy-pages@v4
