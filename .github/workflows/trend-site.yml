@@ -29,23 +29,34 @@ jobs:
       - name: Restore warehouse
         run: |
           set -euo pipefail
-          mkdir -p data/warehouse
+          mkdir -p data/warehouse/daily
           ZIP=$(find artifacts -maxdepth 2 -type f -name '*.zip' | head -n1 || true)
           if [ -n "${ZIP:-}" ]; then
             mkdir -p artifacts/unpacked
             unzip -q "$ZIP" -d artifacts/unpacked
           fi
-          if   [ -d artifacts/data/warehouse ]; then SRC="artifacts/data/warehouse/"
-          elif [ -d artifacts/warehouse ]; then SRC="artifacts/warehouse/"
-          elif [ -d artifacts/unpacked/data/warehouse ]; then SRC="artifacts/unpacked/data/warehouse/"
-          elif [ -d artifacts/unpacked/warehouse ]; then SRC="artifacts/unpacked/warehouse/"
+          if [ -d artifacts/data/warehouse/daily ]; then
+            rsync -av --delete artifacts/data/warehouse/daily/ data/warehouse/daily/
+            test -f artifacts/data/warehouse/master.jsonl && cp -f artifacts/data/warehouse/master.jsonl data/warehouse/master.jsonl || true
+          elif [ -d artifacts/warehouse/daily ]; then
+            rsync -av --delete artifacts/warehouse/daily/ data/warehouse/daily/
+            test -f artifacts/warehouse/master.jsonl && cp -f artifacts/warehouse/master.jsonl data/warehouse/master.jsonl || true
+          elif [ -d artifacts/unpacked/data/warehouse/daily ]; then
+            rsync -av --delete artifacts/unpacked/data/warehouse/daily/ data/warehouse/daily/
+            test -f artifacts/unpacked/data/warehouse/master.jsonl && cp -f artifacts/unpacked/data/warehouse/master.jsonl data/warehouse/master.jsonl || true
+          elif [ -d artifacts/unpacked/warehouse/daily ]; then
+            rsync -av --delete artifacts/unpacked/warehouse/daily/ data/warehouse/daily/
+            test -f artifacts/unpacked/warehouse/master.jsonl && cp -f artifacts/unpacked/warehouse/master.jsonl data/warehouse/master.jsonl || true
+          elif [ -d artifacts/daily ]; then
+            rsync -av --delete artifacts/daily/ data/warehouse/daily/
+            test -f artifacts/master.jsonl && cp -f artifacts/master.jsonl data/warehouse/master.jsonl || true
           else
-            echo "Warehouse dir not found in downloaded artifact"
+            echo "Warehouse layout not recognized"
             find artifacts -maxdepth 3 -print
             exit 23
           fi
-          rsync -av --delete "$SRC" data/warehouse/
           ls -l data/warehouse | head
+          ls -l data/warehouse/daily | head
 
       - name: Aggregate and rising
         run: |
