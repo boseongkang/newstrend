@@ -2,13 +2,14 @@ name: trend-site
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,8 +23,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Download latest warehouse artifact
-        uses: dawidd6/action-download-artifact@v3
+      - uses: dawidd6/action-download-artifact@v3
         with:
           workflow: update-warehouse.yml
           workflow_conclusion: success
@@ -32,57 +32,29 @@ jobs:
           path: artifacts
           if_no_artifact_found: error
 
-      - name: Inspect artifacts
-        run: |
-          set -euo pipefail
-          echo "::group::ARTIFACTS_TREE"
-          ls -lahR artifacts || true
-          echo "::endgroup::"
-
       - name: Restore warehouse
         shell: bash
         run: |
           set -euo pipefail
+          ls -lahR artifacts || true
           mkdir -p data/warehouse/daily
-          zipfile="$(find artifacts -maxdepth 2 -type f -name '*.zip' | head -n1 || true)"
-          if [ -n "${zipfile:-}" ]; then
+          if ls artifacts/*.zip >/dev/null 2>&1; then
             mkdir -p artifacts/unpacked
-            unzip -q "$zipfile" -d artifacts/unpacked
+            unzip -q artifacts/*.zip -d artifacts/unpacked
           fi
-          ok=0
           for base in artifacts artifacts/unpacked; do
-            if [ -d "$base/data/warehouse/daily" ]; then
-              rsync -a "$base/data/warehouse/daily/" data/warehouse/daily/
-              [ -f "$base/data/warehouse/master.jsonl" ] && cp -f "$base/data/warehouse/master.jsonl" data/warehouse/master.jsonl || true
-              ok=1
-              break
-            fi
-            if [ -d "$base/warehouse/daily" ]; then
-              rsync -a "$base/warehouse/daily/" data/warehouse/daily/
-              [ -f "$base/warehouse/master.jsonl" ] && cp -f "$base/warehouse/master.jsonl" data/warehouse/master.jsonl || true
-              ok=1
-              break
-            fi
-            if [ -d "$base/daily" ]; then
-              rsync -a "$base/daily/" data/warehouse/daily/
-              [ -f "$base/master.jsonl" ] && cp -f "$base/master.jsonl" data/warehouse/master.jsonl || true
-              ok=1
-              break
-            fi
+            if [ -d "$base/daily" ]; then rsync -a "$base/daily/" data/warehouse/daily/; fi
+            if [ -d "$base/warehouse/daily" ]; then rsync -a "$base/warehouse/daily/" data/warehouse/daily/; fi
+            if [ -d "$base/data/warehouse/daily" ]; then rsync -a "$base/data/warehouse/daily/" data/warehouse/daily/; fi
+            [ -f "$base/master.jsonl" ] && cp -f "$base/master.jsonl" data/warehouse/master.jsonl || true
+            [ -f "$base/warehouse/master.jsonl" ] && cp -f "$base/warehouse/master.jsonl" data/warehouse/master.jsonl || true
+            [ -f "$base/data/warehouse/master.jsonl" ] && cp -f "$base/data/warehouse/master.jsonl" data/warehouse/master.jsonl || true
           done
-          if [ "$ok" != "1" ]; then
-            echo "Warehouse dir not found in downloaded artifact"
-            exit 23
-          fi
-          cnt=$(find data/warehouse/daily -type f -name '*.jsonl' | wc -l | tr -d ' ')
-          if [ "$cnt" = "0" ]; then
-            echo "No daily jsonl in warehouse"
-            exit 24
-          fi
+          test -d data/warehouse/daily
+          test "$(find data/warehouse/daily -type f -name '*.jsonl' | wc -l | tr -d ' ')" != "0"
 
       - name: Aggregate
         run: |
-          set -euo pipefail
           python scripts/aggregate_from_warehouse.py \
             --warehouse data/warehouse/daily \
             --out run \
@@ -90,41 +62,18 @@ jobs:
             --min-len 4 \
             --extra-stop config/extra_noise.txt
 
-      - name: Make rising top
-        run: |
-          set -euo pipefail
-          cat > mk_rising.py <<'PY'
-import pandas as pd, pathlib
-base = pathlib.Path("run")
-outdir = base/"rising_csv"
-outdir.mkdir(parents=True, exist_ok=True)
-tok = pd.read_csv(base/"tokens_by_day.cleaned.csv")
-top = tok.groupby("term")["count"].sum().sort_values(ascending=False).head(50).reset_index()
-top.rename(columns={"count":"total"}, inplace=True)
-top.to_csv(outdir/"rising_terms_top.csv", index=False)
-print("saved", outdir/"rising_terms_top.csv")
-PY
-          python mk_rising.py
-
       - name: Build static site
         run: |
-          set -euo pipefail
           python scripts/build_static_ui.py --run run --out site
           touch site/.nojekyll
-          echo "::group::SITE_TREE"
           ls -lahR site || true
-          echo "::endgroup::"
 
-      - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
     steps:
       - uses: actions/deploy-pages@v4
