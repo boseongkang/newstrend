@@ -216,6 +216,22 @@ def make_html(outdir, meta, images, tables):
     html.append("</div></body></html>")
     (outdir / "report.html").write_text("\n".join(html), encoding="utf-8")
 
+def resolve_daily_csv(daily_csv, warehouse):
+    if daily_csv and str(daily_csv).strip():
+        return Path(daily_csv)
+    if warehouse and str(warehouse).strip():
+        w = Path(warehouse)
+        if not w.exists() or not w.is_dir():
+            print(f"[entities_report] warehouse not found: {w}", file=sys.stderr)
+            sys.exit(1)
+        candidates = sorted(w.glob("*.csv"))
+        if not candidates:
+            print(f"[entities_report] no CSV files in: {w}", file=sys.stderr)
+            sys.exit(1)
+        return candidates[-1]
+    print("[entities_report] need --daily-csv or --warehouse", file=sys.stderr)
+    sys.exit(2)
+
 def main(daily_csv, outdir, topk, slope_days, trend_days, heat_top):
     outdir = ensure_dirs(outdir)
     df = load_daily(daily_csv)
@@ -244,10 +260,13 @@ def main(daily_csv, outdir, topk, slope_days, trend_days, heat_top):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--daily-csv", default="reports/entities/entities_daily.csv")
+    ap.add_argument("--daily-csv", default="")
+    ap.add_argument("--warehouse", default=None)
     ap.add_argument("--outdir", default="reports/entities")
     ap.add_argument("--topk", type=int, default=30)
     ap.add_argument("--slope-days", type=int, default=30)
     ap.add_argument("--trend-days", type=int, default=60)
     ap.add_argument("--heat-top", type=int, default=20)
-    main(**vars(ap.parse_args()))
+    args = ap.parse_args()
+    resolved_csv = resolve_daily_csv(args.daily_csv, args.warehouse)
+    main(resolved_csv, args.outdir, args.topk, args.slope_days, args.trend_days, args.heat_top)
