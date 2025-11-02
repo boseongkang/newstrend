@@ -226,8 +226,7 @@ def resolve_daily_csv(daily_csv, warehouse):
             sys.exit(1)
         candidates = sorted(w.glob("*.csv"))
         if not candidates:
-            print(f"[entities_report] no CSV files in: {w}", file=sys.stderr)
-            sys.exit(1)
+            return w / "EMPTY.csv"
         return candidates[-1]
     print("[entities_report] need --daily-csv or --warehouse", file=sys.stderr)
     sys.exit(2)
