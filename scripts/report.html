@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>News Report</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root{--bg:#0b0f18;--card:#121826;--line:#1f2937;--txt:#e6e8ec;--accent:#3b82f6}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,Segoe UI,Roboto,Arial}
+  .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .brand{font-weight:700;font-size:22px}
+  .nav a{color:#cbd5e1;text-decoration:none;margin-left:12px;padding:8px 10px;border-radius:10px}
+  .nav a.active{background:var(--accent);color:#fff}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+  canvas{width:100%;height:380px}
+  .hint{opacity:.7;font-size:12px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">News Report</div>
+    <div class="nav">
+      <a href="./index.html">Trends</a>
+      <a class="active" href="./report.html">Report</a>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h3>Top Publishers</h3><canvas id="pubChart"></canvas></div>
+    <div class="card"><h3>Top Words</h3><canvas id="wordChart"></canvas></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>Articles per day</h3>
+    <canvas id="artChart"></canvas>
+  </div>
+
+  <div class="hint">If nothing shows, hard-refresh your browser.</div>
+</div>
+
+<script>
+(async function(){
+  const v=Date.now();
+  async function get(p){const r=await fetch('./data/'+p+'?v='+v,{cache:'no-store'});if(!r.ok)throw new Error(p);return r.json()}
+
+  let pubs=await get('publishers.json');
+  let words=await get('words.json').catch(()=>({labels:[],counts:[]}));
+  let arts=await get('articles.json');
+
+  new Chart(document.getElementById('pubChart').getContext('2d'),{
+    type:'bar',
+    data:{labels:pubs.labels,datasets:[{label:'count',data:pubs.counts}]},
+    options:{indexAxis:'y',responsive:true,scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
+  });
+
+  new Chart(document.getElementById('wordChart').getContext('2d'),{
+    type:'bar',
+    data:{labels:words.labels,datasets:[{label:'count',data:words.counts}]},
+    options:{indexAxis:'y',responsive:true,scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
+  });
+
+  new Chart(document.getElementById('artChart').getContext('2d'),{
+    type:'bar',
+    data:{labels:arts.dates,datasets:[{label:'articles',data:arts.articles}]},
+    options:{responsive:true,scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
+  });
+})();
+</script>
+</body>
+</html>
