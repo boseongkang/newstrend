@@ -36,6 +36,7 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install orjson
+          pip install orjson yfinance
 
       - name: Get latest warehouse run id
         env:
@@ -72,6 +73,34 @@ jobs:
       - name: Aggregate from warehouse
         run: |
           python scripts/aggregate_from_warehouse.py --warehouse data/warehouse/daily --out run --last-days 30 --min-len 4 --extra-stop config/extra_noise.txt
+
+      - name: Fetch prices (AAPL,AMZN,GOOGL,META,NVDA,TSLA)
+        run: |
+          python - <<'PY'
+          import json, datetime as dt, pandas as pd
+          import yfinance as yf
+          from pathlib import Path
+
+          tickers = ["AAPL","AMZN","GOOGL","META","NVDA","TSLA"]
+          end = dt.date.today()
+          start = end - dt.timedelta(days=60)
+
+          df = yf.download(tickers, start=start.isoformat(), end=(end+dt.timedelta(days=1)).isoformat(), progress=False)["Close"]
+          if isinstance(df.columns, pd.MultiIndex):
+              df = df.droplevel(0, axis=1)  
+
+          df = df.sort_index()
+          df = df.round(6)
+
+          df = df.tail(30)
+
+          dates = [d.strftime("%Y-%m-%d") for d in df.index]
+          close = {t: [None if pd.isna(v) else float(v) for v in df[t].tolist()] for t in df.columns}
+          out = {"dates": dates, "tickers": list(df.columns), "close": close}
+
+          outdir = Path("site/data"); outdir.mkdir(parents=True, exist_ok=True)
+          (outdir/"prices.json").write_text(json.dumps(out))
+          PY
 
       - name: Build dashboard data and pages
         run: |
