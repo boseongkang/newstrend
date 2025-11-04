@@ -18,25 +18,23 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install orjson
 
       - name: Get latest warehouse run id
@@ -45,7 +43,7 @@ jobs:
         run: |
           set -euo pipefail
           RID=$(gh run list --workflow update-warehouse.yml --branch main --status success --json databaseId -q '.[0].databaseId')
-          echo "RUN_ID=$RID" >> $GITHUB_ENV
+          echo "RUN_ID=$RID" >> "$GITHUB_ENV"
 
       - name: Download warehouse artifact
         env:
@@ -75,7 +73,7 @@ jobs:
         run: |
           python scripts/aggregate_from_warehouse.py --warehouse data/warehouse/daily --out run --last-days 30 --min-len 4 --extra-stop config/extra_noise.txt
 
-      - name: Build site
+      - name: Build dashboard data and pages
         run: |
           python scripts/build_static_ui.py --run run --out site
           python - <<'PY'
@@ -83,19 +81,16 @@ jobs:
           from collections import defaultdict, Counter
           import orjson
           site = pathlib.Path("site"); (site/"data").mkdir(parents=True, exist_ok=True)
-          rng = pathlib.Path("run")/"date_range.txt"
-          if rng.exists():
-              s,e = open(rng).read().strip().split()
-          else:
-              s = min(p.name[:10] for p in pathlib.Path("data/warehouse/daily").glob("*.jsonl"))
-              e = max(p.name[:10] for p in pathlib.Path("data/warehouse/daily").glob("*.jsonl"))
-          s = dt.date.fromisoformat(s); e = dt.date.fromisoformat(e)
+          ws = pathlib.Path("data/warehouse/daily")
+          days = sorted([p for p in ws.glob("*.jsonl") if re.match(r"\d{4}-\d{2}-\d{2}\.jsonl$", p.name)])
+          if not days:
+              raise SystemExit("no warehouse daily files")
+          s = dt.date.fromisoformat(days[0].name[:10])
+          e = dt.date.fromisoformat(days[-1].name[:10])
           pubs = Counter()
           day_keys = defaultdict(set)
-          for f in sorted(pathlib.Path("data/warehouse/daily").glob("*.jsonl")):
-              m = re.match(r"(\d{4}-\d{2}-\d{2})\.jsonl", f.name)
-              if not m: continue
-              d = dt.date.fromisoformat(m.group(1))
+          for f in days:
+              d = dt.date.fromisoformat(f.name[:10])
               if d<s or d>e: continue
               with open(f,"rb") as fh:
                   for line in fh:
@@ -122,17 +117,29 @@ jobs:
           PY
           cp scripts/static_dashboard.html site/index.html
           cp scripts/report.html site/report.html
-          test -f site/index.html
-          test -f site/report.html
+          test -s site/index.html
+          test -s site/report.html
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v5
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
-      - name: Deploy to Pages
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Try include entities report artifact
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          ERUN=$(gh run list --workflow entities.yml --branch main --status success --json databaseId -q '.[0].databaseId' || true)
+          if [ -n "${ERUN:-}" ]; then
+            mkdir -p _en
+            gh run download "$ERUN" -n entities-report -D _en || true
+            if ls _en/*.zip >/dev/null 2>&1; then unzip -o _en/*.zip -d _en >/dev/null || true; fi
+            if [ -f _en/artifact.tar ]; then tar -xf _en/artifact.tar -C _en || true; fi
+            if [ -f _en/report.html ]; then echo "entities report found"; fi
+          fi
