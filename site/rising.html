@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rising Terms</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root{--bg:#0b0f18;--card:#121826;--line:#1f2937;--txt:#e6e8ec;--accent:#3b82f6}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,Segoe UI,Roboto,Arial}
+  .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .brand{font-weight:700;font-size:22px}
+  .nav a{color:#cbd5e1;text-decoration:none;margin-left:12px;padding:8px 10px;border-radius:10px}
+  .nav a.active{background:var(--accent);color:#fff}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+  canvas{width:100%;height:420px}
+  .hint{opacity:.7;font-size:12px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">Rising Terms</div>
+    <div class="nav">
+      <a href="./index.html">Trends</a>
+      <a href="./report.html">Report</a>
+      <a class="active" href="./rising.html">Rising</a>
+    </div>
+  </div>
+
+  <div class="card"><canvas id="riseChart"></canvas></div>
+  <div class="hint">If nothing shows, hard-refresh your browser.</div>
+</div>
+
+<script>
+(async function(){
+  const v=Date.now();
+  async function get(p){
+    const r=await fetch('./data/'+p+'?v='+v,{cache:'no-store'});
+    if(!r.ok) return null;
+    return r.json();
+  }
+
+  const trends = await get('trends.json');
+  if(!trends){ console.error('trends.json missing'); return; }
+  const rising = await get('rising.json'); // optional
+
+  function median(arr){
+    if(!arr || !arr.length) return 0;
+    const s=[...arr].sort((a,b)=>a-b);
+    const m=Math.floor(s.length/2);
+    return s.length%2 ? s[m] : (s[m-1]+s[m])/2;
+  }
+
+  function liftFor(term){
+    const y = (trends.series[term]||[]).map(Number).filter(x=>Number.isFinite(x));
+    if(!y.length) return null;
+    const last = y[y.length-1] ?? 0;
+    const prev = y.slice(-8,-1);
+    const prevAvg = prev.length ? prev.reduce((a,b)=>a+b,0)/prev.length : 0;
+    const med = median(y.slice(0,-1));
+    const baseline = Math.max(prevAvg, med, 1e-6);
+    const L = last / baseline;
+    return Number.isFinite(L) ? L : null;
+  }
+
+  let candidates = [];
+  if(rising && Array.isArray(rising.rising_terms) && rising.rising_terms.length){
+    candidates = rising.rising_terms.filter(t => t in trends.series);
+  }
+  if(!candidates.length){
+    const pool = trends.top && trends.top.length ? trends.top : trends.terms;
+    candidates = (pool||[]).slice(0,500).filter(t => t in trends.series);
+  }
+
+  let scored = [];
+  for(const t of candidates){
+    const s = liftFor(t);
+    if(s && s>1.05) scored.push([t,s]);
+  }
+  if(!scored.length){
+    console.warn('no rising terms found; falling back to last-value sort');
+    for(const t of candidates){
+      const y = trends.series[t]||[];
+      const last = y[y.length-1]||0;
+      if(last>0) scored.push([t, last]);
+    }
+  }
+  scored.sort((a,b)=>b[1]-a[1]);
+  scored = scored.slice(0,30);
+
+  const ctx = document.getElementById('riseChart').getContext('2d');
+  new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels: scored.map(([t])=>t),
+      datasets:[{label:'lift', data: scored.map(([,s])=>s)}]
+    },
+    options:{
+      responsive:true,
+      scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}
+    }
+  });
+})();
+</script>
+</body>
+</html>

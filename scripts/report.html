@@ -27,6 +27,7 @@
     <div class="nav">
       <a href="./index.html">Trends</a>
       <a class="active" href="./report.html">Report</a>
+      <a href="./rising.html">Rising</a>
     </div>
   </div>
 
@@ -40,30 +41,27 @@
     <canvas id="artChart"></canvas>
   </div>
 
-  <div class="hint">If nothing shows, hard-refresh your browser.</div>
+  <div class="hint">Hard-refresh if stale data appears.</div>
 </div>
 
 <script>
 (async function(){
   const v=Date.now();
   async function get(p){const r=await fetch('./data/'+p+'?v='+v,{cache:'no-store'});if(!r.ok)throw new Error(p);return r.json()}
-
-  let pubs=await get('publishers.json');
+  let pubs=await get('publishers.json').catch(()=>({labels:[],counts:[]}));
   let words=await get('words.json').catch(()=>({labels:[],counts:[]}));
-  let arts=await get('articles.json');
+  let arts=await get('articles.json').catch(()=>({dates:[],articles:[]}));
 
   new Chart(document.getElementById('pubChart').getContext('2d'),{
     type:'bar',
     data:{labels:pubs.labels,datasets:[{label:'count',data:pubs.counts}]},
     options:{indexAxis:'y',responsive:true,scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
   });
-
   new Chart(document.getElementById('wordChart').getContext('2d'),{
     type:'bar',
     data:{labels:words.labels,datasets:[{label:'count',data:words.counts}]},
     options:{indexAxis:'y',responsive:true,scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
   });
-
   new Chart(document.getElementById('artChart').getContext('2d'),{
     type:'bar',
     data:{labels:arts.dates,datasets:[{label:'articles',data:arts.articles}]},

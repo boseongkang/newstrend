@@ -3,7 +3,10 @@ name: trend-site
 on:
   workflow_dispatch:
   schedule:
-    - cron: "25 7 * * *"
+    - cron: "25 07 * * *"
+  workflow_run:
+    workflows: ["update-warehouse"]
+    types: [completed]
   push:
     branches: [ main ]
     paths:
@@ -18,11 +21,12 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
   build:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,9 +38,8 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install -r requirements.txt
           pip install orjson
-          pip install orjson yfinance
 
       - name: Get latest warehouse run id
         env:
@@ -44,7 +47,7 @@ jobs:
         run: |
           set -euo pipefail
           RID=$(gh run list --workflow update-warehouse.yml --branch main --status success --json databaseId -q '.[0].databaseId')
-          echo "RUN_ID=$RID" >> "$GITHUB_ENV"
+          echo "RUN_ID=$RID" >> $GITHUB_ENV
 
       - name: Download warehouse artifact
         env:
@@ -74,105 +77,34 @@ jobs:
         run: |
           python scripts/aggregate_from_warehouse.py --warehouse data/warehouse/daily --out run --last-days 30 --min-len 4 --extra-stop config/extra_noise.txt
 
-      - name: Fetch prices (AAPL,AMZN,GOOGL,META,NVDA,TSLA)
+      - name: Join prices
         run: |
-          python - <<'PY'
-          import json, datetime as dt, pandas as pd
-          import yfinance as yf
-          from pathlib import Path
+          python scripts/join_prices.py \
+            --terms run/tokens_by_day.cleaned.csv \
+            --map   config/ticker_aliases.json \
+            --out   run/prices_join \
+            --min-days 1
 
-          tickers = ["AAPL","AMZN","GOOGL","META","NVDA","TSLA"]
-          end = dt.date.today()
-          start = end - dt.timedelta(days=60)
-
-          df = yf.download(tickers, start=start.isoformat(), end=(end+dt.timedelta(days=1)).isoformat(), progress=False)["Close"]
-          if isinstance(df.columns, pd.MultiIndex):
-              df = df.droplevel(0, axis=1)  
-
-          df = df.sort_index()
-          df = df.round(6)
-
-          df = df.tail(30)
-
-          dates = [d.strftime("%Y-%m-%d") for d in df.index]
-          close = {t: [None if pd.isna(v) else float(v) for v in df[t].tolist()] for t in df.columns}
-          out = {"dates": dates, "tickers": list(df.columns), "close": close}
-
-          outdir = Path("site/data"); outdir.mkdir(parents=True, exist_ok=True)
-          (outdir/"prices.json").write_text(json.dumps(out))
-          PY
-
-      - name: Aggregate from warehouse
+      - name: Make report data
         run: |
-          python scripts/aggregate_from_warehouse.py --warehouse data/warehouse/daily --out run --last-days 30 --min-len 4 --extra-stop config/extra_noise.txt
+          python scripts/make_report_data.py \
+            --warehouse data/warehouse/daily \
+            --run run \
+            --out site/data \
+            --top-publishers 50 \
+            --top-words 50 \
+            --extra-stop config/extra_noise.txt
 
-      - name: Build dashboard data and pages
+      - name: Build dashboard pages
         run: |
           python scripts/build_static_ui.py --run run --out site
-          python - <<'PY'
-          import json, pathlib, re, datetime as dt
-          from collections import defaultdict, Counter
-          import orjson
-          site = pathlib.Path("site"); (site/"data").mkdir(parents=True, exist_ok=True)
-          ws = pathlib.Path("data/warehouse/daily")
-          days = sorted([p for p in ws.glob("*.jsonl") if re.match(r"\d{4}-\d{2}-\d{2}\.jsonl$", p.name)])
-          if not days:
-              raise SystemExit("no warehouse daily files")
-          s = dt.date.fromisoformat(days[0].name[:10])
-          e = dt.date.fromisoformat(days[-1].name[:10])
-          pubs = Counter()
-          day_keys = defaultdict(set)
-          for f in days:
-              d = dt.date.fromisoformat(f.name[:10])
-              if d<s or d>e: continue
-              with open(f,"rb") as fh:
-                  for line in fh:
-                      try: o = orjson.loads(line)
-                      except: continue
-                      v = o.get("publisher") or o.get("source") or o.get("source_name") or o.get("site") or o.get("domain") or ""
-                      if isinstance(v, dict): v = v.get("name") or v.get("id") or ""
-                      if isinstance(v, list): v = v[0] if v else ""
-                      v = str(v).strip()
-                      if v: pubs[v]+=1
-                      url = (o.get("url") or o.get("link") or "").strip()
-                      title = (o.get("title") or "").strip()
-                      key = url or (title, v)
-                      if key: day_keys[d].add(key)
-          top_pubs = pubs.most_common(50)
-          (site/'data/publishers.json').write_text(json.dumps({'labels':[k for k,_ in top_pubs],'counts':[int(v) for _,v in top_pubs]}))
-          dates, counts = [], []
-          d = s
-          while d<=e:
-              dates.append(d.isoformat())
-              counts.append(len(day_keys.get(d,set())))
-              d += dt.timedelta(days=1)
-          (site/'data/articles.json').write_text(json.dumps({'dates':dates,'articles':counts}))
-          PY
-          cp scripts/static_dashboard.html site/index.html
-          cp scripts/report.html site/report.html
           test -s site/index.html
           test -s site/report.html
+          test -s site/rising.html
 
       - uses: actions/configure-pages@v5
-
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
-
       - id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Try include entities report artifact
-        if: always()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          ERUN=$(gh run list --workflow entities.yml --branch main --status success --json databaseId -q '.[0].databaseId' || true)
-          if [ -n "${ERUN:-}" ]; then
-            mkdir -p _en
-            gh run download "$ERUN" -n entities-report -D _en || true
-            if ls _en/*.zip >/dev/null 2>&1; then unzip -o _en/*.zip -d _en >/dev/null || true; fi
-            if [ -f _en/artifact.tar ]; then tar -xf _en/artifact.tar -C _en || true; fi
-            if [ -f _en/report.html ]; then echo "entities report found"; fi
-          fi
