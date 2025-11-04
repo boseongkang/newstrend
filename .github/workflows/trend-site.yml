@@ -102,6 +102,10 @@ jobs:
           (outdir/"prices.json").write_text(json.dumps(out))
           PY
 
+      - name: Aggregate from warehouse
+        run: |
+          python scripts/aggregate_from_warehouse.py --warehouse data/warehouse/daily --out run --last-days 30 --min-len 4 --extra-stop config/extra_noise.txt
+
       - name: Build dashboard data and pages
         run: |
           python scripts/build_static_ui.py --run run --out site
