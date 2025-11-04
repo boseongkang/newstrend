@@ -62,6 +62,7 @@
     if(!res.ok) throw new Error(p+' '+res.status);
     return await res.json();
   }
+
   let trends=null, prices=null, articles=null;
   try{ trends = await getJSON('trends.json'); }catch(e){ console.error(e); }
   try{ prices = await getJSON('prices.json'); }catch(e){ console.warn('prices optional', e); }
@@ -76,13 +77,15 @@
   const tc = new Chart(document.getElementById('termsChart').getContext('2d'),{
     type:'line',
     data:{labels: trends? trends.dates: [], datasets:[]},
-    options:{responsive:true,plugins:{legend:{display:true}},elements:{point:{radius:0}},scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
+    options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
   });
+
   const pc = new Chart(document.getElementById('pricesChart').getContext('2d'),{
     type:'line',
     data:{labels: prices? prices.dates: [], datasets:[]},
-    options:{responsive:true,plugins:{legend:{display:true}},elements:{point:{radius:0}},scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
+    options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
   });
+
   const ac = new Chart(document.getElementById('articlesChart').getContext('2d'),{
     type:'bar',
     data:{labels: articles? articles.dates: [], datasets:[{label:'articles', data: articles? articles.articles: []}]},
@@ -92,38 +95,43 @@
   function updateTerms(sel){
     if(!trends) return;
     const names = sel && sel.length? sel: trends.top.slice(0,10);
-    const ds = names.filter(n => trends.terms.includes(n)).map(t=>({label:t,data:trends.series[t]||[],borderWidth:2}));
+    const ds = names.filter(n => trends.terms.includes(n)).map((t)=>({
+      label:t,data:(trends.series[t]||[]),borderWidth:2,pointRadius:0
+    }));
     tc.data.labels = trends.dates;
     tc.data.datasets = ds;
     tc.update();
   }
+
   function updatePrices(tickers){
     if(!prices) return;
-    const names = tickers && tickers.length? tickers: [];
-    const ds = names.filter(n => prices.tickers.includes(n)).map(t=>({label:t,data:(prices.close[t]||[]).map(v=>v==null?null:Number(v)),borderWidth:2}));
-    pc.data.labels = prices.dates;
+    const want = (tickers||[]).map(s=>s.toUpperCase());
+    const ds = want
+      .filter(n => (prices.tickers||[]).includes(n))
+      .map(t => ({label:t, data:(prices.close[t]||[]).map(v => v==null? null:Number(v)), borderWidth:2, pointRadius:0}));
+    pc.data.labels = prices.dates||[];
     pc.data.datasets = ds;
     pc.update();
   }
 
   btnTop.onclick = () => {
     termsInput.value = (trends? trends.top.slice(0,10): []).join(',');
-    updateTerms(termsInput.value.split(',').map(s=>s.trim()).filter(Boolean));
+    const sel = termsInput.value.split(',').map(s=>s.trim()).filter(Boolean);
+    updateTerms(sel);
   };
   btnClear.onclick = () => {
     termsInput.value = ''; tickersInput.value = '';
     updateTerms([]); updatePrices([]);
   };
-  btnRising.onclick = () => { window.location.href = './rising.html'; };
+  btnRising.onclick = () => { location.href = './rising.html'; };
 
-  termsInput.addEventListener('change', () => {
-    const sel = termsInput.value.split(',').map(s=>s.trim()).filter(Boolean);
-    updateTerms(sel);
-  });
-  tickersInput.addEventListener('change', () => {
+  const applyTickers = () => {
     const sel = tickersInput.value.split(',').map(s=>s.trim()).filter(Boolean);
     updatePrices(sel);
-  });
+  };
+  tickersInput.addEventListener('change', applyTickers);
+  tickersInput.addEventListener('keyup', e => { if(e.key==='Enter') applyTickers(); });
+  tickersInput.addEventListener('blur', applyTickers);
 
   updateTerms([]);
   updatePrices([]);
