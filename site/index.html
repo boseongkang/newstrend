@@ -15,8 +15,6 @@
   .row{display:flex;gap:8px;align-items:center;margin-bottom:12px}
   input{background:#0f1523;border:1px solid #243043;color:#e6e8ec;border-radius:10px;padding:10px 12px;min-width:220px}
   button{background:#253bff;color:#fff;border:0;border-radius:10px;padding:10px 14px;cursor:pointer}
-  button.pill{background:transparent;border:1px solid #253bff;color:#e6e8ec}
-  button.pill:hover{background:#253bff22}
   .hint{opacity:.7;font-size:12px;margin-top:6px}
   canvas{width:100%;height:360px}
 </style>
@@ -28,9 +26,9 @@
   <div class="row">
     <input id="terms" placeholder="Terms (comma separated)">
     <input id="tickers" placeholder="Tickers, e.g. AAPL,MSFT">
-    <button id="btnTop">Top terms</button>
-    <button id="btnClear">Clear</button>
-    <button id="btnRising" class="pill" type="button">Rising</button>
+    <button id="btnTop" type="button">Top terms</button>
+    <button id="btnClear" type="button">Clear</button>
+    <button id="btnRising" type="button">Rising</button>
   </div>
 
   <div class="grid">
@@ -63,6 +61,7 @@
   const tickersInput = document.getElementById('tickers');
   const btnTop = document.getElementById('btnTop');
   const btnClear = document.getElementById('btnClear');
+  const btnRising = document.getElementById('btnRising');
 
   const tc = new Chart(document.getElementById('termsChart').getContext('2d'),{
     type:'line',
@@ -106,17 +105,6 @@
     pc.update();
   }
 
-  function linearSlope(arr, lastN){
-    const y = (lastN ? arr.slice(-lastN) : arr).map(v => v==null ? 0 : Number(v));
-    const n = y.length;
-    if (n < 2) return 0;
-    let sx=0, sy=0, sxy=0, sxx=0;
-    for (let i=0;i<n;i++){ const x=i, yi=y[i]; sx+=x; sy+=yi; sxy+=x*yi; sxx+=x*x; }
-    const denom = n*sxx - sx*sx;
-    if (!denom) return 0;
-    return (n*sxy - sx*sy) / denom;
-}
-
   btnTop.onclick = () => {
     termsInput.value = (trends? trends.top.slice(0,10): []).join(',');
     updateTerms(termsInput.value.split(',').map(s=>s.trim()).filter(Boolean));
@@ -125,19 +113,7 @@
     termsInput.value = ''; tickersInput.value = '';
     updateTerms([]); updatePrices([]);
   };
-  btnRising.onclick = () => {
-  if(!trends) return;
-  const WINDOW = 14;
-  const TOPK = 10;
-  const scores = trends.terms.map(term => ({
-    term,
-    score: linearSlope(trends.series[term] || [], WINDOW)
-  })).sort((a,b) => b.score - a.score);
-
-  const names = scores.slice(0, TOPK).map(x => x.term);
-  termsInput.value = names.join(',');
-  updateTerms(names);
-};
+  btnRising.onclick = () => { location.href = 'report.html'; };
 
   termsInput.addEventListener('change', () => {
     const sel = termsInput.value.split(',').map(s=>s.trim()).filter(Boolean);
@@ -148,15 +124,9 @@
     updatePrices(sel);
   });
 
-  const btnRising = document.getElementById('btnRising');
-
   updateTerms([]);
   updatePrices([]);
 })();
-
-fetch('data/trends.json?v=__STAMP__')
-fetch('data/prices.json?v=__STAMP__')
-fetch('data/articles.json?v=__STAMP__')
 </script>
 </body>
 </html>
