@@ -34,50 +34,8 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install yfinance pandas numpy orjson
-
-      - name: Join prices (derive range and fetch)
-        run: |
-          python - <<'PY'
-          import pandas as pd, os
-          from pandas.tseries.offsets import BDay
-          df = pd.read_csv("run/tokens_by_day.cleaned.csv")
-          s = pd.to_datetime(df['date']).min().date()
-          e = pd.Timestamp("today").date()
-          if pd.Timestamp(e).dayofweek >= 5:
-              e = (pd.Timestamp(e) - BDay(1)).date()
-          with open(os.environ["GITHUB_ENV"], "a") as fh:
-              fh.write(f"START={s}\n")
-              fh.write(f"END={e}\n")
-          print("range:", s, e)
-          PY
-          python scripts/join_prices.py \
-            --terms run/tokens_by_day.cleaned.csv \
-            --map   config/ticker_aliases.json \
-            --start "$START" \
-            --end   "$END" \
-            --out   run/prices.csv \
-            --min-days 1
-
-      - name: Export prices.json (pretty)
-        run: |
-          python - <<'PY'
-          import pandas as pd, json, pathlib
-          root=pathlib.Path("run/prices.csv")
-          df=pd.read_csv(root/"ticker_daily.csv")
-          dates=sorted(df['date'].unique())
-          tickers=sorted(df['ticker'].unique())
-          idx={d:i for i,d in enumerate(dates)}
-          close={t:[None]*len(dates) for t in tickers}
-          for r in df.itertuples(index=False):
-              i=idx[r.date]
-              close[r.ticker][i]=None if pd.isna(r.close) else float(r.close)
-          out={"dates":dates,"tickers":tickers,"close":close}
-          path=pathlib.Path("site/data"); path.mkdir(parents=True, exist_ok=True)
-          (path/"prices.json").write_text(json.dumps(out, indent=2, ensure_ascii=False))
-          print("wrote", path/"prices.json")
-          PY
 
       - name: Get latest warehouse run id
         env:
@@ -115,43 +73,57 @@ jobs:
         run: |
           python scripts/aggregate_from_warehouse.py --warehouse data/warehouse/daily --out run --last-days 30 --min-len 4 --extra-stop config/extra_noise.txt
 
-      - name: Build dashboard data and pages
+      - name: Build dashboard pages
         run: |
           python scripts/build_static_ui.py --run run --out site
-          python - <<'PY'
-          import os, json, pandas as pd, pathlib, datetime as dt
-          terms_csv = pathlib.Path("run")/"tokens_by_day.cleaned.csv"
-          if not terms_csv.exists():
-              raise SystemExit("tokens file missing")
-          df = pd.read_csv(terms_csv)
-          s = df["date"].min(); e = df["date"].max()
-          START = (dt.date.fromisoformat(s) - dt.timedelta(days=10)).isoformat()
-          END = (dt.date.fromisoformat(e) + dt.timedelta(days=2)).isoformat()
-          os.environ["START"]=START; os.environ["END"]=END
-          PY
-          python scripts/join_prices.py --terms run/tokens_by_day.cleaned.csv --map config/ticker_aliases.json --start "$START" --end "$END" --out run/prices.csv --min-days 1
-          python - <<'PY'
-          import pandas as pd, json, pathlib
-          base = pathlib.Path("run")/"prices.csv"
-          td = pd.read_csv(base/"ticker_daily.csv")
-          dates = sorted(td["date"].unique().tolist())
-          tickers = sorted(td["ticker"].unique().tolist())
-          close = {}
-          for t in tickers:
-            s = td[td["ticker"]==t].set_index("date")["close"]
-            close[t] = [ None if pd.isna(s.get(d)) else float(s.get(d)) for d in dates ]
-          out = {"dates":dates,"tickers":tickers,"close":close}
-          outp = pathlib.Path("site")/"data"/"prices.json"; outp.parent.mkdir(parents=True, exist_ok=True)
-          outp.write_text(json.dumps(out))
-          PY
--         cp config/ticker_sectors.json site/data/tickers.json
-+         python scripts/make_ticker_sectors.py --map config/ticker_aliases.json --out site/data/tickers.json
+          cp scripts/static_dashboard.html site/index.html
+          cp scripts/report.html site/report.html
+          cp scripts/rising.html site/rising.html
           test -s site/index.html
           test -s site/report.html
           test -s site/rising.html
-          test -s site/data/articles.json
-          test -s site/data/trends.json
+
+      - name: Join prices
+        run: |
+          python - <<'PY'
+          import os, pandas as pd
+          from pandas.tseries.offsets import BDay
+          df = pd.read_csv("run/tokens_by_day.cleaned.csv")
+          s = pd.to_datetime(df["date"]).min().date()
+          e = pd.Timestamp("today", tz="UTC").date()
+          if pd.Timestamp(e).dayofweek >= 5:
+              e = (pd.Timestamp(e) - BDay(1)).date()
+          with open(os.environ["GITHUB_ENV"], "a") as fh:
+              fh.write(f"START={s}\n")
+              fh.write(f"END={e}\n")
+          print("range:", s, e)
+          PY
+          python scripts/join_prices.py --terms run/tokens_by_day.cleaned.csv --map config/ticker_aliases.json --start "$START" --end "$END" --out run/prices.csv --min-days 1
+
+      - name: Export prices.json
+        run: |
+          python - <<'PY'
+          import pandas as pd, json, pathlib
+          root = pathlib.Path("run")/"prices.csv"
+          df = pd.read_csv(root/"ticker_daily.csv")
+          dates = sorted(df["date"].unique().tolist())
+          tickers = sorted(df["ticker"].unique().tolist())
+          idx = {d:i for i,d in enumerate(dates)}
+          close = {t:[None]*len(dates) for t in tickers}
+          for r in df.itertuples(index=False):
+              i = idx[r.date]
+              close[r.ticker][i] = None if pd.isna(r.close) else float(r.close)
+          out = {"dates": dates, "tickers": tickers, "close": close}
+          p = pathlib.Path("site")/"data"
+          p.mkdir(parents=True, exist_ok=True)
+          (p/"prices.json").write_text(json.dumps(out, indent=2))
+          print("wrote", p/"prices.json")
+          PY
           test -s site/data/prices.json
+
+      - name: Build ticker sectors
+        run: |
+          python scripts/make_ticker_sectors.py --map config/ticker_aliases.json --out site/data/tickers.json
           test -s site/data/tickers.json
 
       - uses: actions/configure-pages@v5
