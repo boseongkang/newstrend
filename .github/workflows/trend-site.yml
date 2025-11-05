@@ -83,7 +83,7 @@ jobs:
           test -s site/report.html
           test -s site/rising.html
 
-      - name: Join prices
+      - name: Join prices (derive range and fetch)
         run: |
           python - <<'PY'
           import os, pandas as pd
@@ -98,21 +98,34 @@ jobs:
               fh.write(f"END={e}\n")
           print("range:", s, e)
           PY
-          python scripts/join_prices.py --terms run/tokens_by_day.cleaned.csv --map config/ticker_aliases.json --start "$START" --end "$END" --out run/prices.csv --min-days 1
+          python scripts/join_prices.py \
+            --terms run/tokens_by_day.cleaned.csv \
+            --map   config/ticker_aliases.json \
+            --start "$START" \
+            --end   "$END" \
+            --out   run/prices.csv \
+            --min-days 1
 
-      - name: Export prices.json
+      - name: Export prices.json (robust columns)
         run: |
           python - <<'PY'
           import pandas as pd, json, pathlib
           root = pathlib.Path("run")/"prices.csv"
           df = pd.read_csv(root/"ticker_daily.csv")
+          if "date" not in df.columns or "ticker" not in df.columns:
+              raise SystemExit(f"unexpected columns: {df.columns.tolist()}")
+          price_cols = [c for c in ["close","Close","adj_close","Adj Close","price","Price"] if c in df.columns]
+          if not price_cols:
+              raise SystemExit("no price column found")
+          pc = price_cols[0]
+          df["date"] = df["date"].astype(str)
           dates = sorted(df["date"].unique().tolist())
-          tickers = sorted(df["ticker"].unique().tolist())
+          tickers = sorted(df["ticker"].astype(str).unique().tolist())
           idx = {d:i for i,d in enumerate(dates)}
           close = {t:[None]*len(dates) for t in tickers}
-          for r in df.itertuples(index=False):
-              i = idx[r.date]
-              close[r.ticker][i] = None if pd.isna(r.close) else float(r.close)
+          for d, t, val in df[["date","ticker",pc]].itertuples(index=False, name=None):
+              i = idx[d]
+              close[t][i] = None if pd.isna(val) else float(val)
           out = {"dates": dates, "tickers": tickers, "close": close}
           p = pathlib.Path("site")/"data"
           p.mkdir(parents=True, exist_ok=True)
