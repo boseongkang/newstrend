@@ -1,129 +1,94 @@
-import json
-from pathlib import Path
-import argparse
-import pandas as pd
-import numpy as np
+#!/usr/bin/env python3
+import json, pathlib, re, datetime as dt
+from collections import defaultdict, Counter
 
-def ensure(p): p.mkdir(parents=True, exist_ok=True); return p
+ROOT = pathlib.Path(__file__).resolve().parent
 
-def to_iso(d):
-    s = pd.to_datetime(d, utc=False)
-    if isinstance(s, pd.Series):
-        s = s.dt.tz_localize(None)
+def load_range(run_dir: pathlib.Path, wh_dir: pathlib.Path):
+    rng = run_dir / "date_range.txt"
+    if rng.exists():
+        s, e = open(rng).read().strip().split()
     else:
-        s = pd.to_datetime(s).tz_localize(None)
-    return [x.strftime("%Y-%m-%d") for x in s]
+        files = sorted(p for p in wh_dir.glob("*.jsonl") if re.match(r"\d{4}-\d{2}-\d{2}\.jsonl$", p.name))
+        if not files:
+            raise SystemExit("no warehouse daily files")
+        s = files[0].name[:10]
+        e = files[-1].name[:10]
+    return dt.date.fromisoformat(s), dt.date.fromisoformat(e)
 
-def load_terms_matrix(tokens_csv, top_terms_csv=None, keep_top=120):
-    df = pd.read_csv(tokens_csv)
-    df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None)
-    base = df.groupby(["date","term"])["count"].sum().reset_index()
-    tops = []
-    if top_terms_csv and Path(top_terms_csv).exists():
-        tdf = pd.read_csv(top_terms_csv)
-        c = "term" if "term" in tdf.columns else tdf.columns[0]
-        tops = [str(x) for x in tdf[c].astype(str).tolist()[:50]]
-    totals = base.groupby("term")["count"].sum().sort_values(ascending=False)
-    head = [str(x) for x in totals.head(keep_top).index.tolist()]
-    want = list(dict.fromkeys(tops + head))
-    mat = (
-        base[base["term"].isin(want)]
-        .pivot(index="date", columns="term", values="count")
-        .sort_index()
-        .fillna(0.0)
-    )
-    return mat
+def build_basic_jsons(wh_daily: pathlib.Path, out_data: pathlib.Path, s: dt.date, e: dt.date):
+    import orjson
+    pubs = Counter()
+    day_keys = defaultdict(set)
+    for f in sorted(wh_daily.glob("*.jsonl")):
+        m = re.match(r"(\d{4}-\d{2}-\d{2})\.jsonl", f.name)
+        if not m: continue
+        d = dt.date.fromisoformat(m.group(1))
+        if d < s or d > e: continue
+        with open(f, "rb") as fh:
+            for line in fh:
+                try:
+                    o = orjson.loads(line)
+                except:
+                    continue
+                v = o.get("publisher") or o.get("source") or o.get("source_name") or o.get("site") or o.get("domain") or ""
+                if isinstance(v, dict): v = v.get("name") or v.get("id") or ""
+                if isinstance(v, list): v = v[0] if v else ""
+                v = str(v).strip()
+                if v: pubs[v] += 1
+                url = (o.get("url") or o.get("link") or "").strip()
+                title = (o.get("title") or "").strip()
+                key = url or (title, v)
+                if key: day_keys[d].add(key)
 
-def load_prices(price_csv):
-    pth = Path(price_csv)
-    if not pth.exists():
-        return None
-    p = pd.read_csv(pth)
-    norm = {c.lower().strip(): c for c in p.columns}
-    def pick(cands):
-        for k in cands:
-            if k in norm:
-                return norm[k]
-        return None
-    date_col   = pick(["date","datetime","day"])
-    ticker_col = pick(["ticker","symbol"])
-    price_col  = pick(["close","adj_close","adj close","adjclose","price","close_price","closing_price"])
-    if not date_col or not ticker_col or not price_col:
-        raise ValueError(f"price csv columns not found. got={list(p.columns)}")
-    p[date_col] = pd.to_datetime(p[date_col]).dt.tz_localize(None)
-    g = p.groupby([date_col, ticker_col])[price_col].last().reset_index()
-    piv = (
-        g.pivot(index=date_col, columns=ticker_col, values=price_col)
-         .sort_index()
-         .astype(float)
-         .ffill()
-    )
-    return piv
+    top_pubs = pubs.most_common(50)
+    (out_data / "publishers.json").write_text(json.dumps({
+        "labels":[k for k,_ in top_pubs],
+        "counts":[int(v) for _,v in top_pubs]
+    }))
 
-def read_terms_list(csv_path, topn=50):
-    p = Path(csv_path)
-    if not p.exists():
-        return []
-    df = pd.read_csv(p)
-    if "term" in df.columns:
-        col = "term"
-    else:
-        col = df.columns[0]
-    vals = [str(x) for x in df[col].astype(str).tolist()[:topn]]
-    return vals
+    dates, counts = [], []
+    d = s
+    while d <= e:
+        dates.append(d.isoformat())
+        counts.append(len(day_keys.get(d, set())))
+        d += dt.timedelta(days=1)
+    (out_data / "articles.json").write_text(json.dumps({"dates":dates,"articles":counts}))
 
-def write_json(obj, path): Path(path).write_text(json.dumps(obj, ensure_ascii=False), encoding="utf-8")
+def main(run: str, out_dir: str):
+    out = pathlib.Path(out_dir); (out / "data").mkdir(parents=True, exist_ok=True)
+    wh = pathlib.Path("data/warehouse/daily")
+    s, e = load_range(pathlib.Path(run), wh)
+    build_basic_jsons(wh, out/"data", s, e)
 
-def main(run_dir, out_dir):
-    run = Path(run_dir)
-    out = ensure(Path(out_dir))
-    data = ensure(out / "data")
+    trends = pathlib.Path(run) / "tokens_by_day.cleaned.csv"
+    if trends.exists():
+        import pandas as pd
+        df = pd.read_csv(trends)
+        dates = sorted(df["date"].unique().tolist())
+        top_terms = df.groupby("term")["count"].sum().sort_values(ascending=False).head(50).index.tolist()
+        terms = sorted(df["term"].unique().tolist())
+        series = {}
+        for t in top_terms:
+            sub = df[df["term"]==t].set_index("date")["count"]
+            series[t] = [int(sub.get(d, 0)) for d in dates]
+        (out/"data"/"trends.json").write_text(json.dumps({"dates":dates,"terms":terms,"top":top_terms,"series":series}))
 
-    tokens_csv = run / "tokens_by_day.cleaned.csv"
-    rising_top_csv = run / "rising_csv" / "rising_terms_top.csv"
-    bursty_top_csv = run / "rising_csv" / "bursty_terms_top.csv"
-    prices_csv = run / "prices_join" / "ticker_daily.csv"
-    art_csv = run / "aggregate" / "articles_by_day.csv"
+    sectors = ROOT.parent / "config" / "ticker_sectors.json"
+    if sectors.exists():
+        (out/"data"/"tickers.json").write_text(sectors.read_text(encoding="utf-8"))
 
-    terms_mat = load_terms_matrix(tokens_csv, rising_top_csv, keep_top=160)
-    dates = to_iso(terms_mat.index)
-    series = {c: [float(x) for x in terms_mat[c].to_numpy()] for c in terms_mat.columns}
-    top_terms = list(terms_mat.sum().sort_values(ascending=False).head(20).index)
-    write_json({"dates": dates, "terms": list(terms_mat.columns), "series": series, "top": top_terms}, data / "trends.json")
-
-    rising_terms = read_terms_list(rising_top_csv, topn=50)
-    bursty_terms = read_terms_list(bursty_top_csv, topn=50)
-    if not rising_terms and "trump" in series:
-        rising_terms = top_terms[:10]
-    write_json({"rising_terms": rising_terms, "bursty_terms": bursty_terms}, data / "rising.json")
-
-    prices_mat = load_prices(prices_csv)
-    if prices_mat is not None:
-        p_json = {
-            "dates": to_iso(prices_mat.index),
-            "tickers": list(prices_mat.columns),
-            "close": {c: [None if (pd.isna(x) or (isinstance(x,float) and np.isnan(x))) else float(x) for x in prices_mat[c].to_numpy()] for c in prices_mat.columns},
-        }
-        write_json(p_json, data / "prices.json")
-
-    if Path(art_csv).exists():
-        ad = pd.read_csv(art_csv)
-        if "date" in ad.columns and "articles" in ad.columns:
-            ad["date"] = pd.to_datetime(ad["date"]).dt.tz_localize(None)
-            ad = ad.groupby("date")["articles"].sum().reset_index().sort_values("date")
-            write_json({"dates": to_iso(ad["date"]), "articles": [int(x) for x in ad["articles"].to_numpy()]}, data / "articles.json")
-
-    html = (Path(__file__).parent / "static_dashboard.html").read_text(encoding="utf-8")
-    (out / "index.html").write_text(html, encoding="utf-8")
-    rep = (Path(__file__).parent / "report.html").read_text(encoding="utf-8")
-    (out / "report.html").write_text(rep, encoding="utf-8")
-    ris = (Path(__file__).parent / "rising.html").read_text(encoding="utf-8")
-    (out / "rising.html").write_text(ris, encoding="utf-8")
-    print(f"saved -> {out}")
+    idx = (ROOT / "static_dashboard.html").read_text(encoding="utf-8")
+    rpt = (ROOT / "report.html").read_text(encoding="utf-8")
+    ris = (ROOT / "rising.html").read_text(encoding="utf-8")
+    (out/"index.html").write_text(idx, encoding="utf-8")
+    (out/"report.html").write_text(rpt, encoding="utf-8")
+    (out/"rising.html").write_text(ris, encoding="utf-8")
 
 if __name__ == "__main__":
+    import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", required=True)
-    ap.add_argument("--out", default="site")
-    args = ap.parse_args()
-    main(args.run, args.out)
+    ap.add_argument("--out", required=True)
+    a = ap.parse_args()
+    main(a.run, a.out)
