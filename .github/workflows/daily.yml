@@ -5,20 +5,16 @@ on:
   workflow_dispatch: {}
 permissions:
   contents: read
-  pages: write
-  id-token: write
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
       NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Install deps
@@ -30,13 +26,12 @@ jobs:
         shell: bash
         run: |
           if date -u -d yesterday +%F >/dev/null 2>&1; then
-            echo "date=$(date -u -d yesterday +%F)" >> "$GITHUB_OUTPUT"
+            D=$(date -u -d yesterday +%F)
           else
-            echo "date=$(date -u -v-1d +%F)" >> "$GITHUB_OUTPUT"
+            D=$(date -u -v-1d +%F)
           fi
-          echo "INGEST_DATE=$(
-            grep -Eo 'date=.*' "$GITHUB_OUTPUT" 2>/dev/null | head -1 | cut -d= -f2
-          )" >> "$GITHUB_ENV"
+          echo "date=$D" >> "$GITHUB_OUTPUT"
+          echo "INGEST_DATE=$D" >> "$GITHUB_ENV"
       - name: Ingest hourly (NewsAPI)
         if: ${{ env.NEWSAPI_KEY != '' }}
         run: |
@@ -55,7 +50,6 @@ jobs:
             echo "in=data/silver_newsapi/$D.jsonl" >> "$GITHUB_OUTPUT"
           else
             echo "in=" >> "$GITHUB_OUTPUT"
-            echo "No input found for $D"
           fi
       - name: Generate daily report
         if: ${{ steps.in.outputs.in != '' }}
@@ -66,14 +60,6 @@ jobs:
             --kind raw_newsapi \
             --outdir reports \
             --top 30
-      - name: Commit reports
-        if: false
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reports
-          git commit -m "auto: daily report ${{ steps.when.outputs.date }}" || true
-          git push || true
       - name: Append summary
         if: ${{ steps.in.outputs.in != '' }}
         run: |
@@ -82,38 +68,13 @@ jobs:
             echo "### Daily run"
             echo "- Date (UTC): $D"
             echo "- Input: ${{ steps.in.outputs.in }}"
-            echo "- Latest: `reports/latest.html`"
+            echo "- Latest: reports/latest.html"
           } >> "$GITHUB_STEP_SUMMARY"
-      - name: Prepare site
+      - name: Upload artifact (daily report)
         if: ${{ steps.in.outputs.in != '' }}
-        run: |
-          rm -rf site && mkdir -p site
-          cp reports/latest.html site/index.html || true
-          cp -r reports/* site/ || true
-      - name: Upload Pages artifact
-        if: ${{ steps.in.outputs.in != '' }}
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          path: site
-      - name: Commit data and reports
-        if: false
-        run: |
-          set -e
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A data reports || true
-          if git diff --cached --quiet; then
-            echo "Nothing to commit."
-          else
-            git commit -m "daily: ${INGEST_DATE:-$(date -u +%F)} data+report"
-            git push
-            echo "Committed data/reports."
-          fi
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-    steps:
-      - id: deploy
-        uses: actions/deploy-pages@v4
+          name: daily-report-${{ steps.when.outputs.date }}
+          path: reports
+          if-no-files-found: error
+          retention-days: 7
