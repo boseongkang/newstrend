@@ -130,8 +130,8 @@ jobs:
           set -euo pipefail
           SHA="${GITHUB_SHA}"
           D="${LATEST:-unknown}"
-          find site -type f -name "*.html" -print0 | xargs -0 sed -i.bak -E "s#(data/[^\"']+\\.(jsonl|json)(\\.gz)?)#\\1?v=${SHA}&d=${D}#g"
-          find site -type f -name "*.js" -print0 | xargs -0 sed -i.bak -E "s#(data/[^\"']+\\.(jsonl|json)(\\.gz)?)#\\1?v=${SHA}&d=${D}#g"
+          find site -type f -name "*.html" -print0 | xargs -0 --no-run-if-empty sed -i.bak -E "s#(data/[^\"']+\\.(jsonl|json)(\\.gz)?)#\\1?v=${SHA}&d=${D}#g"
+          find site -type f -name "*.js" -print0 | xargs -0 --no-run-if-empty sed -i.bak -E "s#(data/[^\"']+\\.(jsonl|json)(\\.gz)?)#\\1?v=${SHA}&d=${D}#g"
           find site -name "*.bak" -delete
 
       - name: Create .nojekyll
