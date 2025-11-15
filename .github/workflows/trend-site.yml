@@ -10,9 +10,11 @@ on:
       - "scripts/**"
       - "site/**"
       - "config/**"
+      - "configs/**"
       - ".github/workflows/trend-site.yml"
 
 permissions:
+  actions: read
   contents: read
   pages: write
   id-token: write
@@ -35,7 +37,7 @@ jobs:
         run: |
           python -m pip install -U pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
-          pip install yfinance pandas numpy orjson
+          pip install yfinance pandas numpy orjson pyyaml || true
 
       - name: Get latest warehouse run id
         env:
@@ -69,6 +71,14 @@ jobs:
           fi
           test -d data/warehouse/daily
 
+      - name: Copy daily files into site
+        run: |
+          set -euo pipefail
+          mkdir -p site/data/daily
+          rsync -a data/warehouse/daily/*.jsonl site/data/daily/ 2>/dev/null || true
+          rsync -a data/warehouse/daily/*.jsonl.gz site/data/daily/ 2>/dev/null || true
+          ls -l site/data/daily | tail -n 5 || true
+
       - name: Aggregate from warehouse
         run: |
           python scripts/aggregate_from_warehouse.py \
@@ -78,14 +88,14 @@ jobs:
             --min-len 4 \
             --extra-stop config/extra_noise.txt
 
-      - name: Build static pages (index/report/rising)
+      - name: Build static pages
         run: |
           python scripts/build_static_ui.py --run run --out site
           test -s site/index.html
           test -s site/report.html
           test -s site/rising.html
 
-      - name: Make prices.json (last 90 business days)
+      - name: Make prices.json
         run: |
           python - <<'PY'
           import json, pathlib, datetime as dt
@@ -118,13 +128,10 @@ jobs:
           PY
           test -s site/data/prices.json
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v5
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v4
