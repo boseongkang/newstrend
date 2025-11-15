@@ -104,7 +104,8 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/build_entities_daily.py
-          test -s site/data/entities_daily.jsonl
+          LINES=$(wc -l < site/data/entities_daily.jsonl || echo 0)
+          echo "entities_daily lines=$LINES"
           head -n 3 site/data/entities_daily.jsonl || true
 
       - name: Gzip entities_daily
@@ -123,7 +124,6 @@ jobs:
           LD=$(date -u -d "$LATEST" +%s)
           DELTA=$(( (TD - LD) / 86400 ))
           echo "freshness_days=$DELTA"
-          if [ "$DELTA" -gt 5 ]; then echo "warning: data older than 5 days"; fi
 
       - name: Cache-bust data urls
         run: |
@@ -141,6 +141,7 @@ jobs:
         run: |
           ls -lt site/data/daily | head -n 12 || true
           ls -lt site/data | grep entities_daily || true
+          wc -l site/data/entities_daily.jsonl || true
 
       - name: Upload site debug artifact
         uses: actions/upload-artifact@v4
