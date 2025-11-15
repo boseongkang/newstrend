@@ -77,7 +77,8 @@ jobs:
           mkdir -p site/data/daily
           rsync -a data/warehouse/daily/*.jsonl site/data/daily/ 2>/dev/null || true
           rsync -a data/warehouse/daily/*.jsonl.gz site/data/daily/ 2>/dev/null || true
-          ls -l site/data/daily | tail -n 5 || true
+          echo "warehouse:" && ls -lt data/warehouse/daily | head -n 5 || true
+          echo "site:" && ls -lt site/data/daily | head -n 5 || true
 
       - name: Aggregate from warehouse
         run: |
@@ -98,7 +99,7 @@ jobs:
       - name: Make prices.json
         run: |
           python - <<'PY'
-          import json, pathlib, datetime as dt
+          import json, pathlib
           import pandas as pd, yfinance as yf
           m = json.loads(pathlib.Path("config/ticker_aliases.json").read_text(encoding="utf-8"))
           tickers = sorted(m.keys())
@@ -127,6 +128,13 @@ jobs:
           (p/"prices.json").write_text(json.dumps(out, indent=2, ensure_ascii=False))
           PY
           test -s site/data/prices.json
+
+      - name: Cache-bust data urls
+        run: |
+          SHA="${GITHUB_SHA}"
+          find site -type f \( -name "*.html" -o -name "*.js" \) -print0 \
+            | xargs -0 sed -i.bak -E "s#(data/[^\"']+\.(jsonl|json)(\.gz)?)#\1?v=${SHA}#g"
+          find site -name "*.bak" -delete
 
       - uses: actions/configure-pages@v5
 
