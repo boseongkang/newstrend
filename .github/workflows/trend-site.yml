@@ -114,24 +114,26 @@ jobs:
           echo "site daily files:" && ls -lt site/data/daily | head -n 12 || true
 
       - name: Determine latest date and assert freshness
-        id: latest
         run: |
           set -euo pipefail
-          LATEST=$(ls site/data/daily/*.jsonl* 2>/dev/null | sed -E 's#.*/([0-9]{4}-[0-9]{2}-[0-9]{2}).*#\1#' | sort | tail -n1)
-          echo "LATEST=$LATEST" >> $GITHUB_ENV
+          LATEST=$(ls site/data/daily/*.jsonl* 2>/dev/null | sed -E 's#.*/([0-9]{4}-[0-9]{2}-[0-9]{2}).*#\1#' | sort | tail -n1 || true)
+          if [ -z "${LATEST:-}" ]; then
+            echo "No daily files found in site/data/daily"
+            exit 1
+          fi
           echo "Latest site daily: $LATEST"
+          export LATEST
           python - <<'PY'
-          import os, datetime
-          latest = os.environ.get("LATEST")
-          if not latest:
-              raise SystemExit("No daily files found in site/data/daily")
-          dt = datetime.date.fromisoformat(latest)
-          today = datetime.datetime.utcnow().date()
-          delta = (today - dt).days
-          if delta > 2:
-              raise SystemExit(f"Data too old: {latest} (delta {delta}d)")
-          print(f"Fresh enough: {latest} (Δ{delta}d)")
-          PY
+import os, datetime
+latest = os.environ["LATEST"]
+dt = datetime.date.fromisoformat(latest)
+today = datetime.datetime.utcnow().date()
+delta = (today - dt).days
+print(f"freshness Δdays={delta}")
+if delta > 2:
+    raise SystemExit(f"Data too old: {latest} (Δ{delta}d)")
+PY
+          echo "LATEST=$LATEST" >> $GITHUB_ENV
 
       - name: Cache-bust data urls
         run: |
