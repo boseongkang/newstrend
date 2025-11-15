@@ -100,6 +100,17 @@ jobs:
           rsync -a data/warehouse/daily/*.jsonl.gz site/data/daily/ 2>/dev/null || true
           ls -lt site/data/daily | head -n 12 || true
 
+      - name: Build aggregate entities_daily.jsonl
+        run: |
+          python scripts/build_entities_daily.py
+          test -s site/data/entities_daily.jsonl
+          head -n 3 site/data/entities_daily.jsonl || true
+
+      - name: Gzip entities_daily
+        run: |
+          gzip -f -k site/data/entities_daily.jsonl
+          ls -lh site/data/entities_daily.jsonl*
+
       - name: Determine latest date and assert freshness
         run: |
           set -euo pipefail
@@ -118,8 +129,10 @@ jobs:
       - name: Create .nojekyll
         run: echo > site/.nojekyll
 
-      - name: Show final daily listing
-        run: ls -lt site/data/daily | head -n 12 || true
+      - name: Show final listings
+        run: |
+          ls -lt site/data/daily | head -n 12 || true
+          ls -lt site/data | grep entities_daily || true
 
       - name: Upload site debug artifact
         uses: actions/upload-artifact@v4
@@ -137,7 +150,7 @@ jobs:
       - id: deploy
         uses: actions/deploy-pages@v4
 
-      - name: HTTP probe latest daily
+      - name: HTTP probe latest and aggregate
         run: |
           set -euo pipefail
           BASE="${{ steps.deploy.outputs.page_url }}"
@@ -146,13 +159,8 @@ jobs:
             echo "probe: $URL"
             curl -I "$URL" || true
           done
-
-      - name: Build aggregate entities_daily.jsonl
-        run: |
-          python scripts/build_entities_daily.py
-          ls -lh site/data/entities_daily.jsonl
-
-      - name: Gzip entities_daily
-        run: |
-          gzip -f -k site/data/entities_daily.jsonl
-          ls -lh site/data/entities_daily.jsonl*
+          for CAND in "entities_daily.jsonl" "entities_daily.jsonl.gz"; do
+            URL="${BASE%/}/data/${CAND}"
+            echo "probe: $URL"
+            curl -I "$URL" || true
+          done
