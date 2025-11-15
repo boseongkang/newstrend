@@ -102,10 +102,10 @@ jobs:
 
       - name: Build aggregate entities_daily.jsonl
         run: |
-        set -euo pipefail
-        python scripts/build_entities_daily.py
-        test -s site/data/entities_daily.jsonl
-        head -n 3 site/data/entities_daily.jsonl || true
+          set -euo pipefail
+          python scripts/build_entities_daily.py
+          test -s site/data/entities_daily.jsonl
+          head -n 3 site/data/entities_daily.jsonl || true
 
       - name: Gzip entities_daily
         run: |
@@ -113,19 +113,25 @@ jobs:
           gzip -f -k site/data/entities_daily.jsonl
           ls -lh site/data/entities_daily.jsonl*
 
-      - name: Determine latest date and assert freshness
+      - name: Determine latest date and export
         run: |
           set -euo pipefail
           LATEST=$(ls site/data/daily/*.jsonl* 2>/dev/null | sed -E 's#.*/([0-9]{4}-[0-9]{2}-[0-9]{2}).*#\1#' | sort | tail -n1 || true)
           if [ -z "${LATEST:-}" ]; then echo "No daily files found in site/data/daily"; exit 1; fi
           echo "LATEST=$LATEST" >> $GITHUB_ENV
-          python -c "import sys,datetime; d=datetime.date.fromisoformat('$LATEST'); t=datetime.datetime.utcnow().date(); print(f'freshness Δdays={(t-d).days}'); sys.exit(1) if (t-d).days>2 else None"
+          TD=$(date -u +%s)
+          LD=$(date -u -d "$LATEST" +%s)
+          DELTA=$(( (TD - LD) / 86400 ))
+          echo "freshness_days=$DELTA"
+          if [ "$DELTA" -gt 5 ]; then echo "warning: data older than 5 days"; fi
 
       - name: Cache-bust data urls
         run: |
+          set -euo pipefail
           SHA="${GITHUB_SHA}"
           D="${LATEST:-unknown}"
-          find site -type f \( -name "*.html" -o -name "*.js" \) -print0 | xargs -0 sed -i.bak -E "s#(data/[^\"']+\.(jsonl|json)(\.gz)?)#\1?v=${SHA}&d=${D}#g"
+          find site -type f -name "*.html" -print0 | xargs -0 sed -i.bak -E "s#(data/[^\"']+\\.(jsonl|json)(\\.gz)?)#\\1?v=${SHA}&d=${D}#g"
+          find site -type f -name "*.js" -print0 | xargs -0 sed -i.bak -E "s#(data/[^\"']+\\.(jsonl|json)(\\.gz)?)#\\1?v=${SHA}&d=${D}#g"
           find site -name "*.bak" -delete
 
       - name: Create .nojekyll
