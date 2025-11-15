@@ -108,11 +108,15 @@ jobs:
           echo "entities_daily lines=$LINES"
           head -n 3 site/data/entities_daily.jsonl || true
 
-      - name: Gzip entities_daily
+      - name: Duplicate aggregate to legacy paths
         run: |
           set -euo pipefail
+          cp -f site/data/entities_daily.jsonl site/entities_daily.jsonl || true
+          cp -f site/data/entities_daily.jsonl site/data/entities.jsonl || true
           gzip -f -k site/data/entities_daily.jsonl
-          ls -lh site/data/entities_daily.jsonl*
+          gzip -f -k site/entities_daily.jsonl
+          gzip -f -k site/data/entities.jsonl
+          ls -lh site/data/entities_daily.jsonl* site/entities_daily.jsonl* site/data/entities.jsonl* || true
 
       - name: Determine latest date and export
         run: |
@@ -140,7 +144,8 @@ jobs:
       - name: Show final listings
         run: |
           ls -lt site/data/daily | head -n 12 || true
-          ls -lt site/data | grep entities_daily || true
+          ls -lt site/data | { grep entities_daily || true; }
+          ls -lt site | { grep entities_daily || true; }
           wc -l site/data/entities_daily.jsonl || true
 
       - name: Upload site debug artifact
@@ -169,6 +174,16 @@ jobs:
             curl -I "$URL" || true
           done
           for CAND in "entities_daily.jsonl" "entities_daily.jsonl.gz"; do
+            URL="${BASE%/}/data/${CAND}"
+            echo "probe: $URL"
+            curl -I "$URL" || true
+          done
+          for CAND in "entities_daily.jsonl" "entities_daily.jsonl.gz"; do
+            URL="${BASE%/}/${CAND}"
+            echo "probe: $URL"
+            curl -I "$URL" || true
+          done
+          for CAND in "entities.jsonl" "entities.jsonl.gz"; do
             URL="${BASE%/}/data/${CAND}"
             echo "probe: $URL"
             curl -I "$URL" || true

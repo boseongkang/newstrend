@@ -47,7 +47,6 @@ with dst.open("w", encoding="utf-8") as w:
             w.write(json.dumps({"date": date, "tok": str(tok), "n": int(n)}, ensure_ascii=False) + "\n")
             written += 1
 
-# CSV까지 백업 입력으로 합치기(위에서 아무것도 못 썼을 때만)
 if written == 0 and src_wh.is_dir():
     for f in sorted(src_wh.glob("*.csv")):
         date = f.stem
