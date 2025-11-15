@@ -146,3 +146,13 @@ jobs:
             echo "probe: $URL"
             curl -I "$URL" || true
           done
+
+      - name: Build aggregate entities_daily.jsonl
+        run: |
+          python scripts/build_entities_daily.py
+          ls -lh site/data/entities_daily.jsonl
+
+      - name: Gzip entities_daily
+        run: |
+          gzip -f -k site/data/entities_daily.jsonl
+          ls -lh site/data/entities_daily.jsonl*
