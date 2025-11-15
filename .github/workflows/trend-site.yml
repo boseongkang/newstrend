@@ -102,12 +102,14 @@ jobs:
 
       - name: Build aggregate entities_daily.jsonl
         run: |
-          python scripts/build_entities_daily.py
-          test -s site/data/entities_daily.jsonl
-          head -n 3 site/data/entities_daily.jsonl || true
+        set -euo pipefail
+        python scripts/build_entities_daily.py
+        test -s site/data/entities_daily.jsonl
+        head -n 3 site/data/entities_daily.jsonl || true
 
       - name: Gzip entities_daily
         run: |
+          set -euo pipefail
           gzip -f -k site/data/entities_daily.jsonl
           ls -lh site/data/entities_daily.jsonl*
 
