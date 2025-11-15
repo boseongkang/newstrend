@@ -72,15 +72,22 @@ jobs:
           test -d data/warehouse/daily
           ls -lt data/warehouse/daily | head -n 8 || true
 
-      - name: Convert csv to legacy tokens
-        run: python scripts/csv_to_tokens.py
+      - name: Convert csv/jsonl to *_tokens.jsonl
+        run: |
+          set -euo pipefail
+          python scripts/csv_to_tokens.py
+          echo "latest tokens:"
+          ls -lt data/warehouse/daily/*_tokens.jsonl | head -n 10 || true
+          DT=$(ls data/warehouse/daily/*_tokens.jsonl | sed -E 's#.*/([0-9]{4}-[0-9]{2}-[0-9]{2})_tokens\.jsonl#\1#' | sort | tail -n1 || true)
+          [ -n "$DT" ] && echo "LATEST_TOKENS=$DT" >> $GITHUB_ENV || true
+          [ -n "$DT" ] && wc -l "data/warehouse/daily/${DT}_tokens.jsonl" || true
 
       - name: Aggregate from warehouse
         run: |
           python scripts/aggregate_from_warehouse.py \
             --warehouse data/warehouse/daily \
             --out run \
-            --last-days 30 \
+            --last-days 60 \
             --min-len 4 \
             --extra-stop config/extra_noise.txt
 
@@ -116,7 +123,19 @@ jobs:
           gzip -f -k site/data/entities_daily.jsonl
           gzip -f -k site/entities_daily.jsonl
           gzip -f -k site/data/entities.jsonl
-          ls -lh site/data/entities_daily.jsonl* site/entities_daily.jsonl* site/data/entities.jsonl* || true
+
+      - name: Summarize trends.json window
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          p = pathlib.Path("site/data/trends.json")
+          if p.exists():
+              obj = json.loads(p.read_text(encoding="utf-8"))
+              dates = obj.get("dates") or obj.get("x") or []
+              print("trends.json dates:", len(dates), "range:", (dates[0] if dates else None), "->", (dates[-1] if dates else None))
+          else:
+              print("site/data/trends.json missing")
+          PY
 
       - name: Determine latest date and export
         run: |
@@ -124,10 +143,6 @@ jobs:
           LATEST=$(ls site/data/daily/*.jsonl* 2>/dev/null | sed -E 's#.*/([0-9]{4}-[0-9]{2}-[0-9]{2}).*#\1#' | sort | tail -n1 || true)
           if [ -z "${LATEST:-}" ]; then echo "No daily files found in site/data/daily"; exit 1; fi
           echo "LATEST=$LATEST" >> $GITHUB_ENV
-          TD=$(date -u +%s)
-          LD=$(date -u -d "$LATEST" +%s)
-          DELTA=$(( (TD - LD) / 86400 ))
-          echo "freshness_days=$DELTA"
 
       - name: Cache-bust data urls
         run: |
@@ -141,13 +156,6 @@ jobs:
       - name: Create .nojekyll
         run: echo > site/.nojekyll
 
-      - name: Show final listings
-        run: |
-          ls -lt site/data/daily | head -n 12 || true
-          ls -lt site/data | { grep entities_daily || true; }
-          ls -lt site | { grep entities_daily || true; }
-          wc -l site/data/entities_daily.jsonl || true
-
       - name: Upload site debug artifact
         uses: actions/upload-artifact@v4
         with:
@@ -155,36 +163,18 @@ jobs:
           path: site
 
       - uses: actions/configure-pages@v5
-
       - id: upload
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
-
       - id: deploy
         uses: actions/deploy-pages@v4
 
-      - name: HTTP probe latest and aggregate
+      - name: HTTP probe
         run: |
           set -euo pipefail
           BASE="${{ steps.deploy.outputs.page_url }}"
-          for CAND in "${LATEST}.jsonl" "${LATEST}_tokens.jsonl" "${LATEST}.jsonl.gz"; do
-            URL="${BASE%/}/data/daily/${CAND}"
-            echo "probe: $URL"
-            curl -I "$URL" || true
-          done
-          for CAND in "entities_daily.jsonl" "entities_daily.jsonl.gz"; do
-            URL="${BASE%/}/data/${CAND}"
-            echo "probe: $URL"
-            curl -I "$URL" || true
-          done
-          for CAND in "entities_daily.jsonl" "entities_daily.jsonl.gz"; do
-            URL="${BASE%/}/${CAND}"
-            echo "probe: $URL"
-            curl -I "$URL" || true
-          done
-          for CAND in "entities.jsonl" "entities.jsonl.gz"; do
-            URL="${BASE%/}/data/${CAND}"
-            echo "probe: $URL"
-            curl -I "$URL" || true
-          done
+          echo "page_url: $BASE"
+          curl -I "${BASE%/}/data/trends.json" || true
+          curl -I "${BASE%/}/data/daily/${LATEST}.jsonl" || true
+          curl -I "${BASE%/}/data/entities_daily.jsonl" || true

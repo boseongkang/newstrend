@@ -7,6 +7,7 @@ root = Path("data/warehouse/daily")
 root.mkdir(parents=True, exist_ok=True)
 
 def write_tokens(out_path, items):
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w", encoding="utf-8") as w:
         for tok, n in items:
             w.write(json.dumps({"tok": str(tok), "n": int(n)}, ensure_ascii=False) + "\n")
@@ -28,7 +29,7 @@ for d in sorted(dates):
         except Exception:
             df = pd.DataFrame(columns=["entity","count"])
         cols = {c.lower(): c for c in df.columns}
-        if {"entity","count"}.issubset(set(k.lower() for k in df.columns)):
+        if {"entity","count"}.issubset({k.lower() for k in df.columns}):
             e = cols.get("entity","entity"); c = cols.get("count","count")
             items = [(r[e], int(r[c])) for _, r in df[[e,c]].fillna({"count":0}).iterrows()]
             write_tokens(out, items)
@@ -40,14 +41,16 @@ for d in sorted(dates):
         with jsonlf.open("r", encoding="utf-8", errors="ignore") as f:
             for line in f:
                 line = line.strip()
-                if not line: continue
+                if not line:
+                    continue
                 try:
                     o = json.loads(line)
                 except Exception:
                     continue
                 tok = o.get("tok") or o.get("entity")
                 n = o.get("n") if "n" in o else o.get("count", 1)
-                if tok is None: continue
+                if tok is None:
+                    continue
                 try:
                     n = int(n)
                 except Exception:
