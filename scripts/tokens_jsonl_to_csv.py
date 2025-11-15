@@ -5,7 +5,7 @@ root = Path("data/warehouse/daily")
 paths = sorted(root.glob("*_tokens.jsonl"))
 
 for jf in paths:
-    cf = jf.with_suffix("").with_suffix(".csv")
+    cf = jf.with_suffix("").with_suffix(".csv")  
     rows = []
     with jf.open("r", encoding="utf-8", errors="ignore") as f:
         for line in f:
@@ -24,10 +24,10 @@ for jf in paths:
                 n = int(n)
             except Exception:
                 continue
-            rows.append((tok, n))
+            rows.append((str(tok), n))
     cf.parent.mkdir(parents=True, exist_ok=True)
     with cf.open("w", newline="", encoding="utf-8") as out:
         w = csv.writer(out)
-        w.writerow(["tok", "n"])
+        w.writerow(["entity", "count"])
         w.writerows(rows)
     print(f"wrote {cf} rows={len(rows)}")
