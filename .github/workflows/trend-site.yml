@@ -72,7 +72,7 @@ jobs:
           test -d data/warehouse/daily
           echo "extracted daily:" && ls -lt data/warehouse/daily | head -n 5 || true
 
-      - name: Make legacy daily jsonl (tok/n) from csv
+      - name: Convert csv -> legacy *_tokens.jsonl
         run: |
           python - <<'PY'
           import pandas as pd, json, pathlib
@@ -80,22 +80,13 @@ jobs:
           for f in sorted(p.glob("*.csv")):
               dt = f.stem
               df = pd.read_csv(f)
-              j_legacy = p / f"{dt}_tokens.jsonl"
-              with j_legacy.open("w", encoding="utf-8") as w:
+              j = p / f"{dt}_tokens.jsonl"
+              with j.open("w", encoding="utf-8") as w:
                   for r in df.itertuples(index=False):
                       w.write(json.dumps({"tok": str(r.entity), "n": int(r.count)}, ensure_ascii=False) + "\n")
-          print("converted csv -> *_tokens.jsonl")
+          print("csv -> *_tokens.jsonl done")
           PY
-          echo "daily after convert:" && ls -lt data/warehouse/daily | head -n 8 || true
-
-      - name: Copy daily files into site
-        run: |
-          set -euo pipefail
-          mkdir -p site/data/daily
-          rsync -a data/warehouse/daily/*.jsonl site/data/daily/ 2>/dev/null || true
-          rsync -a data/warehouse/daily/*_tokens.jsonl site/data/daily/ 2>/dev/null || true
-          rsync -a data/warehouse/daily/*.jsonl.gz site/data/daily/ 2>/dev/null || true
-          echo "site daily files:" && ls -lt site/data/daily | head -n 8 || true
+          ls -lt data/warehouse/daily | head -n 8 || true
 
       - name: Aggregate from warehouse
         run: |
@@ -146,6 +137,15 @@ jobs:
           PY
           test -s site/data/prices.json
 
+      - name: Copy daily files into site (after build)
+        run: |
+          set -euo pipefail
+          mkdir -p site/data/daily
+          rsync -a data/warehouse/daily/*.jsonl site/data/daily/ 2>/dev/null || true
+          rsync -a data/warehouse/daily/*_tokens.jsonl site/data/daily/ 2>/dev/null || true
+          rsync -a data/warehouse/daily/*.jsonl.gz site/data/daily/ 2>/dev/null || true
+          echo "site daily files:" && ls -lt site/data/daily | head -n 10 || true
+
       - name: Cache-bust data urls
         run: |
           SHA="${GITHUB_SHA}"
@@ -153,11 +153,14 @@ jobs:
             | xargs -0 sed -i.bak -E "s#(data/[^\"']+\.(jsonl|json)(\.gz)?)#\1?v=${SHA}#g"
           find site -name "*.bak" -delete
 
-      - name: Trace latest date in built site
+      - name: Assert today's file exists in site
         run: |
-          echo "searching for ISO dates in site data..."
-          grep -RhoE "20[0-9]{2}-[01][0-9]-[0-3][0-9]" site | sort | tail -n 10 || true
-          echo "site daily dir listing:" && ls -lt site/data/daily | head -n 10 || true
+          D=$(date -u +%F)
+          ls -l site/data/daily | tail -n 20 || true
+          test -s "site/data/daily/${D}_tokens.jsonl" || \
+          test -s "site/data/daily/${D}.jsonl" || \
+          test -s "site/data/daily/${D}.jsonl.gz" || \
+          (echo "Missing today's daily file in site/data/daily" && exit 1)
 
       - uses: actions/configure-pages@v5
 
