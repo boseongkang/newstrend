@@ -3,43 +3,47 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>News Trends Dashboard</title>
+<title>News Trends</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-  :root{--bg:#0b0f18;--card:#121826;--line:#1f2937;--txt:#e6e8ec;--accent:#3b82f6}
-  body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,Segoe UI,Roboto,Arial}
-  .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
-  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-  .brand{font-weight:700;font-size:22px}
-  .nav a{color:#cbd5e1;text-decoration:none;margin-left:12px;padding:8px 10px;border-radius:10px}
-  .nav a.active{background:var(--accent);color:#fff}
-  .row{display:flex;gap:8px;align-items:center;margin:12px 0}
+  body{margin:0;background:#0b0f18;color:#e6e8ec;font-family:system-ui,Segoe UI,Roboto,Arial}
+  .wrap{max-width:1200px;margin:28px auto;padding:0 16px;position:relative}
+  h1{font-size:24px;margin:0 0 16px}
+  .nav{position:absolute;right:16px;top:12px;display:flex;gap:8px}
+  .pill{background:#253bff;color:#fff;border-radius:10px;padding:8px 12px;text-decoration:none}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{background:#121826;border:1px solid #1f2937;border-radius:12px;padding:12px}
+  .row{display:flex;gap:8px;align-items:center;margin-bottom:12px}
   input{background:#0f1523;border:1px solid #243043;color:#e6e8ec;border-radius:10px;padding:10px 12px;min-width:220px}
   button{background:#253bff;color:#fff;border:0;border-radius:10px;padding:10px 14px;cursor:pointer}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
-  canvas{width:100%;height:360px}
   .hint{opacity:.7;font-size:12px;margin-top:6px}
+  canvas{width:100%;height:360px}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:20px}
+  .sheet{max-width:900px;width:100%;max-height:80vh;overflow:auto;background:#0f1523;border:1px solid #243043;border-radius:12px;padding:16px}
+  .sec{margin-bottom:10px}
+  .sec h4{margin:10px 0}
+  .grid2{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .sectbar{display:flex;justify-content:space-between;align-items:center}
+  .sbtn{background:#263249;border:1px solid #2f3b57;color:#cbd5e1;border-radius:8px;padding:6px 10px;cursor:pointer}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top">
-    <div class="brand">News Trends</div>
-    <div class="nav">
-      <a class="active" href="./index.html">Trends</a>
-      <a href="./report.html">Report</a>
-      <a href="./rising.html">Rising</a>
-    </div>
+  <div class="nav">
+    <a href="./index.html" class="pill">Trends</a>
+    <a href="./report.html" class="pill">Report</a>
+    <a href="./rising.html" class="pill">Rising</a>
   </div>
+
+  <h1>News Trends</h1>
 
   <div class="row">
     <input id="terms" placeholder="Terms (comma separated)">
     <input id="tickers" placeholder="Tickers, e.g. AAPL,MSFT">
-    <button id="btnTop" type="button">Top terms</button>
-    <button id="btnClear" type="button">Clear</button>
-    <button id="btnRising" type="button">Rising</button>
+    <button id="btnPick">Select tickers</button>
+    <button id="btnTop">Top terms</button>
+    <button id="btnClear">Clear</button>
   </div>
 
   <div class="grid">
@@ -54,50 +58,57 @@
   <div class="hint">Hard-refresh if stale data appears.</div>
 </div>
 
+<div id="modal" class="modal">
+  <div class="sheet">
+    <div class="sectbar">
+      <h3>Select tickers by sector</h3>
+      <div>
+        <button class="sbtn" id="btnAll">All</button>
+        <button class="sbtn" id="btnNone">None</button>
+        <button class="sbtn" id="btnClose">Close</button>
+        <button class="sbtn" id="btnApply">Apply</button>
+      </div>
+    </div>
+    <div id="sectorGrid" class="grid2"></div>
+  </div>
+</div>
+
 <script>
 (async function(){
   const v = Date.now();
-  async function getJSON(p){
-    const res = await fetch('./data/'+p+'?v='+v,{cache:'no-store'});
-    if(!res.ok) throw new Error(p+' '+res.status);
-    return await res.json();
-  }
+  async function getJSON(p){ const r = await fetch('./data/'+p+'?v='+v,{cache:'no-store'}); if(!r.ok) throw new Error(p); return r.json(); }
 
-  let trends=null, prices=null, articles=null;
+  let trends=null, prices=null, articles=null, tickermap=null;
   try{ trends = await getJSON('trends.json'); }catch(e){ console.error(e); }
   try{ prices = await getJSON('prices.json'); }catch(e){ console.warn('prices optional', e); }
   try{ articles = await getJSON('articles.json'); }catch(e){ console.error(e); }
+  try{ tickermap = await getJSON('tickers.json'); }catch(e){ console.warn('tickers list missing', e); }
 
   const termsInput = document.getElementById('terms');
   const tickersInput = document.getElementById('tickers');
   const btnTop = document.getElementById('btnTop');
   const btnClear = document.getElementById('btnClear');
-  const btnRising = document.getElementById('btnRising');
+  const btnPick = document.getElementById('btnPick');
 
   const tc = new Chart(document.getElementById('termsChart').getContext('2d'),{
-    type:'line',
-    data:{labels: trends? trends.dates: [], datasets:[]},
+    type:'line', data:{labels: trends? trends.dates: [], datasets:[]},
     options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
   });
 
   const pc = new Chart(document.getElementById('pricesChart').getContext('2d'),{
-    type:'line',
-    data:{labels: prices? prices.dates: [], datasets:[]},
+    type:'line', data:{labels: prices? prices.dates: [], datasets:[]},
     options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
   });
 
   const ac = new Chart(document.getElementById('articlesChart').getContext('2d'),{
-    type:'bar',
-    data:{labels: articles? articles.dates: [], datasets:[{label:'articles', data: articles? articles.articles: []}]},
+    type:'bar', data:{labels: articles? articles.dates: [], datasets:[{label:'articles', data: articles? articles.articles: []}]},
     options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
   });
 
   function updateTerms(sel){
     if(!trends) return;
     const names = sel && sel.length? sel: trends.top.slice(0,10);
-    const ds = names.filter(n => trends.terms.includes(n)).map((t)=>({
-      label:t,data:(trends.series[t]||[]),borderWidth:2,pointRadius:0
-    }));
+    const ds = names.filter(n => trends.terms.includes(n)).map(t => ({label:t,data:(trends.series[t]||[]),borderWidth:2,pointRadius:0}));
     tc.data.labels = trends.dates;
     tc.data.datasets = ds;
     tc.update();
@@ -106,9 +117,9 @@
   function updatePrices(tickers){
     if(!prices) return;
     const want = (tickers||[]).map(s=>s.toUpperCase());
-    const ds = want
-      .filter(n => (prices.tickers||[]).includes(n))
-      .map(t => ({label:t, data:(prices.close[t]||[]).map(v => v==null? null:Number(v)), borderWidth:2, pointRadius:0}));
+    const ds = want.filter(n => (prices.tickers||[]).includes(n)).map(t => ({
+      label:t, data:(prices.close[t]||[]).map(v => v==null? null:Number(v)), borderWidth:2, pointRadius:0
+    }));
     pc.data.labels = prices.dates||[];
     pc.data.datasets = ds;
     pc.update();
@@ -119,11 +130,7 @@
     const sel = termsInput.value.split(',').map(s=>s.trim()).filter(Boolean);
     updateTerms(sel);
   };
-  btnClear.onclick = () => {
-    termsInput.value = ''; tickersInput.value = '';
-    updateTerms([]); updatePrices([]);
-  };
-  btnRising.onclick = () => { location.href = './rising.html'; };
+  btnClear.onclick = () => { termsInput.value=''; tickersInput.value=''; updateTerms([]); updatePrices([]); };
 
   const applyTickers = () => {
     const sel = tickersInput.value.split(',').map(s=>s.trim()).filter(Boolean);
@@ -132,6 +139,38 @@
   tickersInput.addEventListener('change', applyTickers);
   tickersInput.addEventListener('keyup', e => { if(e.key==='Enter') applyTickers(); });
   tickersInput.addEventListener('blur', applyTickers);
+
+  const modal = document.getElementById('modal');
+  const sectorGrid = document.getElementById('sectorGrid');
+  const btnClose = document.getElementById('btnClose');
+  const btnApply = document.getElementById('btnApply');
+  const btnAll = document.getElementById('btnAll');
+  const btnNone = document.getElementById('btnNone');
+
+  btnPick.onclick = () => { renderSectors(); modal.style.display='flex'; };
+  btnClose.onclick = () => { modal.style.display='none'; };
+
+  function renderSectors(){
+    if(!tickermap){ sectorGrid.innerHTML = '<div>No tickers.json</div>'; return; }
+    sectorGrid.innerHTML = '';
+    Object.entries(tickermap).forEach(([sector, arr])=>{
+      const box = document.createElement('div');
+      box.className='sec';
+      const list = arr.map(t => `<label style="display:inline-block;margin:4px 8px 4px 0"><input type="checkbox" class="tbox" value="${t}"> ${t}</label>`).join('');
+      box.innerHTML = `<h4>${sector}</h4>${list}`;
+      sectorGrid.appendChild(box);
+    });
+  }
+
+  btnAll.onclick = () => document.querySelectorAll('.tbox').forEach(ch => ch.checked = true);
+  btnNone.onclick = () => document.querySelectorAll('.tbox').forEach(ch => ch.checked = false);
+
+  btnApply.onclick = () => {
+    const sel = Array.from(document.querySelectorAll('.tbox:checked')).map(x=>x.value);
+    tickersInput.value = sel.join(',');
+    modal.style.display='none';
+    updatePrices(sel);
+  };
 
   updateTerms([]);
   updatePrices([]);

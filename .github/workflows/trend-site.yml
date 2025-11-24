@@ -12,6 +12,9 @@ on:
       - "config/**"
       - "configs/**"
       - ".github/workflows/trend-site.yml"
+  workflow_run:
+    workflows: ["update-warehouse"]
+    types: [completed]
 
 permissions:
   actions: read
@@ -25,6 +28,7 @@ concurrency:
 
 jobs:
   build:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -105,6 +109,48 @@ jobs:
           test -s site/report.html
           test -s site/rising.html
 
+      - name: Join prices
+        run: |
+          python - <<'PY'
+          import pandas as pd, os, sys
+          df = pd.read_csv("run/tokens_by_day.cleaned.csv")
+          s = pd.to_datetime(df['date']).min().date()
+          e = pd.to_datetime(df['date']).max().date()
+          print("PRICE_RANGE", s, e)
+          os.environ['START']=str(s); os.environ['END']=str(e)
+          PY
+          python scripts/join_prices.py \
+            --terms run/tokens_by_day.cleaned.csv \
+            --map   config/ticker_aliases.json \
+            --start "$START" \
+            --end   "$END" \
+            --out   run/prices.csv \
+            --min-days 1
+
+      - name: Export prices.json
+        run: |
+          python - <<'PY'
+          import pandas as pd, json, pathlib
+          base = pathlib.Path("run")/"prices.csv"
+          td = pd.read_csv(base/"ticker_daily.csv")
+          dates = sorted(td["date"].unique().tolist())
+          tickers = sorted(td["ticker"].unique().tolist())
+          close = {t:[None]*len(dates) for t in tickers}
+          pos = {d:i for i,d in enumerate(dates)}
+          for r in td.itertuples(index=False):
+            i = pos[r.date]
+            v = None if pd.isna(r.close) else float(r.close)
+            close[r.ticker][i] = v
+          out = {"dates":dates,"tickers":tickers,"close":close}
+          outp = pathlib.Path("site/data"); outp.mkdir(parents=True, exist_ok=True)
+          (outp/"prices.json").write_text(json.dumps(out, indent=2, ensure_ascii=False))
+          print("PRICES_DATES", dates[0] if dates else None, dates[-1] if dates else None, "TICKERS", len(tickers))
+          PY
+
+      - name: Build tickers.json (sectors)
+        run: |
+          python scripts/make_ticker_sectors.py --map config/ticker_aliases.json --out site/data/tickers.json || true
+
       - name: Copy daily files into site
         run: |
           set -euo pipefail
@@ -156,8 +202,8 @@ jobs:
           set -euo pipefail
           SHA="${GITHUB_SHA}"
           D="${LATEST:-unknown}"
-          find site -type f -name "*.html" -print0 | xargs -0 --no-run-if-empty sed -i.bak -E "s#(data/[^\"']+\\.(jsonl|json)(\\.gz)?)#\\1?v=${SHA}&d=${D}#g"
-          find site -type f -name "*.js" -print0 | xargs -0 --no-run-if-empty sed -i.bak -E "s#(data/[^\"']+\\.(jsonl|json)(\\.gz)?)#\\1?v=${SHA}&d=${D}#g"
+          find site -type f -name "*.html" -print0 | xargs -0 --no-run-if-empty sed -i.bak -E "s#(data/[^\"']+\.(jsonl|json)(\.gz)?)#\1?v=${SHA}&d=${D}#g"
+          find site -type f -name "*.js" -print0 | xargs -0 --no-run-if-empty sed -i.bak -E "s#(data/[^\"']+\.(jsonl|json)(\.gz)?)#\1?v=${SHA}&d=${D}#g"
           find site -name "*.bak" -delete
 
       - name: Create .nojekyll
@@ -170,10 +216,12 @@ jobs:
           path: site
 
       - uses: actions/configure-pages@v5
+
       - id: upload
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
+
       - id: deploy
         uses: actions/deploy-pages@v4
 
