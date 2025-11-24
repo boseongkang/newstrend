@@ -37,9 +37,7 @@
     <a href="./report.html" class="pill">Report</a>
     <a href="./rising.html" class="pill">Rising</a>
   </div>
-
   <h1>News Trends</h1>
-
   <div class="row">
     <input id="terms" placeholder="Terms (comma separated)">
     <input id="tickers" placeholder="Tickers, e.g. AAPL,MSFT">
@@ -47,19 +45,15 @@
     <button id="btnTop">Top terms</button>
     <button id="btnClear">Clear</button>
   </div>
-
   <div class="grid">
     <div class="card"><canvas id="termsChart"></canvas></div>
     <div class="card"><canvas id="pricesChart"></canvas></div>
   </div>
-
   <div class="card" style="margin-top:16px">
     <canvas id="articlesChart"></canvas>
   </div>
-
   <div class="hint">Hard-refresh if stale data appears.</div>
 </div>
-
 <div id="modal" class="modal">
   <div class="sheet">
     <div class="sectbar">
@@ -74,108 +68,72 @@
     <div id="sectorGrid" class="grid2"></div>
   </div>
 </div>
-
 <script>
 (async function(){
-  const v = Date.now();
-  async function getJSON(p){ const r = await fetch('./data/'+p+'?v='+v,{cache:'no-store'}); if(!r.ok) throw new Error(p); return r.json(); }
-
-  let trends=null, prices=null, articles=null, tickermap=null;
-  try{ trends = await getJSON('trends.json'); }catch(e){ console.error(e); }
-  try{ prices = await getJSON('prices.json'); }catch(e){ console.warn('prices optional', e); }
-  try{ articles = await getJSON('articles.json'); }catch(e){ console.error(e); }
-  try{ tickermap = await getJSON('tickers.json'); }catch(e){ console.warn('tickers list missing', e); }
-
-  const termsInput = document.getElementById('terms');
-  const tickersInput = document.getElementById('tickers');
-  const btnTop = document.getElementById('btnTop');
-  const btnClear = document.getElementById('btnClear');
-  const btnPick = document.getElementById('btnPick');
-
-  const tc = new Chart(document.getElementById('termsChart').getContext('2d'),{
-    type:'line', data:{labels: trends? trends.dates: [], datasets:[]},
-    options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
-  });
-
-  const pc = new Chart(document.getElementById('pricesChart').getContext('2d'),{
-    type:'line', data:{labels: prices? prices.dates: [], datasets:[]},
-    options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
-  });
-
-  const ac = new Chart(document.getElementById('articlesChart').getContext('2d'),{
-    type:'bar', data:{labels: articles? articles.dates: [], datasets:[{label:'articles', data: articles? articles.articles: []}]},
-    options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
-  });
-
+  const v=Date.now();
+  async function getJSON(p){const r=await fetch('./data/'+p+'?v='+v,{cache:'no-store'});if(!r.ok)throw new Error(p);return r.json();}
+  let trends=null,prices=null,articles=null,tickermap=null;
+  try{trends=await getJSON('trends.json');}catch(e){}
+  try{prices=await getJSON('prices.json');}catch(e){}
+  try{articles=await getJSON('articles.json');}catch(e){}
+  try{tickermap=await getJSON('tickers.json');}catch(e){}
+  const termsInput=document.getElementById('terms');
+  const tickersInput=document.getElementById('tickers');
+  const btnTop=document.getElementById('btnTop');
+  const btnClear=document.getElementById('btnClear');
+  const btnPick=document.getElementById('btnPick');
+  const baseLineGrid={color:'#1f2937'};
+  const tc=new Chart(document.getElementById('termsChart').getContext('2d'),{type:'line',data:{labels:trends?trends.dates:[],datasets:[]},options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:baseLineGrid},y:{grid:baseLineGrid}}}});
+  const pc=new Chart(document.getElementById('pricesChart').getContext('2d'),{type:'line',data:{labels:prices?prices.dates:[],datasets:[]},options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:baseLineGrid},y:{grid:baseLineGrid}}}});
+  const ac=new Chart(document.getElementById('articlesChart').getContext('2d'),{type:'bar',data:{labels:articles?articles.dates:[],datasets:[{label:'articles',data:articles?articles.articles:[]}]},options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:baseLineGrid},y:{grid:baseLineGrid}}}});
   function updateTerms(sel){
-    if(!trends) return;
-    const names = sel && sel.length? sel: trends.top.slice(0,10);
-    const ds = names.filter(n => trends.terms.includes(n)).map(t => ({label:t,data:(trends.series[t]||[]),borderWidth:2,pointRadius:0}));
-    tc.data.labels = trends.dates;
-    tc.data.datasets = ds;
+    if(!trends)return;
+    const names=sel&&sel.length?sel:trends.top.slice(0,10);
+    const ds=names.filter(n=>trends.terms.includes(n)).map(t=>({label:t,data:(trends.series[t]||[]),borderWidth:2,pointRadius:0}));
+    tc.data.labels=trends.dates;
+    tc.data.datasets=ds;
     tc.update();
   }
-
   function updatePrices(tickers){
-    if(!prices) return;
-    const want = (tickers||[]).map(s=>s.toUpperCase());
-    const ds = want.filter(n => (prices.tickers||[]).includes(n)).map(t => ({
-      label:t, data:(prices.close[t]||[]).map(v => v==null? null:Number(v)), borderWidth:2, pointRadius:0
-    }));
-    pc.data.labels = prices.dates||[];
-    pc.data.datasets = ds;
+    if(!prices)return;
+    const want=(tickers||[]).map(s=>s.toUpperCase());
+    const ds=want.filter(n=>(prices.tickers||[]).includes(n)).map(t=>({label:t,data:(prices.close[t]||[]).map(v=>v==null?null:Number(v)),borderWidth:2,pointRadius:0}));
+    pc.data.labels=prices.dates||[];
+    pc.data.datasets=ds;
     pc.update();
   }
-
-  btnTop.onclick = () => {
-    termsInput.value = (trends? trends.top.slice(0,10): []).join(',');
-    const sel = termsInput.value.split(',').map(s=>s.trim()).filter(Boolean);
-    updateTerms(sel);
-  };
-  btnClear.onclick = () => { termsInput.value=''; tickersInput.value=''; updateTerms([]); updatePrices([]); };
-
-  const applyTickers = () => {
-    const sel = tickersInput.value.split(',').map(s=>s.trim()).filter(Boolean);
-    updatePrices(sel);
-  };
-  tickersInput.addEventListener('change', applyTickers);
-  tickersInput.addEventListener('keyup', e => { if(e.key==='Enter') applyTickers(); });
-  tickersInput.addEventListener('blur', applyTickers);
-
-  const modal = document.getElementById('modal');
-  const sectorGrid = document.getElementById('sectorGrid');
-  const btnClose = document.getElementById('btnClose');
-  const btnApply = document.getElementById('btnApply');
-  const btnAll = document.getElementById('btnAll');
-  const btnNone = document.getElementById('btnNone');
-
-  btnPick.onclick = () => { renderSectors(); modal.style.display='flex'; };
-  btnClose.onclick = () => { modal.style.display='none'; };
-
+  btnTop.onclick=()=>{termsInput.value=(trends?trends.top.slice(0,10):[]).join(',');const sel=termsInput.value.split(',').map(s=>s.trim()).filter(Boolean);updateTerms(sel);};
+  btnClear.onclick=()=>{termsInput.value='';tickersInput.value='';updateTerms([]);updatePrices([]);};
+  const applyTickers=()=>{const sel=tickersInput.value.split(',').map(s=>s.trim()).filter(Boolean);updatePrices(sel);};
+  tickersInput.addEventListener('change',applyTickers);
+  tickersInput.addEventListener('keyup',e=>{if(e.key==='Enter')applyTickers();});
+  tickersInput.addEventListener('blur',applyTickers);
+  const modal=document.getElementById('modal');
+  const sectorGrid=document.getElementById('sectorGrid');
+  const btnClose=document.getElementById('btnClose');
+  const btnApply=document.getElementById('btnApply');
+  const btnAll=document.getElementById('btnAll');
+  const btnNone=document.getElementById('btnNone');
+  btnPick.onclick=()=>{renderSectors();modal.style.display='flex';};
+  btnClose.onclick=()=>{modal.style.display='none';};
   function renderSectors(){
-    if(!tickermap){ sectorGrid.innerHTML = '<div>No tickers.json</div>'; return; }
-    sectorGrid.innerHTML = '';
-    Object.entries(tickermap).forEach(([sector, arr])=>{
-      const box = document.createElement('div');
+    if(!tickermap){sectorGrid.innerHTML='<div>No tickers.json</div>';return;}
+    sectorGrid.innerHTML='';
+    Object.entries(tickermap).forEach(([sector,arr])=>{
+      const box=document.createElement('div');
       box.className='sec';
-      const list = arr.map(t => `<label style="display:inline-block;margin:4px 8px 4px 0"><input type="checkbox" class="tbox" value="${t}"> ${t}</label>`).join('');
-      box.innerHTML = `<h4>${sector}</h4>${list}`;
+      const list=arr.map(t=>`<label style="display:inline-block;margin:4px 8px 4px 0"><input type="checkbox" class="tbox" value="${t}"> ${t}</label>`).join('');
+      box.innerHTML=`<h4>${sector}</h4>${list}`;
       sectorGrid.appendChild(box);
     });
   }
-
-  btnAll.onclick = () => document.querySelectorAll('.tbox').forEach(ch => ch.checked = true);
-  btnNone.onclick = () => document.querySelectorAll('.tbox').forEach(ch => ch.checked = false);
-
-  btnApply.onclick = () => {
-    const sel = Array.from(document.querySelectorAll('.tbox:checked')).map(x=>x.value);
-    tickersInput.value = sel.join(',');
-    modal.style.display='none';
-    updatePrices(sel);
-  };
-
-  updateTerms([]);
-  updatePrices([]);
+  btnAll.onclick=()=>document.querySelectorAll('.tbox').forEach(ch=>ch.checked=true);
+  btnNone.onclick=()=>document.querySelectorAll('.tbox').forEach(ch=>ch.checked=false);
+  btnApply.onclick=()=>{const sel=Array.from(document.querySelectorAll('.tbox:checked')).map(x=>x.value);tickersInput.value=sel.join(',');modal.style.display='none';updatePrices(sel);};
+  const defaultTerms=(trends?.top||[]).slice(0,10);
+  if(defaultTerms.length){termsInput.value=defaultTerms.join(',');updateTerms(defaultTerms);}else{updateTerms([]);}
+  const defaultTickers=(prices?.tickers||[]).slice(0,6);
+  if(defaultTickers.length){tickersInput.value=defaultTickers.join(',');updatePrices(defaultTickers);}else{updatePrices([]);}
 })();
 </script>
 </body>
