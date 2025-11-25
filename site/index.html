@@ -78,41 +78,41 @@
 <script>
 (async function(){
   const v = Date.now();
-  const gridColor = '#1f2937';
-
   async function getJSON(p){
-    const url = './data/'+p+'?v='+v;
-    const r = await fetch(url, {cache:'no-store'});
-    if(!r.ok){ console.error('GET failed', p, r.status); throw new Error(p+' '+r.status); }
+    const r = await fetch('./data/'+p+'?v='+v,{cache:'no-store'});
+    if(!r.ok) throw new Error(p+' '+r.status);
     return r.json();
   }
 
   let trends=null, prices=null, articles=null, tickermap=null;
-  try{ trends    = await getJSON('trends.json'); }catch(e){ console.error('trends.json', e); }
-  try{ prices    = await getJSON('prices.json'); }catch(e){ console.warn('prices optional', e); }
-  try{ articles  = await getJSON('articles.json'); }catch(e){ console.error('articles.json', e); }
+  try{ trends = await getJSON('trends.json'); }catch(e){ console.error(e); }
+  try{ prices = await getJSON('prices.json'); }catch(e){ console.warn('prices optional', e); }
+  try{ articles = await getJSON('articles.json'); }catch(e){ console.error(e); }
   try{ tickermap = await getJSON('tickers.json'); }catch(e){ console.warn('tickers list missing', e); }
 
-  const termsInput   = document.getElementById('terms');
+  const termsInput = document.getElementById('terms');
   const tickersInput = document.getElementById('tickers');
-  const btnTop   = document.getElementById('btnTop');
+  const btnTop = document.getElementById('btnTop');
   const btnClear = document.getElementById('btnClear');
-  const btnPick  = document.getElementById('btnPick');
+  const btnPick = document.getElementById('btnPick');
+
+  const gridColor = '#1f2937';
 
   const tc = new Chart(document.getElementById('termsChart').getContext('2d'),{
     type:'line',
     data:{labels: trends?.dates||[], datasets:[]},
     options:{responsive:true,plugins:{legend:{display:true}},
+      spanGaps:true, normalized:true,
       scales:{x:{grid:{color:gridColor}},y:{grid:{color:gridColor}}}}
   });
 
   const pc = new Chart(document.getElementById('pricesChart').getContext('2d'),{
     type:'line',
     data:{labels: prices?.dates||[], datasets:[]},
-    options:{responsive:true,plugins:{legend:{display:true}}},
-    plugins:[]
+    options:{responsive:true,plugins:{legend:{display:true}},
+      spanGaps:true, normalized:true,
+      scales:{x:{grid:{color:gridColor}},y:{grid:{color:gridColor}}}}
   });
-  pc.options.scales = {x:{grid:{color:gridColor}},y:{grid:{color:gridColor}}};
 
   const ac = new Chart(document.getElementById('articlesChart').getContext('2d'),{
     type:'bar',
@@ -121,35 +121,17 @@
       scales:{x:{grid:{color:gridColor}},y:{grid:{color:gridColor}}}}
   });
 
+  window.charts = {tc, pc, ac};
+
   function safeTop10(){
     if (Array.isArray(trends?.top) && trends.top.length) return trends.top.slice(0,10);
     if (trends?.series && Array.isArray(trends?.terms)) {
-      const sums = trends.terms.map(t => [t, (trends.series[t]||[]).reduce((a,b)=>a + (+b||0), 0)]);
+      const sums = trends.terms
+        .map(t => [t, (trends.series[t]||[]).reduce((a,b)=>a + (+b||0), 0)]);
       sums.sort((a,b)=>b[1]-a[1]);
       return sums.slice(0,10).map(([t])=>t);
     }
     return [];
-  }
-
-  function availableTickers(){
-    const a = Array.isArray(prices?.tickers)? prices.tickers: [];
-    const close = prices?.close && typeof prices.close==='object'? Object.keys(prices.close): [];
-    const adj   = prices?.adj_close && typeof prices.adj_close==='object'? Object.keys(prices.adj_close): [];
-    const series= prices?.series && typeof prices.series==='object'? Object.keys(prices.series): [];
-    const uniq = [...new Set([...a, ...close, ...adj, ...series])];
-    if(!uniq.length) console.warn('No tickers found in prices.json (expect tickers[] or close{} / adj_close{} / series{} keys).');
-    return uniq;
-  }
-
-  function selectSeriesFor(t){
-    return (prices?.close?.[t])
-        || (prices?.adj_close?.[t])
-        || (prices?.series?.[t])
-        || [];
-  }
-
-  function toNum(v){
-    return (v===null || v===undefined || (typeof v==='string' && v.trim()==='')) ? null : Number(v);
   }
 
   function updateTerms(sel){
@@ -157,7 +139,7 @@
     const names = (Array.isArray(sel) && sel.length) ? sel : safeTop10();
     const ds = names
       .filter(n => trends.terms?.includes(n))
-      .map(t => ({label:t, data:(trends.series?.[t]||[]).map(x => +x||0), borderWidth:2, pointRadius:0}));
+      .map(t => ({label:t, data:(trends.series[t]||[]).map(x => +x||0), borderWidth:2, pointRadius:0}));
     tc.data.labels = trends.dates||[];
     tc.data.datasets = ds;
     tc.update();
@@ -167,11 +149,27 @@
     if(!prices) return;
     const want = (tickers||[]).map(s=>s.toUpperCase());
     const ds = want
-      .filter(t => availableTickers().includes(t))
-      .map(t => ({ label:t, data: selectSeriesFor(t).map(toNum), borderWidth:2, pointRadius:0 }));
+      .filter(n => (prices.tickers||Object.keys(prices.close||{})).includes(n))
+      .map(t => ({
+        label:t,
+        data:(prices.close?.[t]||[]).map(v => (v===null||v===undefined)? null : Number(v)),
+        borderWidth:2, pointRadius:0
+      }));
     pc.data.labels = prices.dates||[];
     pc.data.datasets = ds;
     pc.update();
+  }
+
+  function firstTicker(){
+    if(!prices) return null;
+    const list = Array.isArray(prices.tickers) && prices.tickers.length
+      ? prices.tickers
+      : Object.keys(prices.close||{});
+    for(const t of list){
+      const has = (prices.close?.[t]||[]).some(v => v!=null && !Number.isNaN(+v));
+      if(has) return t;
+    }
+    return list[0] || null;
   }
 
   btnTop.onclick = () => {
@@ -180,14 +178,6 @@
     updateTerms(top10);
   };
   btnClear.onclick = () => { termsInput.value=''; tickersInput.value=''; updateTerms([]); updatePrices([]); };
-
-  function applyTerms(){
-    const sel = termsInput.value.split(',').map(s=>s.trim()).filter(Boolean);
-    updateTerms(sel);
-  }
-  termsInput.addEventListener('change', applyTerms);
-  termsInput.addEventListener('keyup', e => { if(e.key==='Enter') applyTerms(); });
-  termsInput.addEventListener('blur', applyTerms);
 
   const applyTickers = () => {
     const sel = tickersInput.value.split(',').map(s=>s.trim()).filter(Boolean);
@@ -210,22 +200,16 @@
   function renderSectors(){
     if(!tickermap){ sectorGrid.innerHTML = '<div>No tickers.json</div>'; return; }
     sectorGrid.innerHTML = '';
-    const current = new Set(tickersInput.value.split(',').map(s=>s.trim()).filter(Boolean));
     Object.entries(tickermap).forEach(([sector, arr])=>{
       const box = document.createElement('div');
       box.className='sec';
-      const list = arr.map(t => {
-        const checked = current.has(t) ? 'checked' : '';
-        return `<label style="display:inline-block;margin:4px 8px 4px 0">
-                  <input type="checkbox" class="tbox" value="${t}" ${checked}> ${t}
-                </label>`;
-      }).join('');
+      const list = arr.map(t => `<label style="display:inline-block;margin:4px 8px 4px 0"><input type="checkbox" class="tbox" value="${t}"> ${t}</label>`).join('');
       box.innerHTML = `<h4>${sector}</h4>${list}`;
       sectorGrid.appendChild(box);
     });
   }
 
-  btnAll.onclick  = () => document.querySelectorAll('.tbox').forEach(ch => ch.checked = true);
+  btnAll.onclick = () => document.querySelectorAll('.tbox').forEach(ch => ch.checked = true);
   btnNone.onclick = () => document.querySelectorAll('.tbox').forEach(ch => ch.checked = false);
 
   btnApply.onclick = () => {
@@ -237,13 +221,12 @@
 
   updateTerms([]);
 
-  const defaults = availableTickers();
-  if (defaults.length){
-    tickersInput.value = defaults[0];
-    updatePrices([defaults[0]]);
-    console.log('Initial ticker:', defaults[0], 'All available tickers:', defaults);
-  } else {
-    console.warn('Prices chart idle. Check site/data/prices.json structure.');
+  if (prices){
+    const t0 = firstTicker();
+    if (t0){
+      tickersInput.value = t0;
+      updatePrices([t0]);
+    }
   }
 })();
 </script>
