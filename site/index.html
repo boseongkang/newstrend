@@ -54,6 +54,7 @@
   </div>
   <div class="hint">Hard-refresh if stale data appears.</div>
 </div>
+
 <div id="modal" class="modal">
   <div class="sheet">
     <div class="sectbar">
@@ -68,54 +69,73 @@
     <div id="sectorGrid" class="grid2"></div>
   </div>
 </div>
+
 <script>
 (async function(){
   const v=Date.now();
-  async function getJSON(p){const r=await fetch('./data/'+p+'?v='+v,{cache:'no-store'});if(!r.ok)throw new Error(p);return r.json();}
+  async function waitForChart(ms=3000){
+    const t=Date.now(); while(!window.Chart && Date.now()-t<ms){ await new Promise(r=>setTimeout(r,50)); }
+    if(!window.Chart) throw new Error('Chart not loaded');
+  }
+  async function getJSON(p){ const r=await fetch('./data/'+p+'?v='+v,{cache:'no-store'}); if(!r.ok) throw new Error(p); return r.json(); }
+
+  await waitForChart().catch(e=>{document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;bottom:12px;right:12px;background:#ef4444;color:#fff;padding:8px 10px;border-radius:8px;z-index:9999">Chart load error</div>'); throw e;});
+
   let trends=null,prices=null,articles=null,tickermap=null;
-  try{trends=await getJSON('trends.json');}catch(e){}
-  try{prices=await getJSON('prices.json');}catch(e){}
-  try{articles=await getJSON('articles.json');}catch(e){}
-  try{tickermap=await getJSON('tickers.json');}catch(e){}
+  try{ trends=await getJSON('trends.json'); }catch(_){}
+  try{ prices=await getJSON('prices.json'); }catch(_){}
+  try{ articles=await getJSON('articles.json'); }catch(_){}
+  try{ tickermap=await getJSON('tickers.json'); }catch(_){}
+
   const termsInput=document.getElementById('terms');
   const tickersInput=document.getElementById('tickers');
   const btnTop=document.getElementById('btnTop');
   const btnClear=document.getElementById('btnClear');
   const btnPick=document.getElementById('btnPick');
-  const baseLineGrid={color:'#1f2937'};
-  const tc=new Chart(document.getElementById('termsChart').getContext('2d'),{type:'line',data:{labels:trends?trends.dates:[],datasets:[]},options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:baseLineGrid},y:{grid:baseLineGrid}}}});
-  const pc=new Chart(document.getElementById('pricesChart').getContext('2d'),{type:'line',data:{labels:prices?prices.dates:[],datasets:[]},options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:baseLineGrid},y:{grid:baseLineGrid}}}});
-  const ac=new Chart(document.getElementById('articlesChart').getContext('2d'),{type:'bar',data:{labels:articles?articles.dates:[],datasets:[{label:'articles',data:articles?articles.articles:[]}]},options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:baseLineGrid},y:{grid:baseLineGrid}}}});
+
+  const grid={color:'#1f2937'};
+  const tc=new Chart(document.getElementById('termsChart').getContext('2d'),{type:'line',data:{labels:trends?.dates||[],datasets:[]},options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid},y:{grid}},spanGaps:true}});
+  const pc=new Chart(document.getElementById('pricesChart').getContext('2d'),{type:'line',data:{labels:prices?.dates||[],datasets:[]},options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid},y:{grid}},spanGaps:true}});
+  const ac=new Chart(document.getElementById('articlesChart').getContext('2d'),{type:'bar',data:{labels:articles?.dates||[],datasets:[{label:'articles',data:articles?.articles||[]}]},options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid},y:{grid}}}});
+
   function updateTerms(sel){
-    if(!trends)return;
-    const names=sel&&sel.length?sel:trends.top.slice(0,10);
-    const ds=names.filter(n=>trends.terms.includes(n)).map(t=>({label:t,data:(trends.series[t]||[]),borderWidth:2,pointRadius:0}));
-    tc.data.labels=trends.dates;
+    if(!trends) return;
+    const names=(sel&&sel.length?sel:(trends.top||[]).slice(0,10));
+    const pick = names.length? names : (trends.terms||[]).slice(0,10);
+    const ds=pick.filter(n=>trends.terms.includes(n)).map(t=>({label:t,data:trends.series[t]||[],borderWidth:2,pointRadius:0}));
+    tc.data.labels=trends.dates||[];
     tc.data.datasets=ds;
     tc.update();
   }
+
   function updatePrices(tickers){
-    if(!prices)return;
+    if(!prices) return;
     const want=(tickers||[]).map(s=>s.toUpperCase());
-    const ds=want.filter(n=>(prices.tickers||[]).includes(n)).map(t=>({label:t,data:(prices.close[t]||[]).map(v=>v==null?null:Number(v)),borderWidth:2,pointRadius:0}));
+    const chosen=want.length?want:(prices.tickers||[]).slice(0,6);
+    const ds=chosen.filter(n=>(prices.tickers||[]).includes(n)).map(t=>({label:t,data:(prices.close?.[t]||[]).map(v=>v==null?null:Number(v)),borderWidth:2,pointRadius:0}));
     pc.data.labels=prices.dates||[];
     pc.data.datasets=ds;
     pc.update();
   }
-  btnTop.onclick=()=>{termsInput.value=(trends?trends.top.slice(0,10):[]).join(',');const sel=termsInput.value.split(',').map(s=>s.trim()).filter(Boolean);updateTerms(sel);};
+
+  btnTop.onclick=()=>{termsInput.value=(trends?.top||trends?.terms||[]).slice(0,10).join(',');const sel=termsInput.value.split(',').map(s=>s.trim()).filter(Boolean);updateTerms(sel);};
   btnClear.onclick=()=>{termsInput.value='';tickersInput.value='';updateTerms([]);updatePrices([]);};
+
   const applyTickers=()=>{const sel=tickersInput.value.split(',').map(s=>s.trim()).filter(Boolean);updatePrices(sel);};
   tickersInput.addEventListener('change',applyTickers);
   tickersInput.addEventListener('keyup',e=>{if(e.key==='Enter')applyTickers();});
   tickersInput.addEventListener('blur',applyTickers);
+
   const modal=document.getElementById('modal');
   const sectorGrid=document.getElementById('sectorGrid');
   const btnClose=document.getElementById('btnClose');
   const btnApply=document.getElementById('btnApply');
   const btnAll=document.getElementById('btnAll');
   const btnNone=document.getElementById('btnNone');
+
   btnPick.onclick=()=>{renderSectors();modal.style.display='flex';};
   btnClose.onclick=()=>{modal.style.display='none';};
+
   function renderSectors(){
     if(!tickermap){sectorGrid.innerHTML='<div>No tickers.json</div>';return;}
     sectorGrid.innerHTML='';
@@ -127,13 +147,17 @@
       sectorGrid.appendChild(box);
     });
   }
+
   btnAll.onclick=()=>document.querySelectorAll('.tbox').forEach(ch=>ch.checked=true);
   btnNone.onclick=()=>document.querySelectorAll('.tbox').forEach(ch=>ch.checked=false);
   btnApply.onclick=()=>{const sel=Array.from(document.querySelectorAll('.tbox:checked')).map(x=>x.value);tickersInput.value=sel.join(',');modal.style.display='none';updatePrices(sel);};
-  const defaultTerms=(trends?.top||[]).slice(0,10);
-  if(defaultTerms.length){termsInput.value=defaultTerms.join(',');updateTerms(defaultTerms);}else{updateTerms([]);}
+
+  const defaultTerms=(trends?.top?.length?trends.top:(trends?.terms||[])).slice(0,10);
+  if(defaultTerms.length){termsInput.value=defaultTerms.join(',');}
   const defaultTickers=(prices?.tickers||[]).slice(0,6);
-  if(defaultTickers.length){tickersInput.value=defaultTickers.join(',');updatePrices(defaultTickers);}else{updatePrices([]);}
+  if(defaultTickers.length){tickersInput.value=defaultTickers.join(',');}
+  updateTerms(defaultTerms);
+  updatePrices(defaultTickers);
 })();
 </script>
 </body>
