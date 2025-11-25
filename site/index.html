@@ -9,6 +9,7 @@
 <script>window.Chart||document.write('<script src="https://unpkg.com/chart.js@4.4.6/dist/chart.umd.min.js" crossorigin="anonymous"><\/script>')</script>
 <script>window.Chart||document.write('<script src="./vendor/chart.umd.min.js"><\/script>')</script>
 <style>
+  :root { color-scheme: dark; }
   body{margin:0;background:#0b0f18;color:#e6e8ec;font-family:system-ui,Segoe UI,Roboto,Arial}
   .wrap{max-width:1200px;margin:28px auto;padding:0 16px;position:relative}
   h1{font-size:24px;margin:0 0 16px}
@@ -20,7 +21,7 @@
   input{background:#0f1523;border:1px solid #243043;color:#e6e8ec;border-radius:10px;padding:10px 12px;min-width:220px}
   button{background:#253bff;color:#fff;border:0;border-radius:10px;padding:10px 14px;cursor:pointer}
   .hint{opacity:.7;font-size:12px;margin-top:6px}
-  canvas{width:100%;height:360px}
+  .card canvas{width:100%;height:360px}
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:20px}
   .sheet{max-width:900px;width:100%;max-height:80vh;overflow:auto;background:#0f1523;border:1px solid #243043;border-radius:12px;padding:16px}
   .sec{margin-bottom:10px}
@@ -77,7 +78,11 @@
 
 <script>
 (async function(){
+  if(!window.Chart){ alert('Chart.js failed to load'); return; }
+
   const v = Date.now();
+  const gridColor = '#1f2937';
+
   async function getJSON(p){
     const r = await fetch('./data/'+p+'?v='+v,{cache:'no-store'});
     if(!r.ok) throw new Error(p+' '+r.status);
@@ -85,45 +90,53 @@
   }
 
   let trends=null, prices=null, articles=null, tickermap=null;
-  try{ trends = await getJSON('trends.json'); }catch(e){ console.error(e); }
-  try{ prices = await getJSON('prices.json'); }catch(e){ console.warn('prices optional', e); }
+  try{ trends   = await getJSON('trends.json');   }catch(e){ console.error(e); }
+  try{ prices   = await getJSON('prices.json');   }catch(e){ console.warn('prices optional', e); }
   try{ articles = await getJSON('articles.json'); }catch(e){ console.error(e); }
-  try{ tickermap = await getJSON('tickers.json'); }catch(e){ console.warn('tickers list missing', e); }
+  try{ tickermap= await getJSON('tickers.json');  }catch(e){ console.warn('tickers list missing', e); }
 
-  const termsInput = document.getElementById('terms');
+  const termsInput   = document.getElementById('terms');
   const tickersInput = document.getElementById('tickers');
-  const btnTop = document.getElementById('btnTop');
+  const btnTop   = document.getElementById('btnTop');
   const btnClear = document.getElementById('btnClear');
-  const btnPick = document.getElementById('btnPick');
-
-  const gridColor = '#1f2937';
+  const btnPick  = document.getElementById('btnPick');
 
   const tc = new Chart(document.getElementById('termsChart').getContext('2d'),{
     type:'line',
-    data:{labels: trends?.dates||[], datasets:[]},
-    options:{responsive:true,plugins:{legend:{display:true}},
-      scales:{x:{grid:{color:gridColor}},y:{grid:{color:gridColor}}}}
+    data:{labels: trends?.dates || [], datasets:[]},
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:false,
+      spanGaps:true, interaction:{mode:'nearest',intersect:false},
+      plugins:{legend:{display:true}, decimation:{enabled:true, algorithm:'lttb'}},
+      scales:{x:{grid:{color:gridColor}}, y:{grid:{color:gridColor}}}
+    }
   });
 
   const pc = new Chart(document.getElementById('pricesChart').getContext('2d'),{
     type:'line',
-    data:{labels: prices?.dates||[], datasets:[]},
-    options:{responsive:true,plugins:{legend:{display:true}},
-      scales:{x:{grid:{color:gridColor}},y:{grid:{color:gridColor}}}}
+    data:{labels: prices?.dates || [], datasets:[]},
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:false,
+      spanGaps:true, interaction:{mode:'nearest',intersect:false},
+      plugins:{legend:{display:true}, decimation:{enabled:true, algorithm:'lttb'}},
+      scales:{x:{grid:{color:gridColor}}, y:{grid:{color:gridColor}}}
+    }
   });
 
   const ac = new Chart(document.getElementById('articlesChart').getContext('2d'),{
     type:'bar',
-    data:{labels: articles?.dates||[], datasets:[{label:'articles', data: articles?.articles||[]}]},
-    options:{responsive:true,plugins:{legend:{display:true}},
-      scales:{x:{grid:{color:gridColor}},y:{grid:{color:gridColor}}}}
+    data:{labels: articles?.dates || [], datasets:[{label:'articles', data: (articles?.articles || []).map(x => +x||0)}]},
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:false,
+      plugins:{legend:{display:true}},
+      scales:{x:{grid:{color:gridColor}}, y:{grid:{color:gridColor}}}
+    }
   });
 
   function safeTop10(){
     if (Array.isArray(trends?.top) && trends.top.length) return trends.top.slice(0,10);
     if (trends?.series && Array.isArray(trends?.terms)) {
-      const sums = trends.terms
-        .map(t => [t, (trends.series[t]||[]).reduce((a,b)=>a + (+b||0), 0)]);
+      const sums = trends.terms.map(t => [t, (trends.series[t]||[]).reduce((a,b)=>a + (+b||0), 0)]);
       sums.sort((a,b)=>b[1]-a[1]);
       return sums.slice(0,10).map(([t])=>t);
     }
@@ -156,11 +169,7 @@
     pc.update();
   }
 
-  btnTop.onclick = () => {
-    const top10 = safeTop10();
-    termsInput.value = top10.join(',');
-    updateTerms(top10);
-  };
+  btnTop.onclick   = () => { const top10 = safeTop10(); termsInput.value = top10.join(','); updateTerms(top10); };
   btnClear.onclick = () => { termsInput.value=''; tickersInput.value=''; updateTerms([]); updatePrices([]); };
 
   const applyTickers = () => {
@@ -193,7 +202,7 @@
     });
   }
 
-  btnAll.onclick = () => document.querySelectorAll('.tbox').forEach(ch => ch.checked = true);
+  btnAll.onclick  = () => document.querySelectorAll('.tbox').forEach(ch => ch.checked = true);
   btnNone.onclick = () => document.querySelectorAll('.tbox').forEach(ch => ch.checked = false);
 
   btnApply.onclick = () => {
@@ -207,6 +216,8 @@
   if (Array.isArray(prices?.tickers) && prices.tickers.length){
     tickersInput.value = prices.tickers[0];
     updatePrices([prices.tickers[0]]);
+  } else {
+    updatePrices([]);
   }
 })();
 </script>
