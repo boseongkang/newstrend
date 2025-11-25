@@ -46,7 +46,7 @@
   }
 
   const trends = await get('trends.json');
-  if(!trends){ return; }
+  if(!trends){ console.error('trends.json missing'); return; }
   const rising = await get('rising.json');
 
   function median(arr){
@@ -92,17 +92,10 @@
   scored.sort((a,b)=>b[1]-a[1]);
   scored = scored.slice(0,30);
 
-  const ctx = document.getElementById('riseChart').getContext('2d');
-  new Chart(ctx,{
+  new Chart(document.getElementById('riseChart').getContext('2d'),{
     type:'bar',
-    data:{
-      labels: scored.map(([t])=>t),
-      datasets:[{label:'lift', data: scored.map(([,s])=>s)}]
-    },
-    options:{
-      responsive:true,
-      scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}
-    }
+    data:{labels: scored.map(([t])=>t),datasets:[{label:'lift',data: scored.map(([,s])=>s)}]},
+    options:{responsive:true,scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
   });
 })();
 </script>
