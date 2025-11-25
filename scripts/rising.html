@@ -16,7 +16,7 @@
   .brand{font-weight:700;font-size:22px}
   .nav a{color:#cbd5e1;text-decoration:none;margin-left:12px;padding:8px 10px;border-radius:10px}
   .nav a.active{background:var(--accent);color:#fff}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+  .card{background:var(--card);border:1px solid:#1f2937;border-radius:12px;padding:12px}
   canvas{width:100%;height:420px}
   .hint{opacity:.7;font-size:12px;margin-top:6px}
 </style>
@@ -94,7 +94,7 @@
 
   new Chart(document.getElementById('riseChart').getContext('2d'),{
     type:'bar',
-    data:{labels: scored.map(([t])=>t),datasets:[{label:'lift',data: scored.map(([,s])=>s)}]},
+    data:{labels: scored.map(([t])=>t), datasets:[{label:'lift', data: scored.map(([,s])=>s)}]},
     options:{responsive:true,scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
   });
 })();
