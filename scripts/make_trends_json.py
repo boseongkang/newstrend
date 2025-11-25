@@ -1,119 +1,98 @@
-import argparse
-import json
+import argparse, json, re
 from pathlib import Path
+from collections import Counter
 
-import pandas as pd
+WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9']+")
 
+STOPWORDS = {
+    "the","and","for","with","that","this","from","have","has","had","were","was",
+    "been","will","would","could","should","about","into","over","after","before",
+    "their","they","them","your","you","than","then","when","what","which","while",
+    "just","like","also","more","most","some","such","only","other","many","very",
+    "any","each","much","those","these","where","who","whom","whose","our","ours",
+    "its","it's","not","are","but","can","all","out","his","her","him","she","himself",
+    "herself","itself","ourselves","themselves","my","mine","me","i","of","in","on",
+    "at","as","by","to","an","a","or","be","do","does","did","so","no","yes"
+}
 
-def read_tokens_csv(path: Path, min_len: int):
-    try:
-        df = pd.read_csv(path)
-    except Exception:
-        return {}
-    cols_lower = {c.lower(): c for c in df.columns}
-    if {"entity", "count"}.issubset(cols_lower.keys()):
-        e_col = cols_lower["entity"]
-        c_col = cols_lower["count"]
-    elif {"tok", "n"}.issubset(cols_lower.keys()):
-        e_col = cols_lower["tok"]
-        c_col = cols_lower["n"]
-    elif {"term", "n"}.issubset(cols_lower.keys()):
-        e_col = cols_lower["term"]
-        c_col = cols_lower["n"]
-    else:
-        return {}
-    df[e_col] = df[e_col].astype(str)
-    df[c_col] = pd.to_numeric(df[c_col], errors="coerce").fillna(0).astype(int)
-    df = df[df[e_col].str.len() >= min_len]
-    return dict(df[[e_col, c_col]].values)
+TEXT_FIELDS = (
+    "title","headline","summary","description","content","text","body","snippet"
+)
 
+def extract_text(obj):
+    parts = []
+    for k in TEXT_FIELDS:
+        v = obj.get(k)
+        if isinstance(v, str):
+            parts.append(v)
+    return " ".join(parts)
 
-def read_tokens_jsonl(path: Path, min_len: int):
-    rows = []
-    with path.open("r", encoding="utf-8", errors="ignore") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                obj = json.loads(line)
-            except Exception:
-                continue
-            tok = obj.get("tok") or obj.get("term") or obj.get("entity")
-            n = obj.get("n") if "n" in obj else obj.get("count")
-            if tok is None or n is None:
-                continue
-            rows.append((str(tok), int(n)))
-    if not rows:
-        return {}
-    df = pd.DataFrame(rows, columns=["tok", "n"])
-    df = df[df["tok"].str.len() >= min_len]
-    return dict(df.values)
-
-
-def get_date_from_filename(path: Path) -> str:
-    name = path.name
-    for suffix in ("_tokens.csv", "_tokens.jsonl"):
-        if name.endswith(suffix):
-            return name[: -len(suffix)]
-    return path.stem
-
+def tokens_from_text(text, min_len):
+    for m in WORD_RE.findall(text.lower()):
+        if len(m) < min_len:
+            continue
+        if m in STOPWORDS:
+            continue
+        yield m
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--tokens-dir", default="data/warehouse/daily")
-    parser.add_argument("--out", default="site/data/trends.json")
-    parser.add_argument("--last-days", type=int, default=90)
-    parser.add_argument("--topk", type=int, default=200)
-    parser.add_argument("--min-len", type=int, default=4)
-    args = parser.parse_args()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--silver-dir", default="data/silver")
+    ap.add_argument("--out", default="site/data/trends.json")
+    ap.add_argument("--last-days", type=int, default=90)
+    ap.add_argument("--topk", type=int, default=200)
+    ap.add_argument("--min-len", type=int, default=4)
+    args = ap.parse_args()
 
-    tokens_dir = Path(args.tokens_dir)
-    csv_files = sorted(tokens_dir.glob("*_tokens.csv"))
-    jsonl_files = sorted(tokens_dir.glob("*_tokens.jsonl"))
-    files = csv_files + jsonl_files
-
+    sd = Path(args.silver_dir)
+    files = sorted(f for f in sd.glob("*.jsonl") if f.stem[:4].isdigit())
     if not files:
-        raise SystemExit("no *_tokens.csv or *_tokens.jsonl files found")
+        raise SystemExit(f"no silver files in {sd}")
 
-    dates = sorted({get_date_from_filename(p) for p in files})
+    dates = [f.stem for f in files]
     if args.last_days > 0 and len(dates) > args.last_days:
-        dates = dates[-args.last_days :]
+        files = files[-args.last_days:]
+        dates = [f.stem for f in files]
 
     by_date = {}
-    for d in dates:
-        csv_path = tokens_dir / f"{d}_tokens.csv"
-        jsonl_path = tokens_dir / f"{d}_tokens.jsonl"
-        if csv_path.exists():
-            by_date[d] = read_tokens_csv(csv_path, args.min_len)
-        elif jsonl_path.exists():
-            by_date[d] = read_tokens_jsonl(jsonl_path, args.min_len)
-        else:
-            by_date[d] = {}
+    total = Counter()
 
-    totals = {}
-    for d in dates:
-        for tok, n in by_date.get(d, {}).items():
-            totals[tok] = totals.get(tok, 0) + int(n)
+    for f, d in zip(files, dates):
+        cnt = Counter()
+        with f.open("r", encoding="utf-8", errors="ignore") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    obj = json.loads(line)
+                except Exception:
+                    continue
+                text = extract_text(obj)
+                if not text:
+                    continue
+                for tok in tokens_from_text(text, args.min_len):
+                    cnt[tok] += 1
+        by_date[d] = cnt
+        total.update(cnt)
 
-    top_tokens = [
-        t for t, _ in sorted(totals.items(), key=lambda x: x[1], reverse=True)[: args.topk]
-    ]
+    top_terms = [t for t, _ in total.most_common(args.topk)]
 
-    series = {t: [int(by_date.get(d, {}).get(t, 0)) for d in dates] for t in top_tokens}
+    series = {}
+    for t in top_terms:
+        series[t] = [int(by_date.get(d, {}).get(t, 0)) for d in dates]
 
     out = {
         "dates": dates,
-        "terms": top_tokens,
-        "top": top_tokens,
-        "series": series,
+        "terms": top_terms,
+        "top": top_terms,
+        "series": series
     }
 
-    out_path = Path(args.out)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(out, ensure_ascii=False), encoding="utf-8")
-    print("wrote", out_path, "dates", len(dates), "terms", len(top_tokens))
-
+    outp = Path(args.out)
+    outp.parent.mkdir(parents=True, exist_ok=True)
+    outp.write_text(json.dumps(out, ensure_ascii=False), encoding="utf-8")
+    print("wrote", outp, "dates", len(dates), "terms", len(top_terms))
 
 if __name__ == "__main__":
     main()

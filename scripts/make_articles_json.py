@@ -1,63 +1,33 @@
-import argparse, json, gzip
+import argparse, json
 from pathlib import Path
-
-def count_lines(fp):
-    if not fp.exists():
-        return 0
-    if fp.suffix == ".gz":
-        f = gzip.open(fp, "rt", encoding="utf-8", errors="ignore")
-    else:
-        f = fp.open("r", encoding="utf-8", errors="ignore")
-    n = 0
-    try:
-        for line in f:
-            if line.strip():
-                n += 1
-    finally:
-        f.close()
-    return n
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--releases-dir", default="data/releases")
+    ap.add_argument("--silver-dir", default="data/silver")
     ap.add_argument("--out", default="site/data/articles.json")
     ap.add_argument("--last-days", type=int, default=90)
     args = ap.parse_args()
 
-    rd = Path(args.releases_dir)
-    files = sorted(rd.glob("news_*.jsonl")) + sorted(rd.glob("news_*.jsonl.gz"))
+    sd = Path(args.silver_dir)
+    files = sorted(f for f in sd.glob("*.jsonl") if f.stem[:4].isdigit())
+    if not files:
+        raise SystemExit(f"no silver files in {sd}")
 
-    dates = []
-    counts = {}
-
-    for fp in files:
-        name = fp.name
-        if not name.startswith("news_"):
-            continue
-        if name.endswith(".jsonl.gz"):
-            d = name[len("news_"):-len(".jsonl.gz")]
-        elif name.endswith(".jsonl"):
-            d = name[len("news_"):-len(".jsonl")]
-        else:
-            continue
-        dates.append(d)
-
-    dates = sorted(set(dates))
+    dates = [f.stem for f in files]
     if args.last_days > 0 and len(dates) > args.last_days:
-        dates = dates[-args.last_days:]
+        files = files[-args.last_days:]
+        dates = [f.stem for f in files]
 
-    for d in dates:
-        j = rd / f"news_{d}.jsonl"
-        gz = rd / f"news_{d}.jsonl.gz"
+    counts = []
+    for f in files:
         n = 0
-        if j.exists() or gz.exists():
-            n = count_lines(j if j.exists() else gz)
-        counts[d] = n
+        with f.open("r", encoding="utf-8", errors="ignore") as fh:
+            for line in fh:
+                if line.strip():
+                    n += 1
+        counts.append(int(n))
 
-    out = {
-        "dates": dates,
-        "articles": [counts.get(d, 0) for d in dates]
-    }
+    out = {"dates": dates, "articles": counts}
 
     outp = Path(args.out)
     outp.parent.mkdir(parents=True, exist_ok=True)
