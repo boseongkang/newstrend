@@ -46,10 +46,12 @@ jobs:
 
       - name: Restore live inputs
         run: |
-          set -euo pipefail
-          mkdir -p data/live_newsapi
-          mv live_artifacts/*.jsonl data/live_newsapi/ || true
-          ls -l data/live_newsapi || true
+            set -euo pipefail
+            mkdir -p data/live_newsapi
+            find live_artifacts -type f -name "*.jsonl" -exec mv {} data/live_newsapi/ \;
+            
+            echo "Moved files:"
+            ls -l data/live_newsapi
 
       - name: Update corpus
         run: |
