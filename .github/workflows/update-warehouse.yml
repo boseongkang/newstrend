@@ -46,17 +46,45 @@ jobs:
 
       - name: Restore live inputs
         run: |
-            set -euo pipefail
-            mkdir -p data/live_newsapi
-            find live_artifacts -type f -name "*.jsonl" -exec mv {} data/live_newsapi/ \;
-            
-            echo "Moved files:"
-            ls -l data/live_newsapi
+          set -euo pipefail
+          mkdir -p data/live_newsapi
+          find live_artifacts -type f -name "*.jsonl" -exec mv {} data/live_newsapi/ \;
+          ls -l data/live_newsapi || true
 
       - name: Update corpus
         run: |
           set -euo pipefail
           python scripts/update_corpus.py
+
+      - name: Merge Live to Daily JSONL (Raw Data)
+        shell: bash
+        run: |
+          python - <<'PY'
+          import glob, os, re
+
+          live_dir = "data/live_newsapi"
+          warehouse_dir = "data/warehouse/daily"
+          os.makedirs(warehouse_dir, exist_ok=True)
+
+          files = sorted(glob.glob(os.path.join(live_dir, "*.jsonl")))
+          
+          for f in files:
+              fname = os.path.basename(f)
+              match = re.match(r"(\d{4}-\d{2}-\d{2})", fname)
+              if match:
+                  date_str = match.group(1)
+                  dest = os.path.join(warehouse_dir, f"{date_str}.jsonl")
+                  
+                  with open(f, "r", encoding="utf-8") as infile:
+                      content = infile.read()
+                  
+                  with open(dest, "a", encoding="utf-8") as outfile:
+                      if content.strip():
+                          outfile.write(content)
+                          if not content.endswith("\n"):
+                              outfile.write("\n")
+                  print(f"Merged raw data: {fname} -> {dest}")
+          PY
 
       - name: Extract terms to daily CSV
         run: |
@@ -71,21 +99,6 @@ jobs:
             --stop configs/stopwords_en.txt \
             --alias configs/alias_en.yml
 
-      - name: Mirror CSV to JSONL
-        shell: bash
-        run: |
-          python - <<'PY'
-          import pandas as pd, json, pathlib
-          p = pathlib.Path("data/warehouse/daily")
-          p.mkdir(parents=True, exist_ok=True)
-          for f in sorted(p.glob("*.csv")):
-              j = f.with_suffix(".jsonl")
-              df = pd.read_csv(f)
-              with j.open("w", encoding="utf-8") as out:
-                  for r in df.itertuples(index=False):
-                      out.write(json.dumps({"date":str(r.date)[:10],"entity":str(r.entity),"count":int(r.count)}, ensure_ascii=False)+"\n")
-          print("mirrored")
-          PY
 
       - name: Upload warehouse artifact
         uses: actions/upload-artifact@v4
