@@ -16,7 +16,12 @@ jobs:
       SHIFT_MINUTES: 1440
       RECENT_MINUTES: 180
       MAX_PAGES: 10
-      QUERY: news OR market OR tech OR economy
+      QUERY: >-
+        (inflation OR fed OR tariff OR recession OR gdp OR cpi OR rates)
+        OR (earnings OR revenue OR profit OR ipo OR merger OR acquisition)
+        OR (trump OR china OR iran OR russia OR ukraine OR nato OR sanctions)
+        OR (nvidia OR apple OR microsoft OR tesla OR amazon OR google)
+        OR (oil OR energy OR dollar OR treasury OR bond OR crypto OR bitcoin)
     steps:
       - uses: actions/checkout@v4
         with:
