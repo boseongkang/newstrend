@@ -104,6 +104,9 @@ jobs:
           test -s site/report.html
           test -s site/rising.html
 
+      - name: Overwrite index with custom dashboard
+        run: cp site/index_custom.html site/index.html
+
       - name: Join prices
         run: |
           python - <<'PY'
