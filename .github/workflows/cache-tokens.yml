@@ -1,0 +1,137 @@
+# cache-tokens.yml
+# ─────────────────────────────────────────────────────────────────
+# 역할: 매일 수집된 _tokens.csv 를 data-cache 브랜치에 누적 저장
+#
+# 흐름:
+#   update-warehouse 완료
+#   → 오늘 _tokens.csv 추출
+#   → data-cache 브랜치에 push (90일 rolling 유지)
+#
+# 이렇게 하면 raw JSONL(~5MB/일) 없이도 토큰 히스토리가 쌓임
+# tokens.csv는 ~20KB/일 → 90일 = ~1.8MB
+# ─────────────────────────────────────────────────────────────────
+
+name: cache-tokens
+
+on:
+  workflow_run:
+    workflows: ["update-warehouse"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  cache:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # 전체 히스토리 필요 (브랜치 전환용)
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install pandas --quiet
+
+      # ── 오늘 warehouse 아티팩트에서 tokens.csv 가져오기 ──────────
+      - name: Get latest warehouse run id
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RID=$(gh run list --workflow update-warehouse.yml --branch main \
+                --status success --json databaseId -q '.[0].databaseId')
+          echo "RUN_ID=$RID" >> $GITHUB_ENV
+
+      - name: Download warehouse artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p artifacts
+          gh run download "$RUN_ID" -n warehouse -D artifacts
+
+      - name: Extract tokens csv
+        run: |
+          mkdir -p /tmp/today_tokens
+          if ls artifacts/*.zip >/dev/null 2>&1; then
+            unzip -o artifacts/*.zip -d artifacts >/dev/null
+          fi
+          if [ -f artifacts/artifact.tar ]; then
+            tar -xf artifacts/artifact.tar -C artifacts
+          fi
+          # warehouse/daily/_tokens.csv 찾기
+          find artifacts -name "*_tokens.csv" | while read f; do
+            cp "$f" /tmp/today_tokens/
+          done
+          ls /tmp/today_tokens/
+
+      # ── data-cache 브랜치 업데이트 ───────────────────────────────
+      - name: Checkout or create data-cache branch
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # data-cache 브랜치 존재 여부 확인
+          if git ls-remote --heads origin data-cache | grep -q data-cache; then
+            git checkout data-cache
+          else
+            # 최초 생성: orphan 브랜치 (히스토리 없는 독립 브랜치)
+            git checkout --orphan data-cache
+            git rm -rf . >/dev/null 2>&1 || true
+            mkdir -p data/warehouse/daily
+            echo "# Token Cache Branch" > README.md
+            echo "Daily _tokens.csv files for newstrend signal analysis." >> README.md
+          fi
+
+      - name: Copy today's tokens to cache
+        run: |
+          mkdir -p data/warehouse/daily
+          cp /tmp/today_tokens/*.csv data/warehouse/daily/ 2>/dev/null || echo "no csv files"
+          ls -lh data/warehouse/daily/ | tail -5
+
+      - name: Prune old files (keep 90 days rolling)
+        run: |
+          python3 - << 'PY'
+          import os
+          from pathlib import Path
+          from datetime import datetime, timedelta
+
+          daily_dir = Path("data/warehouse/daily")
+          cutoff = datetime.utcnow() - timedelta(days=90)
+
+          removed = 0
+          for f in sorted(daily_dir.glob("*_tokens.csv")):
+              # 파일명: YYYY-MM-DD_tokens.csv
+              try:
+                  date_str = f.name.split("_tokens")[0]
+                  date = datetime.strptime(date_str, "%Y-%m-%d")
+                  if date < cutoff:
+                      f.unlink()
+                      removed += 1
+              except Exception:
+                  continue
+
+          files = list(daily_dir.glob("*_tokens.csv"))
+          print(f"Total: {len(files)} files, removed: {removed}")
+          if files:
+              dates = sorted(f.name.split("_tokens")[0] for f in files)
+              print(f"Range: {dates[0]} → {dates[-1]}")
+          PY
+
+      - name: Commit and push
+        run: |
+          git add data/warehouse/daily/*.csv README.md 2>/dev/null || true
+          COUNT=$(git status --short | wc -l)
+          if [ "$COUNT" -gt "0" ]; then
+            DATE=$(date -u +%Y-%m-%d)
+            git commit -m "cache: tokens ${DATE}"
+            git push origin data-cache
+            echo "Pushed to data-cache branch"
+          else
+            echo "No changes to commit"
+          fi

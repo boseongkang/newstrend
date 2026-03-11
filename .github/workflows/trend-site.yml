@@ -104,6 +104,29 @@ jobs:
           test -s site/report.html
           test -s site/rising.html
 
+      - name: Restore token history from data-cache branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git ls-remote --heads origin data-cache | grep -q data-cache; then
+            git fetch origin data-cache
+            mkdir -p /tmp/token_cache/data/warehouse/daily
+            git --work-tree=/tmp/token_cache checkout origin/data-cache -- data/warehouse/daily 2>/dev/null || true
+            rsync -a --ignore-existing /tmp/token_cache/data/warehouse/daily/ data/warehouse/daily/ 2>/dev/null || true
+            NFILES=$(ls data/warehouse/daily/*_tokens.csv 2>/dev/null | wc -l)
+            echo "Token history loaded: ${NFILES} files"
+          else
+            echo "data-cache branch not yet created — run cache-tokens workflow first"
+          fi
+
+      - name: Build trends.json for custom dashboard
+        run: |
+          python scripts/make_trends_json.py             --tokens-dir data/warehouse/daily             --out site/data/trends.json             --last-days 90             --topk 300             --min-len 3
+
+      - name: Build signal-price correlation
+        run: |
+          python scripts/build_signal_corr.py             --trends  site/data/trends.json             --prices  site/data/prices.json             --out     site/data/signal_corr.json             --top-terms 150             --min-corr 0.15 || echo "[WARN] signal_corr skipped"
+
       - name: Overwrite index with custom dashboard
         run: cp site/index_custom.html site/index.html
 
