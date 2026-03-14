@@ -25,33 +25,31 @@ body{background:var(--bg0);color:var(--t1);font-family:var(--font-sans);font-siz
 ::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
 
 /* HEADER */
-header{height:42px;display:flex;align-items:center;gap:20px;
-  padding:0 16px;background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0}
-.brand{font-family:var(--font-mono);font-size:13px;font-weight:600;
-       color:var(--cyan);letter-spacing:.06em;white-space:nowrap}
+header{height:42px;display:flex;align-items:center;gap:20px;padding:0 16px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0}
+.brand{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--cyan);
+       letter-spacing:.06em;white-space:nowrap}
 .brand em{color:var(--t3);font-style:normal;font-weight:300}
 nav{display:flex;gap:2px}
-nav a{font-family:var(--font-mono);font-size:10px;font-weight:500;
-      letter-spacing:.1em;text-transform:uppercase;color:var(--t2);
-      text-decoration:none;padding:5px 11px;border:1px solid transparent;transition:all .12s}
+nav a{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:5px 11px;
+      border:1px solid transparent;transition:all .12s}
 nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
 .hdr-right{margin-left:auto;display:flex;align-items:center;gap:14px}
-.live{display:flex;align-items:center;gap:5px;
-      font-family:var(--font-mono);font-size:10px;color:var(--green);letter-spacing:.1em}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s ease-in-out infinite}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10px;
+      color:var(--green);letter-spacing:.1em}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);
+     animation:blink 2.4s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 #ts{font-family:var(--font-mono);font-size:10px;color:var(--t3)}
 
-/* WARNING BANNER */
-#data-warn{
-  display:flex;align-items:center;gap:10px;padding:6px 16px;
-  background:rgba(255,179,0,.08);border-bottom:1px solid rgba(255,179,0,.2);
-  font-family:var(--font-mono);font-size:10px;color:var(--amber);flex-shrink:0
-}
-#data-warn .warn-ico{font-size:12px}
+/* DATA QUALITY BANNER */
+#data-warn{display:flex;align-items:center;gap:10px;padding:5px 16px;
+  background:rgba(255,179,0,.07);border-bottom:1px solid rgba(255,179,0,.18);
+  font-family:var(--font-mono);font-size:10px;color:var(--amber);flex-shrink:0}
 
-/* LAYOUT: left panel + right detail */
-main{flex:1;display:grid;grid-template-columns:420px 1fr;gap:1px;
+/* LAYOUT */
+main{flex:1;display:grid;grid-template-columns:400px 1fr;gap:1px;
      background:var(--b1);overflow:hidden;min-height:0}
 .col{background:var(--bg0);display:flex;flex-direction:column;overflow:hidden;min-height:0}
 
@@ -61,86 +59,121 @@ main{flex:1;display:grid;grid-template-columns:420px 1fr;gap:1px;
 .plabel{font-family:var(--font-mono);font-size:10px;font-weight:600;
         letter-spacing:.12em;text-transform:uppercase;color:var(--t2)}
 .pbadge{font-family:var(--font-mono);font-size:10px;color:var(--amber);
-        background:rgba(255,179,0,.1);padding:2px 7px;
-        border:1px solid rgba(255,179,0,.25)}
+        background:rgba(255,179,0,.1);padding:2px 7px;border:1px solid rgba(255,179,0,.25)}
 .sec-lbl{padding:5px 12px;font-family:var(--font-mono);font-size:8px;font-weight:600;
          letter-spacing:.14em;text-transform:uppercase;color:var(--t3);
          border-bottom:1px solid var(--b1);background:var(--bg1);flex-shrink:0}
 
-/* FILTER ROW */
+/* FILTER */
 .filter-row{display:flex;gap:4px;padding:8px 10px;border-bottom:1px solid var(--b1);flex-shrink:0}
-.fbtn{font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;font-weight:500;
-      padding:4px 9px;border:1px solid var(--b2);background:transparent;
-      color:var(--t2);cursor:pointer;transition:all .12s;text-transform:uppercase}
+.fbtn{font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;padding:4px 9px;
+      border:1px solid var(--b2);background:transparent;color:var(--t2);cursor:pointer;
+      transition:all .12s;text-transform:uppercase}
 .fbtn:hover,.fbtn.on{background:var(--bg2);color:var(--cyan);border-color:var(--cyan)}
 
-/* ── SIGNAL CARDS (left) ── */
+/* ── PAIR CARDS ── */
 #pair-list{flex:1;overflow-y:auto;padding:6px}
-.pcard{
-  padding:11px 13px;margin-bottom:5px;cursor:pointer;
-  background:var(--bg1);border:1px solid var(--b1);
-  border-left:3px solid transparent;transition:all .13s;
-}
+
+.pcard{padding:10px 12px;margin-bottom:5px;cursor:pointer;background:var(--bg1);
+       border:1px solid var(--b1);border-left:3px solid transparent;transition:all .13s}
 .pcard:hover{background:var(--bg2);border-color:var(--b2)}
 .pcard.sel{border-left-color:var(--cyan);background:rgba(0,212,255,.05)}
-.pcard-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+
+/* card row 1: term → ticker + badges */
+.pc-row1{display:flex;align-items:center;gap:7px;margin-bottom:8px}
 .pc-term{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--t1)}
-.pc-arr{font-size:14px}
+.pc-arrow{font-size:13px}
 .pc-ticker{font-family:var(--font-mono);font-size:12px;font-weight:600;
            padding:1px 7px;border:1px solid}
-.pc-type{font-family:var(--font-mono);font-size:9px;letter-spacing:.09em;
-         text-transform:uppercase;color:var(--t3);margin-left:auto}
-.pcard-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px}
-.ps{background:var(--bg0);padding:5px 8px;text-align:center}
-.ps-l{font-family:var(--font-mono);font-size:8px;color:var(--t3);
-      letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
-.ps-v{font-family:var(--font-mono);font-size:13px;font-weight:600}
+.pc-lag{font-family:var(--font-mono);font-size:9px;padding:2px 5px;
+        border:1px solid rgba(0,212,255,.3);color:var(--cyan);background:rgba(0,212,255,.07)}
+.pc-stype{font-family:var(--font-mono);font-size:8px;letter-spacing:.09em;
+          text-transform:uppercase;color:var(--t3);margin-left:auto}
+.pc-trend{font-size:12px}
 
-/* lag badge inside card */
-.lag-badge{font-family:var(--font-mono);font-size:9px;padding:2px 6px;
-           border:1px solid rgba(0,212,255,.3);color:var(--cyan);background:rgba(0,212,255,.08)}
+/* card row 2: confidence bar */
+.conf-bar-wrap{height:3px;background:var(--b1);margin-bottom:8px;position:relative}
+.conf-bar{height:100%;transition:width .3s ease}
 
-/* LOW DATA BADGE */
-.low-data{font-family:var(--font-mono);font-size:8px;color:var(--t3);
-          border:1px solid var(--b2);padding:1px 5px;margin-left:4px}
+/* card row 3: stat grid */
+.pc-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:1px}
+.ps{background:var(--bg0);padding:4px 6px;text-align:center}
+.ps-l{font-family:var(--font-mono);font-size:7px;color:var(--t3);
+      letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.ps-v{font-family:var(--font-mono);font-size:12px;font-weight:600}
 
-/* ── RIGHT DETAIL ── */
-#detail-wrap{flex:1;overflow-y:auto;padding:0}
+/* test validation badge */
+.test-badge{font-family:var(--font-mono);font-size:8px;padding:1px 5px;border:1px solid}
+.test-ok{color:var(--green);border-color:rgba(0,230,118,.3);background:rgba(0,230,118,.07)}
+.test-warn{color:var(--amber);border-color:rgba(255,179,0,.3);background:rgba(255,179,0,.07)}
+.test-bad{color:var(--red);border-color:rgba(255,68,68,.3);background:rgba(255,68,68,.07)}
+.test-none{color:var(--t3);border-color:var(--b2)}
 
-/* TODAY ALERTS */
-#today-alerts{padding:10px 14px;border-bottom:1px solid var(--b1);flex-shrink:0}
-.alert-row{display:flex;align-items:center;gap:10px;padding:7px 10px;
-           margin-bottom:4px;background:var(--bg1);border:1px solid var(--b1)}
-.alert-word{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--cyan)}
-.alert-z{font-family:var(--font-mono);font-size:10px;color:var(--amber)}
-.alert-sep{color:var(--t3);font-size:11px}
-.alert-ticker{font-family:var(--font-mono);font-size:11px;font-weight:600}
-.alert-ret{font-family:var(--font-mono);font-size:11px}
-.alert-conf{font-family:var(--font-mono);font-size:9px;color:var(--t3);margin-left:auto}
-.alert-none{font-family:var(--font-mono);font-size:10px;color:var(--t3);padding:10px}
+/* ── RIGHT PANEL TABS ── */
+#right-tabs{display:flex;border-bottom:1px solid var(--b1);background:var(--bg1);flex-shrink:0}
+.rtab{font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.09em;
+      text-transform:uppercase;padding:9px 16px;color:var(--t3);cursor:pointer;
+      border-bottom:2px solid transparent;transition:all .15s}
+.rtab:hover{color:var(--t2)}
+.rtab.on{color:var(--cyan);border-bottom-color:var(--cyan)}
 
-/* PAIR DETAIL */
-#pair-detail{padding:14px 16px}
-.det-title{font-family:var(--font-mono);font-size:11px;font-weight:600;
-           color:var(--t2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
-.lag-chart-wrap{height:160px;position:relative;margin-bottom:16px}
+/* ── TODAY ALERTS ── */
+#tab-alerts{flex:1;overflow-y:auto;padding:0}
+.alert-none{font-family:var(--font-mono);font-size:10px;color:var(--t3);padding:14px 16px}
+
+.alert-card{display:flex;align-items:center;gap:10px;padding:9px 14px;
+            border-bottom:1px solid var(--b1);transition:background .1s;cursor:pointer}
+.alert-card:hover{background:rgba(255,255,255,.02)}
+.alert-card.bullish{border-left:3px solid var(--green)}
+.alert-card.bearish{border-left:3px solid var(--red)}
+.ac-word{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--cyan);
+         min-width:100px}
+.ac-z{font-family:var(--font-mono);font-size:10px;color:var(--amber);min-width:60px}
+.ac-sep{color:var(--t3);font-size:11px}
+.ac-dir{font-size:14px}
+.ac-ticker{font-family:var(--font-mono);font-size:12px;font-weight:600}
+.ac-ret{font-family:var(--font-mono);font-size:11px}
+.ac-in{font-family:var(--font-mono);font-size:9px;color:var(--t3)}
+.ac-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+.ac-conf{font-family:var(--font-mono);font-size:9px;color:var(--t3)}
+
+/* ── PAIR DETAIL ── */
+#tab-detail{flex:1;overflow-y:auto;padding:14px 16px;display:none}
+.det-section{margin-bottom:18px}
+.det-title{font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--t3);margin-bottom:10px;
+           border-bottom:1px solid var(--b1);padding-bottom:5px}
+.lag-chart-wrap{height:150px;position:relative}
 .lag-chart-wrap canvas{position:absolute;inset:0}
-.event-table{width:100%;border-collapse:collapse;margin-top:8px}
-.event-table th{font-family:var(--font-mono);font-size:8px;letter-spacing:.1em;
-                text-transform:uppercase;color:var(--t3);padding:4px 8px;
-                border-bottom:1px solid var(--b1);text-align:left}
-.event-table td{font-family:var(--font-mono);font-size:10px;color:var(--t1);
-                padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.03)}
-.event-table tr:hover td{background:rgba(255,255,255,.025)}
 
-/* data quality warning in detail */
+/* rolling corr chart */
+.roll-chart-wrap{height:100px;position:relative}
+.roll-chart-wrap canvas{position:absolute;inset:0}
+
+/* dq warning */
 .dq-warn{font-family:var(--font-mono);font-size:9px;color:var(--amber);
          background:rgba(255,179,0,.07);border:1px solid rgba(255,179,0,.2);
-         padding:6px 10px;margin-bottom:12px;line-height:1.6}
+         padding:6px 10px;margin-bottom:12px;line-height:1.7}
 
-/* empty / loading */
+/* stat row */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-bottom:1px}
+.stat-cell{background:var(--bg1);padding:8px 10px;text-align:center}
+.stat-lbl{font-family:var(--font-mono);font-size:8px;color:var(--t3);
+          letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
+.stat-val{font-family:var(--font-mono);font-size:14px;font-weight:600}
+
+/* ── CO-OCCURRENCE ── */
+#tab-cluster{flex:1;overflow-y:auto;padding:12px;display:none}
+.cluster-card{padding:10px 12px;margin-bottom:5px;background:var(--bg1);border:1px solid var(--b1)}
+.cc-terms{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--cyan);
+          margin-bottom:4px}
+.cc-bar-wrap{height:4px;background:var(--b1);margin-bottom:4px}
+.cc-bar{height:100%;background:var(--purple)}
+.cc-val{font-family:var(--font-mono);font-size:9px;color:var(--t3)}
+
+/* empty/loading */
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
-       flex:1;gap:10px;color:var(--t3);padding:40px}
+       height:100%;gap:10px;color:var(--t3)}
 .empty-ico{font-size:28px;opacity:.3}
 .empty-txt{font-family:var(--font-mono);font-size:10px;text-align:center;line-height:1.7}
 .spinner{width:18px;height:18px;border:2px solid var(--b2);border-top-color:var(--cyan);
@@ -164,11 +197,7 @@ main{flex:1;display:grid;grid-template-columns:420px 1fr;gap:1px;
   </div>
 </header>
 
-<!-- data quality warning banner -->
-<div id="data-warn">
-  <span class="warn-ico">⚠</span>
-  <span id="warn-txt">신호 데이터 로딩 중…</span>
-</div>
+<div id="data-warn">⚠ <span id="warn-txt">loading…</span></div>
 
 <main>
   <!-- ── LEFT: Pair List ── -->
@@ -178,28 +207,41 @@ main{flex:1;display:grid;grid-template-columns:420px 1fr;gap:1px;
       <div class="pbadge" id="pair-badge">—</div>
     </div>
     <div class="filter-row">
-      <button class="fbtn on" data-f="all">ALL</button>
-      <button class="fbtn" data-f="leading">LEADING</button>
-      <button class="fbtn" data-f="bullish">BULLISH</button>
-      <button class="fbtn" data-f="bearish">BEARISH</button>
+      <button class="fbtn on"  data-f="all">ALL</button>
+      <button class="fbtn"     data-f="leading">LEADING</button>
+      <button class="fbtn"     data-f="validated">VALIDATED</button>
+      <button class="fbtn"     data-f="bullish">BULLISH</button>
+      <button class="fbtn"     data-f="bearish">BEARISH</button>
     </div>
-    <div id="pair-list">
-      <div class="empty"><div class="spinner"></div></div>
-    </div>
+    <div id="pair-list"><div class="empty"><div class="spinner"></div></div></div>
   </div>
 
-  <!-- ── RIGHT: Detail ── -->
+  <!-- ── RIGHT ── -->
   <div class="col">
-    <div class="sec-lbl">TODAY'S ACTIVE SIGNALS (Z ≥ 2.0)</div>
-    <div id="today-alerts">
-      <div class="alert-none">로딩 중…</div>
+    <div id="right-tabs">
+      <div class="rtab on"  data-t="alerts">TODAY'S ALERTS</div>
+      <div class="rtab"     data-t="detail">PAIR DETAIL</div>
+      <div class="rtab"     data-t="cluster">CO-OCCURRENCE</div>
     </div>
 
-    <div class="sec-lbl" id="det-lbl">PAIR DETAIL — SELECT A SIGNAL</div>
-    <div id="detail-wrap">
+    <!-- TODAY ALERTS tab -->
+    <div id="tab-alerts">
+      <div class="alert-none">loading…</div>
+    </div>
+
+    <!-- PAIR DETAIL tab -->
+    <div id="tab-detail">
       <div class="empty">
         <div class="empty-ico">◈</div>
-        <div class="empty-txt">왼쪽에서 신호 쌍을 선택하면<br>lag 상관관계 차트와<br>과거 이벤트 히스토리가 표시됩니다</div>
+        <div class="empty-txt">Select a signal pair<br>to view lag chart + validation stats</div>
+      </div>
+    </div>
+
+    <!-- CO-OCCURRENCE tab -->
+    <div id="tab-cluster">
+      <div class="empty">
+        <div class="empty-ico">◈</div>
+        <div class="empty-txt">loading…</div>
       </div>
     </div>
   </div>
@@ -209,14 +251,10 @@ main{flex:1;display:grid;grid-template-columns:420px 1fr;gap:1px;
 (function(){
 'use strict';
 
-const V    = Date.now();
-const BASE = './data/';
-let SC   = null;   // signal_corr.json
-let T    = null;   // trends.json
-let pairs = [];
-let selPair = null;
-let lagChart = null;
-let curFilter = 'all';
+const V = Date.now(), BASE = './data/';
+let SC = null, T = null;
+let pairs = [], selPair = null, lagChart = null;
+let curFilter = 'all', curTab = 'alerts';
 
 async function fetchJSON(p){
   try{
@@ -226,32 +264,32 @@ async function fetchJSON(p){
   }catch(e){ return null; }
 }
 
-function sign(n){ return n >= 0 ? '+' : ''; }
-function pct(n){ return (n >= 0 ? '+' : '') + n.toFixed(2) + '%'; }
-function fmtCorr(c){ return (c >= 0 ? '+' : '') + c.toFixed(3); }
+const sign  = n => n >= 0 ? '+' : '';
+const pct   = n => (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+const fCorr = c => (c >= 0 ? '+' : '') + c.toFixed(3);
 
-function retColor(v){
-  if(v > 0.5) return 'var(--green)';
-  if(v < -0.5) return 'var(--red)';
-  return 'var(--t2)';
+const retColor  = v => v > 0.5 ? 'var(--green)' : v < -0.5 ? 'var(--red)' : 'var(--t2)';
+const hitColor  = h => h >= 0.65 ? 'var(--green)' : h >= 0.5 ? 'var(--amber)' : 'var(--red)';
+const confColor = c => c >= 0.7 ? 'var(--green)' : c >= 0.45 ? 'var(--cyan)' : c >= 0.25 ? 'var(--amber)' : 'var(--t3)';
+const confBarColor = c => c >= 0.7 ? '#00e676' : c >= 0.45 ? '#00d4ff' : c >= 0.25 ? '#ffb300' : '#344a60';
+const trendSym  = t => t === 1 ? '↑' : t === -1 ? '↓' : '→';
+const trendColor= t => t === 1 ? 'var(--green)' : t === -1 ? 'var(--red)' : 'var(--t2)';
+
+function testBadge(p){
+  if(p.test_n == null || p.test_n === 0)
+    return `<span class="test-badge test-none">NO TEST</span>`;
+  const h = p.test_hit;
+  if(h >= 0.65) return `<span class="test-badge test-ok">TEST ${(h*100).toFixed(0)}%✓</span>`;
+  if(h >= 0.5)  return `<span class="test-badge test-warn">TEST ${(h*100).toFixed(0)}%</span>`;
+  return `<span class="test-badge test-bad">TEST ${(h*100).toFixed(0)}%✗</span>`;
 }
 
-function hitColor(h){
-  if(h >= 0.65) return 'var(--green)';
-  if(h >= 0.5)  return 'var(--amber)';
-  return 'var(--red)';
-}
-
-// ── Init ──────────────────────────────────────────────────────────────
+// ── Init ──────────────────────────────────────────────────────────────────────
 async function init(){
   document.getElementById('ts').textContent =
     'UPDATED '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
 
-  const [sc, t] = await Promise.all([
-    fetchJSON('signal_corr.json'),
-    fetchJSON('trends.json'),
-  ]);
-
+  const [sc, t] = await Promise.all([fetchJSON('signal_corr.json'), fetchJSON('trends.json')]);
   SC = sc; T = t;
 
   if(!SC){
@@ -259,67 +297,74 @@ async function init(){
       '<div class="empty"><div class="empty-txt">signal_corr.json not found</div></div>';
     return;
   }
-
   pairs = SC.pairs || [];
 
-  // Data quality banner
-  const nDates = SC.n_dates || 0;
+  // Banner
+  const nD = SC.n_dates || 0;
   const warnEl = document.getElementById('warn-txt');
-  if(nDates < 30){
-    warnEl.textContent = `⚠ 데이터 ${nDates}일 — 90일 이상 쌓이면 신호 신뢰도가 높아집니다. 현재 상관계수는 참고용.`;
-  } else if(nDates < 60){
-    warnEl.textContent = `데이터 ${nDates}일 — 신호 초기 단계. 60일+ 부터 유의미한 패턴 출현.`;
-  } else {
+  if(nD < 30)
+    warnEl.textContent = `${nD} days of data — signals are exploratory. Reliability increases past 90 days.`;
+  else if(nD < 60)
+    warnEl.textContent = `${nD} days — early signals. Treat high confidence (>0.7) pairs as tentative.`;
+  else
     document.getElementById('data-warn').style.display = 'none';
-  }
 
   renderPairList();
-  renderTodayAlerts();
+  renderAlerts();
+  renderClusters();
   if(pairs.length) selectPair(pairs[0]);
 }
 
-// ── Pair list ─────────────────────────────────────────────────────────
+// ── Pair List ─────────────────────────────────────────────────────────────────
 function renderPairList(){
   const list = document.getElementById('pair-list');
-  let visible = pairs;
+  let vis = pairs;
+  if(curFilter === 'leading')   vis = pairs.filter(p => p.best_lag <= -1);
+  if(curFilter === 'validated') vis = pairs.filter(p => p.test_hit != null && p.test_hit >= 0.6);
+  if(curFilter === 'bullish')   vis = pairs.filter(p => p.avg_ret_1d > 0.3);
+  if(curFilter === 'bearish')   vis = pairs.filter(p => p.avg_ret_1d < -0.3);
 
-  if(curFilter === 'leading') visible = pairs.filter(p => p.best_lag <= -1);
-  else if(curFilter === 'bullish') visible = pairs.filter(p => p.avg_ret_1d > 0.2);
-  else if(curFilter === 'bearish') visible = pairs.filter(p => p.avg_ret_1d < -0.2);
-
-  document.getElementById('pair-badge').textContent = visible.length + ' PAIRS';
-
-  if(!visible.length){
-    list.innerHTML = '<div class="empty"><div class="empty-txt">NO PAIRS MATCH FILTER</div></div>';
+  document.getElementById('pair-badge').textContent = vis.length + ' PAIRS';
+  if(!vis.length){
+    list.innerHTML = '<div class="empty"><div class="empty-txt">NO PAIRS MATCH</div></div>';
     return;
   }
 
-  list.innerHTML = visible.slice(0, 150).map(p => {
-    const isBull = p.avg_ret_1d > 0;
-    const tickerColor = isBull ? 'var(--green)' : 'var(--red)';
-    const tickerBorder = isBull ? 'rgba(0,230,118,.35)' : 'rgba(255,68,68,.35)';
-    const arrow = p.best_lag <= -1 ? '↗' : p.best_lag >= 1 ? '↙' : '→';
-    const arrowColor = p.best_lag <= -1 ? 'var(--cyan)' : 'var(--t3)';
-    const isLowData = p.n_events < 5;
+  list.innerHTML = vis.slice(0,200).map(p => {
+    const isBull = p.avg_ret_1d >= 0;
+    const tc = isBull ? 'var(--green)' : 'var(--red)';
+    const tb = isBull ? 'rgba(0,230,118,.3)' : 'rgba(255,68,68,.3)';
+    const arr = p.best_lag <= -1 ? '→' : p.best_lag >= 1 ? '↗' : '↔';
+    const arrC= p.best_lag <= -1 ? 'var(--cyan)' : 'var(--t3)';
     const isSel = selPair && selPair.term === p.term && selPair.ticker === p.ticker;
+    const confPct = Math.round(p.confidence * 100);
+    const bColor  = confBarColor(p.confidence);
 
     return `<div class="pcard${isSel?' sel':''}" data-term="${p.term}" data-ticker="${p.ticker}">
-      <div class="pcard-top">
+      <div class="pc-row1">
         <span class="pc-term">${p.term}</span>
-        <span class="pc-arr" style="color:${arrowColor}">${arrow}</span>
-        <span class="pc-ticker" style="color:${tickerColor};border-color:${tickerBorder}">${p.ticker}</span>
-        <span class="lag-badge">lag ${sign(p.best_lag)}${p.best_lag}d</span>
-        ${isLowData ? '<span class="low-data">LOW DATA</span>' : ''}
-        <span class="pc-type">${p.signal_type}</span>
+        <span class="pc-arrow" style="color:${arrC}">${arr}</span>
+        <span class="pc-ticker" style="color:${tc};border-color:${tb}">${p.ticker}</span>
+        <span class="pc-lag">lag ${p.best_lag > 0 ? '+':''}${p.best_lag}d</span>
+        ${testBadge(p)}
+        <span class="pc-trend" style="color:${trendColor(p.corr_trend)}">${trendSym(p.corr_trend)}</span>
+        <span class="pc-stype">${p.signal_type}</span>
       </div>
-      <div class="pcard-stats">
+      <div class="conf-bar-wrap">
+        <div class="conf-bar" style="width:${confPct}%;background:${bColor}"></div>
+      </div>
+      <div class="pc-stats">
+        <div class="ps">
+          <div class="ps-l">CONF</div>
+          <div class="ps-v" style="color:${confColor(p.confidence)}">${p.confidence.toFixed(2)}</div>
+        </div>
         <div class="ps">
           <div class="ps-l">CORR</div>
           <div class="ps-v" style="color:${Math.abs(p.corr)>0.6?'var(--cyan)':'var(--t2)'}">
-            ${fmtCorr(p.corr)}</div>
+            ${fCorr(p.corr)}</div>
         </div>
         <div class="ps">
-          <div class="ps-l">HIT RATE</div>
+          <div class="ps-l">HIT</div>
           <div class="ps-v" style="color:${hitColor(p.hit_rate)}">${(p.hit_rate*100).toFixed(0)}%</div>
         </div>
         <div class="ps">
@@ -327,8 +372,8 @@ function renderPairList(){
           <div class="ps-v" style="color:${retColor(p.avg_ret_1d)}">${pct(p.avg_ret_1d)}</div>
         </div>
         <div class="ps">
-          <div class="ps-l">EVENTS</div>
-          <div class="ps-v" style="color:var(--t2)">n=${p.n_events}</div>
+          <div class="ps-l">n</div>
+          <div class="ps-v" style="color:var(--t2)">${p.n_events}</div>
         </div>
       </div>
     </div>`;
@@ -336,229 +381,259 @@ function renderPairList(){
 
   list.querySelectorAll('.pcard').forEach(el =>
     el.addEventListener('click', () => {
-      const p = pairs.find(x => x.term === el.dataset.term && x.ticker === el.dataset.ticker);
+      const p = pairs.find(x => x.term===el.dataset.term && x.ticker===el.dataset.ticker);
       if(p) selectPair(p);
     })
   );
 }
 
-// ── Today's Alerts ────────────────────────────────────────────────────
-function renderTodayAlerts(){
-  const box = document.getElementById('today-alerts');
-  if(!T || !T.series || !T.zscores){
-    box.innerHTML = '<div class="alert-none">trends.json 없음</div>';
+// ── Today's Alerts ────────────────────────────────────────────────────────────
+function renderAlerts(){
+  const box = document.getElementById('tab-alerts');
+  if(!T || !T.zscores){
+    box.innerHTML = '<div class="alert-none">trends.json not loaded</div>';
     return;
   }
 
-  // 오늘 Z-score ≥ 2.0 단어
-  const hotTerms = Object.entries(T.zscores)
+  const hot = Object.entries(T.zscores)
     .filter(([,z]) => z >= 2.0)
     .sort(([,a],[,b]) => b - a)
-    .slice(0, 15)
-    .map(([term, z]) => ({ term, z }));
+    .slice(0, 20);
 
-  if(!hotTerms.length){
-    box.innerHTML = '<div class="alert-none">현재 Z ≥ 2.0 활성 신호 없음</div>';
+  if(!hot.length){
+    box.innerHTML = '<div class="alert-none">No active signals today (Z ≥ 2.0)</div>';
     return;
   }
 
-  // 각 hot term에 대한 leading signal 찾기
   const alerts = [];
-  for(const { term, z } of hotTerms){
-    const leading = pairs.filter(p =>
-      p.term === term && p.best_lag <= -1 && p.hit_rate >= 0.5
-    ).sort((a,b) => Math.abs(b.corr) - Math.abs(a.corr));
-
-    if(leading.length){
-      alerts.push({ term, z, pairs: leading.slice(0, 3) });
-    }
+  for(const [term, z] of hot){
+    const leading = pairs
+      .filter(p => p.term === term && p.best_lag <= -1 && p.confidence >= 0.3)
+      .sort((a,b) => b.confidence - a.confidence)
+      .slice(0, 2);
+    if(leading.length) alerts.push({ term, z, pairs: leading });
   }
 
   if(!alerts.length){
-    box.innerHTML = `<div class="alert-none">오늘 Z≥2 단어: ${hotTerms.map(t=>t.term).join(', ')}<br>
-      <span style="opacity:.6">아직 leading 상관 신호 없음 (데이터 축적 중)</span></div>`;
+    const names = hot.slice(0,5).map(([t]) => t).join(', ');
+    box.innerHTML = `<div class="alert-none">
+      Today's hot terms: <span style="color:var(--t2)">${names}${hot.length>5?'…':''}</span><br>
+      <span style="opacity:.5">No validated leading signals yet — building correlation history.</span>
+    </div>`;
     return;
   }
 
   box.innerHTML = alerts.map(({ term, z, pairs: ps }) =>
     ps.map(p => {
-      const direction = p.avg_ret_1d > 0 ? '▲' : '▼';
-      const dirColor  = p.avg_ret_1d > 0 ? 'var(--green)' : 'var(--red)';
+      const bull = p.avg_ret_1d >= 0;
+      const dir  = bull ? '▲' : '▼';
+      const dc   = bull ? 'var(--green)' : 'var(--red)';
+      const cl   = bull ? 'bullish' : 'bearish';
       const lagAbs = Math.abs(p.best_lag);
-      return `<div class="alert-row">
-        <span class="alert-word">${term}</span>
-        <span class="alert-z">z=${sign(z)}${z.toFixed(1)}σ</span>
-        <span class="alert-sep">→</span>
-        <span class="alert-ticker" style="color:${dirColor}">${direction} ${p.ticker}</span>
-        <span class="alert-ret" style="color:${dirColor}">${pct(p.avg_ret_1d)}</span>
-        <span style="font-family:var(--font-mono);font-size:9px;color:var(--t3)">
-          in ${lagAbs}d</span>
-        <span class="alert-conf">hit ${(p.hit_rate*100).toFixed(0)}%  n=${p.n_events}</span>
+      const confBar = `<div style="width:${Math.round(p.confidence*40)}px;height:3px;
+        background:${confBarColor(p.confidence)};display:inline-block;vertical-align:middle"></div>`;
+      return `<div class="alert-card ${cl}" data-term="${term}" data-ticker="${p.ticker}">
+        <span class="ac-word">${term}</span>
+        <span class="ac-z">z=${sign(z)}${z.toFixed(1)}σ</span>
+        <span class="ac-sep">→</span>
+        <span class="ac-dir" style="color:${dc}">${dir}</span>
+        <span class="ac-ticker" style="color:${dc}">${p.ticker}</span>
+        <span class="ac-ret" style="color:${dc}">${pct(p.avg_ret_1d)}</span>
+        <span class="ac-in">in ${lagAbs}d</span>
+        <div class="ac-right">
+          ${testBadge(p)}
+          <span class="ac-conf" style="color:${confColor(p.confidence)}">
+            conf ${p.confidence.toFixed(2)}</span>
+          ${confBar}
+        </div>
       </div>`;
     }).join('')
   ).join('');
+
+  // click → switch to detail tab
+  box.querySelectorAll('.alert-card').forEach(el =>
+    el.addEventListener('click', () => {
+      const p = pairs.find(x => x.term===el.dataset.term && x.ticker===el.dataset.ticker);
+      if(p){ selectPair(p); switchTab('detail'); }
+    })
+  );
 }
 
-// ── Select pair → detail ──────────────────────────────────────────────
+// ── Co-occurrence clusters ────────────────────────────────────────────────────
+function renderClusters(){
+  const box = document.getElementById('tab-cluster');
+  const clusters = SC.cooccurrence || [];
+  if(!clusters.length){
+    box.innerHTML = '<div class="empty"><div class="empty-txt">No co-occurrence clusters<br>found yet</div></div>';
+    return;
+  }
+
+  const maxC = clusters[0].co_corr;
+  box.innerHTML = `
+    <div style="padding:10px 12px 6px;font-family:var(--font-mono);font-size:9px;color:var(--t3);
+         border-bottom:1px solid var(--b1);margin-bottom:8px">
+      WORDS THAT SPIKE TOGETHER — high co-occurrence suggests a shared macro theme
+    </div>` +
+    clusters.map(c => {
+      const w = Math.round((c.co_corr / maxC) * 100);
+      return `<div class="cluster-card">
+        <div class="cc-terms">${c.terms.join(' + ')}</div>
+        <div class="cc-bar-wrap"><div class="cc-bar" style="width:${w}%"></div></div>
+        <div class="cc-val">co-occurrence corr: ${c.co_corr.toFixed(3)}</div>
+      </div>`;
+    }).join('');
+}
+
+// ── Select pair → detail ──────────────────────────────────────────────────────
 function selectPair(p){
   selPair = p;
   document.querySelectorAll('.pcard').forEach(el =>
-    el.classList.toggle('sel', el.dataset.term === p.term && el.dataset.ticker === p.ticker)
+    el.classList.toggle('sel', el.dataset.term===p.term && el.dataset.ticker===p.ticker)
   );
-
-  document.getElementById('det-lbl').textContent =
-    `PAIR DETAIL — ${p.term.toUpperCase()} → ${p.ticker}`;
-
   renderDetail(p);
 }
 
 function renderDetail(p){
-  const wrap = document.getElementById('detail-wrap');
-  const isLowData = p.n_events < 5;
-  const nDates = SC.n_dates || 0;
-
+  const wrap = document.getElementById('tab-detail');
+  const nD   = SC.n_dates || 0;
   const lagKeys = Object.keys(p.lag_corrs).map(Number).sort((a,b)=>a-b);
   const lagVals = lagKeys.map(k => p.lag_corrs[String(k)]);
 
+  const testRow = p.test_hit != null ? `
+    <div class="stat-cell">
+      <div class="stat-lbl">TEST HIT</div>
+      <div class="stat-val" style="color:${hitColor(p.test_hit)}">${(p.test_hit*100).toFixed(0)}%</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-lbl">TEST n</div>
+      <div class="stat-val" style="color:var(--t2)">${p.test_n}</div>
+    </div>` : `
+    <div class="stat-cell">
+      <div class="stat-lbl">TEST HIT</div>
+      <div class="stat-val" style="color:var(--t3)">—</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-lbl">TEST n</div>
+      <div class="stat-val" style="color:var(--t3)">—</div>
+    </div>`;
+
   wrap.innerHTML = `
-    ${(isLowData || nDates < 30) ? `
-    <div class="dq-warn" style="margin:12px 14px 0">
-      ⚠ n=${p.n_events}개 이벤트, ${nDates}일 데이터 —
-      상관계수 ${fmtCorr(p.corr)}는 참고용입니다.
-      90일+ 데이터 축적 후 신뢰도가 높아집니다.
+    ${(p.n_events < 5 || nD < 30) ? `
+    <div class="dq-warn">
+      ⚠ n=${p.n_events} events · ${nD} days — correlation ${fCorr(p.corr)} is exploratory.
+      Confidence score ${p.confidence.toFixed(3)} accounts for data scarcity.
     </div>` : ''}
 
-    <div id="pair-detail">
-      <div class="det-title">LAG별 상관계수 — 음수(왼쪽)일수록 단어가 주가를 선행</div>
-      <div class="lag-chart-wrap"><canvas id="lag-canvas"></canvas></div>
-
-      <div class="det-title" style="margin-top:8px">
-        Z ≥ 2.0 이벤트 히스토리 (n=${p.n_events})
-        <span style="font-size:9px;color:var(--t3);font-weight:400;margin-left:8px">
-          avg 1d: <span style="color:${retColor(p.avg_ret_1d)}">${pct(p.avg_ret_1d)}</span>
-          &nbsp;|&nbsp;avg 5d: <span style="color:${retColor(p.avg_ret_5d||0)}">${p.avg_ret_5d!=null?pct(p.avg_ret_5d):'—'}</span>
-          &nbsp;|&nbsp;hit rate: <span style="color:${hitColor(p.hit_rate)}">${(p.hit_rate*100).toFixed(0)}%</span>
-        </span>
+    <div class="det-section">
+      <div class="det-title">${p.term.toUpperCase()} → ${p.ticker} · lag analysis</div>
+      <div class="stat-row">
+        <div class="stat-cell">
+          <div class="stat-lbl">CONFIDENCE</div>
+          <div class="stat-val" style="color:${confColor(p.confidence)}">${p.confidence.toFixed(3)}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-lbl">TRAIN CORR</div>
+          <div class="stat-val" style="color:${Math.abs(p.corr)>0.6?'var(--cyan)':'var(--t2)'}">
+            ${fCorr(p.corr)}</div>
+        </div>
+        ${testRow}
       </div>
-      <div id="event-hist">
-        <table class="event-table">
-          <thead><tr>
-            <th>DATE (Z≥2)</th>
-            <th>WORD COUNT</th>
-            <th>Z-SCORE</th>
-            <th>${p.ticker} 1D RET</th>
-            <th>${p.ticker} 5D RET</th>
-            <th>HIT</th>
-          </tr></thead>
-          <tbody id="event-rows"></tbody>
-        </table>
+      <div class="stat-row" style="margin-top:1px">
+        <div class="stat-cell">
+          <div class="stat-lbl">HIT RATE</div>
+          <div class="stat-val" style="color:${hitColor(p.hit_rate)}">${(p.hit_rate*100).toFixed(0)}%</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-lbl">AVG 1D RET</div>
+          <div class="stat-val" style="color:${retColor(p.avg_ret_1d)}">${pct(p.avg_ret_1d)}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-lbl">AVG 5D RET</div>
+          <div class="stat-val" style="color:${retColor(p.avg_ret_5d||0)}">
+            ${p.avg_ret_5d != null ? pct(p.avg_ret_5d) : '—'}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-lbl">SIGNAL TREND</div>
+          <div class="stat-val" style="color:${trendColor(p.corr_trend)}">
+            ${trendSym(p.corr_trend)} ${p.corr_trend===1?'STRENGTH':p.corr_trend===-1?'DECAY':'STABLE'}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="det-section">
+      <div class="det-title">Lag correlation — negative = word leads price (predictive)</div>
+      <div class="lag-chart-wrap"><canvas id="lag-cv"></canvas></div>
+    </div>
+
+    <div class="det-section">
+      <div class="det-title">
+        Best lag: ${p.best_lag > 0 ? '+':''}${p.best_lag}d &nbsp;·&nbsp;
+        p-value: ${p.pval != null ? p.pval.toFixed(3) : '—'} &nbsp;·&nbsp;
+        consistency: ${p.consistency != null ? p.consistency.toFixed(2) : '—'} &nbsp;·&nbsp;
+        source proxy: ${p.source_proxy != null ? p.source_proxy.toFixed(2) : '—'}
       </div>
     </div>`;
 
-  // Draw lag correlation chart
   requestAnimationFrame(() => {
-    const ctx = document.getElementById('lag-canvas');
+    const ctx = document.getElementById('lag-cv');
     if(!ctx) return;
     if(lagChart){ lagChart.destroy(); lagChart = null; }
 
     const colors = lagKeys.map(k => {
-      if(k === p.best_lag) return '#00d4ff';
-      if(k < 0) return 'rgba(0,230,118,.7)';
-      if(k > 0) return 'rgba(255,68,68,.5)';
-      return 'rgba(255,179,0,.7)';
+      if(k === p.best_lag)  return '#00d4ff';
+      if(k < 0)             return 'rgba(0,230,118,.65)';
+      if(k === 0)           return 'rgba(255,179,0,.65)';
+      return 'rgba(255,68,68,.45)';
     });
 
     lagChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: lagKeys.map(k => k===0?'0 (same)': (k<0?`${k}d (lead)`:`+${k}d (lag)`)),
-        datasets: [{
-          data: lagVals,
-          backgroundColor: colors,
-          borderColor: colors,
-          borderWidth: 1,
-        }]
+      type:'bar',
+      data:{
+        labels: lagKeys.map(k => k===0?'0':k<0?`${k}d`:` +${k}d`),
+        datasets:[{data:lagVals, backgroundColor:colors, borderColor:colors, borderWidth:1}]
       },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#0c1220', borderColor: '#1a2840', borderWidth: 1,
-            titleColor: '#6a8aa8', bodyColor: '#c8d8e8',
-            titleFont: { family:'IBM Plex Mono', size:10 },
-            bodyFont:  { family:'IBM Plex Mono', size:11 },
-            callbacks: {
-              title: i => 'LAG ' + lagKeys[i[0].dataIndex] + 'd',
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            backgroundColor:'#0c1220', borderColor:'#1a2840', borderWidth:1,
+            titleColor:'#6a8aa8', bodyColor:'#c8d8e8',
+            titleFont:{family:'IBM Plex Mono',size:10},
+            bodyFont:{family:'IBM Plex Mono',size:11},
+            callbacks:{
+              title: i => (lagKeys[i[0].dataIndex] < 0 ? 'LEAD ' : lagKeys[i[0].dataIndex]===0 ? 'SAME DAY' : 'LAG ') + lagKeys[i[0].dataIndex] + 'd',
               label: i => ` corr: ${Number(i.raw).toFixed(4)}`
             }
-          },
-          annotation: undefined,
-        },
-        scales: {
-          x: {
-            grid: { color:'#1a2840' },
-            ticks: { color:'#6a8aa8', font:{family:'IBM Plex Mono',size:9} }
-          },
-          y: {
-            min: -1, max: 1,
-            grid: { color:'#1a2840' },
-            ticks: { color:'#6a8aa8', font:{family:'IBM Plex Mono',size:9} },
-            afterDataLimits(scale){ scale.min=-1; scale.max=1; }
           }
+        },
+        scales:{
+          x:{grid:{color:'#1a2840'},ticks:{color:'#6a8aa8',font:{family:'IBM Plex Mono',size:9}}},
+          y:{min:-1,max:1,grid:{color:'#1a2840'},ticks:{color:'#6a8aa8',font:{family:'IBM Plex Mono',size:9}},
+             afterDataLimits(s){s.min=-1;s.max=1;}}
         }
       }
     });
-
-    // Fill event history from trends + prices data
-    buildEventRows(p);
   });
 }
 
-// 이벤트 히스토리 테이블
-function buildEventRows(p){
-  const tbody = document.getElementById('event-rows');
-  if(!tbody || !T || !T.series || !T.zscores) return;
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(t){
+  curTab = t;
+  document.querySelectorAll('.rtab').forEach(el =>
+    el.classList.toggle('on', el.dataset.t === t)
+  );
+  document.getElementById('tab-alerts').style.display  = t==='alerts'  ? 'block' : 'none';
+  document.getElementById('tab-detail').style.display  = t==='detail'  ? 'block' : 'none';
+  document.getElementById('tab-cluster').style.display = t==='cluster' ? 'block' : 'none';
 
-  const tDates  = T.dates || [];
-  const counts  = (T.series[p.term] || []).map(Number);
-
-  // Z-score 재계산
-  function zAt(i){
-    if(i < 3) return 0;
-    const hist = counts.slice(Math.max(0, i-28), i);
-    const mean = hist.reduce((a,b)=>a+b,0)/hist.length;
-    const std  = Math.sqrt(hist.reduce((a,b)=>a+(b-mean)**2,0)/hist.length);
-    if(std < 0.5) return 0;
-    return (counts[i]-mean)/std;
-  }
-
-  const rows = [];
-  for(let i=0; i<tDates.length; i++){
-    const z = zAt(i);
-    if(z < 2.0) continue;
-    rows.push({ date: tDates[i], count: counts[i], z });
-  }
-
-  if(!rows.length){
-    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--t3);text-align:center;padding:16px">이벤트 없음</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = rows.map(r => {
-    return `<tr>
-      <td>${r.date}</td>
-      <td>${r.count}</td>
-      <td style="color:var(--amber)">${sign(r.z)}${r.z.toFixed(2)}σ</td>
-      <td style="color:var(--t3)">—</td>
-      <td style="color:var(--t3)">—</td>
-      <td style="color:var(--t3)">—</td>
-    </tr>`;
-  }).join('');
-  // prices.json 없으면 수익률 컬럼은 — 표시 (추후 연동 가능)
+  if(t==='detail' && selPair) renderDetail(selPair);
 }
 
-// ── Controls ──────────────────────────────────────────────────────────
+document.querySelectorAll('.rtab').forEach(el =>
+  el.addEventListener('click', () => switchTab(el.dataset.t))
+);
+
 document.querySelectorAll('.fbtn').forEach(btn =>
   btn.addEventListener('click', () => {
     document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('on'));

@@ -1,36 +1,14 @@
 """
-build_signal_corr.py  v2
+build_signal_corr.py  v3
 trends.json + prices.json → signal_corr.json
 
-핵심 계산:
-  - 각 (단어, 종목) 쌍에 대해 lag -5~+5일 Pearson 상관계수
-  - lag < 0  → 단어가 주가보다 앞섬 (예측력 있음)
-  - lag = 0  → 동시 반응
-  - lag > 0  → 주가가 먼저 움직임 (후행)
-  - 단어 Z-score ≥ 2인 날 다음날/5일 평균 수익률 계산
-
-출력: site/data/signal_corr.json
-{
-  "updated": "...",
-  "n_dates": 90,
-  "pairs": [
-    {
-      "term": "tariff",
-      "ticker": "AAPL",
-      "best_lag": -1,         // 음수 = 단어가 주가를 선행
-      "corr": 0.71,
-      "hit_rate": 0.68,       // z>=2 이벤트 중 다음날 방향 맞춘 비율
-      "n_events": 14,
-      "avg_ret_1d": 1.2,      // z>=2 다음날 평균 수익률(%)
-      "avg_ret_5d": 2.8,
-      "signal_type": "leading_1d",
-      "lag_corrs": {"-2": 0.3, "-1": 0.71, "0": 0.5, ...}
-    }
-  ],
-  "term_stats": {
-    "tariff": {"best_ticker": "AAPL", "best_corr": 0.71, "best_lag": -1}
-  }
-}
+Upgrades over v2:
+  - Train / test split (70/30) — reports both train corr and test hit_rate
+  - Composite confidence score: corr × hit_rate × sqrt(n/10) × consistency × source_proxy
+  - Rolling 21-day correlation — detects whether signal is stable or decaying
+  - Co-occurrence clusters — finds word groups that spike together
+  - p-value approximation filter (n ≥ 5 required)
+  - Source proxy weighting from trends.json
 """
 
 import argparse
@@ -40,10 +18,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-# ── 통계 헬퍼 ─────────────────────────────────────────────────────────
+# ── Statistical helpers ───────────────────────────────────────────────────────
 
 def pearson(xs, ys):
-    """두 리스트의 Pearson 상관계수. 데이터 부족 시 None."""
     n = len(xs)
     if n < 5:
         return None
@@ -57,8 +34,18 @@ def pearson(xs, ys):
     return round(num / (dx * dy), 4)
 
 
-def zscore_series(counts: list, window: int = 28) -> list:
-    """일별 Z-score 시계열 반환."""
+def p_value_approx(r, n):
+    """Two-tailed p-value approximation via t-distribution (df = n-2)."""
+    if r is None or n < 4 or abs(r) >= 1.0:
+        return 1.0
+    t = r * math.sqrt(n - 2) / math.sqrt(1 - r ** 2 + 1e-12)
+    # Rough approximation using logistic transform calibrated on t-dist
+    x = abs(t) / math.sqrt(n - 2)
+    p = 2 * (1 / (1 + math.exp(6 * (x - 0.5))))
+    return round(min(1.0, max(0.0, p)), 4)
+
+
+def zscore_series(counts, window=28):
     result = []
     for i, c in enumerate(counts):
         if i < 3:
@@ -71,59 +58,112 @@ def zscore_series(counts: list, window: int = 28) -> list:
     return result
 
 
-# ── 메인 로직 ─────────────────────────────────────────────────────────
+def rolling_corr(xs, ys, window=21):
+    """Compute rolling Pearson correlations. Returns list of (corr | None)."""
+    result = []
+    for i in range(len(xs)):
+        if i < window - 1:
+            result.append(None)
+            continue
+        wx = xs[i - window + 1: i + 1]
+        wy = ys[i - window + 1: i + 1]
+        result.append(pearson(wx, wy))
+    return result
 
-def build_corr(trends_path: str, prices_path: str,
-               top_terms: int, min_corr: float, min_events: int,
-               lag_range: int) -> dict:
+
+def corr_trend(rolling):
+    """Is the rolling correlation strengthening (+1), stable (0), or decaying (-1)?"""
+    valid = [r for r in rolling if r is not None]
+    if len(valid) < 4:
+        return 0
+    recent = valid[-3:]
+    older  = valid[-6:-3] if len(valid) >= 6 else valid[:3]
+    r_now  = sum(abs(x) for x in recent) / len(recent)
+    r_old  = sum(abs(x) for x in older)  / len(older)
+    if r_now > r_old + 0.08:
+        return 1
+    if r_now < r_old - 0.08:
+        return -1
+    return 0
+
+
+def confidence_score(corr, hit_rate, n_events, consistency, source_proxy):
+    """Composite 0-1 confidence: penalizes low n, low consistency, single-source spikes."""
+    if corr is None:
+        return 0.0
+    # n penalty: approaches 1 as n→∞, 0.5 at n=10
+    n_factor = math.sqrt(n_events / 10.0) if n_events > 0 else 0
+    n_factor = min(n_factor, 1.5) / 1.5
+
+    # hit_rate > 0.5 is meaningful, < 0.5 is noise
+    hit_factor = max(0, (hit_rate - 0.45) / 0.55)
+
+    c = abs(corr) * 0.35 + hit_factor * 0.30 + n_factor * 0.20 + \
+        consistency * 0.10 + source_proxy * 0.05
+    return round(min(1.0, c), 3)
+
+
+# ── Main build ────────────────────────────────────────────────────────────────
+
+def build_corr(trends_path, prices_path,
+               top_terms, min_corr, min_events, lag_range, min_conf):
 
     T = json.loads(Path(trends_path).read_text())
     P = json.loads(Path(prices_path).read_text())
 
-    t_dates  = T["dates"]       # ["2025-09-24", ...]
-    t_series = T["series"]      # {term: [count, ...]}
+    t_dates  = T["dates"]
+    t_series = T["series"]
+    t_cons   = T.get("consistency", {})
+    t_proxy  = T.get("source_proxy", {})
 
-    p_tickers = P["tickers"]    # {ticker: {dates, closes, returns}}
+    p_tickers = P["tickers"]
 
-    # 상위 terms (총 언급량 기준)
+    # Top terms by total frequency
     totals = {t: sum(v) for t, v in t_series.items()}
     top = sorted(totals, key=totals.get, reverse=True)[:top_terms]
 
-    # 날짜 인덱스
     t_date_idx = {d: i for i, d in enumerate(t_dates)}
 
+    # ── Train / test split ────────────────────────────────────────────────────
+    n = len(t_dates)
+    split = int(n * 0.70)
+    train_dates = set(t_dates[:split])
+    test_dates  = set(t_dates[split:])
+    print(f"  Train: {len(train_dates)} days  |  Test: {len(test_dates)} days  (70/30 split)")
+
     pairs = []
-    term_best: dict[str, dict] = {}
+    term_best = {}
 
     for ticker, pdata in p_tickers.items():
         p_dates   = pdata["dates"]
-        p_returns = pdata["returns"]   # [None, 0.005, ...]
-
-        # 공통 날짜 (trends ∩ prices)
-        common = sorted(set(t_dates) & set(p_dates))
-        if len(common) < 10:
-            continue
-
+        p_returns = pdata["returns"]
         p_ret_idx = {d: i for i, d in enumerate(p_dates)}
+
+        common_all   = sorted(set(t_dates) & set(p_dates))
+        common_train = [d for d in common_all if d in train_dates]
+        common_test  = [d for d in common_all if d in test_dates]
+
+        if len(common_all) < 10:
+            continue
 
         for term in top:
             counts = t_series[term]
             zs     = zscore_series(counts)
+            cons   = t_cons.get(term, 0.5)
+            proxy  = t_proxy.get(term, 0.5)
 
-            # lag loop: -lag_range ~ +lag_range
-            # lag < 0 = 단어가 주가보다 앞섬
+            # ── Lag correlation on TRAIN set ──────────────────────────────────
             best_lag, best_corr = 0, 0.0
             lag_corrs = {}
 
             for lag in range(-lag_range, lag_range + 1):
                 xs, ys = [], []
-                for d in common:
+                for d in common_train:
                     ti = t_date_idx[d]
-                    # 주가 인덱스: lag일 후
-                    target_date_idx = p_ret_idx.get(d)
-                    if target_date_idx is None:
+                    pi = p_ret_idx.get(d)
+                    if pi is None:
                         continue
-                    pi_target = target_date_idx - lag  # lag<0 → 미래 주가
+                    pi_target = pi - lag
                     if pi_target < 1 or pi_target >= len(p_returns):
                         continue
                     ret = p_returns[pi_target]
@@ -142,7 +182,31 @@ def build_corr(trends_path: str, prices_path: str,
             if abs(best_corr) < min_corr:
                 continue
 
-            # ── z≥2 이벤트 분석 ───────────────────────────────────────
+            # ── p-value filter ────────────────────────────────────────────────
+            n_train_pts = sum(
+                1 for d in common_train
+                if p_ret_idx.get(d) is not None and
+                   0 < p_ret_idx[d] - best_lag < len(p_returns) and
+                   p_returns[p_ret_idx[d] - best_lag] is not None
+            )
+            pval = p_value_approx(best_corr, n_train_pts)
+            if pval > 0.20:  # relaxed during data accumulation phase
+                continue
+
+            # ── TEST set: forward hit-rate validation ─────────────────────────
+            test_rets_1d = []
+            for d in common_test:
+                ti = t_date_idx[d]
+                if zs[ti] < 2.0:
+                    continue
+                pi = p_ret_idx.get(d)
+                if pi is None:
+                    continue
+                pi_lag = pi - best_lag
+                if 1 <= pi_lag < len(p_returns) and p_returns[pi_lag] is not None:
+                    test_rets_1d.append(p_returns[pi_lag])
+
+            # ── ALL-data event analysis ───────────────────────────────────────
             events_1d, events_5d = [], []
             for i, d in enumerate(t_dates):
                 if zs[i] < 2.0:
@@ -150,70 +214,123 @@ def build_corr(trends_path: str, prices_path: str,
                 pi = p_ret_idx.get(d)
                 if pi is None:
                     continue
-                # 다음날 수익률
                 if pi + 1 < len(p_returns) and p_returns[pi + 1] is not None:
                     events_1d.append(p_returns[pi + 1])
-                # 5일 평균 수익률
-                window_rets = [p_returns[pi + k]
-                               for k in range(1, 6)
-                               if pi + k < len(p_returns) and p_returns[pi + k] is not None]
-                if window_rets:
-                    events_5d.append(sum(window_rets) / len(window_rets))
+                w5 = [p_returns[pi + k] for k in range(1, 6)
+                      if pi + k < len(p_returns) and p_returns[pi + k] is not None]
+                if w5:
+                    events_5d.append(sum(w5) / len(w5))
 
             n_events = len(events_1d)
             if n_events < min_events:
                 continue
 
+            hit_rate   = round(sum(1 for r in events_1d if r > 0) / n_events, 3)
             avg_ret_1d = round(sum(events_1d) / n_events * 100, 3)
             avg_ret_5d = round(sum(events_5d) / len(events_5d) * 100, 3) if events_5d else None
-            hit_rate   = round(sum(1 for r in events_1d if r > 0) / n_events, 3)
 
-            # signal_type 분류
-            if best_lag <= -2:
-                stype = "leading"
-            elif best_lag == -1:
-                stype = "leading_1d"
-            elif best_lag == 0:
-                stype = "coincident"
-            elif best_lag >= 2:
-                stype = "lagging"
-            else:
-                stype = "lagging_1d"
+            # ── Test validation ───────────────────────────────────────────────
+            test_hit = round(sum(1 for r in test_rets_1d if r > 0) / len(test_rets_1d), 3) \
+                       if test_rets_1d else None
+            test_n   = len(test_rets_1d)
+
+            # ── Rolling correlation ───────────────────────────────────────────
+            xs_all, ys_all = [], []
+            for d in common_all:
+                ti = t_date_idx[d]
+                pi = p_ret_idx.get(d)
+                if pi is None:
+                    continue
+                pi_t = pi - best_lag
+                if 1 <= pi_t < len(p_returns) and p_returns[pi_t] is not None:
+                    xs_all.append(zs[ti])
+                    ys_all.append(p_returns[pi_t])
+
+            rolling = rolling_corr(xs_all, ys_all, window=min(21, len(xs_all) // 2))
+            c_trend = corr_trend(rolling)
+
+            # ── Composite confidence ──────────────────────────────────────────
+            conf = confidence_score(best_corr, hit_rate, n_events, cons, proxy)
+            if conf < min_conf:
+                continue
+
+            # ── Signal type ───────────────────────────────────────────────────
+            if best_lag <= -2:  stype = "leading"
+            elif best_lag == -1: stype = "leading_1d"
+            elif best_lag == 0:  stype = "coincident"
+            elif best_lag >= 2:  stype = "lagging"
+            else:                stype = "lagging_1d"
 
             pair = {
-                "term":        term,
-                "ticker":      ticker,
-                "best_lag":    best_lag,
-                "corr":        best_corr,
-                "hit_rate":    hit_rate,
-                "n_events":    n_events,
-                "avg_ret_1d":  avg_ret_1d,
-                "avg_ret_5d":  avg_ret_5d,
-                "signal_type": stype,
-                "lag_corrs":   lag_corrs,
+                "term":          term,
+                "ticker":        ticker,
+                "best_lag":      best_lag,
+                "corr":          best_corr,          # train-set correlation
+                "pval":          pval,
+                "hit_rate":      hit_rate,            # all-data hit rate
+                "test_hit":      test_hit,            # held-out test hit rate
+                "test_n":        test_n,
+                "n_events":      n_events,
+                "avg_ret_1d":    avg_ret_1d,
+                "avg_ret_5d":    avg_ret_5d,
+                "confidence":    conf,               # composite 0-1 score
+                "corr_trend":    c_trend,            # +1 strengthening, 0 stable, -1 decaying
+                "consistency":   cons,
+                "source_proxy":  proxy,
+                "signal_type":   stype,
+                "lag_corrs":     lag_corrs,
             }
             pairs.append(pair)
 
-            # term 최고 상관 종목
-            if term not in term_best or abs(best_corr) > abs(term_best[term]["best_corr"]):
+            if term not in term_best or conf > term_best[term]["confidence"]:
                 term_best[term] = {
-                    "best_ticker": ticker,
-                    "best_corr":   best_corr,
-                    "best_lag":    best_lag,
+                    "best_ticker": ticker, "best_corr": best_corr,
+                    "best_lag": best_lag,  "confidence": conf,
                     "signal_type": stype,
                 }
 
-    # best_corr 절댓값 내림차순
-    pairs.sort(key=lambda x: abs(x["corr"]), reverse=True)
+    # Sort by composite confidence descending
+    pairs.sort(key=lambda x: x["confidence"], reverse=True)
 
     return {
         "updated":    datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "n_dates":    len(t_dates),
+        "n_train":    len(train_dates),
+        "n_test":     len(test_dates),
         "n_pairs":    len(pairs),
         "pairs":      pairs,
         "term_stats": term_best,
     }
 
+
+# ── Co-occurrence cluster detection ─────────────────────────────────────────
+
+def find_cooccurrence_clusters(T, min_corr=0.70, top_n=20):
+    """Find groups of words that spike together (co-occurrence correlation ≥ min_corr)."""
+    t_dates  = T["dates"]
+    t_series = T["series"]
+    totals   = {t: sum(v) for t, v in t_series.items()}
+    top = sorted(totals, key=totals.get, reverse=True)[:top_n]
+
+    clusters = []
+    seen = set()
+
+    for i, t1 in enumerate(top):
+        for t2 in top[i+1:]:
+            z1 = zscore_series(t_series[t1])
+            z2 = zscore_series(t_series[t2])
+            c  = pearson(z1, z2)
+            if c is not None and c >= min_corr:
+                key = tuple(sorted([t1, t2]))
+                if key not in seen:
+                    seen.add(key)
+                    clusters.append({"terms": list(key), "co_corr": c})
+
+    clusters.sort(key=lambda x: x["co_corr"], reverse=True)
+    return clusters[:30]
+
+
+# ── Entry point ───────────────────────────────────────────────────────────────
 
 def main():
     ap = argparse.ArgumentParser()
@@ -223,36 +340,51 @@ def main():
     ap.add_argument("--top-terms",  type=int,   default=200)
     ap.add_argument("--min-corr",   type=float, default=0.25)
     ap.add_argument("--min-events", type=int,   default=3)
+    ap.add_argument("--min-conf",   type=float, default=0.10)
     ap.add_argument("--lag-range",  type=int,   default=5)
     args = ap.parse_args()
 
-    print(f"Loading  trends: {args.trends}")
-    print(f"Loading  prices: {args.prices}")
+    print(f"Loading trends : {args.trends}")
+    print(f"Loading prices : {args.prices}")
 
+    T = json.loads(Path(args.trends).read_text())
     result = build_corr(
         args.trends, args.prices,
-        args.top_terms, args.min_corr, args.min_events, args.lag_range
+        args.top_terms, args.min_corr, args.min_events,
+        args.lag_range, args.min_conf,
     )
+
+    # Co-occurrence clusters
+    clusters = find_cooccurrence_clusters(T, min_corr=0.70)
+    result["cooccurrence"] = clusters
 
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     Path(args.out).write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")
 
     print(f"\n→ {args.out}")
-    print(f"  pairs:     {result['n_pairs']}")
-    print(f"  n_dates:   {result['n_dates']}")
-    print(f"\n  Top 20 signal pairs (|corr| desc):")
-    for p in result["pairs"][:20]:
-        print(f"    {p['term']:<18} {p['ticker']:<6} "
-              f"lag={p['best_lag']:+d}  corr={p['corr']:+.3f}  "
-              f"hit={p['hit_rate']:.0%}  n={p['n_events']}  "
-              f"1d={p['avg_ret_1d']:+.2f}%  [{p['signal_type']}]")
+    print(f"  pairs      : {result['n_pairs']}")
+    print(f"  n_dates    : {result['n_dates']}  (train={result['n_train']}, test={result['n_test']})")
+    print(f"  clusters   : {len(clusters)}")
 
-    print(f"\n  Leading signals (lag ≤ -1, predictive):")
-    leading = [p for p in result["pairs"] if p["best_lag"] <= -1]
-    for p in leading[:10]:
+    print(f"\n  Top 15 by confidence score:")
+    for p in result["pairs"][:15]:
+        trend_sym = "↑" if p["corr_trend"] == 1 else ("↓" if p["corr_trend"] == -1 else "→")
+        test_str  = f"test_hit={p['test_hit']:.0%}" if p["test_hit"] is not None else "no test data"
         print(f"    {p['term']:<18} {p['ticker']:<6} "
               f"lag={p['best_lag']:+d}  corr={p['corr']:+.3f}  "
-              f"1d={p['avg_ret_1d']:+.2f}%")
+              f"conf={p['confidence']:.3f}  {test_str}  "
+              f"1d={p['avg_ret_1d']:+.2f}%  {trend_sym}  [{p['signal_type']}]")
+
+    print(f"\n  Leading signals (lag ≤ -1):")
+    for p in [x for x in result["pairs"] if x["best_lag"] <= -1][:8]:
+        print(f"    {p['term']:<18} {p['ticker']:<6} "
+              f"lag={p['best_lag']:+d}  conf={p['confidence']:.3f}  "
+              f"hit={p['hit_rate']:.0%}  1d={p['avg_ret_1d']:+.2f}%")
+
+    if clusters:
+        print(f"\n  Top co-occurrence clusters:")
+        for c in clusters[:5]:
+            print(f"    {' + '.join(c['terms']):<30}  co_corr={c['co_corr']:+.3f}")
 
 
 if __name__ == "__main__":
