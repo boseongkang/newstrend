@@ -1,109 +1,493 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Rising Terms</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js" crossorigin="anonymous"></script>
-<script>window.Chart||document.write('<script src="https://unpkg.com/chart.js@4.4.6/dist/chart.umd.min.js" crossorigin="anonymous"><\/script>')</script>
-<script>window.Chart||document.write('<script src="./vendor/chart.umd.min.js"><\/script>')</script>
+<title>Newstrend · Rising Signals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0b0f18;--card:#121826;--line:#1f2937;--txt:#e6e8ec;--accent:#3b82f6}
-  body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,Segoe UI,Roboto,Arial}
-  .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
-  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-  .brand{font-weight:700;font-size:22px}
-  .nav a{color:#cbd5e1;text-decoration:none;margin-left:12px;padding:8px 10px;border-radius:10px}
-  .nav a.active{background:var(--accent);color:#fff}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
-  canvas{width:100%;height:420px}
-  .hint{opacity:.7;font-size:12px;margin-top:6px}
+:root {
+  --bg0:#070b10; --bg1:#0c1220; --bg2:#101828;
+  --b1:#1a2840; --b2:#223050;
+  --cyan:#00d4ff; --amber:#ffb300; --green:#00e676; --red:#ff4444;
+  --t1:#c8d8e8; --t2:#6a8aa8; --t3:#344a60;
+  --font-mono:'IBM Plex Mono',monospace;
+  --font-sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--font-sans);font-size:13px;
+     height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+
+header{height:42px;display:flex;align-items:center;gap:20px;padding:0 16px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0}
+.brand{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300}
+nav{display:flex;gap:2px}
+nav a{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:5px 11px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#ts{font-family:var(--font-mono);font-size:10px;color:var(--t3)}
+
+main{flex:1;display:grid;grid-template-columns:1fr 340px;gap:1px;
+     background:var(--b1);overflow:hidden;min-height:0}
+.col{background:var(--bg0);display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.phdr{height:36px;display:flex;align-items:center;justify-content:space-between;
+      padding:0 12px;background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0}
+.plabel{font-family:var(--font-mono);font-size:10px;font-weight:600;
+        letter-spacing:.12em;text-transform:uppercase;color:var(--t2)}
+.pbadge{font-family:var(--font-mono);font-size:10px;color:var(--amber);
+        background:rgba(255,179,0,.1);padding:2px 7px;border:1px solid rgba(255,179,0,.25)}
+.sec-lbl{padding:5px 12px;font-family:var(--font-mono);font-size:8px;font-weight:600;
+         letter-spacing:.14em;text-transform:uppercase;color:var(--t3);
+         border-bottom:1px solid var(--b1);background:var(--bg1);flex-shrink:0}
+
+/* ── SORT TABS ── */
+.sort-row{display:flex;gap:0;border-bottom:1px solid var(--b1);flex-shrink:0}
+.sbtn{font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:.09em;
+      text-transform:uppercase;padding:7px 14px;color:var(--t3);background:transparent;
+      border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s}
+.sbtn:hover{color:var(--t2)}
+.sbtn.on{color:var(--cyan);border-bottom-color:var(--cyan)}
+
+/* ── RISING CARDS ── */
+#rising-list{flex:1;overflow-y:auto;padding:8px}
+.rise-card{padding:10px 12px;margin-bottom:4px;background:var(--bg1);
+           border:1px solid var(--b1);border-left:3px solid transparent;
+           cursor:pointer;transition:all .12s;
+           display:grid;grid-template-columns:140px 1fr auto;align-items:center;gap:12px}
+.rise-card:hover{background:var(--bg2)}
+.rise-card.sel{border-left-color:var(--cyan);background:rgba(0,212,255,.04)}
+.rise-card.tier1{border-left-color:var(--red)}
+.rise-card.tier2{border-left-color:var(--amber)}
+.rise-card.tier3{border-left-color:var(--green)}
+
+.rc-left{}
+.rc-term{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--t1)}
+.rc-meta{font-family:var(--font-mono);font-size:9px;color:var(--t3);margin-top:2px}
+
+.rc-bars{display:flex;flex-direction:column;gap:3px}
+.rc-bar-row{display:flex;align-items:center;gap:6px}
+.rc-bar-lbl{font-family:var(--font-mono);font-size:8px;color:var(--t3);width:36px;
+            letter-spacing:.06em;text-transform:uppercase}
+.rc-bar-track{flex:1;height:5px;background:var(--b1);position:relative}
+.rc-bar-fill{height:100%;transition:width .4s ease}
+.rc-bar-val{font-family:var(--font-mono);font-size:9px;width:36px;text-align:right}
+
+.rc-right{text-align:right}
+.rc-score{font-family:var(--font-mono);font-size:18px;font-weight:600}
+.rc-label{font-family:var(--font-mono);font-size:8px;color:var(--t3);
+          letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+
+/* ── RIGHT: watch + alert config ── */
+#watch-list{flex:1;overflow-y:auto}
+.watch-item{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.03);
+            display:flex;align-items:center;gap:8px}
+.wi-term{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--t1);flex:1}
+.wi-z{font-family:var(--font-mono);font-size:10px;color:var(--t2)}
+.wi-rm{font-family:var(--font-mono);font-size:9px;color:var(--t3);background:none;
+       border:1px solid var(--b2);padding:2px 6px;cursor:pointer;transition:all .1s}
+.wi-rm:hover{color:var(--red);border-color:var(--red)}
+
+/* alert config box */
+#alert-box{padding:10px 12px;border-top:1px solid var(--b1);flex-shrink:0;
+           background:var(--bg1)}
+.ab-title{font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:.1em;
+          text-transform:uppercase;color:var(--t3);margin-bottom:8px}
+.ab-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.ab-lbl{font-family:var(--font-mono);font-size:9px;color:var(--t3);width:80px}
+.ab-input{flex:1;background:var(--bg2);border:1px solid var(--b2);color:var(--t1);
+          font-family:var(--font-mono);font-size:10px;padding:4px 8px;outline:none}
+.ab-input:focus{border-color:var(--cyan)}
+.webhook-row{display:flex;gap:6px}
+.webhook-row input{flex:1}
+#test-btn{font-family:var(--font-mono);font-size:9px;padding:5px 10px;
+          background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);
+          color:var(--cyan);cursor:pointer;white-space:nowrap;transition:all .12s}
+#test-btn:hover{background:rgba(0,212,255,.2)}
+
+/* notification log */
+#notif-log{font-family:var(--font-mono);font-size:9px;color:var(--t3);
+           padding:6px 0;max-height:60px;overflow-y:auto;line-height:1.7}
+.nlog-entry{padding:2px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.nlog-ok{color:var(--green)}
+.nlog-err{color:var(--red)}
+
+/* sparkline canvas in cards */
+.rc-spark{height:28px;position:relative;overflow:hidden}
+.rc-spark canvas{display:block}
+
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+       height:200px;gap:10px;color:var(--t3)}
+.spinner{width:16px;height:16px;border:2px solid var(--b2);border-top-color:var(--cyan);
+         border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-txt{font-family:var(--font-mono);font-size:10px;text-align:center;line-height:1.7}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top">
-    <div class="brand">Rising Terms</div>
-    <div class="nav">
-      <a href="./index.html">Trends</a>
-      <a href="./report.html">Report</a>
-      <a class="active" href="./rising.html">Rising</a>
+
+<header>
+  <div class="brand">NEWSTREND <em>// SIGNAL INTELLIGENCE</em></div>
+  <nav>
+    <a href="./index.html">TRENDS</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./report.html">REPORT</a>
+    <a href="./portfolio.html">PORTFOLIO</a>
+    <a href="./rising.html" class="on">RISING</a>
+  </nav>
+  <div class="hdr-right">
+    <div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10px;color:var(--green)">
+      <div class="live-dot"></div>LIVE
     </div>
+    <div id="ts">—</div>
+  </div>
+</header>
+
+<main>
+  <!-- ── LEFT: rising list ── -->
+  <div class="col">
+    <div class="phdr">
+      <div class="plabel">RISING SIGNALS</div>
+      <div class="pbadge" id="rise-badge">—</div>
+    </div>
+    <div class="sort-row">
+      <button class="sbtn on" data-s="momentum">MOMENTUM</button>
+      <button class="sbtn" data-s="burst">BURST</button>
+      <button class="sbtn" data-s="zscore">Z-SCORE</button>
+      <button class="sbtn" data-s="acceleration">ACCELERATION</button>
+    </div>
+    <div id="rising-list"><div class="empty"><div class="spinner"></div></div></div>
   </div>
 
-  <div class="card"><canvas id="riseChart"></canvas></div>
-  <div class="hint">If nothing shows, hard-refresh your browser.</div>
-</div>
+  <!-- ── RIGHT: watchlist + webhook ── -->
+  <div class="col">
+    <div class="phdr">
+      <div class="plabel">WATCHLIST</div>
+      <div class="pbadge" id="watch-badge">0</div>
+    </div>
+    <div class="sec-lbl">TRACKED TERMS (click card to add)</div>
+    <div id="watch-list">
+      <div class="empty">
+        <div class="empty-txt">Click any rising signal<br>to add to watchlist</div>
+      </div>
+    </div>
+    <div id="alert-box">
+      <div class="ab-title">⚡ WEBHOOK ALERT</div>
+      <div class="ab-row">
+        <span class="ab-lbl">Z threshold</span>
+        <input class="ab-input" id="z-thresh" type="number" value="2.5" min="1" max="10" step="0.5">
+      </div>
+      <div class="ab-row">
+        <span class="ab-lbl">Webhook URL</span>
+        <div class="webhook-row" style="flex:1">
+          <input class="ab-input" id="webhook-url" type="text" placeholder="https://hooks.slack.com/…">
+          <button id="test-btn" onclick="testWebhook()">TEST</button>
+        </div>
+      </div>
+      <div id="notif-log"></div>
+    </div>
+  </div>
+</main>
 
 <script>
-(async function(){
-  const v=Date.now();
-  async function get(p){
-    const r=await fetch('./data/'+p+'?v='+v,{cache:'no-store'});
+(function(){
+'use strict';
+
+const V = Date.now(), BASE = './data/';
+const WL_KEY = 'nt_watchlist_v1';
+const WH_KEY = 'nt_webhook_v1';
+
+let T = null;
+let allRising = [];
+let watchlist = [];
+let sortMode  = 'momentum';
+let selTerm   = null;
+
+async function fetchJSON(p){
+  try{
+    const r = await fetch(BASE+p+'?v='+V,{cache:'no-store'});
     if(!r.ok) return null;
     return r.json();
+  }catch(e){ return null; }
+}
+
+function sign(n){ return n >= 0 ? '+' : ''; }
+
+// ── Persistence ───────────────────────────────────────────────────────────────
+function loadWatchlist(){ try{ return JSON.parse(localStorage.getItem(WL_KEY)||'[]'); }catch{ return []; } }
+function saveWatchlist(){ localStorage.setItem(WL_KEY, JSON.stringify(watchlist)); }
+function loadWebhook(){
+  try{
+    const d = JSON.parse(localStorage.getItem(WH_KEY)||'{}');
+    if(d.url)   document.getElementById('webhook-url').value = d.url;
+    if(d.thresh) document.getElementById('z-thresh').value  = d.thresh;
+  }catch{}
+}
+function saveWebhook(){
+  localStorage.setItem(WH_KEY, JSON.stringify({
+    url:    document.getElementById('webhook-url').value.trim(),
+    thresh: parseFloat(document.getElementById('z-thresh').value) || 2.5,
+  }));
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init(){
+  document.getElementById('ts').textContent =
+    'UPDATED '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+  watchlist = loadWatchlist();
+  loadWebhook();
+
+  T = await fetchJSON('trends.json');
+  if(!T){ document.getElementById('rising-list').innerHTML =
+    '<div class="empty"><div class="empty-txt">trends.json not found</div></div>'; return; }
+
+  buildRising();
+  renderRising();
+  renderWatchlist();
+  checkAlerts();
+
+  // Auto-recheck every 5 min
+  setInterval(checkAlerts, 5 * 60 * 1000);
+
+  document.getElementById('webhook-url').addEventListener('change', saveWebhook);
+  document.getElementById('z-thresh').addEventListener('change', saveWebhook);
+}
+
+// ── Build rising list ─────────────────────────────────────────────────────────
+function buildRising(){
+  const zscores = T.zscores  || {};
+  const slopes  = T.slopes   || {};
+  const bursts  = T.bursts   || {};
+  const series  = T.series   || {};
+  const dates   = T.dates    || [];
+  const today   = T.today    || {};
+  const cons    = T.consistency   || {};
+  const proxy   = T.source_proxy  || {};
+
+  allRising = Object.keys(zscores)
+    .filter(t => slopes[t] > 0.02 || bursts[t] > 0.5 || zscores[t] > 0.5)
+    .map(t => {
+      const counts = (series[t] || []).map(Number);
+      const n = counts.length;
+
+      // Acceleration: slope of slope (second derivative)
+      const recentSlopes = counts.slice(-7).map((_,i,a) => {
+        if(i < 2) return 0;
+        const w = a.slice(0, i+1);
+        const mx = (w.length-1)/2;
+        const my = w.reduce((a,b)=>a+b,0)/w.length;
+        const num = w.reduce((s,v,j)=>s+(j-mx)*(v-my),0);
+        const den = w.reduce((s,_,j)=>s+(j-mx)**2,0);
+        return den ? num/den : 0;
+      });
+      const accel = recentSlopes.length >= 4
+        ? recentSlopes[recentSlopes.length-1] - recentSlopes[recentSlopes.length-4]
+        : 0;
+
+      // Composite momentum score (0-100)
+      const zNorm  = Math.min(Math.max(zscores[t]||0, 0) / 5, 1);
+      const slNorm = Math.min(Math.max(slopes[t]||0, 0) / 0.3, 1);
+      const buNorm = Math.min(Math.max(bursts[t]||0, 0) / 4, 1);
+      const acNorm = Math.min(Math.max(accel, 0) / 0.5, 1);
+      const score  = Math.round((zNorm*30 + slNorm*35 + buNorm*25 + acNorm*10) * 100);
+
+      return {
+        term: t,
+        z:     zscores[t] || 0,
+        slope: slopes[t]  || 0,
+        burst: bursts[t]  || 0,
+        accel: round2(accel),
+        score,
+        todayC: today[t] || 0,
+        counts,
+        cons:  cons[t]  || 0,
+        proxy: proxy[t] || 0,
+        tier: score >= 60 ? 1 : score >= 35 ? 2 : 3,
+      };
+    })
+    .filter(x => x.score > 5);
+}
+
+function round2(n){ return Math.round(n * 100) / 100; }
+
+// ── Render rising list ────────────────────────────────────────────────────────
+function renderRising(){
+  const list = document.getElementById('rising-list');
+  let sorted = [...allRising];
+  if(sortMode === 'burst')        sorted.sort((a,b) => b.burst - a.burst);
+  else if(sortMode === 'zscore')  sorted.sort((a,b) => b.z - a.z);
+  else if(sortMode === 'acceleration') sorted.sort((a,b) => b.accel - a.accel);
+  else                            sorted.sort((a,b) => b.score - a.score);
+
+  document.getElementById('rise-badge').textContent = sorted.length + ' RISING';
+
+  const maxScore = sorted[0]?.score || 1;
+  const maxSlope = Math.max(...sorted.map(x => x.slope), 0.01);
+  const maxBurst = Math.max(...sorted.map(x => x.burst), 0.01);
+  const maxZ     = Math.max(...sorted.map(x => x.z),     0.01);
+
+  list.innerHTML = sorted.slice(0, 80).map(s => {
+    const isSel = selTerm === s.term;
+    const scoreColor = s.tier===1 ? 'var(--red)' : s.tier===2 ? 'var(--amber)' : 'var(--green)';
+    const tierCls    = `tier${s.tier}`;
+    const inWatch    = watchlist.includes(s.term);
+
+    const bars = [
+      { lbl:'SLOPE',  val: s.slope, max: maxSlope, color:'#00d4ff', fmt: v => (v>=0?'+':'')+v.toFixed(3) },
+      { lbl:'BURST',  val: s.burst, max: maxBurst, color:'#ffb300', fmt: v => (v>=0?'+':'')+v.toFixed(2)+'σ' },
+      { lbl:'Z',      val: s.z,     max: maxZ,     color:'#00e676', fmt: v => (v>=0?'+':'')+v.toFixed(2)+'σ' },
+    ].map(b => {
+      const w = Math.max(0, Math.round((b.val / b.max) * 100));
+      const vc = b.val > 0 ? b.color : 'var(--red)';
+      return `<div class="rc-bar-row">
+        <span class="rc-bar-lbl">${b.lbl}</span>
+        <div class="rc-bar-track">
+          <div class="rc-bar-fill" style="width:${w}%;background:${vc}"></div>
+        </div>
+        <span class="rc-bar-val" style="color:${vc}">${b.fmt(b.val)}</span>
+      </div>`;
+    }).join('');
+
+    return `<div class="rise-card ${tierCls}${isSel?' sel':''}" data-term="${s.term}">
+      <div class="rc-left">
+        <div class="rc-term">${inWatch ? '★ ' : ''}${s.term}</div>
+        <div class="rc-meta">${s.todayC} today · accel ${s.accel>=0?'+':''}${s.accel}</div>
+      </div>
+      <div class="rc-bars">${bars}</div>
+      <div class="rc-right">
+        <div class="rc-score" style="color:${scoreColor}">${s.score}</div>
+        <div class="rc-label">MOMENTUM</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.rise-card').forEach(el =>
+    el.addEventListener('click', () => {
+      selTerm = el.dataset.term;
+      document.querySelectorAll('.rise-card').forEach(e =>
+        e.classList.toggle('sel', e.dataset.term === selTerm));
+      addToWatchlist(selTerm);
+    })
+  );
+}
+
+// ── Watchlist ─────────────────────────────────────────────────────────────────
+function addToWatchlist(term){
+  if(!watchlist.includes(term)){
+    watchlist.push(term);
+    saveWatchlist();
+    renderWatchlist();
+  }
+}
+
+function removeFromWatch(term){
+  watchlist = watchlist.filter(t => t !== term);
+  saveWatchlist();
+  renderWatchlist();
+  renderRising(); // refresh ★ marks
+}
+
+function renderWatchlist(){
+  const box = document.getElementById('watch-list');
+  document.getElementById('watch-badge').textContent = watchlist.length;
+
+  if(!watchlist.length){
+    box.innerHTML = '<div class="empty"><div class="empty-txt">Click any rising signal<br>to add to watchlist</div></div>';
+    return;
   }
 
-  const trends = await get('trends.json');
-  if(!trends){ return; }
-  const rising = await get('rising.json');
+  const zscores = T?.zscores || {};
+  box.innerHTML = watchlist.map(term => {
+    const z = zscores[term] || 0;
+    return `<div class="watch-item">
+      <span class="wi-term">${term}</span>
+      <span class="wi-z">${z >= 0 ? '+':''}${z.toFixed(2)}σ</span>
+      <button class="wi-rm" onclick="removeFromWatch('${term}')">✕</button>
+    </div>`;
+  }).join('');
+}
 
-  function median(arr){
-    if(!arr || !arr.length) return 0;
-    const s=[...arr].sort((a,b)=>a-b);
-    const m=Math.floor(s.length/2);
-    return s.length%2 ? s[m] : (s[m-1]+s[m])/2;
-  }
+// ── Alert checking ────────────────────────────────────────────────────────────
+function checkAlerts(){
+  if(!T || !watchlist.length) return;
+  const zscores = T.zscores || {};
+  const thresh  = parseFloat(document.getElementById('z-thresh').value) || 2.5;
+  const url     = document.getElementById('webhook-url').value.trim();
 
-  function liftFor(term){
-    const y = (trends.series[term]||[]).map(Number).filter(x=>Number.isFinite(x));
-    if(!y.length) return null;
-    const last = y[y.length-1] ?? 0;
-    const prev = y.slice(-8,-1);
-    const prevAvg = prev.length ? prev.reduce((a,b)=>a+b,0)/prev.length : 0;
-    const med = median(y.slice(0,-1));
-    const baseline = Math.max(prevAvg, med, 1e-6);
-    const L = last / baseline;
-    return Number.isFinite(L) ? L : null;
-  }
+  const triggered = watchlist.filter(t => (zscores[t] || 0) >= thresh);
+  if(!triggered.length) return;
 
-  let candidates = [];
-  if(rising && Array.isArray(rising.rising_terms) && rising.rising_terms.length){
-    candidates = rising.rising_terms.filter(t => t in trends.series);
-  }
-  if(!candidates.length){
-    const pool = trends.top && trends.top.length ? trends.top : trends.terms;
-    candidates = (pool||[]).slice(0,500).filter(t => t in trends.series);
-  }
+  const msg = triggered.map(t =>
+    `*${t}* z=${sign(zscores[t])}${(zscores[t]||0).toFixed(2)}σ`
+  ).join('  |  ');
 
-  let scored = [];
-  for(const t of candidates){
-    const s = liftFor(t);
-    if(s && s>1.05) scored.push([t,s]);
-  }
-  if(!scored.length){
-    for(const t of candidates){
-      const y = trends.series[t]||[];
-      const last = y[y.length-1]||0;
-      if(last>0) scored.push([t, last]);
-    }
-  }
-  scored.sort((a,b)=>b[1]-a[1]);
-  scored = scored.slice(0,30);
+  logNotif(`Alert triggered: ${msg}`, 'ok');
 
-  const ctx = document.getElementById('riseChart').getContext('2d');
-  new Chart(ctx,{
-    type:'bar',
-    data:{
-      labels: scored.map(([t])=>t),
-      datasets:[{label:'lift', data: scored.map(([,s])=>s)}]
-    },
-    options:{
-      responsive:true,
-      scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}
-    }
+  if(url){
+    sendWebhook(url, {
+      text: `🚨 *Newstrend Alert* — ${new Date().toISOString().slice(0,10)}\n${msg}`,
+      terms: triggered,
+      zscores: Object.fromEntries(triggered.map(t => [t, zscores[t]])),
+    });
+  }
+}
+
+async function testWebhook(){
+  const url = document.getElementById('webhook-url').value.trim();
+  if(!url){ logNotif('No webhook URL set', 'err'); return; }
+  saveWebhook();
+
+  const zscores = T?.zscores || {};
+  const sample  = watchlist.slice(0,3).map(t =>
+    `*${t}* z=${sign(zscores[t]||0)}${(zscores[t]||0).toFixed(2)}σ`).join(' | ');
+
+  await sendWebhook(url, {
+    text: `🧪 *Newstrend Test Alert*\n${sample || 'No watchlist terms yet'}`,
   });
+}
+
+async function sendWebhook(url, payload){
+  try{
+    const r = await fetch(url, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+    });
+    logNotif(`Webhook sent → ${r.status}`, r.ok ? 'ok' : 'err');
+  }catch(e){
+    logNotif(`Webhook error: ${e.message}`, 'err');
+  }
+}
+
+function logNotif(msg, type){
+  const log = document.getElementById('notif-log');
+  const t   = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const el  = document.createElement('div');
+  el.className = `nlog-entry nlog-${type}`;
+  el.textContent = `[${t}] ${msg}`;
+  log.prepend(el);
+  while(log.children.length > 8) log.removeChild(log.lastChild);
+}
+
+// ── Sort buttons ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.sbtn').forEach(btn =>
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sbtn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    sortMode = btn.dataset.s;
+    renderRising();
+  })
+);
+
+init();
 })();
 </script>
 </body>

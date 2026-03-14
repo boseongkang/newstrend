@@ -4,6 +4,15 @@ on:
   schedule:
     - cron: "30 21 * * 1-5"   # 월~금 21:30 UTC = 미장 마감 후 (16:30 ET)
   workflow_dispatch:
+    inputs:
+      full_reload:
+        description: "Full reload (분할/조정 발생 시)"
+        type: boolean
+        default: false
+      since:
+        description: "YYYY-MM-DD: 이 날짜부터 재다운로드"
+        type: string
+        default: ""
 
 permissions:
   contents: write
@@ -27,43 +36,88 @@ jobs:
       - name: Install deps
         run: pip install --quiet yfinance pandas
 
-      - name: Download previous prices artifact
-        uses: dawidd6/action-download-artifact@v3
-        with:
-          workflow: fetch-prices.yml
-          name: prices
-          path: prev_prices
-          if_no_artifact_found: ignore
-
-      - name: Restore previous prices
+      # ── CSV 원장을 data-cache 브랜치에서 복원 ──────────────────────────────
+      - name: Restore price CSVs from data-cache
         run: |
-          mkdir -p site/data
-          if [ -f prev_prices/prices.json ]; then
-            cp prev_prices/prices.json site/data/prices.json
-            echo "Restored previous prices.json"
+          mkdir -p data/prices
+          git fetch origin data-cache 2>/dev/null || true
+          if git show-ref --verify refs/remotes/origin/data-cache 2>/dev/null; then
+            git checkout origin/data-cache -- data/prices/ 2>/dev/null || true
+            echo "Restored price CSVs from data-cache"
+            ls data/prices/*.csv 2>/dev/null | wc -l | xargs echo "CSV files:"
+          else
+            echo "data-cache branch not found — first run"
           fi
 
-      - name: Fetch latest prices
+      # ── 증분 fetch ──────────────────────────────────────────────────────────
+      - name: Fetch latest prices (incremental)
         run: |
-          python scripts/fetch_prices.py \
-            --days 180 \
-            --out site/data/prices.json
+          EXTRA=""
+          if [ "${{ github.event.inputs.full_reload }}" = "true" ]; then
+            EXTRA="--full-reload"
+          elif [ -n "${{ github.event.inputs.since }}" ]; then
+            EXTRA="--since ${{ github.event.inputs.since }}"
+          fi
+          python scripts/fetch_prices_v2.py \
+            --price-dir data/prices \
+            --out-json  site/data/prices.json \
+            --out-meta  site/data/prices_meta.json \
+            --last-days 365 \
+            $EXTRA
 
-      - name: Upload prices artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: prices
-          path: site/data/prices.json
-          retention-days: 7
-
-      - name: Commit to site/data
+      # ── CSV 원장을 data-cache 브랜치에 저장 ────────────────────────────────
+      - name: Save price CSVs to data-cache
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add site/data/prices.json
-          if git diff --cached --quiet; then
-            echo "No price changes"
+
+          # data-cache 브랜치에만 CSV 커밋 (main에는 안 올림)
+          CURRENT_BRANCH=$(git branch --show-current)
+          git stash -u 2>/dev/null || true
+
+          if git show-ref --verify refs/remotes/origin/data-cache 2>/dev/null; then
+            git checkout data-cache
           else
-            git commit -m "data: update prices.json $(date -u +%Y-%m-%d)"
+            git checkout --orphan data-cache
+            git rm -rf . 2>/dev/null || true
+          fi
+
+          mkdir -p data/prices
+          git stash pop 2>/dev/null || true
+          cp -r /home/runner/work/newstrend/newstrend/data/prices/* data/prices/ 2>/dev/null || true
+
+          git add data/prices/
+          if git diff --cached --quiet; then
+            echo "No CSV changes"
+          else
+            git commit -m "prices: update $(date -u +%Y-%m-%d)"
+            git push origin data-cache
+          fi
+
+          git checkout "$CURRENT_BRANCH"
+
+      # ── TA 계산 ─────────────────────────────────────────────────────────────
+      - name: Run technical analysis
+        run: |
+          python scripts/analyze_prices.py \
+            --prices site/data/prices.json \
+            --trends site/data/trends.json \
+            --out-json     site/data/technical_analysis.json \
+            --out-summary  site/data/ta_summary.json \
+            --out-csv-dir  run || true
+
+      # ── prices.json + meta를 main에 커밋 ───────────────────────────────────
+      - name: Commit prices to main
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add site/data/prices.json \
+                  site/data/prices_meta.json \
+                  site/data/technical_analysis.json \
+                  site/data/ta_summary.json
+          if git diff --cached --quiet; then
+            echo "No price changes to commit"
+          else
+            git commit -m "data: prices + TA update $(date -u +%Y-%m-%d)"
             git push origin main
           fi
