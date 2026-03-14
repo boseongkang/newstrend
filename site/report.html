@@ -1,74 +1,439 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>News Report</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js" crossorigin="anonymous"></script>
-<script>window.Chart||document.write('<script src="https://unpkg.com/chart.js@4.4.6/dist/chart.umd.min.js" crossorigin="anonymous"><\/script>')</script>
-<script>window.Chart||document.write('<script src="./vendor/chart.umd.min.js"><\/script>')</script>
+<title>Newstrend · Daily Brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0b0f18;--card:#121826;--line:#1f2937;--txt:#e6e8ec;--accent:#3b82f6}
-  body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,Segoe UI,Roboto,Arial}
-  .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
-  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-  .brand{font-weight:700;font-size:22px}
-  .nav a{color:#cbd5e1;text-decoration:none;margin-left:12px;padding:8px 10px;border-radius:10px}
-  .nav a.active{background:var(--accent);color:#fff}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
-  canvas{width:100%;height:380px}
-  .hint{opacity:.7;font-size:12px;margin-top:6px}
+:root {
+  --bg0:#070b10; --bg1:#0c1220; --bg2:#101828; --bg3:#162035;
+  --b1:#1a2840; --b2:#223050;
+  --cyan:#00d4ff; --amber:#ffb300; --green:#00e676; --red:#ff4444;
+  --purple:#b39ddb; --blue:#4d9fff;
+  --t1:#c8d8e8; --t2:#6a8aa8; --t3:#344a60;
+  --font-mono:'IBM Plex Mono',monospace;
+  --font-sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--font-sans);font-size:13px;
+     height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+
+/* HEADER */
+header{height:42px;display:flex;align-items:center;gap:20px;padding:0 16px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0}
+.brand{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--cyan);
+       letter-spacing:.06em;white-space:nowrap}
+.brand em{color:var(--t3);font-style:normal;font-weight:300}
+nav{display:flex;gap:2px}
+nav a{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:5px 11px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10px;
+      color:var(--green);letter-spacing:.1em}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);
+     animation:blink 2.4s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#ts{font-family:var(--font-mono);font-size:10px;color:var(--t3)}
+
+/* LAYOUT */
+main{flex:1;display:grid;grid-template-columns:320px 1fr;gap:1px;
+     background:var(--b1);overflow:hidden;min-height:0}
+.col{background:var(--bg0);display:flex;flex-direction:column;overflow:hidden;min-height:0}
+
+/* SHARED */
+.phdr{height:36px;display:flex;align-items:center;justify-content:space-between;
+      padding:0 12px;background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0}
+.plabel{font-family:var(--font-mono);font-size:10px;font-weight:600;
+        letter-spacing:.12em;text-transform:uppercase;color:var(--t2)}
+.pbadge{font-family:var(--font-mono);font-size:10px;color:var(--amber);
+        background:rgba(255,179,0,.1);padding:2px 7px;border:1px solid rgba(255,179,0,.25)}
+
+/* LEFT: signal snapshot */
+#snap-list{flex:1;overflow-y:auto;padding:8px 6px}
+
+.snap-item{padding:8px 10px;margin-bottom:3px;background:var(--bg1);
+           border:1px solid var(--b1);border-left:2px solid transparent;cursor:pointer;
+           transition:all .1s}
+.snap-item:hover{background:var(--bg2)}
+.snap-item.hot{border-left-color:var(--red)}
+.snap-item.rising{border-left-color:var(--cyan)}
+.snap-item.normal{border-left-color:var(--t3)}
+.snap-row1{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.snap-term{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--t1)}
+.snap-z{font-family:var(--font-mono);font-size:10px;padding:1px 5px;border:1px solid}
+.zh{color:var(--red);border-color:rgba(255,68,68,.4);background:rgba(255,68,68,.08)}
+.zm{color:var(--amber);border-color:rgba(255,179,0,.4);background:rgba(255,179,0,.08)}
+.zl{color:var(--green);border-color:rgba(0,230,118,.4);background:rgba(0,230,118,.08)}
+.zn{color:var(--t3);border-color:var(--b2)}
+.snap-meta{font-family:var(--font-mono);font-size:9px;color:var(--t3)}
+
+/* RIGHT: brief panel */
+#brief-wrap{flex:1;overflow-y:auto;padding:0}
+
+/* Brief header */
+#brief-hdr{padding:16px 20px 12px;border-bottom:1px solid var(--b1);flex-shrink:0}
+.brief-date{font-family:var(--font-mono);font-size:9px;color:var(--t3);
+            letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+.brief-title{font-family:var(--font-mono);font-size:15px;font-weight:600;
+             color:var(--t1);line-height:1.4;margin-bottom:8px}
+.brief-pills{display:flex;flex-wrap:wrap;gap:5px}
+.pill{font-family:var(--font-mono);font-size:9px;padding:2px 8px;
+      border:1px solid;letter-spacing:.06em}
+.pill-hot{color:var(--red);border-color:rgba(255,68,68,.35);background:rgba(255,68,68,.07)}
+.pill-rise{color:var(--cyan);border-color:rgba(0,212,255,.35);background:rgba(0,212,255,.07)}
+.pill-pred{color:var(--amber);border-color:rgba(255,179,0,.35);background:rgba(255,179,0,.07)}
+
+/* Generate button */
+#gen-btn{display:flex;align-items:center;gap:10px;padding:12px 20px;
+         border-bottom:1px solid var(--b1);flex-shrink:0}
+button#generate{
+  font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;padding:8px 20px;background:rgba(0,212,255,.1);
+  border:1px solid rgba(0,212,255,.4);color:var(--cyan);cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;gap:8px
+}
+button#generate:hover{background:rgba(0,212,255,.2);border-color:var(--cyan)}
+button#generate:disabled{opacity:.4;cursor:not-allowed}
+.gen-note{font-family:var(--font-mono);font-size:9px;color:var(--t3)}
+
+/* Brief output */
+#brief-out{padding:20px;flex:1}
+
+.brief-section{margin-bottom:22px}
+.bs-label{font-family:var(--font-mono);font-size:8px;font-weight:600;letter-spacing:.16em;
+          text-transform:uppercase;color:var(--t3);margin-bottom:10px;
+          padding-bottom:5px;border-bottom:1px solid var(--b1)}
+.bs-body{font-size:13px;line-height:1.75;color:var(--t1)}
+.bs-body p{margin-bottom:10px}
+.bs-body strong{color:var(--cyan);font-weight:600}
+.bs-body em{color:var(--amber);font-style:normal}
+
+/* signal table in brief */
+.sig-table{width:100%;border-collapse:collapse;margin-top:8px;font-family:var(--font-mono)}
+.sig-table th{font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);
+              padding:4px 8px;border-bottom:1px solid var(--b1);text-align:left}
+.sig-table td{font-size:10px;padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.03)}
+.sig-table tr:hover td{background:rgba(255,255,255,.02)}
+
+/* streaming cursor */
+.cursor{display:inline-block;width:8px;height:13px;background:var(--cyan);
+        animation:blink2 .7s ease-in-out infinite;vertical-align:middle;margin-left:2px}
+@keyframes blink2{0%,100%{opacity:1}50%{opacity:0}}
+
+/* empty / loading */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+       height:200px;gap:10px;color:var(--t3)}
+.empty-ico{font-size:28px;opacity:.3}
+.empty-txt{font-family:var(--font-mono);font-size:10px;text-align:center;line-height:1.7}
+.spinner{width:16px;height:16px;border:2px solid var(--b2);border-top-color:var(--cyan);
+         border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top">
-    <div class="brand">News Report</div>
-    <div class="nav">
-      <a href="./index.html">Trends</a>
-      <a class="active" href="./report.html">Report</a>
-      <a href="./rising.html">Rising</a>
+
+<header>
+  <div class="brand">NEWSTREND <em>// SIGNAL INTELLIGENCE</em></div>
+  <nav>
+    <a href="./index.html">TRENDS</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./report.html" class="on">REPORT</a>
+    <a href="./rising.html">RISING</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="live"><div class="dot"></div>LIVE</div>
+    <div id="ts">—</div>
+  </div>
+</header>
+
+<main>
+  <!-- LEFT: today's signal snapshot -->
+  <div class="col">
+    <div class="phdr">
+      <div class="plabel">TODAY'S SIGNALS</div>
+      <div class="pbadge" id="snap-badge">—</div>
+    </div>
+    <div id="snap-list">
+      <div class="empty"><div class="spinner"></div></div>
     </div>
   </div>
 
-  <div class="grid">
-    <div class="card"><h3>Top Publishers</h3><canvas id="pubChart"></canvas></div>
-    <div class="card"><h3>Top Words</h3><canvas id="wordChart"></canvas></div>
+  <!-- RIGHT: AI brief -->
+  <div class="col">
+    <div id="brief-hdr">
+      <div class="brief-date" id="brief-date">—</div>
+      <div class="brief-title" id="brief-title">DAILY MACRO BRIEF</div>
+      <div class="brief-pills" id="brief-pills"></div>
+    </div>
+    <div id="gen-btn">
+      <button id="generate" onclick="generateBrief()">
+        <span id="gen-ico">◈</span> GENERATE BRIEF
+      </button>
+      <span class="gen-note" id="gen-note">Uses Claude API · ~10 seconds</span>
+    </div>
+    <div id="brief-out">
+      <div class="empty">
+        <div class="empty-ico">◈</div>
+        <div class="empty-txt">Click GENERATE BRIEF to create<br>an AI-powered macro summary<br>from today's signal data</div>
+      </div>
+    </div>
   </div>
-
-  <div class="card" style="margin-top:16px">
-    <h3>Articles per day</h3>
-    <canvas id="artChart"></canvas>
-  </div>
-
-  <div class="hint">Hard-refresh if stale data appears.</div>
-</div>
+</main>
 
 <script>
-(async function(){
-  const v=Date.now();
-  async function get(p){const r=await fetch('./data/'+p+'?v='+v,{cache:'no-store'});if(!r.ok)throw new Error(p);return r.json()}
-  let pubs=await get('publishers.json').catch(()=>({labels:[],counts:[]}));
-  let words=await get('words.json').catch(()=>({labels:[],counts:[]}));
-  let arts=await get('articles.json').catch(()=>({dates:[],articles:[]}));
+(function(){
+'use strict';
 
-  new Chart(document.getElementById('pubChart').getContext('2d'),{
-    type:'bar',
-    data:{labels:pubs.labels,datasets:[{label:'count',data:pubs.counts}]},
-    options:{indexAxis:'y',responsive:true,scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
-  });
-  new Chart(document.getElementById('wordChart').getContext('2d'),{
-    type:'bar',
-    data:{labels:words.labels,datasets:[{label:'count',data:words.counts}]},
-    options:{indexAxis:'y',responsive:true,scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
-  });
-  new Chart(document.getElementById('artChart').getContext('2d'),{
-    type:'bar',
-    data:{labels:arts.dates,datasets:[{label:'articles',data:arts.articles}]},
-    options:{responsive:true,scales:{x:{grid:{color:'#1f2937'}},y:{grid:{color:'#1f2937'}}}}
-  });
+const V = Date.now(), BASE = './data/';
+let T = null, SC = null;
+
+async function fetchJSON(p){
+  try{
+    const r = await fetch(BASE+p+'?v='+V,{cache:'no-store'});
+    if(!r.ok) return null;
+    return r.json();
+  }catch(e){ return null; }
+}
+
+const sign = n => n >= 0 ? '+' : '';
+
+function zClass(z){
+  if(Math.abs(z) >= 3) return 'zh';
+  if(Math.abs(z) >= 1.5) return 'zm';
+  if(Math.abs(z) >= 0.5) return 'zl';
+  return 'zn';
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init(){
+  document.getElementById('ts').textContent =
+    'UPDATED '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+  const today = new Date().toLocaleDateString('en-US',
+    {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('brief-date').textContent = today.toUpperCase();
+
+  const [t, sc] = await Promise.all([fetchJSON('trends.json'), fetchJSON('signal_corr.json')]);
+  T = t; SC = sc;
+
+  if(!T){ renderSnapError(); return; }
+  renderSnap();
+  buildPills();
+}
+
+function renderSnapError(){
+  document.getElementById('snap-list').innerHTML =
+    '<div class="empty"><div class="empty-txt">trends.json not found</div></div>';
+}
+
+function renderSnap(){
+  const list = document.getElementById('snap-list');
+  const zscores = T.zscores || {};
+  const slopes  = T.slopes  || {};
+  const today   = T.today   || {};
+
+  const terms = Object.keys(zscores)
+    .sort((a,b) => Math.abs(zscores[b]) - Math.abs(zscores[a]))
+    .slice(0, 40);
+
+  document.getElementById('snap-badge').textContent = terms.length + ' SIGNALS';
+
+  list.innerHTML = terms.map(t => {
+    const z  = zscores[t] || 0;
+    const sl = slopes[t]  || 0;
+    const tc = today[t]   || 0;
+    const cls = Math.abs(z) >= 2 ? 'hot' : sl > 0.05 ? 'rising' : 'normal';
+    const trend = sl > 0.06 ? '↑' : sl < -0.06 ? '↓' : '→';
+    return `<div class="snap-item ${cls}">
+      <div class="snap-row1">
+        <span class="snap-term">${t}</span>
+        <span class="snap-z ${zClass(z)}">${sign(z)}${z.toFixed(1)}σ</span>
+      </div>
+      <div class="snap-meta">${trend} ${tc} today · slope ${sign(sl)}${sl.toFixed(3)}</div>
+    </div>`;
+  }).join('');
+}
+
+function buildPills(){
+  const pills = document.getElementById('brief-pills');
+  const zscores = T?.zscores || {};
+
+  const hot     = Object.entries(zscores).filter(([,z]) => z >= 2).map(([t]) => t).slice(0,5);
+  const rising  = Object.entries(T?.slopes||{}).filter(([,s]) => s > 0.05).map(([t]) => t).slice(0,4);
+  const leading = (SC?.pairs||[]).filter(p => p.best_lag <= -1 && p.confidence >= 0.5)
+                                  .slice(0,3).map(p => `${p.term}→${p.ticker}`);
+
+  pills.innerHTML =
+    hot.map(t => `<span class="pill pill-hot">${t}</span>`).join('') +
+    rising.map(t => `<span class="pill pill-rise">↑${t}</span>`).join('') +
+    leading.map(s => `<span class="pill pill-pred">⟳${s}</span>`).join('');
+}
+
+// ── Build prompt from signal data ─────────────────────────────────────────────
+function buildPrompt(){
+  const zscores    = T?.zscores    || {};
+  const slopes     = T?.slopes     || {};
+  const today_cnt  = T?.today      || {};
+  const dates      = T?.dates      || [];
+  const pairs      = SC?.pairs     || [];
+  const clusters   = SC?.cooccurrence || [];
+
+  const todayDate  = dates[dates.length - 1] || 'today';
+  const nDates     = dates.length;
+
+  // Hot terms (z ≥ 2)
+  const hot = Object.entries(zscores)
+    .filter(([,z]) => z >= 2)
+    .sort(([,a],[,b]) => b-a)
+    .map(([t,z]) => `${t} (z=${z > 0 ? '+':''}${z.toFixed(2)}, today=${today_cnt[t]||0})`);
+
+  // Rising terms
+  const rising = Object.entries(slopes)
+    .filter(([,s]) => s > 0.06)
+    .sort(([,a],[,b]) => b-a)
+    .slice(0, 8)
+    .map(([t,s]) => `${t} (slope=${s > 0 ? '+':''}${s.toFixed(3)})`);
+
+  // Leading signals
+  const leading = pairs
+    .filter(p => p.best_lag <= -1 && p.confidence >= 0.4)
+    .slice(0, 8)
+    .map(p => `${p.term} → ${p.ticker} (lag=${p.best_lag}d, conf=${p.confidence.toFixed(2)}, hit=${(p.hit_rate*100).toFixed(0)}%, 1d_ret=${p.avg_ret_1d > 0 ? '+':''}${p.avg_ret_1d.toFixed(2)}%)`);
+
+  // Co-occurrence
+  const cooc = clusters.slice(0,5).map(c => `[${c.terms.join(' + ')}] corr=${c.co_corr.toFixed(2)}`);
+
+  return `You are a macro market analyst. Based on the following NLP signal data extracted from today's financial and geopolitical news, write a concise daily macro brief.
+
+DATA DATE: ${todayDate} (${nDates} days of history)
+
+HOT SIGNALS (Z-score ≥ 2.0 — unusually high news coverage today):
+${hot.length ? hot.join('\n') : 'None today'}
+
+RISING MOMENTUM (slope trending up over past 14 days):
+${rising.length ? rising.join('\n') : 'None'}
+
+WORD → PRICE LEADING SIGNALS (word spike predicts price move N days later):
+${leading.length ? leading.join('\n') : 'Insufficient data — still building correlation history'}
+
+CO-OCCURRENCE CLUSTERS (words that spike together = shared theme):
+${cooc.length ? cooc.join('\n') : 'None detected'}
+
+Write the brief in this exact structure:
+1. HEADLINE (one sentence summary of today's macro narrative based on the signals)
+2. KEY THEMES (2-3 paragraphs interpreting what the hot/rising signals mean for markets — what macro story are these words telling?)
+3. PRICE IMPLICATIONS (based on the leading signals, what might move in the next 1-3 days? Be specific about direction and magnitude where data supports it. Note if data is limited.)
+4. RISKS & CAVEATS (what could invalidate these signals? Mention data limitations if <60 days of history)
+
+Keep it under 400 words. Use bold for key terms. Be analytical, not generic. If signals are thin, say so honestly.`;
+}
+
+// ── Generate brief via Claude API ─────────────────────────────────────────────
+async function generateBrief(){
+  if(!T){ alert('trends.json not loaded'); return; }
+
+  const btn  = document.getElementById('generate');
+  const out  = document.getElementById('brief-out');
+  const note = document.getElementById('gen-note');
+  const ico  = document.getElementById('gen-ico');
+
+  btn.disabled = true;
+  ico.textContent = '◌';
+  note.textContent = 'Generating…';
+  out.innerHTML = `<div class="empty"><div class="spinner"></div>
+    <div class="empty-txt">Analyzing signals…</div></div>`;
+
+  const prompt = buildPrompt();
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        stream: false,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if(!resp.ok){
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const text = data.content?.map(b => b.text || '').join('') || '';
+
+    renderBrief(text);
+    note.textContent = 'Generated · ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+  } catch(e) {
+    out.innerHTML = `<div style="padding:16px;font-family:var(--font-mono);font-size:10px">
+      <div style="color:var(--red);margin-bottom:8px">⚠ API ERROR</div>
+      <div style="color:var(--t2)">${e.message}</div>
+      <div style="color:var(--t3);margin-top:12px;line-height:1.7">
+        To use this feature, the Anthropic API key must be injected<br>
+        by the build pipeline via a server-side proxy or GitHub Action.<br><br>
+        Add to trend-site.yml:<br>
+        <span style="color:var(--cyan)">python scripts/build_report.py --out site/data/brief.json</span>
+      </div>
+    </div>`;
+    note.textContent = 'Error — see output';
+  }
+
+  btn.disabled = false;
+  ico.textContent = '◈';
+}
+
+// ── Render brief markdown-style ───────────────────────────────────────────────
+function renderBrief(text){
+  const out = document.getElementById('brief-out');
+
+  // Split into sections by numbered headings
+  const sections = text.split(/(?=\n?\d+\.\s+[A-Z])/);
+
+  let html = '';
+  for(const sec of sections){
+    if(!sec.trim()) continue;
+    const lines = sec.trim().split('\n');
+    const header = lines[0].replace(/^\d+\.\s+/, '');
+    const body   = lines.slice(1).join('\n').trim();
+
+    // Format body: bold **x**, italic *x*, newlines → paragraphs
+    const fmt = s => s
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g,   '<em>$1</em>')
+      .split(/\n\n+/)
+      .map(p => p.trim() ? `<p>${p.replace(/\n/g,' ')}</p>` : '')
+      .join('');
+
+    html += `<div class="brief-section">
+      <div class="bs-label">${header}</div>
+      <div class="bs-body">${fmt(body)}</div>
+    </div>`;
+  }
+
+  if(!html){
+    // fallback: render as-is
+    html = `<div class="brief-section"><div class="bs-body">${
+      text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+          .replace(/\n\n/g,'</p><p>')
+          .replace(/\n/g,'<br>')
+    }</div></div>`;
+  }
+
+  out.innerHTML = html;
+}
+
+init();
 })();
 </script>
 </body>
