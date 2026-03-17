@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · Predictions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--purple:#b39ddb;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --font-mono:'IBM Plex Mono',monospace;--font-sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--font-sans);font-size:13px;
+     height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+
+/* ── HEADER ── */
+header{height:42px;display:flex;align-items:center;gap:20px;padding:0 16px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0}
+.brand{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300}
+nav{display:flex;gap:2px}
+nav a{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:5px 11px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10px;color:var(--green);letter-spacing:.1em}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#ts{font-family:var(--font-mono);font-size:10px;color:var(--t3)}
+
+/* ── REGIME BAR ── */
+#regime-bar{display:flex;align-items:center;gap:16px;padding:7px 16px;
+            border-bottom:1px solid var(--b1);flex-shrink:0;background:var(--bg1)}
+.rb-item{display:flex;align-items:center;gap:6px}
+.rb-label{font-family:var(--font-mono);font-size:9px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase}
+.rb-val{font-family:var(--font-mono);font-size:11px;font-weight:600}
+.rb-div{width:1px;height:20px;background:var(--b2)}
+#fg-bar-wrap{flex:1;max-width:160px;height:6px;background:var(--b1);position:relative;border-radius:3px}
+#fg-bar-fill{height:100%;border-radius:3px;transition:width .5s ease}
+#data-quality-note{font-family:var(--font-mono);font-size:9px;color:var(--t3);margin-left:auto}
+
+/* ── LAYOUT ── */
+main{flex:1;display:grid;grid-template-columns:360px 1fr;gap:1px;
+     background:var(--b1);overflow:hidden;min-height:0}
+.col{background:var(--bg0);display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.phdr{height:36px;display:flex;align-items:center;justify-content:space-between;
+      padding:0 12px;background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0}
+.plabel{font-family:var(--font-mono);font-size:10px;font-weight:600;
+        letter-spacing:.12em;text-transform:uppercase;color:var(--t2)}
+.pbadge{font-family:var(--font-mono);font-size:10px;color:var(--amber);
+        background:rgba(255,179,0,.1);padding:2px 7px;border:1px solid rgba(255,179,0,.25)}
+
+/* ── FILTER ROW ── */
+.filter-row{display:flex;gap:4px;padding:8px 10px;border-bottom:1px solid var(--b1);flex-shrink:0}
+.fbtn{font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;padding:4px 9px;
+      border:1px solid var(--b2);background:transparent;color:var(--t2);
+      cursor:pointer;transition:all .12s;text-transform:uppercase}
+.fbtn:hover,.fbtn.on{background:var(--bg2);color:var(--cyan);border-color:var(--cyan)}
+
+/* ── PREDICTION CARDS ── */
+#pred-list{flex:1;overflow-y:auto;padding:6px}
+
+.pcard{padding:10px 12px;margin-bottom:5px;background:var(--bg1);
+       border:1px solid var(--b1);border-left:3px solid transparent;
+       cursor:pointer;transition:all .12s}
+.pcard:hover{background:var(--bg2);border-color:var(--b2)}
+.pcard.sel{background:rgba(0,212,255,.05);border-left-color:var(--cyan)}
+.pcard.action-BUY{border-left-color:var(--green)}
+.pcard.action-WATCH{border-left-color:var(--cyan)}
+.pcard.action-HOLD{border-left-color:var(--t3)}
+.pcard.action-REDUCE{border-left-color:var(--amber)}
+.pcard.action-SELL{border-left-color:var(--red)}
+
+.pc-row1{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pc-ticker{font-family:var(--font-mono);font-size:14px;font-weight:600;color:var(--t1);min-width:52px}
+.pc-action{font-family:var(--font-mono);font-size:10px;font-weight:600;
+           padding:2px 8px;border:1px solid;letter-spacing:.08em}
+.a-BUY   {color:var(--green); border-color:rgba(0,230,118,.4); background:rgba(0,230,118,.08)}
+.a-WATCH {color:var(--cyan);  border-color:rgba(0,212,255,.4); background:rgba(0,212,255,.08)}
+.a-HOLD  {color:var(--t2);   border-color:var(--b2);           background:transparent}
+.a-REDUCE{color:var(--amber); border-color:rgba(255,179,0,.4); background:rgba(255,179,0,.08)}
+.a-SELL  {color:var(--red);  border-color:rgba(255,68,68,.4);  background:rgba(255,68,68,.08)}
+
+.pc-conf-wrap{height:3px;background:var(--b1);margin-bottom:8px}
+.pc-conf-bar{height:100%;transition:width .4s}
+
+.pc-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:1px}
+.ps{background:var(--bg0);padding:4px 6px;text-align:center}
+.ps-l{font-family:var(--font-mono);font-size:7px;color:var(--t3);
+      letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.ps-v{font-family:var(--font-mono);font-size:12px;font-weight:600}
+
+/* ── RIGHT DETAIL ── */
+#detail-area{flex:1;overflow-y:auto;padding:0}
+.det-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+           height:100%;gap:10px;color:var(--t3)}
+.det-empty-ico{font-size:28px;opacity:.3}
+.det-empty-txt{font-family:var(--font-mono);font-size:10px;text-align:center;line-height:1.7}
+
+/* detail sections */
+.det-section{padding:14px 16px;border-bottom:1px solid var(--b1)}
+.det-title{font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--t3);margin-bottom:10px;
+           padding-bottom:5px;border-bottom:1px solid var(--b1)}
+
+/* price header */
+.det-header{padding:14px 16px 12px;border-bottom:1px solid var(--b1)}
+.det-ticker{font-family:var(--font-mono);font-size:20px;font-weight:600;color:var(--cyan);margin-bottom:4px}
+.det-price{font-family:var(--font-mono);font-size:13px;color:var(--t2)}
+.det-action-big{font-family:var(--font-mono);font-size:11px;font-weight:600;
+                padding:4px 14px;border:1px solid;display:inline-block;margin-top:6px}
+
+/* target/stop row */
+.ts-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;margin-bottom:1px}
+.ts-cell{background:var(--bg1);padding:8px 10px;text-align:center}
+.ts-lbl{font-family:var(--font-mono);font-size:8px;color:var(--t3);
+        letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
+.ts-val{font-family:var(--font-mono);font-size:15px;font-weight:600}
+
+/* gauge chart */
+.gauge-wrap{display:flex;align-items:center;justify-content:center;height:120px;position:relative}
+.gauge-wrap canvas{position:absolute}
+.gauge-label{position:absolute;text-align:center;bottom:8px}
+.gauge-num{font-family:var(--font-mono);font-size:20px;font-weight:600}
+.gauge-sub{font-family:var(--font-mono);font-size:9px;color:var(--t3);letter-spacing:.08em}
+
+/* signals grid */
+.sig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.sig-item{background:var(--bg1);border:1px solid var(--b1);padding:7px 10px}
+.sig-name{font-family:var(--font-mono);font-size:8px;color:var(--t3);
+          letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.sig-val{font-family:var(--font-mono);font-size:12px;font-weight:600}
+
+/* reasons/risks */
+.reason-list{display:flex;flex-direction:column;gap:4px}
+.reason-item{display:flex;align-items:flex-start;gap:8px;padding:5px 8px;background:var(--bg1)}
+.reason-ico{font-size:10px;flex-shrink:0;margin-top:1px}
+.reason-txt{font-family:var(--font-mono);font-size:10px;color:var(--t1);line-height:1.5}
+
+.spinner{width:16px;height:16px;border:2px solid var(--b2);border-top-color:var(--cyan);
+         border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">NEWSTREND <em>// SIGNAL INTELLIGENCE</em></div>
+  <nav>
+    <a href="./index.html">TRENDS</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html" class="on">PREDICT</a>
+    <a href="./report.html">REPORT</a>
+    <a href="./portfolio.html">PORTFOLIO</a>
+    <a href="./rising.html">RISING</a>
+    <a href="./macro.html">MACRO</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="live"><div class="dot"></div>LIVE</div>
+    <div id="ts">—</div>
+  </div>
+</header>
+
+<!-- Market Regime Bar -->
+<div id="regime-bar">
+  <div class="rb-item">
+    <span class="rb-label">REGIME</span>
+    <span class="rb-val" id="rb-regime">—</span>
+  </div>
+  <div class="rb-div"></div>
+  <div class="rb-item">
+    <span class="rb-label">FEAR/GREED</span>
+    <span class="rb-val" id="rb-fg-num">—</span>
+  </div>
+  <div id="fg-bar-wrap"><div id="fg-bar-fill"></div></div>
+  <span class="rb-val" id="rb-fg-label" style="font-size:10px">—</span>
+  <div class="rb-div"></div>
+  <div class="rb-item">
+    <span class="rb-label">BULL %</span>
+    <span class="rb-val" id="rb-bull">—</span>
+  </div>
+  <div class="rb-div"></div>
+  <div class="rb-item">
+    <span class="rb-label">AVG RSI</span>
+    <span class="rb-val" id="rb-rsi">—</span>
+  </div>
+  <div class="rb-div"></div>
+  <div class="rb-item">
+    <span class="rb-label">BUY</span>
+    <span class="rb-val" style="color:var(--green)" id="rb-buy">—</span>
+  </div>
+  <div class="rb-item">
+    <span class="rb-label">WATCH</span>
+    <span class="rb-val" style="color:var(--cyan)" id="rb-watch">—</span>
+  </div>
+  <div class="rb-item">
+    <span class="rb-label">SELL</span>
+    <span class="rb-val" style="color:var(--red)" id="rb-sell">—</span>
+  </div>
+  <div id="data-quality-note">—</div>
+</div>
+
+<main>
+  <!-- LEFT: prediction list -->
+  <div class="col">
+    <div class="phdr">
+      <div class="plabel">PREDICTIONS</div>
+      <div class="pbadge" id="pred-badge">—</div>
+    </div>
+    <div class="filter-row">
+      <button class="fbtn on"  data-f="all">ALL</button>
+      <button class="fbtn" data-f="BUY">BUY</button>
+      <button class="fbtn" data-f="WATCH">WATCH</button>
+      <button class="fbtn" data-f="HOLD">HOLD</button>
+      <button class="fbtn" data-f="SELL">SELL</button>
+    </div>
+    <div id="pred-list">
+      <div style="display:flex;align-items:center;justify-content:center;height:200px;gap:10px">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: detail -->
+  <div class="col">
+    <div class="phdr">
+      <div class="plabel" id="det-lbl">SIGNAL DETAIL</div>
+      <div class="pbadge" id="det-badge">—</div>
+    </div>
+    <div id="detail-area">
+      <div class="det-empty">
+        <div class="det-empty-ico">◈</div>
+        <div class="det-empty-txt">Select a ticker<br>to view prediction detail</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function(){
+'use strict';
+
+const V = Date.now(), BASE = './data/';
+let P = null;  // predictions.json
+let preds = [];
+let selTicker = null;
+let curFilter = 'all';
+let gaugeChart = null;
+
+async function fetchJSON(p){
+  try{
+    const r = await fetch(BASE+p+'?v='+V,{cache:'no-store'});
+    if(!r.ok) return null;
+    return r.json();
+  }catch(e){ return null; }
+}
+
+const sign  = n => n >= 0 ? '+' : '';
+const pct   = n => (n >= 0 ? '+':'') + n.toFixed(2) + '%';
+const r2    = n => n != null ? n.toFixed(2) : '—';
+
+function actionColor(a){
+  return {BUY:'var(--green)',WATCH:'var(--cyan)',HOLD:'var(--t2)',
+          REDUCE:'var(--amber)',SELL:'var(--red)'}[a] || 'var(--t2)';
+}
+function confBarColor(c){
+  return c >= 0.7 ? '#00e676' : c >= 0.5 ? '#00d4ff' : c >= 0.35 ? '#ffb300' : '#344a60';
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init(){
+  document.getElementById('ts').textContent =
+    'UPDATED '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+  P = await fetchJSON('predictions.json');
+  if(!P){
+    document.getElementById('pred-list').innerHTML =
+      '<div style="padding:20px;font-family:var(--font-mono);font-size:10px;color:var(--t3)">predictions.json not found</div>';
+    return;
+  }
+  preds = P.predictions || [];
+  renderRegimeBar();
+  renderPredList();
+  if(preds.length) selectPred(preds[0]);
+}
+
+// ── Regime bar ────────────────────────────────────────────────────────────────
+function renderRegimeBar(){
+  const mr = P.market_regime || {};
+  const dq = P.data_quality  || {};
+
+  const regime = mr.regime || '—';
+  const regimeColor = {
+    'RISK-ON':        'var(--green)',
+    'RISK-OFF':       'var(--red)',
+    'OVERSOLD-BOUNCE':'var(--amber)',
+    'NEUTRAL':        'var(--t2)',
+  }[regime] || 'var(--t2)';
+
+  document.getElementById('rb-regime').textContent  = regime;
+  document.getElementById('rb-regime').style.color  = regimeColor;
+  document.getElementById('rb-fg-num').textContent  = mr.fear_greed ?? '—';
+  document.getElementById('rb-fg-label').textContent= mr.fear_greed_label || '—';
+  document.getElementById('rb-bull').textContent    = mr.bull_pct != null ? (mr.bull_pct*100).toFixed(0)+'%' : '—';
+  document.getElementById('rb-rsi').textContent     = mr.avg_rsi != null ? mr.avg_rsi.toFixed(1) : '—';
+  document.getElementById('rb-buy').textContent     = P.n_buy   ?? 0;
+  document.getElementById('rb-watch').textContent   = P.n_watch ?? 0;
+  document.getElementById('rb-sell').textContent    = (P.n_sell ?? 0) + (P.n_reduce ?? 0);
+
+  // Fear/Greed bar
+  const fg = mr.fear_greed ?? 50;
+  const fgColor = fg < 25 ? '#ff4444' : fg < 45 ? '#ffb300' : fg < 55 ? '#6a8aa8' : fg < 75 ? '#00d4ff' : '#00e676';
+  document.getElementById('fg-bar-fill').style.width     = fg + '%';
+  document.getElementById('fg-bar-fill').style.background= fgColor;
+  document.getElementById('rb-fg-num').style.color = fgColor;
+
+  // Data quality note
+  const note = dq.price_days
+    ? `${dq.price_days}d prices · ${dq.news_days}d news · ${dq.regime}`
+    : '';
+  document.getElementById('data-quality-note').textContent = note;
+}
+
+// ── Prediction list ───────────────────────────────────────────────────────────
+function renderPredList(){
+  const list = document.getElementById('pred-list');
+  let vis = preds;
+  if(curFilter !== 'all') vis = preds.filter(p => p.action === curFilter);
+  document.getElementById('pred-badge').textContent = vis.length + ' TICKERS';
+
+  if(!vis.length){
+    list.innerHTML = '<div style="padding:20px;font-family:var(--font-mono);font-size:10px;color:var(--t3)">No predictions match filter</div>';
+    return;
+  }
+
+  list.innerHTML = vis.map(p => {
+    const ac   = actionColor(p.action);
+    const conf = Math.round(p.confidence * 100);
+    const bc   = confBarColor(p.confidence);
+    const isSel= selTicker === p.ticker;
+    const rsi  = p.signals?.rsi14;
+    const rsiStr = rsi != null ? rsi.toFixed(0) : '—';
+
+    const rr = p.rr_ratio;
+    const rrStr = rr != null ? rr.toFixed(1)+'x' : '—';
+
+    return `<div class="pcard action-${p.action}${isSel?' sel':''}" data-ticker="${p.ticker}">
+      <div class="pc-row1">
+        <span class="pc-ticker">${p.ticker}</span>
+        <span class="pc-action a-${p.action}">${p.action}</span>
+        <span style="font-family:var(--font-mono);font-size:9px;color:var(--t3);margin-left:4px">
+          conf ${p.confidence.toFixed(2)}</span>
+        <span style="margin-left:auto;font-family:var(--font-mono);font-size:10px;color:var(--t2)">
+          $${p.price?.toFixed(2) ?? '—'}</span>
+      </div>
+      <div class="pc-conf-wrap">
+        <div class="pc-conf-bar" style="width:${conf}%;background:${bc}"></div>
+      </div>
+      <div class="pc-stats">
+        <div class="ps">
+          <div class="ps-l">RSI</div>
+          <div class="ps-v" style="color:${rsi<30?'var(--green)':rsi>70?'var(--red)':'var(--t2)'}">${rsiStr}</div>
+        </div>
+        <div class="ps">
+          <div class="ps-l">TARGET</div>
+          <div class="ps-v" style="color:var(--green)">${p.target ? '$'+p.target.toFixed(0) : '—'}</div>
+        </div>
+        <div class="ps">
+          <div class="ps-l">STOP</div>
+          <div class="ps-v" style="color:var(--red)">${p.stop ? '$'+p.stop.toFixed(0) : '—'}</div>
+        </div>
+        <div class="ps">
+          <div class="ps-l">R/R</div>
+          <div class="ps-v" style="color:${rr>=1.5?'var(--green)':rr>=1?'var(--t2)':'var(--red)'}">${rrStr}</div>
+        </div>
+        <div class="ps">
+          <div class="ps-l">TREND</div>
+          <div class="ps-v" style="font-size:10px;color:${p.signals?.trend?.includes('bull')?'var(--green)':'var(--red)'}">
+            ${p.signals?.trend?.includes('bull') ? '▲ BULL' : '▼ BEAR'}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.pcard').forEach(el =>
+    el.addEventListener('click', () => {
+      const p = preds.find(x => x.ticker === el.dataset.ticker);
+      if(p) selectPred(p);
+    })
+  );
+}
+
+// ── Select → detail ───────────────────────────────────────────────────────────
+function selectPred(p){
+  selTicker = p.ticker;
+  document.querySelectorAll('.pcard').forEach(el =>
+    el.classList.toggle('sel', el.dataset.ticker === p.ticker));
+  document.getElementById('det-lbl').textContent = p.ticker + ' · PREDICTION DETAIL';
+  document.getElementById('det-badge').textContent = p.date || '—';
+  renderDetail(p);
+}
+
+function renderDetail(p){
+  const area = document.getElementById('detail-area');
+  const s    = p.signals || {};
+  const ac   = actionColor(p.action);
+
+  // R/R 색상
+  const rrColor = p.rr_ratio >= 1.5 ? 'var(--green)' : p.rr_ratio >= 1 ? 'var(--t2)' : 'var(--red)';
+
+  area.innerHTML = `
+    <!-- Price header -->
+    <div class="det-header">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div>
+          <div class="det-ticker">${p.ticker}</div>
+          <div class="det-price">$${p.price?.toFixed(2) ?? '—'} · ${p.date ?? '—'}</div>
+          <div class="det-action-big a-${p.action}" style="border-color:${ac};color:${ac}">
+            ${p.action} · conf ${p.confidence.toFixed(3)}
+          </div>
+        </div>
+        <div style="width:120px;height:120px;position:relative">
+          <canvas id="gauge-cv"></canvas>
+          <div class="gauge-label">
+            <div class="gauge-num" style="color:${ac}">${Math.round(p.confidence*100)}</div>
+            <div class="gauge-sub">CONFIDENCE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Target / Stop / R/R -->
+    <div class="det-section" style="padding:0">
+      <div class="ts-row">
+        <div class="ts-cell">
+          <div class="ts-lbl">TARGET</div>
+          <div class="ts-val" style="color:var(--green)">${p.target ? '$'+p.target.toFixed(2) : '—'}</div>
+        </div>
+        <div class="ts-cell">
+          <div class="ts-lbl">STOP LOSS</div>
+          <div class="ts-val" style="color:var(--red)">${p.stop ? '$'+p.stop.toFixed(2) : '—'}</div>
+        </div>
+        <div class="ts-cell">
+          <div class="ts-lbl">RISK/REWARD</div>
+          <div class="ts-val" style="color:${rrColor}">${p.rr_ratio ? p.rr_ratio.toFixed(2)+'x' : '—'}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TA Signals -->
+    <div class="det-section">
+      <div class="det-title">TECHNICAL SIGNALS</div>
+      <div class="sig-grid">
+        ${sigItem('RSI 14', s.rsi14?.toFixed(1) ?? '—',
+            s.rsi14 < 30 ? 'var(--green)' : s.rsi14 > 70 ? 'var(--red)' : 'var(--t2)')}
+        ${sigItem('RSI STATE', (s.rsi_state||'—').replace(/_/g,' '),
+            s.rsi_state?.includes('oversold') ? 'var(--green)' : s.rsi_state?.includes('overbought') ? 'var(--red)' : 'var(--t2)')}
+        ${sigItem('MACD BIAS', (s.macd_bias||'—').replace(/_/g,' '),
+            s.macd_bias?.includes('bull') ? 'var(--green)' : 'var(--red)')}
+        ${sigItem('BB POSITION', (s.bb_position||'—').replace(/_/g,' '),
+            s.bb_position?.includes('lower') ? 'var(--green)' : s.bb_position?.includes('upper') ? 'var(--red)' : 'var(--t2)')}
+        ${sigItem('TREND', (s.trend||'—').replace(/_/g,' '),
+            s.trend?.includes('bull') ? 'var(--green)' : 'var(--red)')}
+        ${sigItem('VOLATILITY', (s.volatility||'—'),
+            s.volatility === 'extreme' ? 'var(--red)' : s.volatility === 'high' ? 'var(--amber)' : 'var(--t2)')}
+        ${sigItem('HV 20', s.hv20 ? s.hv20.toFixed(1)+'%' : '—', 'var(--t2)')}
+        ${sigItem('ATR 14', s.atr14 ? '$'+s.atr14.toFixed(2) : '—', 'var(--t2)')}
+        ${sigItem('HORIZON', p.horizon || '3-5d', 'var(--cyan)')}
+      </div>
+    </div>
+
+    <!-- Reasons -->
+    <div class="det-section">
+      <div class="det-title">✓ BULLISH REASONS</div>
+      <div class="reason-list">
+        ${(p.reasons||[]).length
+          ? (p.reasons||[]).map(r => `
+            <div class="reason-item">
+              <span class="reason-ico" style="color:var(--green)">▲</span>
+              <span class="reason-txt">${r}</span>
+            </div>`).join('')
+          : '<div style="padding:5px 8px;font-family:var(--font-mono);font-size:10px;color:var(--t3)">No bullish signals</div>'
+        }
+      </div>
+    </div>
+
+    <!-- Risks -->
+    <div class="det-section">
+      <div class="det-title">⚠ RISKS & CAVEATS</div>
+      <div class="reason-list">
+        ${(p.risks||[]).length
+          ? (p.risks||[]).map(r => `
+            <div class="reason-item">
+              <span class="reason-ico" style="color:var(--amber)">▼</span>
+              <span class="reason-txt">${r}</span>
+            </div>`).join('')
+          : '<div style="padding:5px 8px;font-family:var(--font-mono);font-size:10px;color:var(--t3)">No risk flags</div>'
+        }
+      </div>
+    </div>
+
+    <!-- News context (if available) -->
+    ${p.news?.available ? `
+    <div class="det-section">
+      <div class="det-title">📰 NEWS SIGNAL CONTEXT</div>
+      <div class="reason-list">
+        <div class="reason-item">
+          <span class="reason-ico" style="color:var(--purple)">◈</span>
+          <span class="reason-txt">${p.news.best_signal}</span>
+        </div>
+        ${p.news.active_terms?.length ? `
+        <div class="reason-item">
+          <span class="reason-ico" style="color:var(--purple)">◈</span>
+          <span class="reason-txt">Active terms: ${p.news.active_terms.join(', ')}</span>
+        </div>` : ''}
+      </div>
+    </div>` : `
+    <div class="det-section">
+      <div class="det-title">📰 NEWS SIGNAL CONTEXT</div>
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--t3);line-height:1.7">
+        News correlation building… (${P.data_quality?.news_days ?? 0}d / 90d needed)<br>
+        TA-only mode until sufficient news history.
+      </div>
+    </div>`}
+  `;
+
+  // Confidence gauge
+  requestAnimationFrame(() => drawGauge(p.confidence, ac));
+}
+
+function sigItem(label, val, color){
+  return `<div class="sig-item">
+    <div class="sig-name">${label}</div>
+    <div class="sig-val" style="color:${color};font-size:11px">${val}</div>
+  </div>`;
+}
+
+function drawGauge(conf, color){
+  const cv = document.getElementById('gauge-cv');
+  if(!cv) return;
+  if(gaugeChart){ gaugeChart.destroy(); gaugeChart = null; }
+
+  const val = Math.round(conf * 100);
+  gaugeChart = new Chart(cv, {
+    type: 'doughnut',
+    data: {
+      datasets:[{
+        data: [val, 100 - val],
+        backgroundColor: [color, '#1a2840'],
+        borderWidth: 0,
+        circumference: 240,
+        rotation: 240,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      cutout: '72%',
+      plugins: { legend:{display:false}, tooltip:{enabled:false} },
+    }
+  });
+}
+
+// ── Controls ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.fbtn').forEach(btn =>
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    curFilter = btn.dataset.f;
+    renderPredList();
+  })
+);
+
+init();
+})();
+</script>
+</body>
+</html>
