@@ -44,12 +44,65 @@ jobs:
           path: live_artifacts
           if_no_artifact_found: ignore
 
-      - name: Restore live inputs
+      - name: Download RSS jsonl
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: collect_rss.yml
+          name: rss-jsonl
+          path: rss_artifacts
+          if_no_artifact_found: ignore
+
+      - name: Restore live inputs (NewsAPI + RSS merged)
         run: |
           set -euo pipefail
           mkdir -p data/live_newsapi
-          find live_artifacts -type f -name "*.jsonl" -exec mv {} data/live_newsapi/ \;
-          ls -l data/live_newsapi || true
+
+          # NewsAPI artifacts
+          find live_artifacts -type f -name "*.jsonl" -exec cp {} data/live_newsapi/ \; 2>/dev/null || true
+
+          # RSS artifacts — merge into same date files
+          python3 - <<'PY2'
+          import glob, json, os
+          from pathlib import Path
+
+          rss_dir  = "rss_artifacts"
+          out_dir  = "data/live_newsapi"
+          seen     = set()
+
+          for src in sorted(glob.glob(f"{rss_dir}/**/*.jsonl", recursive=True) +
+                            glob.glob(f"{rss_dir}/*.jsonl")):
+              date = Path(src).stem[:10]  # YYYY-MM-DD
+              dest = f"{out_dir}/{date}.jsonl"
+
+              # 기존 NewsAPI 파일의 article ID 수집 (중복 방지)
+              if os.path.exists(dest):
+                  with open(dest) as f:
+                      for line in f:
+                          try:
+                              obj = json.loads(line)
+                              aid = obj.get("id") or obj.get("url","")
+                              if aid: seen.add(aid)
+                          except: pass
+
+              # RSS 기사 추가 (중복 제외)
+              added = 0
+              with open(src) as f_in, open(dest, "a") as f_out:
+                  for line in f_in:
+                      try:
+                          obj = json.loads(line.strip())
+                          aid = obj.get("id") or obj.get("url","")
+                          if aid and aid not in seen:
+                              seen.add(aid)
+                              f_out.write(json.dumps(obj, ensure_ascii=False) + "\n")
+                              added += 1
+                      except: pass
+              if added:
+                  print(f"  RSS merged {date}: +{added} articles")
+          PY2
+
+          echo "live_newsapi contents:"
+          ls -lh data/live_newsapi/ | tail -8
+          wc -l data/live_newsapi/*.jsonl 2>/dev/null | tail -5 || true
 
       - name: Update corpus
         run: |

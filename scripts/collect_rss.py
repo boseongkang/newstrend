@@ -17,30 +17,37 @@ import xml.etree.ElementTree as ET
 
 # ── 수집 대상 RSS 피드 ────────────────────────────────────────────
 RSS_FEEDS = [
-    # 거시경제 / 금융
-    {"url": "https://feeds.reuters.com/reuters/businessNews",       "source": "Reuters Business",    "category": "macro"},
-    {"url": "https://feeds.reuters.com/reuters/topNews",            "source": "Reuters Top",         "category": "macro"},
-    {"url": "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",       "source": "WSJ Markets",         "category": "macro"},
-    {"url": "https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml",     "source": "WSJ Business",        "category": "macro"},
-    {"url": "https://www.cnbc.com/id/100003114/device/rss/rss.html","source": "CNBC Markets",        "category": "macro"},
-    {"url": "https://www.cnbc.com/id/20910258/device/rss/rss.html", "source": "CNBC Economy",       "category": "macro"},
-    {"url": "https://feeds.marketwatch.com/marketwatch/topstories", "source": "MarketWatch Top",     "category": "macro"},
-    {"url": "https://feeds.marketwatch.com/marketwatch/marketpulse","source": "MarketWatch Pulse",   "category": "macro"},
-    {"url": "https://finance.yahoo.com/news/rssindex",              "source": "Yahoo Finance",       "category": "macro"},
-    # 지정학 / 정치
-    {"url": "https://feeds.bbci.co.uk/news/world/rss.xml",         "source": "BBC World",           "category": "geopolitical"},
-    {"url": "https://feeds.bbci.co.uk/news/business/rss.xml",      "source": "BBC Business",        "category": "macro"},
+    # ── 거시경제 / 금융 ───────────────────────────────────────────
+    {"url": "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",        "source": "WSJ Markets",         "category": "macro"},
+    {"url": "https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml",      "source": "WSJ Business",        "category": "macro"},
+    {"url": "https://feeds.a.dj.com/rss/RSSWorldNews.xml",          "source": "WSJ World",           "category": "geopolitical"},
+    {"url": "https://www.cnbc.com/id/100003114/device/rss/rss.html", "source": "CNBC Markets",       "category": "macro"},
+    {"url": "https://www.cnbc.com/id/20910258/device/rss/rss.html",  "source": "CNBC Economy",       "category": "macro"},
+    {"url": "https://feeds.marketwatch.com/marketwatch/topstories",  "source": "MarketWatch Top",    "category": "macro"},
+    {"url": "https://finance.yahoo.com/news/rssindex",               "source": "Yahoo Finance",      "category": "macro"},
+    {"url": "https://www.ft.com/markets?format=rss",                 "source": "FT Markets",         "category": "macro"},
+    {"url": "https://feeds.bloomberg.com/markets/news.rss",          "source": "Bloomberg Markets",  "category": "macro"},
+    {"url": "https://www.economist.com/finance-and-economics/rss.xml","source": "Economist Finance", "category": "macro"},
+    {"url": "https://thehill.com/business/feed/",                    "source": "The Hill Business",  "category": "macro"},
+    # ── 지정학 / 정치 ─────────────────────────────────────────────
+    {"url": "https://feeds.bbci.co.uk/news/world/rss.xml",          "source": "BBC World",          "category": "geopolitical"},
+    {"url": "https://feeds.bbci.co.uk/news/business/rss.xml",       "source": "BBC Business",       "category": "macro"},
     {"url": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml","source": "NYT World",         "category": "geopolitical"},
     {"url": "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml","source": "NYT Business",   "category": "macro"},
-    {"url": "https://foreignpolicy.com/feed/",                     "source": "Foreign Policy",      "category": "geopolitical"},
-    # 에너지 / 원자재
-    {"url": "https://oilprice.com/rss/main",                       "source": "OilPrice",            "category": "energy"},
-    # 중앙은행 공식 발표
-    {"url": "https://www.federalreserve.gov/feeds/press_all.xml",  "source": "Federal Reserve",     "category": "macro"},
-    {"url": "https://www.ecb.europa.eu/rss/press.html",            "source": "ECB",                 "category": "macro"},
-    # 기술 / 반도체
-    {"url": "https://techcrunch.com/feed/",                        "source": "TechCrunch",          "category": "tech"},
-    {"url": "https://feeds.arstechnica.com/arstechnica/technology", "source": "Ars Technica",       "category": "tech"},
+    {"url": "https://foreignpolicy.com/feed/",                       "source": "Foreign Policy",    "category": "geopolitical"},
+    {"url": "https://www.aljazeera.com/xml/rss/all.xml",             "source": "Al Jazeera",        "category": "geopolitical"},
+    {"url": "https://www.defensenews.com/arc/outboundfeeds/rss/",    "source": "Defense News",      "category": "geopolitical"},
+    {"url": "https://api.axios.com/feed/",                           "source": "Axios",             "category": "macro"},
+    # ── 아시아 ────────────────────────────────────────────────────
+    {"url": "https://asia.nikkei.com/rss/feed/nar",                  "source": "Nikkei Asia",       "category": "macro"},
+    {"url": "https://www.scmp.com/rss/92/feed",                      "source": "SCMP Business",     "category": "macro"},
+    # ── 에너지 / 원자재 ───────────────────────────────────────────
+    {"url": "https://oilprice.com/rss/main",                         "source": "OilPrice",          "category": "energy"},
+    # ── 중앙은행 공식 발표 ────────────────────────────────────────
+    {"url": "https://www.federalreserve.gov/feeds/press_all.xml",    "source": "Federal Reserve",   "category": "macro"},
+    {"url": "https://www.ecb.europa.eu/rss/press.html",              "source": "ECB",               "category": "macro"},
+    # ── 기술 / 반도체 ─────────────────────────────────────────────
+    {"url": "https://techcrunch.com/feed/",                          "source": "TechCrunch",        "category": "tech"},
 ]
 
 # ── XML 네임스페이스 ──────────────────────────────────────────────
