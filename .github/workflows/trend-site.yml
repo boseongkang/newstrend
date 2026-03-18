@@ -97,6 +97,15 @@ jobs:
             --min-len 4 \
             --extra-stop config/extra_noise.txt
 
+      - name: Build trends.json
+        run: |
+          python scripts/make_trends_json.py \
+            --tokens-dir data/warehouse/daily \
+            --out        site/data/trends.json \
+            --last-days  180 \
+            --topk       300 \
+            --min-len    4 || true
+
       - name: Build static pages
         run: |
           python scripts/build_static_ui.py --run run --out site
@@ -109,7 +118,7 @@ jobs:
 
       - name: Join prices
         run: |
-          python - <<'PY' || true
+          python - <<'PY'
           import pandas as pd, os
           df = pd.read_csv("run/tokens_by_day.cleaned.csv")
           s = pd.to_datetime(df['date']).min().date()
@@ -121,14 +130,14 @@ jobs:
           python scripts/join_prices.py \
             --terms run/tokens_by_day.cleaned.csv \
             --map   config/ticker_aliases.json \
-            --start "${START:-2025-01-01}" \
-            --end   "${END:-2026-12-31}" \
+            --start "$START" \
+            --end   "$END" \
             --out   run/prices.csv \
-            --min-days 1 || true
+            --min-days 1          
 
-      - name: Export prices.json (legacy — skipped if fetch_prices_v2 ran)
+      - name: Export prices.json
         run: |
-          python - <<'PY' || true
+          python - <<'PY'
           import pandas as pd, json, pathlib, sys
           base = pathlib.Path("run")/"prices.csv"
           td = pd.read_csv(base/"ticker_daily.csv")
@@ -164,6 +173,25 @@ jobs:
             --top-terms 200 \
             --min-corr 0.25 \
             --min-events 3 || true
+
+
+      - name: Run technical analysis
+        run: |
+          python scripts/analyze_prices.py \
+            --prices      site/data/prices.json \
+            --trends      site/data/trends.json \
+            --out-json    site/data/technical_analysis.json \
+            --out-summary site/data/ta_summary.json \
+            --out-csv-dir run || true
+          gzip -f -k site/data/technical_analysis.json || true
+
+      - name: Generate predictions
+        run: |
+          python scripts/predict.py \
+            --ta      site/data/technical_analysis.json \
+            --signals site/data/signal_corr.json \
+            --trends  site/data/trends.json \
+            --out     site/data/predictions.json || true
 
       - name: Build tickers.json (sectors)
         run: |
