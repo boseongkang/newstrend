@@ -24,7 +24,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -97,6 +97,20 @@ jobs:
             --min-len 4 \
             --extra-stop config/extra_noise.txt
 
+      - name: Build trends.json
+        run: |
+          python scripts/make_trends_json.py \
+            --tokens-dir data/warehouse/daily \
+            --out        site/data/trends.json \
+            --last-days  180 \
+            --topk       300 \
+            --min-len    4
+          python3 -c "
+          import json
+          d=json.load(open('site/data/trends.json'))
+          print('trends.json: dates='+str(len(d['dates']))+' last='+d['dates'][-1])
+          " || true
+
       - name: Build static pages
         run: |
           python scripts/build_static_ui.py --run run --out site
@@ -166,6 +180,37 @@ jobs:
             --top-terms 200 \
             --min-corr 0.25 \
             --min-events 3 || true
+
+      - name: Run technical analysis
+        continue-on-error: true
+        run: |
+          python scripts/analyze_prices.py \
+            --prices      site/data/prices.json \
+            --trends      site/data/trends.json \
+            --out-json    site/data/technical_analysis.json \
+            --out-summary site/data/ta_summary.json \
+            --out-csv-dir run
+          gzip -f -k site/data/technical_analysis.json || true
+
+      - name: Build signal correlations
+        continue-on-error: true
+        run: |
+          python scripts/build_signal_corr.py \
+            --trends     site/data/trends.json \
+            --prices     site/data/prices.json \
+            --out        site/data/signal_corr.json \
+            --top-terms  200 \
+            --min-corr   0.25 \
+            --min-events 3
+
+      - name: Generate predictions
+        continue-on-error: true
+        run: |
+          python scripts/predict.py \
+            --ta      site/data/technical_analysis.json \
+            --signals site/data/signal_corr.json \
+            --trends  site/data/trends.json \
+            --out     site/data/predictions.json
 
       - name: Build tickers.json (sectors)
         run: |
