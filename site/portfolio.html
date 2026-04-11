@@ -135,6 +135,32 @@ main{flex:1;display:grid;grid-template-columns:280px 1fr;gap:1px;
 .spinner{width:16px;height:16px;border:2px solid var(--b2);border-top-color:var(--cyan);
          border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── PREDICT INTEGRATION ── */
+.pred-badge{font-family:var(--font-mono);font-size:10px;font-weight:600;
+            padding:2px 8px;border:1px solid;letter-spacing:.06em}
+.pred-BUY   {color:var(--green);border-color:rgba(0,230,118,.4);background:rgba(0,230,118,.1)}
+.pred-WATCH {color:var(--cyan);border-color:rgba(0,212,255,.4);background:rgba(0,212,255,.08)}
+.pred-HOLD  {color:var(--t2);border-color:var(--b2);background:transparent}
+.pred-REDUCE{color:var(--amber);border-color:rgba(255,179,0,.4);background:rgba(255,179,0,.08)}
+.pred-SELL  {color:var(--red);border-color:rgba(255,68,68,.4);background:rgba(255,68,68,.1)}
+.pred-card{padding:12px 14px;border-bottom:1px solid var(--b1)}
+.pred-card-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pred-ticker-big{font-family:var(--font-mono);font-size:16px;font-weight:600;color:var(--cyan)}
+.pred-price{font-family:var(--font-mono);font-size:11px;color:var(--t2)}
+.pred-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-bottom:8px}
+.pred-stat{background:var(--bg1);padding:6px 8px;text-align:center}
+.pred-stat-l{font-family:var(--font-mono);font-size:8px;color:var(--t3);
+             letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
+.pred-stat-v{font-family:var(--font-mono);font-size:13px;font-weight:600}
+.pred-conf-wrap{height:3px;background:var(--b1);margin-bottom:8px}
+.pred-conf-bar{height:100%;transition:width .4s}
+.pred-reasons{display:flex;flex-direction:column;gap:3px;margin-top:6px}
+.pred-reason{font-family:var(--font-mono);font-size:9px;color:var(--t2);
+             padding:3px 6px;background:var(--bg0);display:flex;gap:6px;line-height:1.4}
+.pred-risk{color:var(--amber)}
+.pr-pred{margin-left:auto;display:flex;align-items:center;gap:6px}
+
 </style>
 </head>
 <body>
@@ -144,6 +170,7 @@ main{flex:1;display:grid;grid-template-columns:280px 1fr;gap:1px;
   <nav>
     <a href="./index.html">TRENDS</a>
     <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
     <a href="./report.html">REPORT</a>
     <a href="./portfolio.html" class="on">PORTFOLIO</a>
     <a href="./rising.html">RISING</a>
@@ -184,6 +211,7 @@ main{flex:1;display:grid;grid-template-columns:280px 1fr;gap:1px;
 
   <!-- ── RIGHT ── -->
   <div class="col">
+    <div id="pred-card-area"></div>
     <div id="det-header" style="display:none">
       <div id="det-name">—</div>
       <div id="det-meta">—</div>
@@ -203,7 +231,7 @@ main{flex:1;display:grid;grid-template-columns:280px 1fr;gap:1px;
 
 const V = Date.now(), BASE = './data/';
 const STORAGE_KEY = 'nt_portfolio_v1';
-let SC = null, T = null;
+let SC = null, T = null, P = null;
 let holdings = [];
 let selTicker = null;
 
@@ -236,8 +264,12 @@ async function init(){
 
   holdings = loadHoldings();
 
-  const [sc, t] = await Promise.all([fetchJSON('signal_corr.json'), fetchJSON('trends.json')]);
-  SC = sc; T = t;
+  const [sc, t, p] = await Promise.all([
+    fetchJSON('signal_corr.json'),
+    fetchJSON('trends.json'),
+    fetchJSON('predictions.json'),
+  ]);
+  SC = sc; T = t; P = p;
 
   renderChips();
   renderPortfolioSignals();
@@ -303,16 +335,24 @@ function renderPortfolioSignals(){
   const zscores = T?.zscores || {};
 
   // For each holding, find all signal pairs
+  const predMap = {};
+  (P?.predictions || []).forEach(p => { predMap[p.ticker] = p; });
+
   const rows = holdings.map(ticker => {
     const tickerPairs = pairs.filter(p => p.ticker === ticker);
     const leading     = tickerPairs.filter(p => p.best_lag <= -1 && p.confidence >= 0.3);
-
-    // Active signals: word is hot today AND leads this ticker
     const active = leading.filter(p => (zscores[p.term] || 0) >= 1.5)
                           .sort((a,b) => b.confidence - a.confidence);
-
-    return { ticker, tickerPairs, leading, active };
-  }).sort((a,b) => b.active.length - a.active.length);
+    const pred = predMap[ticker] || null;
+    return { ticker, tickerPairs, leading, active, pred };
+  }).sort((a,b) => {
+    // BUY/WATCH 먼저, 그 다음 active signal 수
+    const order = {BUY:0,WATCH:1,HOLD:2,REDUCE:3,SELL:4};
+    const ao = order[a.pred?.action] ?? 5;
+    const bo = order[b.pred?.action] ?? 5;
+    if(ao !== bo) return ao - bo;
+    return b.active.length - a.active.length;
+  });
 
   box.innerHTML = rows.map(({ ticker, tickerPairs, leading, active }) => {
     const isSel = selTicker === ticker;
@@ -328,13 +368,24 @@ function renderPortfolioSignals(){
       </span>`;
     }).join('');
 
+    const pred = rows.find(r => r.ticker === ticker)?.pred;
+    const predBadge = pred
+      ? `<span class="pred-badge pred-${pred.action}">${pred.action}</span>
+         <span style="font-family:var(--font-mono);font-size:9px;color:var(--t3)">
+           ${(pred.confidence*100).toFixed(0)}%</span>`
+      : '';
+    const priceStr = pred?.price ? `$${pred.price.toFixed(2)}` : '';
+
     return `<div class="port-row${isSel?' sel':''}" data-ticker="${ticker}" onclick="selectTicker('${ticker}')">
       <div class="pr-top">
         <span class="pr-ticker">${ticker}</span>
-        <span class="pr-alert ${alertCls}">${alertTxt}</span>
-        <span class="pr-count">${leading.length} signals</span>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--t2)">${priceStr}</span>
+        <div class="pr-pred">${predBadge}</div>
       </div>
-      ${chips ? `<div class="pr-signals">${chips}</div>` : ''}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
+        <div>${chips}</div>
+        ${hasAlert ? `<span class="pr-alert alert-on">${active.length} NEWS</span>` : ''}
+      </div>
     </div>`;
   }).join('');
 }
@@ -375,6 +426,9 @@ function renderDetail(ticker){
   const nActive  = tickerPairs.filter(p => p.best_lag <= -1 && (zscores[p.term]||0) >= 1.5).length;
   document.getElementById('det-meta').textContent =
     `${tickerPairs.length} total pairs · ${nLeading} leading signals · ${nActive} active today`;
+
+  // Predict card 렌더
+  renderPredCard(ticker);
 
   const scroll = document.getElementById('detail-scroll');
 
@@ -459,6 +513,74 @@ function signalCard(p, zscores, bg){
       </div>
     </div>
   </div>`;
+}
+
+
+// ── Predict card render ────────────────────────────────────────────────────────
+function renderPredCard(ticker){
+  const predMap = {};
+  (P?.predictions || []).forEach(p => { predMap[p.ticker] = p; });
+  const pred = predMap[ticker];
+
+  const box = document.getElementById('pred-card-area');
+  if(!box) return;
+
+  if(!pred){
+    box.innerHTML = `<div style="padding:10px 12px;font-family:var(--font-mono);
+      font-size:9px;color:var(--t3)">No prediction data for ${ticker}</div>`;
+    return;
+  }
+
+  const ac = {BUY:'var(--green)',WATCH:'var(--cyan)',HOLD:'var(--t2)',
+              REDUCE:'var(--amber)',SELL:'var(--red)'}[pred.action]||'var(--t2)';
+  const bc = pred.confidence >= 0.7 ? '#00e676' : pred.confidence >= 0.5 ? '#00d4ff' :
+             pred.confidence >= 0.35 ? '#ffb300' : '#344a60';
+  const s  = pred.signals || {};
+  const sign = n => n >= 0 ? '+' : '';
+
+  const rsiColor = s.rsi14 < 30 ? 'var(--green)' : s.rsi14 > 70 ? 'var(--red)' : 'var(--t2)';
+
+  box.innerHTML = `
+    <div class="pred-card">
+      <div class="pred-card-top">
+        <span class="pred-ticker-big">${ticker}</span>
+        <span class="pred-badge pred-${pred.action}">${pred.action}</span>
+        <span class="pred-price">$${pred.price?.toFixed(2) ?? '—'}</span>
+        <span style="font-family:var(--font-mono);font-size:9px;color:var(--t3);margin-left:auto">
+          ${pred.horizon ?? '3-5d'} horizon</span>
+      </div>
+      <div class="pred-conf-wrap">
+        <div class="pred-conf-bar" style="width:${Math.round(pred.confidence*100)}%;background:${bc}"></div>
+      </div>
+      <div class="pred-stats">
+        <div class="pred-stat">
+          <div class="pred-stat-l">CONF</div>
+          <div class="pred-stat-v" style="color:${bc}">${pred.confidence.toFixed(2)}</div>
+        </div>
+        <div class="pred-stat">
+          <div class="pred-stat-l">RSI 14</div>
+          <div class="pred-stat-v" style="color:${rsiColor}">${s.rsi14?.toFixed(0) ?? '—'}</div>
+        </div>
+        <div class="pred-stat">
+          <div class="pred-stat-l">TARGET</div>
+          <div class="pred-stat-v" style="color:var(--green);font-size:11px">
+            ${pred.target ? '$'+pred.target.toFixed(1) : '—'}</div>
+        </div>
+        <div class="pred-stat">
+          <div class="pred-stat-l">STOP</div>
+          <div class="pred-stat-v" style="color:var(--red);font-size:11px">
+            ${pred.stop ? '$'+pred.stop.toFixed(1) : '—'}</div>
+        </div>
+      </div>
+      <div class="pred-reasons">
+        ${(pred.reasons||[]).map(r =>
+          `<div class="pred-reason"><span style="color:var(--green)">▲</span>${r}</div>`
+        ).join('')}
+        ${(pred.risks||[]).slice(0,2).map(r =>
+          `<div class="pred-reason pred-risk"><span>⚠</span>${r}</div>`
+        ).join('')}
+      </div>
+    </div>`;
 }
 
 // ── Entry ─────────────────────────────────────────────────────────────────────

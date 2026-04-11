@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · Ticker Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --font-mono:'IBM Plex Mono',monospace;--font-sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--font-sans);font-size:13px;
+     height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+
+header{height:42px;display:flex;align-items:center;gap:20px;padding:0 16px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0}
+.brand{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300}
+nav{display:flex;gap:2px}
+nav a{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:5px 11px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10px;color:var(--green)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#ts{font-family:var(--font-mono);font-size:10px;color:var(--t3)}
+
+main{flex:1;display:grid;grid-template-columns:260px 1fr;gap:1px;background:var(--b1);overflow:hidden;min-height:0}
+.col{background:var(--bg0);display:flex;flex-direction:column;overflow:hidden;min-height:0}
+
+.phdr{height:36px;display:flex;align-items:center;justify-content:space-between;
+      padding:0 12px;background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0}
+.plabel{font-family:var(--font-mono);font-size:10px;font-weight:600;
+        letter-spacing:.12em;text-transform:uppercase;color:var(--t2)}
+.pbadge{font-family:var(--font-mono);font-size:10px;color:var(--amber);
+        background:rgba(255,179,0,.1);padding:2px 7px;border:1px solid rgba(255,179,0,.25)}
+
+/* LEFT: ticker list */
+#ticker-list{flex:1;overflow-y:auto;padding:6px}
+.t-item{padding:9px 12px;margin-bottom:3px;cursor:pointer;background:var(--bg1);
+        border:1px solid var(--b1);border-left:3px solid transparent;transition:all .12s}
+.t-item:hover{background:var(--bg2)}
+.t-item.sel{border-left-color:var(--cyan);background:rgba(0,212,255,.05)}
+.t-row1{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.t-name{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--t1)}
+.t-action{font-family:var(--font-mono);font-size:9px;font-weight:600;padding:2px 6px;border:1px solid}
+.a-BUY{color:var(--green);border-color:rgba(0,230,118,.4);background:rgba(0,230,118,.08)}
+.a-WATCH{color:var(--cyan);border-color:rgba(0,212,255,.4);background:rgba(0,212,255,.08)}
+.a-HOLD{color:var(--t3);border-color:var(--b2)}
+.a-SELL{color:var(--red);border-color:rgba(255,68,68,.4);background:rgba(255,68,68,.08)}
+.a-REDUCE{color:var(--amber);border-color:rgba(255,179,0,.4);background:rgba(255,179,0,.08)}
+.t-words{display:flex;flex-wrap:wrap;gap:3px}
+.tw{font-family:var(--font-mono);font-size:8px;padding:1px 5px;border:1px solid}
+.tw-bull{color:var(--green);border-color:rgba(0,230,118,.3)}
+.tw-bear{color:var(--red);border-color:rgba(255,68,68,.3)}
+
+/* RIGHT: detail */
+#detail{flex:1;overflow-y:auto;padding:0}
+
+/* today signal banner */
+.sig-banner{padding:14px 16px;border-bottom:1px solid var(--b1)}
+.sb-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.sb-ticker{font-family:var(--font-mono);font-size:20px;font-weight:600;color:var(--cyan)}
+.sb-action{font-family:var(--font-mono);font-size:12px;font-weight:600;
+           padding:4px 14px;border:1px solid}
+.sb-score{font-family:var(--font-mono);font-size:11px;color:var(--t2)}
+.sb-summary{font-family:var(--font-mono);font-size:10px;color:var(--t3);margin-top:4px}
+
+.active-words{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.aw{padding:5px 10px;border:1px solid;font-family:var(--font-mono);font-size:10px}
+.aw-bull{color:var(--green);border-color:rgba(0,230,118,.4);background:rgba(0,230,118,.06)}
+.aw-bear{color:var(--red);border-color:rgba(255,68,68,.4);background:rgba(255,68,68,.06)}
+
+/* word table */
+.section{padding:14px 16px;border-bottom:1px solid var(--b1)}
+.sec-title{font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--t3);margin-bottom:10px;
+           padding-bottom:5px;border-bottom:1px solid var(--b1)}
+.word-table{width:100%;border-collapse:collapse}
+.word-table th{font-family:var(--font-mono);font-size:8px;letter-spacing:.1em;
+               text-transform:uppercase;color:var(--t3);padding:5px 8px;
+               border-bottom:1px solid var(--b1);text-align:left;white-space:nowrap}
+.word-table td{font-family:var(--font-mono);font-size:10px;padding:5px 8px;
+               border-bottom:1px solid rgba(255,255,255,.03)}
+.word-table tr:hover td{background:rgba(255,255,255,.025)}
+
+/* hit bar */
+.hit-bar-wrap{width:60px;height:5px;background:var(--b1);display:inline-block;vertical-align:middle;margin-right:4px}
+.hit-bar{height:100%}
+
+/* examples */
+.examples{margin-top:6px;display:flex;flex-direction:column;gap:2px}
+.ex-row{display:flex;gap:8px;padding:3px 6px;background:var(--bg0);
+        font-family:var(--font-mono);font-size:9px}
+.ex-date{color:var(--t3);width:75px;flex-shrink:0}
+.ex-z{color:var(--amber);width:45px;flex-shrink:0}
+.ex-ret{width:55px;flex-shrink:0}
+
+.data-note{font-family:var(--font-mono);font-size:9px;color:var(--amber);
+           padding:8px 12px;background:rgba(255,179,0,.06);border:1px solid rgba(255,179,0,.2);
+           margin:10px 16px}
+
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+       height:200px;gap:10px;color:var(--t3)}
+.spinner{width:16px;height:16px;border:2px solid var(--b2);border-top-color:var(--cyan);
+         border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── CHART AREA ── */
+#chart-section{padding:0;border-bottom:1px solid var(--b1);flex-shrink:0}
+#chart-controls{display:flex;align-items:center;gap:8px;padding:8px 12px;
+                border-bottom:1px solid var(--b1);background:var(--bg1)}
+.cc-word{font-family:var(--font-mono);font-size:9px;padding:3px 8px;
+         border:1px solid var(--b2);background:transparent;color:var(--t2);
+         cursor:pointer;transition:all .12s;text-transform:uppercase}
+.cc-word:hover,.cc-word.on{background:var(--bg2);color:var(--cyan);border-color:var(--cyan)}
+.cc-word.bull-on{color:var(--green);border-color:var(--green);background:rgba(0,230,118,.08)}
+.cc-word.bear-on{color:var(--red);border-color:var(--red);background:rgba(255,68,68,.08)}
+.chart-wrap{height:220px;position:relative;padding:8px 12px}
+.chart-wrap canvas{display:block}
+.chart-legend{display:flex;gap:12px;padding:4px 12px 8px;flex-wrap:wrap}
+.cl-item{display:flex;align-items:center;gap:4px;font-family:var(--font-mono);font-size:9px;color:var(--t3)}
+.cl-dot{width:8px;height:8px;border-radius:50%}
+.cl-line{width:16px;height:2px}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">NEWSTREND <em>// SIGNAL INTELLIGENCE</em></div>
+  <nav>
+    <a href="./index.html">TRENDS</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
+    <a href="./ticker_detail.html" class="on">TICKER</a>
+    <a href="./report.html">REPORT</a>
+    <a href="./portfolio.html">PORTFOLIO</a>
+    <a href="./macro.html">MACRO</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="live"><div class="dot"></div>LIVE</div>
+    <div id="ts">—</div>
+  </div>
+</header>
+
+<main>
+  <div class="col">
+    <div class="phdr">
+      <div class="plabel">TICKERS</div>
+      <div class="pbadge" id="t-badge">—</div>
+    </div>
+    <div id="ticker-list"><div class="empty"><div class="spinner"></div></div></div>
+  </div>
+  <div class="col">
+    <div class="phdr">
+      <div class="plabel" id="det-label">SELECT A TICKER</div>
+      <div class="pbadge" id="det-badge">—</div>
+    </div>
+    <!-- 차트 섹션 (고정) -->
+    <div id="chart-section" style="display:none">
+      <div id="chart-controls">
+        <span style="font-family:var(--font-mono);font-size:9px;color:var(--t3);margin-right:4px">OVERLAY:</span>
+        <div id="word-btns"></div>
+        <span style="margin-left:auto;font-family:var(--font-mono);font-size:9px;color:var(--t3)" id="chart-range-label"></span>
+      </div>
+      <div class="chart-wrap"><canvas id="price-chart"></canvas></div>
+      <div class="chart-legend" id="chart-legend"></div>
+    </div>
+    <!-- 스크롤 영역 -->
+    <div id="detail">
+      <div class="empty">
+        <div style="font-size:28px;opacity:.3">◈</div>
+        <div style="font-family:var(--font-mono);font-size:10px;text-align:center;line-height:1.7">
+          Select a ticker to see<br>which news words<br>predict its price moves
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function(){
+'use strict';
+
+const V = Date.now(), BASE = './data/';
+const TICKERS = [
+  'AAPL','MSFT','NVDA','GOOGL','META','AMZN','TSLA',
+  'AMD','INTC','AVGO','QCOM','ASML','MU','NXPI',
+  'JPM','BAC','GS','MS','BLK','XOM','CVX',
+  'SPY','QQQ','IWM','DIA','TLT','GLD','USO'
+];
+
+let cache = {};
+
+async function fetchJSON(p){
+  try{
+    const r = await fetch(BASE+p+'?v='+V,{cache:'no-store'});
+    if(!r.ok) return null;
+    return r.json();
+  }catch(e){ return null; }
+}
+
+function ac(a){ return {BUY:'var(--green)',WATCH:'var(--cyan)',HOLD:'var(--t2)',REDUCE:'var(--amber)',SELL:'var(--red)'}[a]||'var(--t2)'; }
+
+
+// ── Global state ──────────────────────────────────────────────────────────────
+let priceChart  = null;
+let pricesData  = null;    // prices.json 전체
+let currentTicker = null;
+let activeWords = new Set();
+
+async function loadPrices(){
+  if(pricesData) return pricesData;
+  pricesData = await fetchJSON('prices.json');
+  return pricesData;
+}
+
+// ── 차트 렌더 ─────────────────────────────────────────────────────────────────
+async function renderChart(ticker, analysis){
+  const pd = await loadPrices();
+  const section = document.getElementById('chart-section');
+  section.style.display = 'block';
+
+  const pdata = pd?.tickers?.[ticker];
+  if(!pdata){ section.style.display = 'none'; return; }
+
+  const allDates  = pdata.dates;
+  const allCloses = pdata.closes;
+
+  // 최근 180일
+  const N = Math.min(180, allDates.length);
+  const dates  = allDates.slice(-N);
+  const closes = allCloses.slice(-N);
+
+  document.getElementById('chart-range-label').textContent =
+    dates[0] + ' ~ ' + dates[dates.length-1];
+
+  // Word spike 버튼 생성
+  const bull = (analysis.analysis.bullish_words||[]).slice(0,6);
+  const bear = (analysis.analysis.bearish_words||[]).slice(0,4);
+  const btnWrap = document.getElementById('word-btns');
+  btnWrap.innerHTML = [
+    ...bull.map(w => `<button class="cc-word" data-word="${w.word}" data-type="bull"
+      onclick="toggleWord('${w.word}','bull',this)">${w.word}</button>`),
+    ...bear.map(w => `<button class="cc-word" data-word="${w.word}" data-type="bear"
+      onclick="toggleWord('${w.word}','bear',this)">${w.word}</button>`),
+  ].join('');
+
+  drawChart(ticker, dates, closes, analysis, {});
+}
+
+function toggleWord(word, type, btn){
+  if(activeWords.has(word)){
+    activeWords.delete(word);
+    btn.classList.remove('bull-on','bear-on','on');
+  } else {
+    activeWords.add(word);
+    btn.classList.add(type==='bull'?'bull-on':'bear-on');
+  }
+  if(currentTicker && cache[currentTicker]){
+    const d = cache[currentTicker];
+    const pd = pricesData?.tickers?.[currentTicker];
+    if(pd){
+      const N = Math.min(180, pd.dates.length);
+      drawChart(currentTicker, pd.dates.slice(-N), pd.closes.slice(-N), d, {});
+    }
+  }
+}
+
+function drawChart(ticker, dates, closes, analysis, opts){
+  const ctx = document.getElementById('price-chart');
+  if(!ctx) return;
+  if(priceChart){ priceChart.destroy(); priceChart = null; }
+
+  // 주가 데이터셋
+  const datasets = [{
+    label: ticker,
+    data:  closes,
+    borderColor: '#00d4ff',
+    backgroundColor: 'rgba(0,212,255,0.05)',
+    borderWidth: 1.5,
+    fill: true,
+    pointRadius: 0,
+    pointHoverRadius: 3,
+    tension: 0.2,
+    yAxisID: 'y',
+    order: 10,
+  }];
+
+  // word Z-score 시계열 로드 (trends.json에서)
+  const tData = window._trendsData;  // preloaded below
+  if(tData && activeWords.size > 0){
+    const tDates = tData.dates || [];
+    const tSeries = tData.series || {};
+    const zMap = {};
+    tDates.forEach((d,i)=>{ zMap[d]=i; });
+
+    // Z-score 계산 함수
+    function zsAt(counts, i, win=28){
+      if(i<3) return 0;
+      const hist = counts.slice(Math.max(0,i-win),i);
+      const mean = hist.reduce((a,b)=>a+b,0)/hist.length;
+      const std  = Math.sqrt(hist.reduce((a,b)=>a+(b-mean)**2,0)/hist.length);
+      return std>0.5 ? (counts[i]-mean)/std : 0;
+    }
+
+    for(const word of activeWords){
+      const wdata = [...(analysis.analysis.bullish_words||[]),
+                     ...(analysis.analysis.bearish_words||[])].find(w=>w.word===word);
+      const type  = (analysis.analysis.bullish_words||[]).find(w=>w.word===word)?'bull':'bear';
+      const color = type==='bull' ? '#00e676' : '#ff4444';
+      const counts = tSeries[word] || [];
+
+      const zData = dates.map(d => {
+        const ti = zMap[d];
+        if(ti===undefined||!counts.length) return null;
+        const z = zsAt(counts, ti);
+        return z > 0 ? z : null;
+      });
+
+      datasets.push({
+        label: word + ' z',
+        data:  zData,
+        borderColor: color+'88',
+        backgroundColor: color+'22',
+        borderWidth: 1,
+        borderDash: [3,3],
+        fill: true,
+        pointRadius: zData.map(v=>v&&v>=1.5?5:0),
+        pointBackgroundColor: color,
+        pointBorderColor: color,
+        tension: 0.3,
+        yAxisID: 'y2',
+        order: 1,
+      });
+    }
+  }
+
+  // 레전드
+  const legend = document.getElementById('chart-legend');
+  legend.innerHTML = `
+    <div class="cl-item"><div class="cl-line" style="background:#00d4ff"></div>${ticker} price</div>
+    ${[...(analysis.analysis.bullish_words||[]).slice(0,6),
+        ...(analysis.analysis.bearish_words||[]).slice(0,4)]
+      .filter(w=>activeWords.has(w.word))
+      .map(w=>{
+        const isBull=(analysis.analysis.bullish_words||[]).find(x=>x.word===w.word);
+        const c=isBull?'#00e676':'#ff4444';
+        return `<div class="cl-item"><div class="cl-dot" style="background:${c}"></div>${w.word} z-score</div>`;
+      }).join('')}
+  `;
+
+  priceChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: dates, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode:'index', intersect:false },
+      plugins: {
+        legend: { display:false },
+        tooltip: {
+          backgroundColor:'#0c1220', borderColor:'#1a2840', borderWidth:1,
+          titleColor:'#6a8aa8', bodyColor:'#c8d8e8',
+          titleFont:{family:'IBM Plex Mono',size:10},
+          bodyFont:{family:'IBM Plex Mono',size:10},
+          callbacks: {
+            label: i => {
+              if(i.datasetIndex===0) return ` $${Number(i.raw).toFixed(2)}`;
+              return ` ${i.dataset.label}: ${Number(i.raw).toFixed(2)}σ`;
+            }
+          }
+        }
+      },
+      scales: {
+        x:{
+          grid:{color:'#1a2840'},
+          ticks:{color:'#344a60',font:{family:'IBM Plex Mono',size:8},maxTicksLimit:8,maxRotation:0}
+        },
+        y:{
+          position:'left',
+          grid:{color:'#1a2840'},
+          ticks:{color:'#344a60',font:{family:'IBM Plex Mono',size:8},
+            callback: v=>'$'+v.toFixed(0)}
+        },
+        y2:{
+          position:'right',
+          display: activeWords.size>0,
+          grid:{drawOnChartArea:false},
+          ticks:{color:'#344a60',font:{family:'IBM Plex Mono',size:8},
+            callback: v=>v.toFixed(1)+'σ'},
+          min:0,
+        }
+      }
+    }
+  });
+}
+
+// trends.json 프리로드
+async function preloadTrends(){
+  window._trendsData = await fetchJSON('trends.json');
+}
+
+async function init(){
+  document.getElementById('ts').textContent =
+    'UPDATED '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  preloadTrends();
+  await renderTickerList();
+}
+
+async function renderTickerList(){
+  const list = document.getElementById('ticker-list');
+  list.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+
+  // 모든 ticker_analysis JSON 병렬 로드
+  const results = await Promise.all(
+    TICKERS.map(t => fetchJSON(`ticker_analysis/${t}.json`).then(d => ({ticker:t, data:d})))
+  );
+
+  results.forEach(({ticker, data}) => { if(data) cache[ticker] = data; });
+  document.getElementById('t-badge').textContent = Object.keys(cache).length + ' ANALYZED';
+
+  list.innerHTML = TICKERS.map(t => {
+    const d = cache[t];
+    if(!d || d.error){
+      return `<div class="t-item" data-t="${t}" onclick="loadTicker('${t}')">
+        <div class="t-row1">
+          <span class="t-name">${t}</span>
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--t3)">NO DATA</span>
+        </div>
+      </div>`;
+    }
+    const sig = d.today_signal;
+    const b   = d.analysis.bullish_words.slice(0,3);
+    const dr  = d.analysis.bearish_words.slice(0,2);
+    const ac_color = ac(sig.action);
+
+    const words = [
+      ...b.map(w => `<span class="tw tw-bull">▲${w.word}</span>`),
+      ...dr.map(w => `<span class="tw tw-bear">▼${w.word}</span>`),
+    ].join('');
+
+    return `<div class="t-item" data-t="${t}" onclick="loadTicker('${t}')">
+      <div class="t-row1">
+        <span class="t-name">${t}</span>
+        <span class="t-action a-${sig.action}">${sig.action}</span>
+        <span style="font-family:var(--font-mono);font-size:9px;color:${ac_color};margin-left:auto">
+          ${sig.net_score > 0 ? '+':''}${sig.net_score.toFixed(1)}</span>
+      </div>
+      ${words ? `<div class="t-words">${words}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function loadTicker(ticker){
+  document.querySelectorAll('.t-item').forEach(el =>
+    el.classList.toggle('sel', el.dataset.t === ticker));
+  document.getElementById('det-label').textContent = ticker + ' · NEWS→PRICE ANALYSIS';
+  currentTicker = ticker;
+  activeWords.clear();
+  document.querySelectorAll('.cc-word').forEach(b=>b.classList.remove('bull-on','bear-on','on'));
+
+  let d = cache[ticker];
+  if(!d){
+    const detail = document.getElementById('detail');
+    detail.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+    d = await fetchJSON(`ticker_analysis/${ticker}.json`);
+    if(!d){ detail.innerHTML = '<div class="empty"><div style="font-size:10px;font-family:var(--font-mono)">No analysis data yet</div></div>'; return; }
+    cache[ticker] = d;
+  }
+
+  await renderChart(ticker, d);
+  renderDetail(ticker, d);
+}
+
+function renderDetail(ticker, d){
+  const detail = document.getElementById('detail');
+  const sig  = d.today_signal;
+  const bull = d.analysis.bullish_words;
+  const bear = d.analysis.bearish_words;
+  const ac_color = ac(sig.action);
+
+  document.getElementById('det-badge').textContent =
+    `${d.common_days}d overlap · ${d.price_days}d prices`;
+
+  const lowData = d.common_days < 30;
+
+  // Active words today
+  const activeBull = sig.active_bullish || [];
+  const activeBear = sig.active_bearish || [];
+
+  const activeHtml = [...activeBull.map(w =>
+    `<div class="aw aw-bull">▲ ${w.word} z=${w.z.toFixed(1)} → avg ${w.expected_ret > 0 ? '+':''}${w.expected_ret.toFixed(2)}%</div>`
+  ), ...activeBear.map(w =>
+    `<div class="aw aw-bear">▼ ${w.word} z=${w.z.toFixed(1)} → avg ${w.expected_ret > 0 ? '+':''}${w.expected_ret.toFixed(2)}%</div>`
+  )].join('');
+
+  detail.innerHTML = `
+    ${lowData ? `<div class="data-note">⚠ Only ${d.common_days} days of overlapping data — patterns will strengthen past 90 days</div>` : ''}
+
+    <!-- Today signal -->
+    <div class="sig-banner">
+      <div class="sb-top">
+        <span class="sb-ticker">${ticker}</span>
+        <span class="t-action a-${sig.action}" style="font-size:12px;padding:4px 14px">${sig.action}</span>
+        <span class="sb-score">score ${sig.net_score > 0?'+':''}${sig.net_score.toFixed(2)}</span>
+      </div>
+      <div class="sb-summary">${sig.summary}</div>
+      ${activeHtml ? `<div class="active-words">${activeHtml}</div>` : ''}
+    </div>
+
+    <!-- Bullish words -->
+    <div class="section">
+      <div class="sec-title">▲ BULLISH WORDS — when these spike, ${ticker} tends to go UP</div>
+      ${bull.length ? wordTable(bull, 'bull') :
+        `<div style="font-family:var(--font-mono);font-size:10px;color:var(--t3)">No bullish patterns found yet</div>`}
+    </div>
+
+    <!-- Bearish words -->
+    <div class="section">
+      <div class="sec-title">▼ BEARISH WORDS — when these spike, ${ticker} tends to go DOWN</div>
+      ${bear.length ? wordTable(bear, 'bear') :
+        `<div style="font-family:var(--font-mono);font-size:10px;color:var(--t3)">No bearish patterns found yet</div>`}
+    </div>
+
+    <!-- Stats -->
+    <div class="section">
+      <div class="sec-title">DATA SUMMARY</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px">
+        ${statCell('PRICE DAYS', d.price_days)}
+        ${statCell('NEWS DAYS', d.news_days)}
+        ${statCell('OVERLAP', d.common_days+'d')}
+        ${statCell('UP DAYS', d.up_days)}
+        ${statCell('DOWN DAYS', d.down_days)}
+        ${statCell('BULLISH SIG', bull.length)}
+      </div>
+    </div>`;
+}
+
+function wordTable(words, type){
+  const color = type === 'bull' ? 'var(--green)' : 'var(--red)';
+  const rows = words.slice(0, 15).map(w => {
+    const lagStr   = w.lead_days === 0 ? '당일' : `전 ${Math.abs(w.lead_days)}일`;
+    const hitPct   = (w.hit_rate * 100).toFixed(0);
+    const hitColor = type === 'bull'
+      ? (w.hit_rate >= 0.7 ? 'var(--green)' : w.hit_rate >= 0.55 ? 'var(--amber)' : 'var(--t2)')
+      : (w.hit_rate <= 0.3 ? 'var(--green)' : w.hit_rate <= 0.45 ? 'var(--amber)' : 'var(--t2)');
+    const retColor = w.avg_ret_1d > 0 ? 'var(--green)' : 'var(--red)';
+
+    // 과거 사례
+    const exHtml = (w.examples||[]).slice(0,3).map(e =>
+      `<div class="ex-row">
+        <span class="ex-date">${e.news_date||e.price_date}</span>
+        <span class="ex-z">z=${e.word_z}</span>
+        <span class="ex-ret" style="color:${e.ret_1d>0?'var(--green)':'var(--red)'}">${e.ret_1d>0?'+':''}${e.ret_1d.toFixed(2)}%</span>
+       </div>`
+    ).join('');
+
+    return `<tr>
+      <td style="color:${color};font-weight:600">${w.word}</td>
+      <td style="color:var(--t3)">${lagStr}</td>
+      <td>
+        <div class="hit-bar-wrap"><div class="hit-bar" style="width:${hitPct}%;background:${hitColor}"></div></div>
+        <span style="color:${hitColor}">${hitPct}%</span>
+      </td>
+      <td style="color:${retColor}">${w.avg_ret_1d>0?'+':''}${w.avg_ret_1d.toFixed(2)}%</td>
+      <td style="color:var(--t2)">n=${w.n_events}</td>
+      <td style="color:var(--t2)">${w.corr>0?'+':''}${w.corr.toFixed(3)}</td>
+    </tr>
+    <tr><td colspan="6" style="padding:0 8px 8px;background:var(--bg0)">${exHtml}</td></tr>`;
+  }).join('');
+
+  return `<table class="word-table">
+    <thead><tr>
+      <th>WORD</th><th>TIMING</th><th>HIT RATE</th>
+      <th>AVG RET 1D</th><th>EVENTS</th><th>CORR</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function statCell(label, val){
+  return `<div style="background:var(--bg1);padding:8px 10px;text-align:center">
+    <div style="font-family:var(--font-mono);font-size:8px;color:var(--t3);
+                letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px">${label}</div>
+    <div style="font-family:var(--font-mono);font-size:14px;font-weight:600">${val}</div>
+  </div>`;
+}
+
+init();
+})();
+</script>
+</body>
+</html>

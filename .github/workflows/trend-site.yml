@@ -24,7 +24,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -97,20 +97,6 @@ jobs:
             --min-len 4 \
             --extra-stop config/extra_noise.txt
 
-      - name: Build trends.json
-        run: |
-          python scripts/make_trends_json.py \
-            --tokens-dir data/warehouse/daily \
-            --out        site/data/trends.json \
-            --last-days  180 \
-            --topk       300 \
-            --min-len    4
-          python3 -c "
-          import json
-          d=json.load(open('site/data/trends.json'))
-          print('trends.json: dates='+str(len(d['dates']))+' last='+d['dates'][-1])
-          " || true
-
       - name: Build static pages
         run: |
           python scripts/build_static_ui.py --run run --out site
@@ -122,7 +108,6 @@ jobs:
         run: cp site/index_custom.html site/index.html
 
       - name: Join prices
-        continue-on-error: true
         run: |
           python - <<'PY'
           import pandas as pd, os
@@ -142,7 +127,6 @@ jobs:
             --min-days 1          
 
       - name: Export prices.json
-        continue-on-error: true
         run: |
           python - <<'PY'
           import pandas as pd, json, pathlib, sys
@@ -181,36 +165,18 @@ jobs:
             --min-corr 0.25 \
             --min-events 3 || true
 
-      - name: Run technical analysis
-        continue-on-error: true
-        run: |
-          python scripts/analyze_prices.py \
-            --prices      site/data/prices.json \
-            --trends      site/data/trends.json \
-            --out-json    site/data/technical_analysis.json \
-            --out-summary site/data/ta_summary.json \
-            --out-csv-dir run
-          gzip -f -k site/data/technical_analysis.json || true
 
-      - name: Build signal correlations
+      - name: Analyze ticker news-price patterns
         continue-on-error: true
         run: |
-          python scripts/build_signal_corr.py \
+          python scripts/analyze_ticker.py \
             --trends     site/data/trends.json \
             --prices     site/data/prices.json \
-            --out        site/data/signal_corr.json \
-            --top-terms  200 \
-            --min-corr   0.25 \
-            --min-events 3
-
-      - name: Generate predictions
-        continue-on-error: true
-        run: |
-          python scripts/predict.py \
-            --ta      site/data/technical_analysis.json \
-            --signals site/data/signal_corr.json \
-            --trends  site/data/trends.json \
-            --out     site/data/predictions.json
+            --out-dir    site/data/ticker_analysis \
+            --tickers    AAPL,MSFT,NVDA,GOOGL,META,AMZN,TSLA,AMD,INTC,AVGO,QCOM,ASML,MU,NXPI,JPM,BAC,GS,MS,BLK,XOM,CVX,SPY,QQQ,IWM,DIA,TLT,GLD,USO \
+            --min-events 3 \
+            --z-thresh   1.5 \
+            --lag-range  2
 
       - name: Build tickers.json (sectors)
         run: |
