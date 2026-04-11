@@ -43,6 +43,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
           pip install yfinance pandas numpy orjson pyyaml feedparser || true
 
+      # ── Warehouse 다운로드 ────────────────────────────────────────────────────
       - name: Get latest warehouse run id
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -76,6 +77,7 @@ jobs:
           test -d data/warehouse/daily
           ls -lt data/warehouse/daily | head -n 8 || true
 
+      # ── 토큰 처리 ─────────────────────────────────────────────────────────────
       - name: Convert csv/jsonl to *_tokens.jsonl
         run: |
           set -euo pipefail
@@ -97,14 +99,22 @@ jobs:
             --min-len 4 \
             --extra-stop config/extra_noise.txt
 
+      # ── trends.json 빌드 ──────────────────────────────────────────────────────
       - name: Build trends.json
-        continue-on-error: true
         run: |
           python scripts/make_trends_json.py \
             --tokens-dir data/warehouse/daily \
             --out        site/data/trends.json \
-            --last-days  180 --topk 300 --min-len 4 || true
+            --last-days  180 \
+            --topk       300 \
+            --min-len    4 || true
+          python3 -c "
+          import json
+          d=json.load(open('site/data/trends.json'))
+          print('trends: dates='+str(len(d['dates']))+' terms='+str(len(d['terms']))+' last='+d['dates'][-1])
+          " || true
 
+      # ── 정적 페이지 빌드 ──────────────────────────────────────────────────────
       - name: Build static pages
         run: |
           python scripts/build_static_ui.py --run run --out site
@@ -115,77 +125,19 @@ jobs:
       - name: Overwrite index with custom dashboard
         run: cp site/index_custom.html site/index.html
 
-      - name: Join prices
-        continue-on-error: true
-        run: |
-          python - <<'PY'
-          import pandas as pd, os
-          df = pd.read_csv("run/tokens_by_day.cleaned.csv")
-          s = pd.to_datetime(df['date']).min().date()
-          e = pd.to_datetime(df['date']).max().date()
-          with open(os.environ["GITHUB_ENV"], "a") as fh:
-              fh.write(f"START={s}\n")
-              fh.write(f"END={e}\n")
-          PY
-          python scripts/join_prices.py \
-            --terms run/tokens_by_day.cleaned.csv \
-            --map   config/ticker_aliases.json \
-            --start "$START" \
-            --end   "$END" \
-            --out   run/prices.csv \
-            --min-days 1          
-
-      - name: Export prices.json
-        continue-on-error: true
-        run: |
-          python - <<'PY'
-          import pandas as pd, json, pathlib, sys
-          base = pathlib.Path("run")/"prices.csv"
-          td = pd.read_csv(base/"ticker_daily.csv")
-          date_col, tick_col = "date", "ticker"
-          cand = ["close","Close","Adj Close","adj_close","price","Price"]
-          val_col = next((c for c in cand if c in td.columns), None)
-          if val_col is None:
-              raise SystemExit("no price column found")
-          td = td[[date_col, tick_col, val_col]].rename(columns={val_col: "close"})
-          dates   = sorted(td[date_col].unique().tolist())
-          tickers = sorted(td[tick_col].unique().tolist())
-          pv = (td.pivot(index=date_col, columns=tick_col, values="close")
-                  .reindex(dates)
-                  .reindex(columns=tickers))
-          close = {t: [None if pd.isna(v) else float(v) for v in pv[t].tolist()] for t in tickers}
-          out = {"dates": dates, "tickers": tickers, "close": close}
-          outp = pathlib.Path("site/data"); outp.mkdir(parents=True, exist_ok=True)
-          (outp/"prices.json").write_text(json.dumps(out, indent=2, ensure_ascii=False))
-          PY
-
-      - name: Fetch latest prices
-        run: |
-          python scripts/fetch_prices.py \
-            --days 180 \
-            --out site/data/prices.json
-
-      - name: Build signal correlations
-        run: |
-          python scripts/build_signal_corr.py \
-            --trends site/data/trends.json \
-            --prices site/data/prices.json \
-            --out site/data/signal_corr.json \
-            --top-terms 200 \
-            --min-corr 0.25 \
-            --min-events 3 || true
-
-      - name: Restore price CSVs
-        continue-on-error: true
+      # ── 가격 데이터 ───────────────────────────────────────────────────────────
+      - name: Restore price CSVs from data-cache
         run: |
           mkdir -p data/prices
           git fetch origin data-cache 2>/dev/null || true
           if git show-ref --verify refs/remotes/origin/data-cache 2>/dev/null; then
             git checkout origin/data-cache -- data/prices/ 2>/dev/null || true
+            echo "Restored: $(ls data/prices/*.csv 2>/dev/null | wc -l) CSV files"
+          else
+            echo "data-cache not found — will download fresh"
           fi
 
       - name: Fetch prices (incremental)
-        continue-on-error: true
         run: |
           python scripts/fetch_prices_v2.py \
             --price-dir data/prices \
@@ -193,28 +145,47 @@ jobs:
             --out-meta  site/data/prices_meta.json \
             --last-days 365 || true
 
+      - name: Save price CSVs to data-cache
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          CURRENT=$(git rev-parse --abbrev-ref HEAD)
+          git stash -u 2>/dev/null || true
+          if git show-ref --verify refs/remotes/origin/data-cache 2>/dev/null; then
+            git checkout data-cache
+          else
+            git checkout --orphan data-cache && git rm -rf . 2>/dev/null || true
+          fi
+          mkdir -p data/prices
+          git stash pop 2>/dev/null || true
+          git add data/prices/ 2>/dev/null || true
+          if ! git diff --cached --quiet 2>/dev/null; then
+            git commit -m "prices: $(date -u +%Y-%m-%d)" && git push origin data-cache || true
+          fi
+          git checkout "$CURRENT" 2>/dev/null || git checkout main
+
+      # ── TA + 신호 분석 ────────────────────────────────────────────────────────
       - name: Run technical analysis
-        continue-on-error: true
         run: |
           python scripts/analyze_prices.py \
-            --prices   site/data/prices.json \
-            --trends   site/data/trends.json \
-            --out-json site/data/technical_analysis.json \
+            --prices      site/data/prices.json \
+            --trends      site/data/trends.json \
+            --out-json    site/data/technical_analysis.json \
             --out-summary site/data/ta_summary.json \
             --out-csv-dir run || true
           gzip -f -k site/data/technical_analysis.json || true
 
       - name: Build signal correlations
-        continue-on-error: true
         run: |
           python scripts/build_signal_corr.py \
-            --trends site/data/trends.json \
-            --prices site/data/prices.json \
-            --out    site/data/signal_corr.json \
-            --top-terms 200 --min-corr 0.25 --min-events 3 || true
+            --trends     site/data/trends.json \
+            --prices     site/data/prices.json \
+            --out        site/data/signal_corr.json \
+            --top-terms  200 \
+            --min-corr   0.25 \
+            --min-events 3 || true
 
       - name: Generate predictions
-        continue-on-error: true
         run: |
           python scripts/predict.py \
             --ta      site/data/technical_analysis.json \
@@ -223,15 +194,17 @@ jobs:
             --out     site/data/predictions.json || true
 
       - name: Analyze ticker patterns
-        continue-on-error: true
         run: |
           python scripts/analyze_ticker.py \
-            --trends site/data/trends.json \
-            --prices site/data/prices.json \
-            --out-dir site/data/ticker_analysis \
-            --tickers AAPL,MSFT,NVDA,GOOGL,META,AMZN,TSLA,AMD,INTC,AVGO,QCOM,ASML,MU,NXPI,JPM,BAC,GS,MS,BLK,XOM,CVX,SPY,QQQ,IWM,DIA,TLT,GLD,USO \
-            --min-events 3 --z-thresh 1.0 --lag-range 2 || true
+            --trends     site/data/trends.json \
+            --prices     site/data/prices.json \
+            --out-dir    site/data/ticker_analysis \
+            --tickers    AAPL,MSFT,NVDA,GOOGL,META,AMZN,TSLA,AMD,INTC,AVGO,QCOM,ASML,MU,NXPI,JPM,BAC,GS,MS,BLK,XOM,CVX,SPY,QQQ,IWM,DIA,TLT,GLD,USO \
+            --min-events 3 \
+            --z-thresh   1.0 \
+            --lag-range  2 || true
 
+      # ── 기타 ──────────────────────────────────────────────────────────────────
       - name: Build tickers.json (sectors)
         run: |
           python scripts/make_ticker_sectors.py --map config/ticker_aliases.json --out site/data/tickers.json || true
