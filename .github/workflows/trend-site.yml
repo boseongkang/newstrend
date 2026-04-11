@@ -108,6 +108,7 @@ jobs:
         run: cp site/index_custom.html site/index.html
 
       - name: Join prices
+        continue-on-error: true
         run: |
           python - <<'PY'
           import pandas as pd, os
@@ -127,6 +128,7 @@ jobs:
             --min-days 1          
 
       - name: Export prices.json
+        continue-on-error: true
         run: |
           python - <<'PY'
           import pandas as pd, json, pathlib, sys
