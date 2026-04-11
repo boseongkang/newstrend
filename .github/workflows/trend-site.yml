@@ -149,20 +149,28 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          CURRENT=$(git rev-parse --abbrev-ref HEAD)
-          git stash -u 2>/dev/null || true
-          if git show-ref --verify refs/remotes/origin/data-cache 2>/dev/null; then
-            git checkout data-cache
+
+          # worktree 방식 — 브랜치 전환/stash 없이 data-cache에 직접 push
+          mkdir -p /tmp/cache-worktree
+
+          if git ls-remote --heads origin data-cache | grep -q data-cache; then
+            git worktree add /tmp/cache-worktree data-cache 2>/dev/null ||             git worktree add /tmp/cache-worktree -b data-cache origin/data-cache
           else
-            git checkout --orphan data-cache && git rm -rf . 2>/dev/null || true
+            git worktree add --orphan /tmp/cache-worktree data-cache 2>/dev/null ||             git worktree add /tmp/cache-worktree -b data-cache
           fi
-          mkdir -p data/prices
-          git stash pop 2>/dev/null || true
-          git add data/prices/ 2>/dev/null || true
-          if ! git diff --cached --quiet 2>/dev/null; then
-            git commit -m "prices: $(date -u +%Y-%m-%d)" && git push origin data-cache || true
+
+          mkdir -p /tmp/cache-worktree/data/prices
+          cp -r data/prices/. /tmp/cache-worktree/data/prices/ 2>/dev/null || true
+
+          cd /tmp/cache-worktree
+          git add data/prices/
+          if ! git diff --cached --quiet; then
+            git commit -m "prices: $(date -u +%Y-%m-%d)"
+            git push origin data-cache
+            echo "Pushed price CSVs to data-cache"
+          else
+            echo "No price changes to push"
           fi
-          git checkout "$CURRENT" 2>/dev/null || git checkout main
 
       # ── TA + 신호 분석 ────────────────────────────────────────────────────────
       - name: Run technical analysis
