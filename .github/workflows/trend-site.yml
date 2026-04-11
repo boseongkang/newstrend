@@ -163,6 +163,8 @@ jobs:
           cp -r data/prices/. /tmp/cache-worktree/data/prices/ 2>/dev/null || true
 
           cd /tmp/cache-worktree
+          # .gitignore가 data/prices를 막으므로 worktree에서 제거 후 add
+          rm -f .gitignore
           git add data/prices/
           if ! git diff --cached --quiet; then
             git commit -m "prices: $(date -u +%Y-%m-%d)"
