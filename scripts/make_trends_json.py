@@ -246,16 +246,25 @@ def main():
     if args.last_days > 0 and len(dates) > args.last_days:
         dates = dates[-args.last_days:]
 
+    # file_map: date → 실제 파일 (토큰 우선, 없으면 raw)
+    file_map = {}
+    for f in files:
+        d = get_date_from_filename(f)
+        # _tokens 파일 우선
+        if "_tokens" in f.name:
+            file_map[d] = f
+        elif d not in file_map:
+            file_map[d] = f
+
     by_date = {}
     for d in dates:
-        csv_path = td / f"{d}_tokens.csv"
-        jsonl_path = td / f"{d}_tokens.jsonl"
-        if csv_path.exists():
-            by_date[d] = read_tokens_csv(csv_path, args.min_len)
-        elif jsonl_path.exists():
-            by_date[d] = read_tokens_jsonl(jsonl_path, args.min_len)
-        else:
+        f = file_map.get(d)
+        if f is None:
             by_date[d] = {}
+        elif f.suffix == ".csv":
+            by_date[d] = read_tokens_csv(f, args.min_len)
+        else:
+            by_date[d] = read_tokens_jsonl(f, args.min_len)
 
     # Total frequency across all dates (for topk selection)
     totals: dict[str, int] = {}
