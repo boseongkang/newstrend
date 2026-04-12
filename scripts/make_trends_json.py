@@ -82,15 +82,25 @@ STOP_WORDS = {
     "google","amazon","apple","microsoft","tesla","nvidia","meta",
     "leaders","leader","access","network","series","rally","solar",
     "sensex","attack","connection","rising","prime","check","please",
-    "skip","foreign","donald","trump","military","iran","korea",
+    "skip","foreign","military","korea",
     "started","begins","begin","launch","launched","launches",
     "takes","taken","takes","puts","gets","gives","makes","says",
     "reported","reporting","according","noted","added","said",
+    # ── Round-7: confirmed noise ───────────────────────────────────────────────
+    "prime","globe","follow","follows","followed","global",
+    "february","april","june","july","august","september","october","november",
+    "that","from","what","when","where","which","while","then","than",
+    "view","views","read","open","take","make","want","need","help",
+    "high","wide","deep","fast","slow","hard","easy","true","full",
+    "device","department","store","stores","comes","preferred","using","including",
+
 }
 
 def is_meaningful(tok: str, min_len: int) -> bool:
     t = tok.strip().lower()
     if len(t) < min_len:
+        return False
+    if " " in t:            # bigram ("source by", "of the") 제거
         return False
     if t in STOP_WORDS:
         return False

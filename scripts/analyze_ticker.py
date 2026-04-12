@@ -125,7 +125,13 @@ def analyze(ticker: str, T: dict, P_data: dict,
     # ── 단어별 분석 ───────────────────────────────────────────────────────────
     # 총 빈도 기준 상위 단어
     totals = {t: sum(v) for t, v in t_series.items()}
-    top_terms = sorted(totals, key=totals.get, reverse=True)[:300]
+    # bigram/noise 필터
+    def _clean(t):
+        if " " in t: return False          # bigram
+        if len(t) < 4: return False        # 짧은 단어
+        return True
+    top_terms = [t for t in sorted(totals, key=totals.get, reverse=True)
+                 if _clean(t)][:300]
 
     bullish_words = []
     bearish_words = []
@@ -207,10 +213,10 @@ def analyze(ticker: str, T: dict, P_data: dict,
             }
 
             # 분류: 절대 상관 0.25+, 방향성 있는 것만
-            if abs(corr) >= 0.25 and len(events) >= min_events:
-                if corr > 0 and hit_rate >= 0.55:
+            if abs(corr) >= 0.15 and len(events) >= min_events:
+                if corr > 0 and hit_rate >= 0.52:
                     bullish_words.append(word_data)
-                elif corr < 0 and hit_rate <= 0.45:
+                elif corr < 0 and hit_rate <= 0.48:
                     bearish_words.append(word_data)
                 else:
                     neutral_words.append(word_data)
@@ -290,8 +296,8 @@ def main():
     ap.add_argument("--out-dir",     default="site/data/ticker_analysis")
     ap.add_argument("--tickers",     default="MU",
                     help="쉼표 구분 티커 (기본: MU)")
-    ap.add_argument("--min-events",  type=int,   default=5)
-    ap.add_argument("--z-thresh",    type=float, default=1.5)
+    ap.add_argument("--min-events",  type=int,   default=3)
+    ap.add_argument("--z-thresh",    type=float, default=0.8)
     ap.add_argument("--lag-range",   type=int,   default=2,
                     help="0=당일, 1=전날, 2=이틀전 분석")
     args = ap.parse_args()

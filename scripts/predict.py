@@ -55,6 +55,20 @@ def load_ta(path: str) -> dict:
         return {}
 
 
+
+def load_ticker_analysis(analysis_dir: str, tickers: list) -> dict:
+    """ticker_analysis/<TICKER>.json 로드 → {ticker: analysis_data}"""
+    result = {}
+    base = Path(analysis_dir)
+    for ticker in tickers:
+        p = base / f"{ticker}.json"
+        if p.exists():
+            try:
+                result[ticker] = json.loads(p.read_text())
+            except Exception:
+                pass
+    return result
+
 def load_signals(path: str) -> list:
     try:
         d = json.loads(Path(path).read_text())
@@ -440,11 +454,16 @@ def main():
     ap.add_argument("--trends",  default="site/data/trends.json")
     ap.add_argument("--out",     default="site/data/predictions.json")
     ap.add_argument("--tickers", default=None)
+    ap.add_argument("--analysis-dir", default="site/data/ticker_analysis",
+                    help="ticker_analysis JSON 디렉토리")
     ap.add_argument("--min-conf", type=float, default=0.0)
     args = ap.parse_args()
 
-    ta_data = load_ta(args.ta)
-    pairs   = load_signals(args.signals)
+    ta_data  = load_ta(args.ta)
+    pairs    = load_signals(args.signals)
+    tickers_list = [t.strip().upper() for t in args.tickers.split(",")]\
+                   if args.tickers else list(ta_data.keys())
+    ta_news  = load_ticker_analysis(args.analysis_dir, tickers_list)
 
     # 뉴스 날짜 수
     try:
@@ -475,8 +494,7 @@ def main():
     market_regime = analyze_market_regime(ta_data)
     print(f"Market regime: {market_regime['regime']} | Fear/Greed: {market_regime['fear_greed']} ({market_regime['fear_greed_label']})")
 
-    tickers = [t.strip().upper() for t in args.tickers.split(",")]\
-              if args.tickers else list(ta_data.keys())
+    tickers = tickers_list
 
     predictions = []
 
@@ -518,11 +536,40 @@ def main():
         news["news_days"] = news_days
 
         # ── 액션 결정 ─────────────────────────────────────────────────────────
+        # ticker_analysis에서 오늘 뉴스 신호 가져오기
+        ticker_news_sig = ta_news.get(ticker, {}).get("today_signal", {})
+        news_action    = ticker_news_sig.get("action", "HOLD")
+        news_net_score = ticker_news_sig.get("net_score", 0)
+        active_bull    = ticker_news_sig.get("active_bullish", [])
+        active_bear    = ticker_news_sig.get("active_bearish", [])
+
+        # news 컨텍스트에 ticker_analysis 결과 병합
+        if active_bull or active_bear:
+            news["available"]     = True
+            news["active_terms"]  = [w["word"] for w in active_bull[:3]]
+            news["best_conf"]     = max((w.get("expected_ret",0) for w in active_bull), default=0) / 5
+            news["best_ret_1d"]   = active_bull[0]["expected_ret"] if active_bull else 0
+            news["best_lag"]      = -1
+            news["best_signal"]   = (
+                f"{active_bull[0]['word']}→{ticker} "
+                f"hit={active_bull[0].get('hit_rate',0):.0%} "
+                f"avg={active_bull[0]['expected_ret']:+.2f}%"
+                if active_bull else ""
+            )
+
         action, conf, reasons, risks = decide_action(
             rsi_state, macd_bias, bb_state, trend, vol_state,
             ta_sigs, news, price_days,
             market_regime=market_regime.get("regime", "NEUTRAL")
         )
+
+        # 뉴스 신호가 강하면 action 보강
+        if news_net_score >= 3 and action in ("HOLD", "WATCH"):
+            action = "WATCH" if action == "HOLD" else "BUY"
+            reasons.append(f"News signal boost: {ticker_news_sig.get('summary','')}")
+        elif news_net_score <= -3 and action in ("HOLD", "WATCH"):
+            action = "REDUCE"
+            risks.append(f"News signal warning: {ticker_news_sig.get('summary','')}")
 
         if conf < args.min_conf:
             continue
