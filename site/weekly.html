@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · Weekly Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
+
+header{height:42px;display:flex;align-items:center;gap:20px;padding:0 16px;
+  background:var(--bg1);border-bottom:1px solid var(--b1)}
+.brand{font-family:var(--fm);font-size:13px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300}
+nav{display:flex;gap:2px}
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:5px 11px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10px;color:var(--green)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+main{max-width:1200px;margin:20px auto;padding:0 20px}
+.section{background:var(--bg1);border:1px solid var(--b1);padding:16px 20px;margin-bottom:16px}
+.stitle{font-family:var(--fm);font-size:10px;font-weight:600;letter-spacing:.14em;
+        text-transform:uppercase;color:var(--t3);margin-bottom:12px;
+        padding-bottom:6px;border-bottom:1px solid var(--b1)}
+
+/* KPI 카드 */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1)}
+.kpi{background:var(--bg2);padding:14px;text-align:center}
+.kpi-label{font-family:var(--fm);font-size:9px;letter-spacing:.12em;
+           text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.kpi-val{font-family:var(--fm);font-size:24px;font-weight:600;color:var(--cyan)}
+.kpi-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:3px}
+
+/* Action 테이블 */
+.action-table{width:100%;border-collapse:collapse}
+.action-table th{font-family:var(--fm);font-size:8px;letter-spacing:.1em;
+                 text-transform:uppercase;color:var(--t3);padding:8px 12px;
+                 border-bottom:1px solid var(--b1);text-align:right}
+.action-table th:first-child{text-align:left}
+.action-table td{font-family:var(--fm);font-size:11px;padding:8px 12px;
+                 border-bottom:1px solid rgba(255,255,255,.03);text-align:right}
+.action-table td:first-child{text-align:left}
+.action-table tr:hover{background:var(--bg2)}
+
+.tag-BUY{color:var(--green)}
+.tag-WATCH{color:var(--cyan)}
+.tag-HOLD{color:var(--t2)}
+.tag-REDUCE{color:var(--amber)}
+.tag-SELL{color:var(--red)}
+
+/* Top signals */
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.sig-list{display:flex;flex-direction:column;gap:6px}
+.sig-row{display:flex;gap:10px;padding:8px 12px;background:var(--bg2);
+         font-family:var(--fm);font-size:10px;align-items:center}
+.sig-date{color:var(--t3);width:75px;flex-shrink:0}
+.sig-ticker{color:var(--cyan);font-weight:600;width:55px;flex-shrink:0}
+.sig-action{width:55px;flex-shrink:0}
+.sig-ret{margin-left:auto;font-weight:600}
+
+/* Word signals */
+.word-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.word-card{background:var(--bg2);padding:10px 12px;border:1px solid var(--b1);
+           border-left:3px solid}
+.word-card.bull{border-left-color:var(--green)}
+.word-card.bear{border-left-color:var(--red)}
+.word-word{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--t1);margin-bottom:4px}
+.word-meta{font-family:var(--fm);font-size:9px;color:var(--t2);display:flex;gap:8px;flex-wrap:wrap}
+.word-meta span{white-space:nowrap}
+
+.empty{text-align:center;padding:40px;color:var(--t3);font-family:var(--fm);font-size:11px}
+.spinner{width:20px;height:20px;border:2px solid var(--b2);border-top-color:var(--cyan);
+         border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">NEWSTREND <em>// WEEKLY REPORT</em></div>
+  <nav>
+    <a href="./index.html">TRENDS</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
+    <a href="./ticker_detail.html">TICKER</a>
+    <a href="./report.html">REPORT</a>
+    <a href="./weekly.html" class="on">WEEKLY</a>
+    <a href="./portfolio.html">PORTFOLIO</a>
+    <a href="./macro.html">MACRO</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="live"><div class="dot"></div>LIVE</div>
+    <div id="ts">—</div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="empty"><div class="spinner"></div>Loading weekly report...</div>
+</main>
+
+<script>
+(function(){
+'use strict';
+const V = Date.now();
+
+async function load(){
+  try {
+    const r = await fetch(`./data/reports/weekly_report.json?v=${V}`, {cache:'no-store'});
+    if (!r.ok) throw new Error('not found');
+    const d = await r.json();
+    render(d);
+  } catch(e) {
+    document.getElementById('main').innerHTML =
+      `<div class="empty">No weekly report yet. Run: python scripts/weekly_report.py</div>`;
+  }
+}
+
+function render(d){
+  const gen = new Date(d.generated);
+  document.getElementById('ts').textContent = 'GENERATED ' + gen.toLocaleDateString();
+  const s = d.stats || {};
+
+  const html = `
+    <div class="section">
+      <div class="stitle">📊 Performance Summary · Last ${d.lookback_days} Days · ${d.hold_days}d Hold</div>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-label">TOTAL PREDICTIONS</div>
+          <div class="kpi-val">${s.total || 0}</div>
+          <div class="kpi-sub">evaluated</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">OVERALL HIT RATE</div>
+          <div class="kpi-val" style="color:${(s.overall_hit_rate||0)>0.55?'var(--green)':(s.overall_hit_rate||0)>0.45?'var(--amber)':'var(--red)'}">
+            ${((s.overall_hit_rate||0)*100).toFixed(0)}%
+          </div>
+          <div class="kpi-sub">direction correct</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">BUY/WATCH HIT</div>
+          <div class="kpi-val" style="color:${(s.buy_watch_hit_rate||0)>0.55?'var(--green)':(s.buy_watch_hit_rate||0)>0.45?'var(--amber)':'var(--red)'}">
+            ${((s.buy_watch_hit_rate||0)*100).toFixed(0)}%
+          </div>
+          <div class="kpi-sub">actionable signals</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">BUY/WATCH AVG</div>
+          <div class="kpi-val" style="color:${(s.buy_watch_avg_ret||0)>0?'var(--green)':'var(--red)'}">
+            ${(s.buy_watch_avg_ret||0)>0?'+':''}${(s.buy_watch_avg_ret||0).toFixed(2)}%
+          </div>
+          <div class="kpi-sub">${d.hold_days}d return</div>
+        </div>
+      </div>
+    </div>
+
+    ${renderActionTable(s.by_action || {})}
+    ${renderSignals(s.best_signals || [], s.worst_signals || [])}
+    ${renderWordSignals(d.word_signals || {})}
+  `;
+
+  document.getElementById('main').innerHTML = html;
+}
+
+function renderActionTable(ba){
+  const actions = ['BUY','WATCH','HOLD','REDUCE','SELL'];
+  const rows = actions.filter(a=>ba[a]).map(a=>{
+    const d = ba[a];
+    return `<tr>
+      <td class="tag-${a}" style="font-weight:600">${a}</td>
+      <td>${d.count}</td>
+      <td style="color:${d.hit_rate>0.55?'var(--green)':d.hit_rate>0.45?'var(--amber)':'var(--red)'}">
+        ${(d.hit_rate*100).toFixed(0)}%</td>
+      <td style="color:${d.avg_ret>0?'var(--green)':'var(--red)'}">
+        ${d.avg_ret>0?'+':''}${d.avg_ret.toFixed(2)}%</td>
+      <td>${d.std_ret.toFixed(2)}</td>
+      <td style="color:${d.sharpe>0?'var(--green)':'var(--red)'}">
+        ${d.sharpe>0?'+':''}${d.sharpe.toFixed(2)}</td>
+      <td>${(d.avg_conf*100).toFixed(0)}%</td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="section">
+    <div class="stitle">📈 Performance by Action</div>
+    <table class="action-table">
+      <thead><tr>
+        <th>ACTION</th><th>COUNT</th><th>HIT RATE</th>
+        <th>AVG RET</th><th>STD</th><th>SHARPE</th><th>AVG CONF</th>
+      </tr></thead>
+      <tbody>${rows || '<tr><td colspan="7" style="text-align:center;color:var(--t3)">No data</td></tr>'}</tbody>
+    </table>
+  </div>`;
+}
+
+function renderSignals(best, worst){
+  const render = (sigs, label, color) => `
+    <div>
+      <div class="stitle" style="margin-bottom:8px">${label}</div>
+      <div class="sig-list">
+        ${sigs.map(s=>`
+          <div class="sig-row">
+            <span class="sig-date">${s.date}</span>
+            <span class="sig-ticker">${s.ticker}</span>
+            <span class="sig-action tag-${s.action}">${s.action}</span>
+            <span style="color:var(--t3)">conf ${(s.confidence*100).toFixed(0)}%</span>
+            <span class="sig-ret" style="color:${color}">${s.actual_ret>0?'+':''}${s.actual_ret.toFixed(2)}%</span>
+          </div>`).join('') || '<div class="empty">No data</div>'}
+      </div>
+    </div>`;
+
+  return `<div class="section">
+    <div class="sig-grid">
+      ${render(best, '🏆 Top Winners', 'var(--green)')}
+      ${render(worst, '❌ Worst Misses', 'var(--red)')}
+    </div>
+  </div>`;
+}
+
+function renderWordSignals(ws){
+  const top = ws.top_signals || [];
+  const cards = top.map(s=>{
+    const cls = s.direction === 'bullish' ? 'bull' : 'bear';
+    const arrow = s.direction === 'bullish' ? '▲' : '▼';
+    const color = s.direction === 'bullish' ? 'var(--green)' : 'var(--red)';
+    return `<div class="word-card ${cls}">
+      <div class="word-word">${arrow} ${s.word} → ${s.ticker}</div>
+      <div class="word-meta">
+        <span>lag ${s.lag}d</span>
+        <span style="color:${color}">${(s.avg_ret>0?'+':'')}${s.avg_ret.toFixed(2)}%</span>
+        <span>hit ${(s.hit_rate*100).toFixed(0)}%</span>
+        ${s.test_hit!==null && s.test_hit!==undefined ? `<span style="color:var(--cyan)">test ${(s.test_hit*100).toFixed(0)}%</span>` : ''}
+        <span>n=${s.n_events}</span>
+        <span style="color:var(--amber)">stab ${s.stability.toFixed(2)}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="section">
+    <div class="stitle">🎯 Verified Word Signals · Train/Test Validated · ${ws.total || 0} total</div>
+    <div class="word-grid">${cards || '<div class="empty" style="grid-column:span 3">No verified signals yet</div>'}</div>
+  </div>`;
+}
+
+load();
+})();
+</script>
+</body>
+</html>

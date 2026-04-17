@@ -214,6 +214,17 @@ jobs:
             --z-thresh   1.0 \
             --lag-range  2 || true
 
+      - name: Generate weekly report
+        run: |
+          python scripts/weekly_report.py \
+            --prices       site/data/prices.json \
+            --pred-dir     site/data/predictions_history \
+            --current-pred site/data/predictions.json \
+            --analysis-dir site/data/ticker_analysis \
+            --out-dir      site/data/reports \
+            --lookback-days 7 \
+            --hold-days 5 || true
+
       # ── 기타 ──────────────────────────────────────────────────────────────────
       - name: Build tickers.json (sectors)
         run: |
