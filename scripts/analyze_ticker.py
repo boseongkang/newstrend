@@ -137,64 +137,113 @@ def analyze(ticker: str, T: dict, P_data: dict,
     bearish_words = []
     neutral_words = []
 
-    for term in top_terms:
+    # ── Train/Test split: 앞 70% train, 뒤 30% test ────────────────────────────
+    split_idx = int(len(common_dates) * 0.7)
+    train_dates = set(common_dates[:split_idx])
+    test_dates  = set(common_dates[split_idx:])
+    print(f"    Train: {len(train_dates)}d, Test: {len(test_dates)}d")
+
+    def compute_stats(term, lag, date_set, z_thresh):
+        """특정 기간에서 단어-수익률 통계 계산."""
         counts = t_series[term]
         zs     = zscore_series(counts)
+        xs, ys, events = [], [], []
 
-        for lag in range(0, lag_range + 1):  # 0=당일, 1=전날, 2=이틀전
-            xs, ys = [], []
-            examples = []
+        for d in date_set:
+            ti = t_date_idx.get(d)
+            if ti is None: continue
+            news_ti = ti - lag
+            if news_ti < 0: continue
+            z = zs[news_ti]
+            pi = p_date_idx.get(d)
+            if pi is None or pi + 1 >= len(p_rets): continue
+            ret = p_rets[pi + 1]
+            if ret is None: continue
 
-            for d in common_dates:
-                ti = t_date_idx.get(d)
-                if ti is None:
-                    continue
-                # lag일 전 뉴스 → 오늘 수익률
-                news_ti = ti - lag
-                if news_ti < 0:
-                    continue
-                news_date = t_dates[news_ti]
-                z = zs[news_ti]
+            xs.append(z)
+            ys.append(ret)
+            if z >= z_thresh:
+                events.append({
+                    "news_date":  t_dates[news_ti],
+                    "price_date": d,
+                    "word_z":     round(z, 2),
+                    "ret_1d":     round(ret * 100, 2),
+                })
 
-                pi = p_date_idx.get(d)
-                if pi is None or pi + 1 >= len(p_rets):
-                    continue
-                ret = p_rets[pi + 1]  # d 다음날 수익률
-                if ret is None:
-                    continue
+        if len(xs) < 5:
+            return None
 
-                xs.append(z)
-                ys.append(ret)
+        corr = pearson(xs, ys)
+        if corr is None:
+            return None
 
-                if z >= z_thresh:
-                    examples.append({
-                        "news_date": news_date,
-                        "price_date": d,
-                        "word_z": round(z, 2),
-                        "ret_1d": round(ret * 100, 2),
-                    })
+        if not events:
+            return {"corr": corr, "hit_rate": None, "avg_ret": None,
+                    "n_events": 0, "events": []}
 
-            if len(xs) < 10:
+        hit_rate = sum(1 for e in events if e["ret_1d"] > 0) / len(events)
+        avg_ret  = sum(e["ret_1d"] for e in events) / len(events)
+        return {
+            "corr":     corr,
+            "hit_rate": round(hit_rate, 3),
+            "avg_ret":  round(avg_ret, 3),
+            "n_events": len(events),
+            "events":   events,
+        }
+
+    for term in top_terms:
+        for lag in range(0, lag_range + 1):
+            # ── 1단계: Train 데이터에서 패턴 발견 ────────────────────────────
+            train_stats = compute_stats(term, lag, train_dates, z_thresh)
+            if train_stats is None or train_stats["n_events"] < min_events:
                 continue
 
-            corr = pearson(xs, ys)
-            if corr is None:
+            train_corr = train_stats["corr"]
+            train_hit  = train_stats["hit_rate"] or 0
+
+            # Train에서 유의미한 패턴만 통과
+            if abs(train_corr) < 0.15:
+                continue
+            if train_corr > 0 and train_hit < 0.55:
+                continue
+            if train_corr < 0 and train_hit > 0.45:
                 continue
 
-            # Z >= z_thresh인 이벤트만
-            events = [e for e in examples]
-            if len(events) < min_events:
+            # ── 2단계: Test 데이터로 검증 ──────────────────────────────────
+            test_stats = compute_stats(term, lag, test_dates, z_thresh)
+            if test_stats is None:
                 continue
 
-            hit_rate   = sum(1 for e in events if e["ret_1d"] > 0) / len(events)
-            avg_ret_1d = sum(e["ret_1d"] for e in events) / len(events)
+            test_hit = test_stats["hit_rate"]
+            test_corr = test_stats["corr"]
 
-            # 3일 수익률도 계산
+            # Test에서도 같은 방향이어야 함 (과적합 제거)
+            if test_corr is None:
+                continue
+            direction_match = (train_corr > 0 and test_corr > 0) or \
+                              (train_corr < 0 and test_corr < 0)
+            if not direction_match:
+                continue
+
+            # Test 데이터에 이벤트가 없으면 검증 불가 → 탈락
+            if test_hit is None or test_stats["n_events"] < 2:
+                continue
+
+            # Train hit rate vs Test hit rate 편차 < 20% (안정성 검증)
+            hit_drop = abs(train_hit - test_hit)
+            if hit_drop > 0.25:
+                continue  # 불안정한 패턴 제외
+
+            # ── 3단계: 전체 기간 통계 (표시용) ──────────────────────────────
+            full_stats = compute_stats(term, lag, set(common_dates), z_thresh)
+            if full_stats is None or full_stats["n_events"] < min_events:
+                continue
+
+            # 3일 수익률
             ret3_list = []
-            for e in events:
+            for e in full_stats["events"]:
                 pi = p_date_idx.get(e["price_date"])
-                if pi is None:
-                    continue
+                if pi is None: continue
                 r3 = [p_rets[pi + k] for k in range(1, 4)
                       if pi + k < len(p_rets) and p_rets[pi + k] is not None]
                 if r3:
@@ -203,28 +252,35 @@ def analyze(ticker: str, T: dict, P_data: dict,
 
             word_data = {
                 "word":       term,
-                "lead_days":  -lag,       # -1 = 전날, 0 = 당일
-                "corr":       corr,
-                "hit_rate":   round(hit_rate, 3),
-                "avg_ret_1d": round(avg_ret_1d, 3),
+                "lead_days":  -lag,
+                "corr":       full_stats["corr"],
+                "hit_rate":   full_stats["hit_rate"],
+                "avg_ret_1d": full_stats["avg_ret"],
                 "avg_ret_3d": avg_ret_3d,
-                "n_events":   len(events),
-                "examples":   sorted(examples, key=lambda x: abs(x["ret_1d"]), reverse=True)[:5],
+                "n_events":   full_stats["n_events"],
+                # Train/Test 검증 결과 추가
+                "train_corr": round(train_corr, 3),
+                "train_hit":  round(train_hit, 3),
+                "test_corr":  round(test_corr, 3),
+                "test_hit":   round(test_hit, 3) if test_hit is not None else None,
+                "stability":  round(1 - (abs(train_hit - (test_hit or train_hit))), 3),
+                "examples":   sorted(full_stats["events"],
+                                    key=lambda x: abs(x["ret_1d"]),
+                                    reverse=True)[:5],
             }
 
-            # 분류: 절대 상관 0.25+, 방향성 있는 것만
-            if abs(corr) >= 0.15 and len(events) >= min_events:
-                if corr > 0 and hit_rate >= 0.52:
-                    bullish_words.append(word_data)
-                elif corr < 0 and hit_rate <= 0.48:
-                    bearish_words.append(word_data)
-                else:
-                    neutral_words.append(word_data)
+            # ── 분류 ────────────────────────────────────────────────────────
+            if full_stats["corr"] > 0 and full_stats["hit_rate"] >= 0.55:
+                bullish_words.append(word_data)
+            elif full_stats["corr"] < 0 and full_stats["hit_rate"] <= 0.45:
+                bearish_words.append(word_data)
 
     # 정렬: |corr| × hit_rate
     def score(w):
+        """Train/Test 안정성 + 상관 + hit rate + 표본 크기."""
         hr = w["hit_rate"] if w["corr"] > 0 else (1 - w["hit_rate"])
-        return abs(w["corr"]) * hr * math.sqrt(w["n_events"] / 5)
+        stability = w.get("stability", 1.0)
+        return abs(w["corr"]) * hr * math.sqrt(w["n_events"] / 5) * stability
 
     bullish_words.sort(key=score, reverse=True)
     bearish_words.sort(key=score, reverse=True)
@@ -333,14 +389,20 @@ def main():
             print(f"\n  Top BULLISH words (→ {ticker} up):")
             for w in b[:8]:
                 lag_str = f"lag {w['lead_days']}d"
-                print(f"    {w['word']:<18} {lag_str}  corr={w['corr']:+.3f}  "
-                      f"hit={w['hit_rate']:.0%}  avg_ret={w['avg_ret_1d']:+.2f}%  n={w['n_events']}")
+                test_hit_str = f"test_hit={w['test_hit']:.0%}" if w.get('test_hit') is not None else "test_hit=—"
+            print(f"    {w['word']:<18} {lag_str}  "
+                  f"corr={w['corr']:+.3f}  hit={w['hit_rate']:.0%}  "
+                  f"{test_hit_str}  avg={w['avg_ret_1d']:+.2f}%  n={w['n_events']}  "
+                  f"stab={w.get('stability',0):.2f}")
         if d:
             print(f"\n  Top BEARISH words (→ {ticker} down):")
             for w in d[:8]:
                 lag_str = f"lag {w['lead_days']}d"
-                print(f"    {w['word']:<18} {lag_str}  corr={w['corr']:+.3f}  "
-                      f"hit={w['hit_rate']:.0%}  avg_ret={w['avg_ret_1d']:+.2f}%  n={w['n_events']}")
+                test_hit_str = f"test_hit={w['test_hit']:.0%}" if w.get('test_hit') is not None else "test_hit=—"
+            print(f"    {w['word']:<18} {lag_str}  "
+                  f"corr={w['corr']:+.3f}  hit={w['hit_rate']:.0%}  "
+                  f"{test_hit_str}  avg={w['avg_ret_1d']:+.2f}%  n={w['n_events']}  "
+                  f"stab={w.get('stability',0):.2f}")
 
 
 if __name__ == "__main__":
