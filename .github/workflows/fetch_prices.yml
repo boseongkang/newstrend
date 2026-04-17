@@ -2,15 +2,15 @@ name: fetch-prices
 
 on:
   schedule:
-    - cron: "30 21 * * 1-5"   # 월~금 21:30 UTC
+    - cron: "30 21 * * 1-5"
   workflow_dispatch:
     inputs:
       full_reload:
-        description: "Full reload (분할/조정 발생 시)"
+        description: "Full reload"
         type: boolean
         default: false
       since:
-        description: "YYYY-MM-DD: 이 날짜부터 재다운로드"
+        description: "YYYY-MM-DD"
         type: string
         default: ""
 
@@ -25,9 +25,10 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
+      # ── 전체 히스토리 받기 (rebase에 필수) ────────────────────────────────
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -36,18 +37,22 @@ jobs:
       - name: Install deps
         run: pip install --quiet yfinance pandas
 
-      # ── data-cache에서 CSV 복원 ──────────────────────────────────────────────
+      # ── data-cache CSV 복원 (인덱스 오염 방지 → git restore 사용) ─────────
       - name: Restore price CSVs from data-cache
         run: |
           mkdir -p data/prices
           git fetch origin data-cache 2>/dev/null || true
           if git show-ref --verify refs/remotes/origin/data-cache 2>/dev/null; then
+            # --worktree: 파일만 복원, 인덱스는 건드리지 않음
+            git restore --worktree --source=origin/data-cache -- data/prices/ 2>/dev/null || \
             git checkout origin/data-cache -- data/prices/ 2>/dev/null || true
+            # checkout이 실행됐을 경우를 대비해 인덱스에서 제거
+            git reset HEAD data/prices/ 2>/dev/null || true
             echo "Restored: $(ls data/prices/*.csv 2>/dev/null | wc -l) CSV files"
           fi
 
       # ── 증분 fetch ──────────────────────────────────────────────────────────
-      - name: Fetch latest prices (incremental)
+      - name: Fetch latest prices
         run: |
           EXTRA=""
           if [ "${{ github.event.inputs.full_reload }}" = "true" ]; then
@@ -72,45 +77,62 @@ jobs:
             --out-summary  site/data/ta_summary.json \
             --out-csv-dir  run || true
 
-      # ── CSV를 data-cache에 push (worktree 방식) ─────────────────────────────
+      # ── CSV → data-cache (worktree 격리) ────────────────────────────────────
       - name: Save price CSVs to data-cache
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          mkdir -p /tmp/cache-worktree
+          # main 작업 디렉토리의 CSV를 /tmp에 백업
+          cp -r data/prices /tmp/prices_backup
+
+          # worktree로 data-cache만 격리된 디렉토리에 체크아웃
+          rm -rf /tmp/cache-worktree
           if git ls-remote --heads origin data-cache | grep -q data-cache; then
-            git worktree add /tmp/cache-worktree data-cache 2>/dev/null || \
-            git worktree add /tmp/cache-worktree -b data-cache origin/data-cache
+            git worktree add /tmp/cache-worktree data-cache
           else
             git worktree add /tmp/cache-worktree -b data-cache
           fi
 
+          # 백업한 CSV를 worktree에 복사
           mkdir -p /tmp/cache-worktree/data/prices
-          cp -r data/prices/. /tmp/cache-worktree/data/prices/ 2>/dev/null || true
+          cp -r /tmp/prices_backup/. /tmp/cache-worktree/data/prices/
 
           cd /tmp/cache-worktree
-          rm -f .gitignore
+          rm -f .gitignore  # worktree 자체의 .gitignore 제거
           git add data/prices/
           if ! git diff --cached --quiet; then
             git commit -m "prices: $(date -u +%Y-%m-%d)"
             git push origin data-cache
           fi
 
-      # ── prices.json을 main에 커밋 ───────────────────────────────────────────
-      - name: Commit prices to main
+      # ── main 작업 디렉토리 정리 → JSON만 커밋 ──────────────────────────────
+      - name: Commit prices JSON to main
         run: |
           cd "$GITHUB_WORKSPACE"
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 핵심: data/prices/는 main에 들어가면 안 됨 → 체크아웃으로 원복
+          git checkout HEAD -- data/prices/ 2>/dev/null || true
+          # 추적되지 않는 파일도 제거 (manifest.json 등)
+          rm -rf data/prices
+
+          # 명시적으로 JSON 요약본만 스테이징
           git add site/data/prices.json \
+                  site/data/prices.json.gz \
                   site/data/prices_meta.json \
                   site/data/technical_analysis.json \
+                  site/data/technical_analysis.json.gz \
                   site/data/ta_summary.json 2>/dev/null || true
+
           if git diff --cached --quiet; then
-            echo "No price changes to commit"
-          else
-            git commit -m "data: prices + TA update $(date -u +%Y-%m-%d)"
-            git pull --rebase origin main
-            git push origin main
+            echo "No JSON changes to commit"
+            exit 0
           fi
+
+          git commit -m "data: prices + TA update $(date -u +%Y-%m-%d)"
+
+          # 원격 상태와 동기화 (작업 트리 clean 상태라 rebase 안전)
+          git pull --rebase origin main || git pull --no-rebase origin main
+          git push origin HEAD:main
