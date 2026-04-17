@@ -2,7 +2,7 @@ name: fetch-prices
 
 on:
   schedule:
-    - cron: "30 21 * * 1-5"   # 월~금 21:30 UTC = 미장 마감 후 (16:30 ET)
+    - cron: "30 21 * * 1-5"   # 월~금 21:30 UTC
   workflow_dispatch:
     inputs:
       full_reload:
@@ -36,17 +36,14 @@ jobs:
       - name: Install deps
         run: pip install --quiet yfinance pandas
 
-      # ── CSV 원장을 data-cache 브랜치에서 복원 ──────────────────────────────
+      # ── data-cache에서 CSV 복원 ──────────────────────────────────────────────
       - name: Restore price CSVs from data-cache
         run: |
           mkdir -p data/prices
           git fetch origin data-cache 2>/dev/null || true
           if git show-ref --verify refs/remotes/origin/data-cache 2>/dev/null; then
             git checkout origin/data-cache -- data/prices/ 2>/dev/null || true
-            echo "Restored price CSVs from data-cache"
-            ls data/prices/*.csv 2>/dev/null | wc -l | xargs echo "CSV files:"
-          else
-            echo "data-cache branch not found — first run"
+            echo "Restored: $(ls data/prices/*.csv 2>/dev/null | wc -l) CSV files"
           fi
 
       # ── 증분 fetch ──────────────────────────────────────────────────────────
@@ -65,37 +62,6 @@ jobs:
             --last-days 365 \
             $EXTRA
 
-      # ── CSV 원장을 data-cache 브랜치에 저장 ────────────────────────────────
-      - name: Save price CSVs to data-cache
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # data-cache 브랜치에만 CSV 커밋 (main에는 안 올림)
-          CURRENT_BRANCH=$(git branch --show-current)
-          git stash -u 2>/dev/null || true
-
-          if git show-ref --verify refs/remotes/origin/data-cache 2>/dev/null; then
-            git checkout data-cache
-          else
-            git checkout --orphan data-cache
-            git rm -rf . 2>/dev/null || true
-          fi
-
-          mkdir -p data/prices
-          git stash pop 2>/dev/null || true
-          cp -r /home/runner/work/newstrend/newstrend/data/prices/* data/prices/ 2>/dev/null || true
-
-          git add data/prices/
-          if git diff --cached --quiet; then
-            echo "No CSV changes"
-          else
-            git commit -m "prices: update $(date -u +%Y-%m-%d)"
-            git push origin data-cache
-          fi
-
-          git checkout "$CURRENT_BRANCH"
-
       # ── TA 계산 ─────────────────────────────────────────────────────────────
       - name: Run technical analysis
         run: |
@@ -106,18 +72,45 @@ jobs:
             --out-summary  site/data/ta_summary.json \
             --out-csv-dir  run || true
 
-      # ── prices.json + meta를 main에 커밋 ───────────────────────────────────
+      # ── CSV를 data-cache에 push (worktree 방식) ─────────────────────────────
+      - name: Save price CSVs to data-cache
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          mkdir -p /tmp/cache-worktree
+          if git ls-remote --heads origin data-cache | grep -q data-cache; then
+            git worktree add /tmp/cache-worktree data-cache 2>/dev/null || \
+            git worktree add /tmp/cache-worktree -b data-cache origin/data-cache
+          else
+            git worktree add /tmp/cache-worktree -b data-cache
+          fi
+
+          mkdir -p /tmp/cache-worktree/data/prices
+          cp -r data/prices/. /tmp/cache-worktree/data/prices/ 2>/dev/null || true
+
+          cd /tmp/cache-worktree
+          rm -f .gitignore
+          git add data/prices/
+          if ! git diff --cached --quiet; then
+            git commit -m "prices: $(date -u +%Y-%m-%d)"
+            git push origin data-cache
+          fi
+
+      # ── prices.json을 main에 커밋 ───────────────────────────────────────────
       - name: Commit prices to main
         run: |
+          cd "$GITHUB_WORKSPACE"
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add site/data/prices.json \
                   site/data/prices_meta.json \
                   site/data/technical_analysis.json \
-                  site/data/ta_summary.json
+                  site/data/ta_summary.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No price changes to commit"
           else
             git commit -m "data: prices + TA update $(date -u +%Y-%m-%d)"
+            git pull --rebase origin main
             git push origin main
           fi
