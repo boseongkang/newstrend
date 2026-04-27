@@ -64,6 +64,44 @@ def pearson(xs, ys):
     return round(num / (dx * dy), 4)
 
 
+
+
+def binomial_pvalue(hits: int, n: int, p_null: float = 0.5) -> float:
+    """이항분포 양측검정 p-value.
+
+    H0: 단어가 random (hit rate = 0.5)
+    H1: 단어가 신호 (hit rate ≠ 0.5)
+
+    p < 0.05면 통계적으로 유의미한 신호.
+    """
+    if n == 0:
+        return 1.0
+
+    # 정규근사: n이 크면 정확
+    mean = n * p_null
+    std = math.sqrt(n * p_null * (1 - p_null))
+    if std < 1e-9:
+        return 1.0
+
+    # 양측 p-value
+    z = abs(hits - mean) / std
+    # 표준정규분포 cdf 근사
+    # 1 - erf(z/sqrt(2)) 의 양측 = 2 * (1 - phi(z))
+    # erf 근사 (Abramowitz & Stegun)
+    def erf_approx(x):
+        a1, a2, a3 = 0.254829592, -0.284496736, 1.421413741
+        a4, a5 = -1.453152027, 1.061405429
+        p = 0.3275911
+        sign = 1 if x >= 0 else -1
+        x = abs(x)
+        t = 1.0 / (1.0 + p * x)
+        y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * math.exp(-x * x)
+        return sign * y
+
+    p_one_tail = 0.5 * (1 - erf_approx(z / math.sqrt(2)))
+    return min(1.0, 2 * p_one_tail)
+
+
 def zscore_series(counts, window=28):
     out = []
     for i, c in enumerate(counts):
@@ -250,6 +288,19 @@ def analyze(ticker: str, T: dict, P_data: dict,
                     ret3_list.append(sum(r3) / len(r3) * 100)
             avg_ret_3d = round(sum(ret3_list) / len(ret3_list), 2) if ret3_list else None
 
+            # ── 4단계: 통계적 유의성 검정 (Binomial test) ───────────────────
+            full_hits = sum(1 for e in full_stats["events"] if e["ret_1d"] > 0)
+            p_value = binomial_pvalue(full_hits, full_stats["n_events"])
+
+            # bearish는 hit rate가 낮아야 의미있음 → flip 후 검정
+            if full_stats["corr"] < 0:
+                bear_hits = full_stats["n_events"] - full_hits
+                p_value = binomial_pvalue(bear_hits, full_stats["n_events"])
+
+            # p > 0.05 → 통계적으로 random과 구별 안 됨 → 노이즈 → 탈락
+            if p_value > 0.05:
+                continue
+
             word_data = {
                 "word":       term,
                 "lead_days":  -lag,
@@ -258,7 +309,7 @@ def analyze(ticker: str, T: dict, P_data: dict,
                 "avg_ret_1d": full_stats["avg_ret"],
                 "avg_ret_3d": avg_ret_3d,
                 "n_events":   full_stats["n_events"],
-                # Train/Test 검증 결과 추가
+                "p_value":    round(p_value, 4),  # 새 필드
                 "train_corr": round(train_corr, 3),
                 "train_hit":  round(train_hit, 3),
                 "test_corr":  round(test_corr, 3),
@@ -277,10 +328,12 @@ def analyze(ticker: str, T: dict, P_data: dict,
 
     # 정렬: |corr| × hit_rate
     def score(w):
-        """Train/Test 안정성 + 상관 + hit rate + 표본 크기."""
+        """Train/Test 안정성 + 상관 + hit rate + 표본 크기 + p-value 신뢰도."""
         hr = w["hit_rate"] if w["corr"] > 0 else (1 - w["hit_rate"])
         stability = w.get("stability", 1.0)
-        return abs(w["corr"]) * hr * math.sqrt(w["n_events"] / 5) * stability
+        # p-value가 작을수록 신뢰도 높음 (0.001 → 1.0, 0.05 → ~0.3)
+        p_conf = max(0.1, 1.0 - w.get("p_value", 0.5) / 0.05)
+        return abs(w["corr"]) * hr * math.sqrt(w["n_events"] / 5) * stability * p_conf
 
     bullish_words.sort(key=score, reverse=True)
     bearish_words.sort(key=score, reverse=True)
@@ -389,20 +442,24 @@ def main():
             print(f"\n  Top BULLISH words (→ {ticker} up):")
             for w in b[:8]:
                 lag_str = f"lag {w['lead_days']}d"
-                test_hit_str = f"test_hit={w['test_hit']:.0%}" if w.get('test_hit') is not None else "test_hit=—"
+                test_hit_str = f"test={w['test_hit']:.0%}" if w.get('test_hit') is not None else "test=—"
+            p_val = w.get('p_value', 1.0)
+            sig = "***" if p_val < 0.001 else "**" if p_val < 0.01 else "*" if p_val < 0.05 else ""
             print(f"    {w['word']:<18} {lag_str}  "
-                  f"corr={w['corr']:+.3f}  hit={w['hit_rate']:.0%}  "
-                  f"{test_hit_str}  avg={w['avg_ret_1d']:+.2f}%  n={w['n_events']}  "
-                  f"stab={w.get('stability',0):.2f}")
+                  f"hit={w['hit_rate']:.0%}  {test_hit_str}  "
+                  f"avg={w['avg_ret_1d']:+.2f}%  n={w['n_events']}  "
+                  f"p={p_val:.3f}{sig}  stab={w.get('stability',0):.2f}")
         if d:
             print(f"\n  Top BEARISH words (→ {ticker} down):")
             for w in d[:8]:
                 lag_str = f"lag {w['lead_days']}d"
-                test_hit_str = f"test_hit={w['test_hit']:.0%}" if w.get('test_hit') is not None else "test_hit=—"
+                test_hit_str = f"test={w['test_hit']:.0%}" if w.get('test_hit') is not None else "test=—"
+            p_val = w.get('p_value', 1.0)
+            sig = "***" if p_val < 0.001 else "**" if p_val < 0.01 else "*" if p_val < 0.05 else ""
             print(f"    {w['word']:<18} {lag_str}  "
-                  f"corr={w['corr']:+.3f}  hit={w['hit_rate']:.0%}  "
-                  f"{test_hit_str}  avg={w['avg_ret_1d']:+.2f}%  n={w['n_events']}  "
-                  f"stab={w.get('stability',0):.2f}")
+                  f"hit={w['hit_rate']:.0%}  {test_hit_str}  "
+                  f"avg={w['avg_ret_1d']:+.2f}%  n={w['n_events']}  "
+                  f"p={p_val:.3f}{sig}  stab={w.get('stability',0):.2f}")
 
 
 if __name__ == "__main__":
