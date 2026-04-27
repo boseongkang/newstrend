@@ -56,6 +56,16 @@ def load_ta(path: str) -> dict:
 
 
 
+
+
+def load_ticker_weights(path: str) -> dict:
+    """ticker_weights.json 로드 → {ticker: {ta_weight, news_weight, regime_weight}}."""
+    try:
+        d = json.loads(Path(path).read_text())
+        return d.get("weights", {})
+    except Exception:
+        return {}
+
 def load_ticker_analysis(analysis_dir: str, tickers: list) -> dict:
     """ticker_analysis/<TICKER>.json 로드 → {ticker: analysis_data}"""
     result = {}
@@ -456,6 +466,8 @@ def main():
     ap.add_argument("--tickers", default=None)
     ap.add_argument("--analysis-dir", default="site/data/ticker_analysis",
                     help="ticker_analysis JSON 디렉토리")
+    ap.add_argument("--weights", default="site/data/ticker_weights.json",
+                    help="종목별 TA/News 가중치")
     ap.add_argument("--min-conf", type=float, default=0.0)
     args = ap.parse_args()
 
@@ -464,6 +476,8 @@ def main():
     tickers_list = [t.strip().upper() for t in args.tickers.split(",")]\
                    if args.tickers else list(ta_data.keys())
     ta_news  = load_ticker_analysis(args.analysis_dir, tickers_list)
+    weights  = load_ticker_weights(args.weights)
+    print(f"Loaded weights for {len(weights)} tickers")
 
     # 뉴스 날짜 수
     try:
@@ -557,19 +571,51 @@ def main():
                 if active_bull else ""
             )
 
+        # 종목별 가중치 적용
+        tw = weights.get(ticker, {})
+        ta_w   = tw.get("ta_weight",     0.6)
+        news_w = tw.get("news_weight",   0.3)
+
         action, conf, reasons, risks = decide_action(
             rsi_state, macd_bias, bb_state, trend, vol_state,
             ta_sigs, news, price_days,
             market_regime=market_regime.get("regime", "NEUTRAL")
         )
 
-        # 뉴스 신호가 강하면 action 보강
-        if news_net_score >= 3 and action in ("HOLD", "WATCH"):
-            action = "WATCH" if action == "HOLD" else "BUY"
-            reasons.append(f"News signal boost: {ticker_news_sig.get('summary','')}")
-        elif news_net_score <= -3 and action in ("HOLD", "WATCH"):
-            action = "REDUCE"
-            risks.append(f"News signal warning: {ticker_news_sig.get('summary','')}")
+        # 종목별 가중치로 뉴스 영향 조정
+        # news_w가 클수록 뉴스 신호를 더 크게 반영
+        news_threshold_buy  = 3.0 / max(news_w, 0.2)   # news_w=0.5 → 6, news_w=0.9 → 3.3
+        news_threshold_sell = -3.0 / max(news_w, 0.2)
+
+        # 뉴스 가중치가 높은 종목은 뉴스 신호 적극 반영
+        if news_w >= 0.5:
+            if news_net_score >= news_threshold_buy and action in ("HOLD", "WATCH"):
+                action = "BUY"
+                conf = min(0.95, conf + 0.15)
+                reasons.append(f"NEWS-driven (w={news_w:.0%}): {ticker_news_sig.get('summary','')}")
+            elif news_net_score >= 2 and action == "HOLD":
+                action = "WATCH"
+                reasons.append(f"News bullish (w={news_w:.0%})")
+            elif news_net_score <= news_threshold_sell and action in ("HOLD", "WATCH"):
+                action = "SELL" if news_net_score <= -5 else "REDUCE"
+                conf = min(0.95, conf + 0.10)
+                risks.append(f"NEWS-driven warning (w={news_w:.0%}): {ticker_news_sig.get('summary','')}")
+        # TA가 강한 종목은 뉴스 영향 작게
+        elif ta_w >= 0.5:
+            if news_net_score >= 5 and action == "HOLD":
+                action = "WATCH"
+                reasons.append(f"Strong news signal despite TA-priority")
+            elif news_net_score <= -5 and action == "HOLD":
+                action = "REDUCE"
+                risks.append(f"Strong news warning despite TA-priority")
+        # 기본 동작 (둘 다 약한 종목)
+        else:
+            if news_net_score >= 3 and action in ("HOLD", "WATCH"):
+                action = "WATCH" if action == "HOLD" else "BUY"
+                reasons.append(f"News signal: {ticker_news_sig.get('summary','')}")
+            elif news_net_score <= -3 and action in ("HOLD", "WATCH"):
+                action = "REDUCE"
+                risks.append(f"News warning: {ticker_news_sig.get('summary','')}")
 
         if conf < args.min_conf:
             continue
