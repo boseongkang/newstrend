@@ -17,14 +17,14 @@ on:
     types: [completed]
 
 permissions:
-  actions: write
-  contents: write
+  actions: read
+  contents: read
   pages: write
   id-token: write
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -41,9 +41,8 @@ jobs:
         run: |
           python -m pip install -U pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
-          pip install yfinance pandas numpy orjson pyyaml feedparser || true
+          pip install yfinance pandas numpy orjson pyyaml || true
 
-      # ── Warehouse 다운로드 ────────────────────────────────────────────────────
       - name: Get latest warehouse run id
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -77,7 +76,6 @@ jobs:
           test -d data/warehouse/daily
           ls -lt data/warehouse/daily | head -n 8 || true
 
-      # ── 토큰 처리 ─────────────────────────────────────────────────────────────
       - name: Convert csv/jsonl to *_tokens.jsonl
         run: |
           set -euo pipefail
@@ -99,22 +97,6 @@ jobs:
             --min-len 4 \
             --extra-stop config/extra_noise.txt
 
-      # ── trends.json 빌드 ──────────────────────────────────────────────────────
-      - name: Build trends.json
-        run: |
-          python scripts/make_trends_json.py \
-            --tokens-dir data/warehouse/daily \
-            --out        site/data/trends.json \
-            --last-days  180 \
-            --topk       300 \
-            --min-len    4 || true
-          python3 -c "
-          import json
-          d=json.load(open('site/data/trends.json'))
-          print('trends: dates='+str(len(d['dates']))+' terms='+str(len(d['terms']))+' last='+d['dates'][-1])
-          " || true
-
-      # ── 정적 페이지 빌드 ──────────────────────────────────────────────────────
       - name: Build static pages
         run: |
           python scripts/build_static_ui.py --run run --out site
@@ -125,107 +107,86 @@ jobs:
       - name: Overwrite index with custom dashboard
         run: cp site/index_custom.html site/index.html
 
-      # ── 가격 데이터 ───────────────────────────────────────────────────────────
-      - name: Restore price CSVs from data-cache
+      - name: Join prices
         run: |
-          mkdir -p data/prices
-          git fetch origin data-cache 2>/dev/null || true
-          if git show-ref --verify refs/remotes/origin/data-cache 2>/dev/null; then
-            git checkout origin/data-cache -- data/prices/ 2>/dev/null || true
-            echo "Restored: $(ls data/prices/*.csv 2>/dev/null | wc -l) CSV files"
-          else
-            echo "data-cache not found — will download fresh"
-          fi
+          python - <<'PY'
+          import pandas as pd, os
+          df = pd.read_csv("run/tokens_by_day.cleaned.csv")
+          s = pd.to_datetime(df['date']).min().date()
+          e = pd.to_datetime(df['date']).max().date()
+          with open(os.environ["GITHUB_ENV"], "a") as fh:
+              fh.write(f"START={s}\n")
+              fh.write(f"END={e}\n")
+          PY
+          python scripts/join_prices.py \
+            --terms run/tokens_by_day.cleaned.csv \
+            --map   config/ticker_aliases.json \
+            --start "$START" \
+            --end   "$END" \
+            --out   run/prices.csv \
+            --min-days 1          
 
-      - name: Fetch prices (incremental)
+      - name: Export prices.json
         run: |
-          python scripts/fetch_prices_v2.py \
-            --price-dir data/prices \
-            --out-json  site/data/prices.json \
-            --out-meta  site/data/prices_meta.json \
-            --last-days 365 || true
+          python - <<'PY'
+          import pandas as pd, json, pathlib, sys
+          base = pathlib.Path("run")/"prices.csv"
+          td = pd.read_csv(base/"ticker_daily.csv")
+          date_col, tick_col = "date", "ticker"
+          cand = ["close","Close","Adj Close","adj_close","price","Price"]
+          val_col = next((c for c in cand if c in td.columns), None)
+          if val_col is None:
+              raise SystemExit("no price column found")
+          td = td[[date_col, tick_col, val_col]].rename(columns={val_col: "close"})
+          dates   = sorted(td[date_col].unique().tolist())
+          tickers = sorted(td[tick_col].unique().tolist())
+          pv = (td.pivot(index=date_col, columns=tick_col, values="close")
+                  .reindex(dates)
+                  .reindex(columns=tickers))
+          close = {t: [None if pd.isna(v) else float(v) for v in pv[t].tolist()] for t in tickers}
+          out = {"dates": dates, "tickers": tickers, "close": close}
+          outp = pathlib.Path("site/data"); outp.mkdir(parents=True, exist_ok=True)
+          (outp/"prices.json").write_text(json.dumps(out, indent=2, ensure_ascii=False))
+          PY
 
-      - name: Save price CSVs to data-cache
+      - name: Fetch latest prices
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # worktree 방식 — 브랜치 전환/stash 없이 data-cache에 직접 push
-          mkdir -p /tmp/cache-worktree
-
-          if git ls-remote --heads origin data-cache | grep -q data-cache; then
-            git worktree add /tmp/cache-worktree data-cache 2>/dev/null ||             git worktree add /tmp/cache-worktree -b data-cache origin/data-cache
-          else
-            git worktree add --orphan /tmp/cache-worktree data-cache 2>/dev/null ||             git worktree add /tmp/cache-worktree -b data-cache
-          fi
-
-          mkdir -p /tmp/cache-worktree/data/prices
-          cp -r data/prices/. /tmp/cache-worktree/data/prices/ 2>/dev/null || true
-
-          cd /tmp/cache-worktree
-          # .gitignore가 data/prices를 막으므로 worktree에서 제거 후 add
-          rm -f .gitignore
-          git add data/prices/
-          if ! git diff --cached --quiet; then
-            git commit -m "prices: $(date -u +%Y-%m-%d)"
-            git push origin data-cache
-            echo "Pushed price CSVs to data-cache"
-          else
-            echo "No price changes to push"
-          fi
-
-      # ── TA + 신호 분석 ────────────────────────────────────────────────────────
-      - name: Run technical analysis
-        run: |
-          python scripts/analyze_prices.py \
-            --prices      site/data/prices.json \
-            --trends      site/data/trends.json \
-            --out-json    site/data/technical_analysis.json \
-            --out-summary site/data/ta_summary.json \
-            --out-csv-dir run || true
-          gzip -f -k site/data/technical_analysis.json || true
+          python scripts/fetch_prices.py \
+            --days 180 \
+            --out site/data/prices.json
 
       - name: Build signal correlations
         run: |
           python scripts/build_signal_corr.py \
-            --trends     site/data/trends.json \
-            --prices     site/data/prices.json \
-            --out        site/data/signal_corr.json \
-            --top-terms  200 \
-            --min-corr   0.25 \
+            --trends site/data/trends.json \
+            --prices site/data/prices.json \
+            --out site/data/signal_corr.json \
+            --top-terms 200 \
+            --min-corr 0.25 \
             --min-events 3 || true
 
-      - name: Generate predictions
+      - name: Commit predictions history to main
         run: |
-          python scripts/predict.py \
-            --ta      site/data/technical_analysis.json \
-            --signals site/data/signal_corr.json \
-            --trends  site/data/trends.json \
-            --out     site/data/predictions.json || true
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Analyze ticker patterns
+          git add site/data/predictions_history/ site/data/reports/ 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "No history changes to commit"
+            exit 0
+          fi
+
+          git commit -m "data: archive predictions $(date -u +%Y-%m-%d)"
+          git pull --rebase origin main || true
+          git push origin HEAD:main
+
+      - name: Build macro themes
         run: |
-          python scripts/analyze_ticker.py \
-            --trends     site/data/trends.json \
-            --prices     site/data/prices.json \
-            --out-dir    site/data/ticker_analysis \
-            --tickers    AAPL,MSFT,NVDA,GOOGL,META,AMZN,TSLA,AMD,INTC,AVGO,QCOM,ASML,MU,NXPI,JPM,BAC,GS,MS,BLK,XOM,CVX,SPY,QQQ,IWM,DIA,TLT,GLD,USO \
-            --min-events 3 \
-            --z-thresh   1.0 \
-            --lag-range  2 || true
+          python scripts/macro_themes.py \
+            --trends site/data/trends.json \
+            --out    site/data/macro_themes.json || true
 
-      - name: Generate weekly report
-        run: |
-          python scripts/weekly_report.py \
-            --prices       site/data/prices.json \
-            --pred-dir     site/data/predictions_history \
-            --current-pred site/data/predictions.json \
-            --analysis-dir site/data/ticker_analysis \
-            --out-dir      site/data/reports \
-            --lookback-days 7 \
-            --hold-days 5 || true
-
-      # ── 기타 ──────────────────────────────────────────────────────────────────
       - name: Build tickers.json (sectors)
         run: |
           python scripts/make_ticker_sectors.py --map config/ticker_aliases.json --out site/data/tickers.json || true

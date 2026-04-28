@@ -3,417 +3,251 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Newstrend · Macro Radar</title>
+<title>Newstrend · Macro Themes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
 <style>
-:root {
-  --bg0:#070b10; --bg1:#0c1220; --bg2:#101828;
-  --b1:#1a2840; --b2:#223050;
-  --cyan:#00d4ff; --amber:#ffb300; --green:#00e676; --red:#ff4444;
-  --purple:#b39ddb; --blue:#4d9fff;
-  --t1:#c8d8e8; --t2:#6a8aa8; --t3:#344a60;
-  --font-mono:'IBM Plex Mono',monospace;
-  --font-sans:'IBM Plex Sans',sans-serif;
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--purple:#b380ff;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg0);color:var(--t1);font-family:var(--font-sans);font-size:13px;
-     height:100dvh;overflow:hidden;display:flex;flex-direction:column}
-::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
 
-header{height:42px;display:flex;align-items:center;gap:20px;padding:0 16px;
-  background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0}
-.brand{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
-.brand em{color:var(--t3);font-style:normal;font-weight:300}
+header{height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:10}
+.brand{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300;margin-left:6px}
 nav{display:flex;gap:2px}
-nav a{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.1em;
-      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:5px 11px;
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:6px 12px;
       border:1px solid transparent;transition:all .12s}
 nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
-.hdr-right{margin-left:auto;display:flex;align-items:center;gap:14px}
-.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-#ts{font-family:var(--font-mono);font-size:10px;color:var(--t3)}
+.hdr-right{margin-left:auto}
+#ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
 
-/* main: full-page scrollable */
-.page{flex:1;overflow-y:auto;padding:16px}
+main{max-width:1400px;margin:0 auto;padding:20px 24px}
 
-/* ── CATEGORY GRID ── */
-.radar-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
-  gap:12px;
-  margin-bottom:20px
-}
+/* TOP THEMES */
+.top-themes{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+.theme-card{background:var(--bg1);border:1px solid var(--b1);padding:14px;
+            border-left:4px solid;transition:all .15s;cursor:pointer}
+.theme-card:hover{transform:translateY(-2px);background:var(--bg2)}
+.theme-card.rank1{border-left-color:var(--green)}
+.theme-card.rank2{border-left-color:var(--cyan)}
+.theme-card.rank3{border-left-color:var(--amber)}
+.theme-card.rank4{border-left-color:var(--purple)}
+.theme-card.rank5{border-left-color:var(--t2)}
+.theme-emoji{font-size:24px;margin-bottom:8px}
+.theme-name{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.08em;
+            color:var(--t1);margin-bottom:6px}
+.theme-score{font-family:var(--fm);font-size:20px;font-weight:600;color:var(--t1)}
+.theme-trend{font-family:var(--fm);font-size:9px;margin-top:4px;letter-spacing:.06em}
+.tr-rising{color:var(--green)}
+.tr-falling{color:var(--red)}
+.tr-stable{color:var(--t3)}
+.theme-top-word{font-family:var(--fm);font-size:11px;color:var(--t2);margin-top:6px;
+                padding-top:6px;border-top:1px solid var(--b1)}
 
-.cat-block{background:var(--bg1);border:1px solid var(--b1)}
-.cat-hdr{display:flex;align-items:center;justify-content:space-between;
-         padding:8px 12px;border-bottom:1px solid var(--b1)}
-.cat-name{font-family:var(--font-mono);font-size:10px;font-weight:600;
-          letter-spacing:.12em;text-transform:uppercase}
-.cat-score{font-family:var(--font-mono);font-size:11px;font-weight:600;padding:2px 8px;border:1px solid}
-.cat-body{padding:8px}
+/* RISING/FALLING bars */
+.movers{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.mover-section{background:var(--bg1);border:1px solid var(--b1);padding:16px 20px}
+.mover-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.12em;
+             text-transform:uppercase;margin-bottom:10px}
+.mover-rising{color:var(--green)}
+.mover-falling{color:var(--red)}
+.mover-list{display:flex;flex-wrap:wrap;gap:6px}
+.mover-tag{padding:4px 10px;font-family:var(--fm);font-size:10px;font-weight:600;
+           border:1px solid;letter-spacing:.06em}
+.mover-tag.rising{color:var(--green);border-color:var(--green);background:rgba(0,230,118,.08)}
+.mover-tag.falling{color:var(--red);border-color:var(--red);background:rgba(255,68,68,.08)}
 
-/* heatmap cell */
-.hm-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
-.hm-cell{padding:5px 4px;text-align:center;cursor:pointer;transition:all .12s;position:relative}
-.hm-cell:hover{filter:brightness(1.3)}
-.hm-cell-term{font-family:var(--font-mono);font-size:9px;font-weight:600;
-              white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hm-cell-z{font-family:var(--font-mono);font-size:8px;margin-top:1px}
+/* DETAIL grid */
+.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media(max-width:1024px){.detail-grid{grid-template-columns:1fr}}
 
-/* ── TIMELINE HEATMAP ── */
-.timeline-section{background:var(--bg1);border:1px solid var(--b1);margin-bottom:12px;padding:12px}
-.tl-title{font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:.14em;
-          text-transform:uppercase;color:var(--t3);margin-bottom:10px}
-#timeline-canvas{width:100%;height:160px;display:block}
+.cat-section{background:var(--bg1);border:1px solid var(--b1)}
+.cat-hdr{padding:14px 18px;border-bottom:1px solid var(--b1);display:flex;
+         align-items:center;justify-content:space-between}
+.cat-name{font-family:var(--fm);font-size:12px;font-weight:600;letter-spacing:.1em;color:var(--t1)}
+.cat-meta{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.cat-body{padding:14px 18px}
+.cat-chart{height:80px;margin-bottom:12px}
+.cat-active{display:flex;flex-wrap:wrap;gap:5px}
+.cat-word{padding:3px 8px;font-family:var(--fm);font-size:10px;
+          background:var(--bg2);border:1px solid var(--b1);color:var(--t1)}
+.cat-word .z{color:var(--amber);margin-left:5px}
 
-/* ── DETAIL TOOLTIP ── */
-#radar-tooltip{
-  display:none;position:fixed;z-index:100;pointer-events:none;
-  background:#0c1220;border:1px solid #1a2840;padding:8px 12px;
-  font-family:var(--font-mono);font-size:10px;color:var(--t1);
-  min-width:180px;box-shadow:0 4px 20px rgba(0,0,0,.5)
-}
-#radar-tooltip strong{color:var(--cyan)}
-#radar-tooltip em{color:var(--amber);font-style:normal}
-
-/* ── CATEGORY INTENSITY BARS ── */
-.intensity-section{background:var(--bg1);border:1px solid var(--b1);
-                   margin-bottom:12px;padding:12px}
-.int-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.int-cat{font-family:var(--font-mono);font-size:10px;font-weight:600;width:130px;
-         text-transform:uppercase;letter-spacing:.06em}
-.int-bar-track{flex:1;height:8px;background:var(--b1);position:relative}
-.int-bar-fill{height:100%;transition:width .5s ease}
-.int-score{font-family:var(--font-mono);font-size:10px;width:36px;text-align:right}
-
-/* legend */
-.legend{display:flex;align-items:center;gap:12px;margin-bottom:12px;
-        font-family:var(--font-mono);font-size:9px;color:var(--t3)}
-.leg-cell{width:14px;height:14px;border:1px solid rgba(255,255,255,.1)}
+.empty{text-align:center;padding:30px;color:var(--t3);font-family:var(--fm);font-size:11px}
+.spinner{width:18px;height:18px;border:2px solid var(--b2);border-top-color:var(--cyan);
+         border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-
 <header>
-  <div class="brand">NEWSTREND <em>// SIGNAL INTELLIGENCE</em></div>
+  <div class="brand">NEWSTREND <em>// MACRO THEMES</em></div>
   <nav>
-    <a href="./index.html">TRENDS</a>
+    <a href="./index.html">DASHBOARD</a>
     <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
+    <a href="./ticker_detail.html">TICKER</a>
     <a href="./report.html">REPORT</a>
     <a href="./weekly.html">WEEKLY</a>
     <a href="./portfolio.html">PORTFOLIO</a>
-    <a href="./rising.html">RISING</a>
     <a href="./macro.html" class="on">MACRO</a>
   </nav>
-  <div class="hdr-right">
-    <div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);
-                font-size:10px;color:var(--green)">
-      <div class="live-dot"></div>LIVE
-    </div>
-    <div id="ts">—</div>
-  </div>
+  <div class="hdr-right"><div id="ts">—</div></div>
 </header>
 
-<div id="radar-tooltip"></div>
-
-<div class="page" id="page">
-  <div style="font-family:var(--font-mono);font-size:10px;color:var(--t3);
-              padding:8px 0 14px;display:flex;align-items:center;gap:16px">
-    <span>MACRO RADAR — category signal intensity</span>
-    <span id="data-note" style="color:var(--amber)"></span>
+<main>
+  <h2 style="font-family:var(--fm);font-size:14px;color:var(--t1);font-weight:600;
+             letter-spacing:.08em;margin-bottom:14px">🔥 TODAY'S TOP THEMES</h2>
+  <div class="top-themes" id="top-themes">
+    <div class="empty"><div class="spinner"></div>Loading themes...</div>
   </div>
 
-  <!-- Category intensity overview -->
-  <div class="intensity-section">
-    <div style="font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:.14em;
-                text-transform:uppercase;color:var(--t3);margin-bottom:10px">
-      CATEGORY INTENSITY TODAY
+  <div class="movers">
+    <div class="mover-section">
+      <div class="mover-title mover-rising">📈 RISING — past 3 days vs prior</div>
+      <div class="mover-list" id="rising-list"><span class="empty">—</span></div>
     </div>
-    <div id="intensity-bars"></div>
-  </div>
-
-  <!-- Color legend -->
-  <div class="legend">
-    <span>Z-SCORE:</span>
-    <div class="leg-cell" style="background:#0d1f10"></div><span>0–0.5</span>
-    <div class="leg-cell" style="background:#1a4020"></div><span>0.5–1</span>
-    <div class="leg-cell" style="background:#1e6030"></div><span>1–1.5</span>
-    <div class="leg-cell" style="background:#e8a000"></div><span>1.5–2.5</span>
-    <div class="leg-cell" style="background:#cc2222"></div><span>≥2.5 HOT</span>
-    <div class="leg-cell" style="background:#2244aa"></div><span>negative</span>
-  </div>
-
-  <!-- Category heatmap grid -->
-  <div class="radar-grid" id="radar-grid">
-    <div style="font-family:var(--font-mono);font-size:10px;color:var(--t3);padding:20px">
-      Loading…
+    <div class="mover-section">
+      <div class="mover-title mover-falling">📉 FALLING — past 3 days vs prior</div>
+      <div class="mover-list" id="falling-list"><span class="empty">—</span></div>
     </div>
   </div>
 
-  <!-- Timeline heatmap: top terms × last 14 days -->
-  <div class="timeline-section">
-    <div class="tl-title">SIGNAL TIMELINE — top terms × last 14 days</div>
-    <canvas id="timeline-canvas"></canvas>
-  </div>
-</div>
+  <h2 style="font-family:var(--fm);font-size:14px;color:var(--t1);font-weight:600;
+             letter-spacing:.08em;margin-bottom:14px;margin-top:24px">📊 ALL THEMES — 30-day trend</h2>
+  <div class="detail-grid" id="detail-grid"></div>
+</main>
 
 <script>
 (function(){
 'use strict';
+const V = Date.now();
 
-const V = Date.now(), BASE = './data/';
-
-// ── Category definitions ──────────────────────────────────────────────────────
-const CATEGORIES = {
-  'MONETARY POLICY': {
-    color:'#00d4ff',
-    terms:['inflation','rates','fed','fomc','hike','cut','pivot','tapering','qe','qt',
-           'treasury','yield','curve','terminal','neutral','restrictive','accommodative',
-           'boe','ecb','boj','pboc','rba','rbi','hawkish','dovish','cpi','pce','core']
-  },
-  'FISCAL / GOVT': {
-    color:'#4d9fff',
-    terms:['deficit','debt','spending','budget','congress','senate','stimulus','infrastructure',
-           'subsidy','regulation','deregulation','tariff','sanction','sanctions','tax',
-           'appropriations','ceiling','shutdown','treasury','fiscal']
-  },
-  'GEOPOLITICAL': {
-    color:'#ff4444',
-    terms:['war','conflict','nato','missile','nuclear','troops','ceasefire','invasion',
-           'taiwan','chip','semiconductor','export','ban','alliance','tension','crisis',
-           'iran','israel','gaza','middle','east','pacific','arctic','strait']
-  },
-  'COMMODITIES': {
-    color:'#ffb300',
-    terms:['oil','crude','opec','brent','wti','gas','natural','energy','coal','uranium',
-           'gold','silver','copper','iron','steel','wheat','corn','soybean','lithium',
-           'cobalt','rare','earth','aluminum','nickel','platinum']
-  },
-  'TECHNOLOGY': {
-    color:'#00e676',
-    terms:['ai','chip','semiconductor','nvidia','intel','tsmc','arm','quantum','cloud',
-           'data','cyber','hack','breach','regulation','antitrust','ipo','startup',
-           'venture','robot','automation','autonomous','electric','battery','solar']
-  },
-  'FINANCIAL MARKETS': {
-    color:'#b39ddb',
-    terms:['earnings','revenue','profit','margin','guidance','outlook','beat','miss',
-           'buyback','dividend','merger','acquisition','ipo','spac','leverage','credit',
-           'spread','default','liquidity','volatility','vix','rally','selloff','correction']
-  },
-  'MACRO INDICATORS': {
-    color:'#ff9100',
-    terms:['gdp','growth','recession','unemployment','payroll','nonfarm','pmi','ism',
-           'retail','sales','housing','construction','manufacturing','services','trade',
-           'balance','current','account','surplus','import','export','consumer']
-  },
-  'CRYPTO / DIGITAL': {
-    color:'#ea80fc',
-    terms:['bitcoin','ethereum','crypto','defi','nft','blockchain','stablecoin','cbdc',
-           'mining','wallet','exchange','sec','etf','spot','halving','protocol','layer']
-  },
+const EMOJI = {
+  GEOPOLITICS:"🌍", POLITICS:"🏛️", MACRO:"📈", TRADE:"📦",
+  TECH:"💻", ENERGY:"⚡", FINANCE:"💰", CRYPTO:"₿",
+  HEALTH:"🏥", DISASTER:"🌪️"
 };
 
-let T = null;
-const tooltip = document.getElementById('radar-tooltip');
-
-async function fetchJSON(p){
-  try{
-    const r = await fetch(BASE+p+'?v='+V,{cache:'no-store'});
-    if(!r.ok) return null;
-    return r.json();
-  }catch(e){ return null; }
-}
-
-// ── Z → cell color ────────────────────────────────────────────────────────────
-function zColor(z){
-  if(z >= 3.0) return ['#cc2222','#ff8888'];
-  if(z >= 2.0) return ['#882200','#ffaa44'];
-  if(z >= 1.5) return ['#6b5500','#e8a000'];
-  if(z >= 1.0) return ['#1e6030','#44dd88'];
-  if(z >= 0.5) return ['#1a4020','#33bb66'];
-  if(z >= 0.0) return ['#0d1f10','#22aa55'];
-  if(z >= -1.0) return ['#0a1830','#4466aa'];
-  return ['#060d1a','#2244aa'];
-}
-
-// ── Category intensity score ──────────────────────────────────────────────────
-function catScore(catTerms, zscores){
-  const vals = catTerms.map(t => zscores[t] || 0).filter(z => z > 0);
-  if(!vals.length) return 0;
-  const topK = vals.sort((a,b)=>b-a).slice(0,5);
-  return Math.round(topK.reduce((a,b)=>a+b,0) / topK.length * 10) / 10;
-}
-
-// ── Init ──────────────────────────────────────────────────────────────────────
 async function init(){
-  document.getElementById('ts').textContent =
-    'UPDATED '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('ts').textContent = 'UPDATED ' +
+    new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
 
-  T = await fetchJSON('trends.json');
-  if(!T){ document.getElementById('radar-grid').innerHTML =
-    '<div style="color:var(--t3);font-family:var(--font-mono);font-size:10px">trends.json not found</div>';
+  let data;
+  try {
+    const r = await fetch(`./data/macro_themes.json?v=${V}`, {cache:'no-store'});
+    if (!r.ok) throw new Error();
+    data = await r.json();
+  } catch(e) {
+    document.getElementById('top-themes').innerHTML =
+      '<div class="empty">Run: python scripts/macro_themes.py</div>';
     return;
   }
 
-  const nD = (T.dates||[]).length;
-  document.getElementById('data-note').textContent =
-    nD < 60 ? `⚠ ${nD} days — heatmap patterns become meaningful at 60+ days` : `${nD} days of data`;
-
-  renderIntensityBars();
-  renderCategoryGrid();
-  renderTimeline();
+  renderTopThemes(data.top_themes_today || []);
+  renderMovers(data.rising_themes || [], data.falling_themes || []);
+  renderDetailGrid(data.categories || {});
 }
 
-// ── Intensity bars overview ───────────────────────────────────────────────────
-function renderIntensityBars(){
-  const zscores = T.zscores || {};
-  const box = document.getElementById('intensity-bars');
-
-  const cats = Object.entries(CATEGORIES).map(([name, {color, terms}]) => ({
-    name, color, score: catScore(terms, zscores)
-  })).sort((a,b) => b.score - a.score);
-
-  const maxScore = Math.max(...cats.map(c=>c.score), 1);
-
-  box.innerHTML = cats.map(c => {
-    const w = Math.round((c.score / maxScore) * 100);
-    const scoreColor = c.score >= 2 ? 'var(--red)' : c.score >= 1 ? 'var(--amber)' : 'var(--t2)';
-    return `<div class="int-row">
-      <span class="int-cat" style="color:${c.color}">${c.name}</span>
-      <div class="int-bar-track">
-        <div class="int-bar-fill" style="width:${w}%;background:${c.color}55;
-             border-right:2px solid ${c.color}"></div>
-      </div>
-      <span class="int-score" style="color:${scoreColor}">${c.score.toFixed(1)}σ</span>
+function renderTopThemes(top){
+  const html = top.map((t, i) => {
+    const emoji = EMOJI[t.category] || '•';
+    return `<div class="theme-card rank${i+1}">
+      <div class="theme-emoji">${emoji}</div>
+      <div class="theme-name">${t.category}</div>
+      <div class="theme-score">${t.score.toFixed(1)}<span style="font-size:11px;color:var(--t3)">σ</span></div>
+      ${t.top_word ? `<div class="theme-top-word">→ ${t.top_word}</div>` : ''}
     </div>`;
   }).join('');
+  document.getElementById('top-themes').innerHTML =
+    html || '<div class="empty">No active themes today</div>';
 }
 
-// ── Category heatmap grid ─────────────────────────────────────────────────────
-function renderCategoryGrid(){
-  const zscores = T.zscores || {};
-  const slopes  = T.slopes  || {};
-  const today   = T.today   || {};
-  const grid    = document.getElementById('radar-grid');
+function renderMovers(rising, falling){
+  const r = rising.map(c => `<span class="mover-tag rising">${EMOJI[c]||''} ${c}</span>`).join('');
+  const f = falling.map(c => `<span class="mover-tag falling">${EMOJI[c]||''} ${c}</span>`).join('');
+  document.getElementById('rising-list').innerHTML = r || '<span class="empty">No rising themes</span>';
+  document.getElementById('falling-list').innerHTML = f || '<span class="empty">No falling themes</span>';
+}
 
-  grid.innerHTML = Object.entries(CATEGORIES).map(([name, {color, terms}]) => {
-    const scored = terms.map(t => ({
-      term: t,
-      z:    zscores[t] || 0,
-      sl:   slopes[t]  || 0,
-      tc:   today[t]   || 0,
-    })).sort((a,b) => Math.abs(b.z) - Math.abs(a.z));
+function renderDetailGrid(categories){
+  const grid = document.getElementById('detail-grid');
+  const sorted = Object.entries(categories).sort((a,b) => b[1].today_score - a[1].today_score);
 
-    const score = catScore(terms, zscores);
-    const scoreColor = score >= 2 ? 'var(--red)' : score >= 1 ? 'var(--amber)' : 'var(--t2)';
-    const scoreBorder= score >= 2 ? 'rgba(255,68,68,.4)' : score >= 1 ? 'rgba(255,179,0,.4)' : 'var(--b2)';
+  const html = sorted.map(([cat, data]) => {
+    const trendClass = data.trend === 'rising' ? 'tr-rising' :
+                       data.trend === 'falling' ? 'tr-falling' : 'tr-stable';
+    const trendArrow = data.trend === 'rising' ? '▲' :
+                       data.trend === 'falling' ? '▼' : '─';
 
-    const cells = scored.slice(0, 15).map(({term, z, sl, tc}) => {
-      const [bg, fc] = zColor(z);
-      const known = zscores[term] !== undefined;
-      if(!known) return `<div class="hm-cell" style="background:#0a0d12;opacity:.3">
-        <div class="hm-cell-term" style="color:var(--t3)">${term}</div>
-        <div class="hm-cell-z" style="color:var(--t3)">—</div>
-      </div>`;
-      return `<div class="hm-cell" style="background:${bg}"
-          data-term="${term}" data-z="${z.toFixed(2)}" data-sl="${sl.toFixed(3)}" data-tc="${tc}">
-        <div class="hm-cell-term" style="color:${fc}">${term}</div>
-        <div class="hm-cell-z" style="color:${fc}88">${z>=0?'+':''}${z.toFixed(1)}σ</div>
-      </div>`;
-    }).join('');
+    const wordsHtml = (data.active_words || []).map(w =>
+      `<span class="cat-word">${w.word}<span class="z">${w.z>0?'+':''}${w.z.toFixed(1)}σ</span></span>`
+    ).join('') || '<span style="font-family:var(--fm);font-size:10px;color:var(--t3)">No active words</span>';
 
-    return `<div class="cat-block">
+    return `<div class="cat-section">
       <div class="cat-hdr">
-        <span class="cat-name" style="color:${color}">${name}</span>
-        <span class="cat-score" style="color:${scoreColor};border-color:${scoreBorder}">
-          ${score.toFixed(1)}σ</span>
+        <div class="cat-name">${EMOJI[cat]||''} ${cat}</div>
+        <div class="cat-meta">
+          <span class="${trendClass}">${trendArrow} ${data.trend}</span>
+          · today <span style="color:var(--t1)">${data.today_score.toFixed(1)}</span>
+          · 7d avg <span style="color:var(--t1)">${data.week_avg.toFixed(1)}</span>
+        </div>
       </div>
       <div class="cat-body">
-        <div class="hm-grid">${cells}</div>
+        <div class="cat-chart"><canvas id="chart-${cat}"></canvas></div>
+        <div class="cat-active">${wordsHtml}</div>
       </div>
     </div>`;
   }).join('');
 
-  // Tooltip on hover
-  grid.querySelectorAll('.hm-cell[data-term]').forEach(el => {
-    el.addEventListener('mouseenter', e => {
-      const {term, z, sl, tc} = e.currentTarget.dataset;
-      tooltip.innerHTML = `<strong>${term}</strong><br>
-        z-score: <em>${parseFloat(z)>=0?'+':''}${parseFloat(z).toFixed(3)}σ</em><br>
-        slope: ${parseFloat(sl)>=0?'+':''}${parseFloat(sl).toFixed(4)}<br>
-        today: ${tc} mentions`;
-      tooltip.style.display = 'block';
+  grid.innerHTML = html;
+
+  // 차트 그리기 (DOM 추가 후)
+  setTimeout(() => {
+    sorted.forEach(([cat, data]) => {
+      const canvas = document.getElementById(`chart-${cat}`);
+      if (!canvas || !data.daily) return;
+      const ctx = canvas.getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.daily.map(d => d.date.slice(5)),
+          datasets: [{
+            data: data.daily.map(d => d.score),
+            borderColor: '#00d4ff',
+            backgroundColor: 'rgba(0,212,255,0.1)',
+            borderWidth: 1.5,
+            fill: true,
+            pointRadius: 0,
+            tension: 0.3,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {legend: {display:false}, tooltip: {
+            backgroundColor:'#0c1220', borderColor:'#1a2840', borderWidth:1,
+            titleFont:{family:'IBM Plex Mono',size:9},
+            bodyFont:{family:'IBM Plex Mono',size:9},
+          }},
+          scales: {
+            x: {display:false},
+            y: {display:false, beginAtZero:true},
+          }
+        }
+      });
     });
-    el.addEventListener('mousemove', e => {
-      tooltip.style.left = (e.clientX + 14) + 'px';
-      tooltip.style.top  = (e.clientY - 10) + 'px';
-    });
-    el.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
-  });
-}
-
-// ── Timeline heatmap: top 20 terms × last 14 days ────────────────────────────
-function renderTimeline(){
-  const cv  = document.getElementById('timeline-canvas');
-  const ctx = cv.getContext('2d');
-  const zscores = T.zscores || {};
-  const series  = T.series  || {};
-  const dates   = T.dates   || [];
-
-  // Top 20 by |z-score|
-  const top = Object.entries(zscores)
-    .sort((a,b) => Math.abs(b[1]) - Math.abs(a[1]))
-    .slice(0, 20).map(([t]) => t);
-
-  const last14 = dates.slice(-14);
-  const W = cv.parentElement.clientWidth;
-  const ROWS = top.length;
-  const COLS = last14.length;
-  const cellW = Math.floor((W - 80) / COLS);
-  const cellH = 8;
-  const H     = ROWS * (cellH + 1) + 24;
-
-  cv.width  = W;
-  cv.height = H;
-  ctx.clearRect(0, 0, W, H);
-
-  // Draw cells
-  top.forEach((term, row) => {
-    const counts = series[term] || [];
-    const dateMap = {};
-    dates.forEach((d,i) => dateMap[d] = counts[i] || 0);
-
-    // Rolling z for each of last 14
-    last14.forEach((d, col) => {
-      const di = dates.indexOf(d);
-      if(di < 0) return;
-      const hist = counts.slice(Math.max(0, di-28), di);
-      const mean = hist.length ? hist.reduce((a,b)=>a+b,0)/hist.length : 0;
-      const std  = hist.length ? Math.sqrt(hist.reduce((a,b)=>a+(b-mean)**2,0)/hist.length) : 0;
-      const z    = std > 0.5 ? (counts[di]-mean)/std : 0;
-
-      const [bg] = zColor(z);
-      ctx.fillStyle = bg;
-      ctx.fillRect(80 + col*cellW, row*(cellH+1), cellW-1, cellH);
-    });
-
-    // Term label
-    ctx.fillStyle = '#6a8aa8';
-    ctx.font = '9px IBM Plex Mono';
-    ctx.fillText(term, 0, row*(cellH+1) + cellH - 1);
-  });
-
-  // Date labels
-  ctx.fillStyle = '#344a60';
-  ctx.font = '8px IBM Plex Mono';
-  last14.forEach((d, col) => {
-    const label = d.slice(5); // MM-DD
-    ctx.fillText(label, 80 + col*cellW, H - 4);
-  });
+  }, 50);
 }
 
 init();
