@@ -389,10 +389,10 @@ function renderHeroThemes(themes){
     '<div style="font-family:var(--fm);font-size:10px;color:var(--t3)">No active themes</div>';
 }
 
-function init(){
+async function init(){
   const tsEl = document.getElementById('unified-ts') || document.getElementById('ts');
-  if (tsEl) tsEl.textContent = 'UPDATED ' +
-    new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
+  if (tsEl) tsEl.textContent = 'UPDATED ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
+
 
   const [pred, trends, weights, weekly, themes] = await Promise.all([
     fetchJSON('predictions.json'),
