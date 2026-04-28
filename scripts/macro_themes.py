@@ -44,64 +44,237 @@ from pathlib import Path
 
 CATEGORIES = {
     "GEOPOLITICS": [
-        "war", "wars", "military", "attack", "missile", "weapon", "weapons",
-        "iran", "russia", "ukraine", "china", "chinese", "korea", "korean",
-        "israel", "gaza", "syria", "iraq", "afghanistan", "putin", "xi",
-        "sanctions", "sanction", "diplomatic", "embassy", "hostage",
-        "ceasefire", "treaty", "border",
+        # 전쟁/군사
+        "war", "wars", "warfare", "military", "army", "navy", "marines",
+        "attack", "attacks", "missile", "missiles", "weapon", "weapons",
+        "drone", "drones", "ammunition", "tank", "tanks", "soldier", "soldiers",
+        "troops", "deployment", "invasion", "strike", "strikes", "bomb", "bombing",
+        "rocket", "rockets", "airstrike",
+        # 국가/지역
+        "iran", "iranian", "russia", "russian", "moscow", "kremlin",
+        "ukraine", "ukrainian", "kyiv", "china", "chinese", "beijing",
+        "korea", "korean", "pyongyang", "seoul", "north", "south",
+        "israel", "israeli", "tel", "aviv", "jerusalem", "gaza", "palestinian",
+        "syria", "syrian", "damascus", "iraq", "iraqi", "baghdad",
+        "afghanistan", "kabul", "yemen", "yemeni", "lebanon", "hezbollah",
+        "taiwan", "taiwanese", "venezuela", "cuba", "saudi", "arabia",
+        "turkey", "turkish", "egypt", "qatar", "uae",
+        # 인물
+        "putin", "zelensky", "netanyahu", "khamenei", "kim", "jong",
+        "erdogan", "macron", "scholz",
+        # 외교/제재
+        "sanctions", "sanction", "embargo", "diplomatic", "diplomacy",
+        "embassy", "consulate", "ambassador", "hostage", "captive",
+        "ceasefire", "armistice", "treaty", "alliance", "nato", "pact",
+        "border", "borders", "refugee", "refugees", "asylum", "exile",
+        "summit", "meeting", "negotiation", "negotiations", "talks",
+        "intelligence", "espionage", "spy", "spies",
     ],
     "POLITICS": [
-        "trump", "donald", "biden", "harris", "obama", "kamala",
-        "congress", "senate", "house", "speaker", "republican", "democrat",
-        "democratic", "republicans", "democrats", "election", "vote", "votes",
-        "voter", "voters", "campaign", "primary", "presidential",
-        "impeachment", "investigation", "indictment", "subpoena",
+        # 미국 정치인
+        "trump", "donald", "melania", "ivanka", "vance",
+        "biden", "joe", "harris", "kamala", "obama", "barack", "michelle",
+        "clinton", "hillary", "pence", "desantis", "ramaswamy",
+        "newsom", "abbott", "whitmer",
+        # 정부/기관
+        "congress", "senate", "house", "speaker", "majority", "minority",
+        "republican", "democrat", "democratic", "republicans", "democrats",
+        "gop", "dnc", "rnc", "filibuster", "caucus",
+        # 선거
+        "election", "elections", "vote", "votes", "voted", "voter", "voters",
+        "voting", "ballot", "ballots", "campaign", "campaigning", "primary",
+        "primaries", "presidential", "midterm", "midterms",
+        "polls", "polling", "candidate", "candidates", "incumbent",
+        # 입법/사법
+        "law", "laws", "bill", "bills", "legislation", "legislative",
+        "act", "acts", "amendment", "amendments", "veto", "executive",
+        "order", "orders", "ruling", "rulings", "verdict", "verdicts",
+        "supreme", "court", "justice", "justices", "scotus",
+        # 스캔들/조사
+        "impeachment", "impeach", "investigation", "investigations", "probe",
+        "indictment", "indicted", "subpoena", "subpoenaed", "testimony",
+        "hearing", "hearings", "scandal", "controversy", "leaked",
+        "whistleblower", "perjury",
+        # 정책
+        "policy", "policies", "regulation", "regulations", "regulatory",
+        "deregulation", "reform", "reforms", "mandate", "mandates",
     ],
     "MACRO": [
-        "fed", "federal", "powell", "rate", "rates", "inflation", "deflation",
-        "gdp", "cpi", "ppi", "pce", "unemployment", "jobs", "payroll", "payrolls",
-        "recession", "growth", "stagflation", "yield", "yields", "treasury",
-        "treasuries", "balance", "stimulus", "deficit", "debt",
+        # 중앙은행
+        "fed", "federal", "reserve", "fomc", "powell", "yellen",
+        "ecb", "boe", "boj", "pboc", "lagarde", "ueda",
+        # 금리
+        "rate", "rates", "hike", "hikes", "cut", "cuts", "raise",
+        "tightening", "easing", "dovish", "hawkish", "neutral",
+        "yield", "yields", "spread", "curve", "inverted",
+        # 인플레이션
+        "inflation", "deflation", "disinflation", "stagflation",
+        "cpi", "ppi", "pce", "core",
+        # 경제 지표
+        "gdp", "gnp", "pmi", "ism", "ifo", "consumer", "confidence",
+        "sentiment", "retail", "production", "manufacturing", "services",
+        "unemployment", "employment", "jobs", "payroll", "payrolls",
+        "nonfarm", "claims", "jobless", "hiring", "wages", "earnings",
+        "labor", "workforce",
+        # 경기
+        "recession", "depression", "expansion", "contraction", "growth",
+        "slowdown", "rebound", "recovery", "boom", "bust", "downturn",
+        # 국채/부채
+        "treasury", "treasuries", "bond", "bonds", "deficit", "surplus",
+        "debt", "borrowing", "issuance", "auction", "stimulus", "relief",
     ],
     "TRADE": [
-        "tariff", "tariffs", "trade", "deal", "deals", "import", "imports",
-        "export", "exports", "supply", "chain", "manufacturing", "factory",
-        "factories", "wto", "agreement", "negotiation", "negotiations",
+        # 관세/무역
+        "tariff", "tariffs", "duty", "duties", "trade", "trading",
+        "deal", "deals", "agreement", "agreements", "pact", "treaty",
+        "import", "imports", "importing", "export", "exports", "exporting",
+        "shipment", "shipments", "shipping", "container", "containers",
+        # 공급망
+        "supply", "supplies", "chain", "chains", "logistics", "warehouse",
+        "manufacturing", "manufacturer", "manufacturers", "factory",
+        "factories", "production", "assembly", "components", "parts",
+        "materials", "raw", "inputs",
+        # 기관/협정
+        "wto", "imf", "worldbank", "nafta", "usmca", "tpp", "rcep",
+        "negotiation", "negotiations", "deal", "deals",
+        # 통상 분쟁
+        "dispute", "retaliation", "retaliatory", "subsidy", "subsidies",
+        "dumping", "antidumping", "quota", "quotas", "ban", "banned",
+        "restriction", "restrictions", "blacklist",
     ],
     "TECH": [
-        "ai", "artificial", "intelligence", "chip", "chips", "semiconductor",
-        "semiconductors", "software", "cloud", "cyber", "hack", "hacked",
-        "data", "algorithm", "model", "models", "openai", "google", "microsoft",
-        "apple", "nvidia", "meta", "tesla", "amazon", "tech", "startup",
+        # AI/ML
+        "ai", "artificial", "intelligence", "machine", "learning",
+        "model", "models", "llm", "gpt", "chatbot", "chatgpt",
+        "openai", "anthropic", "claude", "gemini", "copilot", "generative",
+        "neural", "algorithm", "algorithms", "training", "inference",
+        # 반도체
+        "chip", "chips", "semiconductor", "semiconductors", "fab", "foundry",
+        "wafer", "wafers", "node", "lithography", "tsmc", "asml", "samsung",
+        # 기업
+        "google", "alphabet", "microsoft", "apple", "nvidia", "meta",
+        "tesla", "amazon", "netflix", "uber", "airbnb", "openai", "anthropic",
+        "spacex", "tiktok", "bytedance", "tencent", "alibaba",
+        # 인물
+        "musk", "zuckerberg", "bezos", "pichai", "nadella", "altman",
+        "huang", "cook", "tim",
+        # 기술 분야
+        "software", "hardware", "cloud", "computing", "saas", "iaas",
+        "cybersecurity", "cyber", "hack", "hacked", "hacking", "breach",
+        "ransomware", "phishing", "malware",
+        "data", "database", "analytics", "platform", "api", "open", "source",
+        "blockchain", "metaverse", "vr", "ar", "robotics", "robot", "automation",
+        "5g", "6g", "broadband", "satellite", "starlink",
+        # 칩 관련 단어
+        "gpu", "cpu", "tpu", "accelerator", "transistor", "memory",
+        "ddr", "hbm", "nand", "dram",
     ],
     "ENERGY": [
-        "oil", "gas", "opec", "energy", "solar", "nuclear", "power",
-        "electricity", "grid", "renewable", "battery", "lithium", "barrel",
-        "barrels", "drilling", "pipeline", "exxon", "chevron", "saudi",
+        # 화석 연료
+        "oil", "crude", "petroleum", "barrel", "barrels", "wti", "brent",
+        "gas", "gasoline", "diesel", "lng", "natgas", "natural",
+        "coal", "fossil", "fuel", "fuels", "refinery", "refining",
+        "drilling", "rig", "rigs", "shale", "fracking", "pipeline", "pipelines",
+        # OPEC/생산국
+        "opec", "saudi", "venezuela", "iran", "iraq", "russia", "uae",
+        "kuwait", "qatar", "production", "output", "quota", "quotas",
+        # 재생/원전
+        "solar", "wind", "hydro", "geothermal", "renewable", "renewables",
+        "clean", "green", "carbon", "emission", "emissions", "co2",
+        "nuclear", "uranium", "reactor", "reactors", "plant", "plants",
+        "battery", "batteries", "lithium", "cobalt", "ev", "electric",
+        # 기업
+        "exxon", "exxonmobil", "chevron", "bp", "shell", "totalenergies",
+        "aramco", "occidental", "conocophillips",
+        # 인프라
+        "grid", "power", "electricity", "utility", "utilities", "transmission",
+        "storage", "capacity", "generation",
     ],
     "FINANCE": [
-        "bank", "banks", "banking", "financial", "credit", "loan", "loans",
-        "mortgage", "bond", "bonds", "dollar", "dollars", "currency", "fx",
-        "forex", "investor", "investors", "investment", "ipo", "merger",
-        "acquisition", "buyback", "dividend", "earnings", "revenue", "profit",
+        # 은행/금융기관
+        "bank", "banks", "banking", "lender", "lenders", "lending",
+        "jpmorgan", "chase", "citigroup", "citi", "wells", "fargo",
+        "goldman", "sachs", "morgan", "stanley", "blackrock", "vanguard",
+        "bofa", "bank of america", "ubs", "credit", "suisse", "deutsche",
+        # 신용/대출
+        "loan", "loans", "mortgage", "mortgages", "credit", "creditcard",
+        "default", "defaults", "delinquency", "foreclosure",
+        # 채권/통화
+        "bond", "bonds", "yield", "yields", "treasury", "treasuries",
+        "junk", "investment", "grade", "high", "yield",
+        "dollar", "dollars", "euro", "yen", "yuan", "pound", "currency",
+        "currencies", "fx", "forex", "exchange",
+        # 투자/거래
+        "investor", "investors", "investment", "investments",
+        "ipo", "listing", "spac", "merger", "mergers", "acquisition",
+        "acquisitions", "buyback", "buybacks", "dividend", "dividends",
+        "earnings", "revenue", "revenues", "profit", "profits", "loss", "losses",
+        "guidance", "outlook", "forecast",
+        # 증시
+        "stock", "stocks", "market", "markets", "index", "indices",
+        "rally", "selloff", "correction", "bubble", "crash", "volatility",
+        "vix", "options", "futures", "derivative", "hedge",
+        "sec", "regulator", "regulators", "compliance",
     ],
     "CRYPTO": [
-        "bitcoin", "btc", "crypto", "cryptocurrency", "ethereum", "eth",
-        "blockchain", "wallet", "exchange", "binance", "coinbase", "stablecoin",
-        "defi", "nft", "mining",
+        "bitcoin", "btc", "satoshi", "halving", "crypto", "cryptocurrency",
+        "cryptocurrencies", "ethereum", "eth", "vitalik", "buterin",
+        "blockchain", "ledger", "wallet", "wallets", "exchange", "exchanges",
+        "binance", "coinbase", "kraken", "bitfinex", "huobi", "okx",
+        "stablecoin", "stablecoins", "tether", "usdt", "usdc", "dai",
+        "defi", "decentralized", "dex", "yield", "farming", "staking",
+        "nft", "nfts", "token", "tokens", "tokenization", "ico",
+        "mining", "miner", "miners", "hashrate", "proof", "stake", "work",
+        "altcoin", "altcoins", "solana", "cardano", "polkadot", "ripple",
+        "xrp", "doge", "dogecoin", "shiba", "memecoin",
+        "regulation", "etf", "spot", "futures", "halving",
+        "bull", "bear", "moon", "pump", "dump", "fud", "hodl",
     ],
     "HEALTH": [
-        "pandemic", "virus", "covid", "vaccine", "vaccines", "health",
-        "drug", "drugs", "fda", "medical", "hospital", "patient", "patients",
-        "outbreak", "disease", "treatment",
+        # 감염병
+        "pandemic", "epidemic", "outbreak", "virus", "viral", "infection",
+        "covid", "coronavirus", "sars", "flu", "influenza", "rsv",
+        "monkeypox", "ebola", "measles", "polio", "tuberculosis",
+        # 백신/치료
+        "vaccine", "vaccines", "vaccination", "booster", "shot", "shots",
+        "jab", "jabs", "immunity", "antibody", "antibodies",
+        "drug", "drugs", "pharmaceutical", "pharmaceuticals", "pharma",
+        "treatment", "therapy", "therapies", "trial", "trials", "clinical",
+        # 기관/규제
+        "fda", "cdc", "who", "nih", "ema", "mhra",
+        "approval", "approved", "rejected", "recall", "warning",
+        # 의료
+        "hospital", "hospitals", "clinic", "clinics", "doctor", "doctors",
+        "physician", "nurse", "patient", "patients", "icu", "emergency",
+        "surgery", "surgeon", "diagnosis", "diagnostic",
+        "disease", "diseases", "cancer", "diabetes", "obesity", "alzheimer",
+        "mental", "depression", "anxiety", "addiction", "opioid",
+        "insurance", "medicare", "medicaid", "insulin", "obamacare",
     ],
     "DISASTER": [
-        "earthquake", "flood", "floods", "hurricane", "tornado", "fire",
-        "fires", "wildfire", "climate", "warming", "drought", "tsunami",
-        "disaster", "evacuation", "damage",
+        # 자연재해
+        "earthquake", "earthquakes", "quake", "tremor", "aftershock",
+        "tsunami", "tsunamis", "flood", "floods", "flooding",
+        "hurricane", "hurricanes", "typhoon", "cyclone", "storm", "storms",
+        "tornado", "tornados", "tornadoes",
+        "fire", "fires", "wildfire", "wildfires", "blaze",
+        "drought", "droughts", "famine",
+        "volcano", "eruption", "lava", "ash",
+        "landslide", "avalanche", "mudslide",
+        # 기후
+        "climate", "warming", "global", "heat", "heatwave", "cold",
+        "freeze", "blizzard", "snowstorm",
+        "carbon", "co2", "emission", "emissions", "greenhouse",
+        "ipcc", "cop", "kyoto", "paris", "agreement",
+        # 인공/기술 재난
+        "explosion", "explosions", "blast", "spill", "spills", "leak",
+        "contamination", "radiation", "nuclear", "chemical",
+        "crash", "crashes", "collision", "derailment",
+        "evacuation", "evacuated", "rescue", "casualty", "casualties",
+        "damage", "destruction", "victim", "victims",
+        "fema", "disaster", "emergency", "alert",
     ],
 }
-
 
 def zscore_at(counts, i, window=28):
     if i < 3 or i >= len(counts):
