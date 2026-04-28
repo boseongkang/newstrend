@@ -107,48 +107,6 @@ jobs:
       - name: Overwrite index with custom dashboard
         run: cp site/index_custom.html site/index.html
 
-      - name: Join prices
-        run: |
-          python - <<'PY'
-          import pandas as pd, os
-          df = pd.read_csv("run/tokens_by_day.cleaned.csv")
-          s = pd.to_datetime(df['date']).min().date()
-          e = pd.to_datetime(df['date']).max().date()
-          with open(os.environ["GITHUB_ENV"], "a") as fh:
-              fh.write(f"START={s}\n")
-              fh.write(f"END={e}\n")
-          PY
-          python scripts/join_prices.py \
-            --terms run/tokens_by_day.cleaned.csv \
-            --map   config/ticker_aliases.json \
-            --start "$START" \
-            --end   "$END" \
-            --out   run/prices.csv \
-            --min-days 1          
-
-      - name: Export prices.json
-        run: |
-          python - <<'PY'
-          import pandas as pd, json, pathlib, sys
-          base = pathlib.Path("run")/"prices.csv"
-          td = pd.read_csv(base/"ticker_daily.csv")
-          date_col, tick_col = "date", "ticker"
-          cand = ["close","Close","Adj Close","adj_close","price","Price"]
-          val_col = next((c for c in cand if c in td.columns), None)
-          if val_col is None:
-              raise SystemExit("no price column found")
-          td = td[[date_col, tick_col, val_col]].rename(columns={val_col: "close"})
-          dates   = sorted(td[date_col].unique().tolist())
-          tickers = sorted(td[tick_col].unique().tolist())
-          pv = (td.pivot(index=date_col, columns=tick_col, values="close")
-                  .reindex(dates)
-                  .reindex(columns=tickers))
-          close = {t: [None if pd.isna(v) else float(v) for v in pv[t].tolist()] for t in tickers}
-          out = {"dates": dates, "tickers": tickers, "close": close}
-          outp = pathlib.Path("site/data"); outp.mkdir(parents=True, exist_ok=True)
-          (outp/"prices.json").write_text(json.dumps(out, indent=2, ensure_ascii=False))
-          PY
-
       - name: Fetch latest prices
         run: |
           python scripts/fetch_prices.py \
