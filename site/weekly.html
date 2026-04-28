@@ -178,7 +178,8 @@ async function load(){
 
 function render(d){
   const gen = new Date(d.generated);
-  document.getElementById('ts').textContent = 'GENERATED ' + gen.toLocaleDateString();
+  const _tsEl = document.getElementById('unified-ts') || document.getElementById('ts');
+  if (_tsEl) _tsEl.textContent = 'GENERATED ' + gen.toLocaleDateString();
   const s = d.stats || {};
 
   const html = `

@@ -135,53 +135,90 @@ main{max-width:1400px;margin:0 auto;padding:20px 24px}
          border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* === UNIFIED HEADER STYLE === */
-.unified-header{
-  height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
-  background:var(--bg1, #0c1220);border-bottom:1px solid var(--b1, #1a2840);
-  position:sticky;top:0;z-index:100;font-family:var(--fs, 'IBM Plex Sans', sans-serif);
+/* ── MODAL ──────────────────────────────────────────────────────────────── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;
+  animation:fadeIn 0.2s ease-out;
 }
-.unified-header .brand{
-  font-family:var(--fm, 'IBM Plex Mono', monospace);
-  font-size:14px;font-weight:600;color:var(--cyan, #00d4ff);letter-spacing:.06em;
+.modal-overlay.show{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal{
+  background:var(--bg1);border:1px solid var(--b2);max-width:720px;width:100%;
+  max-height:85vh;overflow-y:auto;animation:slideUp 0.25s ease-out;
 }
-.unified-header .brand em{
-  color:var(--t3, #344a60);font-style:normal;font-weight:300;margin-left:6px;
+.modal-hdr{
+  padding:18px 24px;border-bottom:1px solid var(--b1);display:flex;
+  align-items:center;justify-content:space-between;background:var(--bg2);
+  position:sticky;top:0;z-index:1;
 }
-.unified-header nav{display:flex;gap:2px;flex-wrap:wrap;}
-.unified-header nav a{
-  font-family:var(--fm, 'IBM Plex Mono', monospace);
-  font-size:10px;font-weight:500;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--t2, #6a8aa8);text-decoration:none;
-  padding:6px 12px;border:1px solid transparent;transition:all .12s;
-}
-.unified-header nav a:hover,
-.unified-header nav a.on{
-  color:var(--cyan, #00d4ff);border-color:var(--b2, #223050);
-  background:var(--bg2, #101828);
-}
-.unified-header .hdr-right{
-  margin-left:auto;display:flex;gap:14px;align-items:center;
-}
-.unified-header .live{
-  display:flex;align-items:center;gap:5px;
-  font-family:var(--fm, 'IBM Plex Mono', monospace);
-  font-size:10px;color:var(--green, #00e676);
-}
-.unified-header .live .dot{
-  width:6px;height:6px;border-radius:50%;background:var(--green, #00e676);
-  animation:hdr-blink 2.4s infinite;
-}
-@keyframes hdr-blink{0%,100%{opacity:1}50%{opacity:.25}}
-.unified-header .ts{
-  font-family:var(--fm, 'IBM Plex Mono', monospace);
-  font-size:10px;color:var(--t3, #344a60);
-}
+.modal-title{font-family:var(--fm);font-size:20px;font-weight:600;color:var(--t1);
+             display:flex;align-items:center;gap:10px}
+.modal-close{background:none;border:1px solid var(--b2);color:var(--t2);
+             font-family:var(--fm);font-size:14px;cursor:pointer;padding:4px 12px;
+             transition:all 0.12s}
+.modal-close:hover{color:var(--t1);border-color:var(--cyan)}
+.modal-body{padding:20px 24px}
+
+.m-section{margin-bottom:18px}
+.m-section:last-child{margin-bottom:0}
+.m-stitle{font-family:var(--fm);font-size:9px;font-weight:600;letter-spacing:.14em;
+          text-transform:uppercase;color:var(--t3);margin-bottom:10px;
+          padding-bottom:6px;border-bottom:1px solid var(--b1)}
+
+.m-price-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1);
+             border:1px solid var(--b1)}
+.m-price-cell{background:var(--bg2);padding:10px 12px;text-align:center}
+.m-pl{font-family:var(--fm);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+      color:var(--t3);margin-bottom:4px}
+.m-pv{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--t1)}
+
+.m-tech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.m-tech-card{background:var(--bg2);padding:10px;border:1px solid var(--b1)}
+.m-tech-label{font-family:var(--fm);font-size:9px;letter-spacing:.1em;
+              text-transform:uppercase;color:var(--t3);margin-bottom:3px}
+.m-tech-val{font-family:var(--fm);font-size:13px;font-weight:600;color:var(--t1)}
+.m-tech-state{font-family:var(--fm);font-size:9px;color:var(--cyan);margin-top:2px}
+
+.m-reason-list{display:flex;flex-direction:column;gap:6px}
+.m-reason{padding:8px 12px;background:var(--bg2);border-left:3px solid;
+          font-family:var(--fm);font-size:11px;color:var(--t1)}
+.m-reason.bull{border-left-color:var(--green)}
+.m-reason.bear{border-left-color:var(--red)}
+.m-reason.risk{border-left-color:var(--amber)}
+.m-reason::before{font-weight:600;margin-right:6px}
+.m-reason.bull::before{content:'▲';color:var(--green)}
+.m-reason.bear::before{content:'▼';color:var(--red)}
+.m-reason.risk::before{content:'⚠';color:var(--amber)}
+
+.m-news-grid{display:flex;flex-wrap:wrap;gap:6px}
+.m-news-tag{padding:6px 12px;font-family:var(--fm);font-size:10px;
+            background:var(--bg2);border:1px solid;display:flex;align-items:center;gap:6px}
+.m-news-tag.bull{border-color:rgba(0,230,118,0.4);color:var(--green);background:rgba(0,230,118,0.05)}
+.m-news-tag.bear{border-color:rgba(255,68,68,0.4);color:var(--red);background:rgba(255,68,68,0.05)}
+.m-news-tag .z{font-size:9px;opacity:0.7}
+.m-news-tag .ret{font-size:9px;color:var(--t2)}
+
+.m-themes{display:flex;flex-wrap:wrap;gap:5px}
+.m-theme-tag{padding:4px 10px;font-family:var(--fm);font-size:9px;font-weight:600;
+             border:1px solid var(--b2);color:var(--t2);letter-spacing:.06em}
+.m-theme-tag.hot{border-color:var(--amber);color:var(--amber);background:rgba(255,179,0,0.08)}
+
+.m-actions{display:flex;gap:8px;margin-top:6px}
+.m-btn{flex:1;padding:10px;font-family:var(--fm);font-size:11px;font-weight:600;
+       text-align:center;border:1px solid var(--b2);color:var(--t1);text-decoration:none;
+       background:var(--bg2);transition:all 0.12s;cursor:pointer;letter-spacing:.06em}
+.m-btn:hover{border-color:var(--cyan);color:var(--cyan);background:var(--bg1)}
+.m-btn.primary{background:var(--cyan);color:var(--bg0);border-color:var(--cyan)}
+.m-btn.primary:hover{background:transparent;color:var(--cyan)}
+
+.m-empty{font-family:var(--fm);font-size:10px;color:var(--t3);font-style:italic}
 
 </style>
 </head>
 <body>
-<header class="unified-header">
+<header>
   <div class="brand">NEWSTREND <em>// SIGNAL INTELLIGENCE</em></div>
   <nav>
     <a href="./index.html" class="on">DASHBOARD</a>
@@ -191,19 +228,17 @@ main{max-width:1400px;margin:0 auto;padding:20px 24px}
     <a href="./report.html">REPORT</a>
     <a href="./weekly.html">WEEKLY</a>
     <a href="./portfolio.html">PORTFOLIO</a>
-    <a href="./rising.html">RISING</a>
     <a href="./macro.html">MACRO</a>
   </nav>
   <div class="hdr-right">
     <div class="live"><div class="dot"></div>LIVE</div>
-    <div class="ts" id="unified-ts">—</div>
+    <div id="ts">—</div>
   </div>
 </header>
 
-
 <main>
   <!-- HERO: 시장 상태 한 줄 요약 -->
-  <div class="hero" id="hero">
+  <div class="hero" id="hero" style="grid-template-columns:1fr 1px 1fr 1px 1fr 1px 1.4fr">
     <div class="hero-block">
       <div class="hero-label">Market Regime</div>
       <div class="hero-value" id="hero-regime">—</div>
@@ -221,6 +256,13 @@ main{max-width:1400px;margin:0 auto;padding:20px 24px}
       <div class="hero-label">Today's Signals</div>
       <div class="hero-value" id="hero-signals">—</div>
       <div class="hero-sub" id="hero-signals-sub">—</div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-block">
+      <div class="hero-label">Hot Themes Today</div>
+      <div id="hero-themes" style="display:flex;flex-direction:column;gap:5px;margin-top:8px">
+        <div style="font-family:var(--fm);font-size:10px;color:var(--t3)">Loading...</div>
+      </div>
     </div>
   </div>
 
@@ -293,6 +335,21 @@ main{max-width:1400px;margin:0 auto;padding:20px 24px}
   </div>
 </main>
 
+<!-- BUY/SELL Detail Modal -->
+<div class="modal-overlay" id="detail-modal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-hdr">
+      <div class="modal-title">
+        <span id="m-ticker">—</span>
+        <span class="act-tag" id="m-action">—</span>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕  CLOSE</button>
+    </div>
+    <div class="modal-body" id="m-body"></div>
+  </div>
+</div>
+
+
 <script>
 (function(){
 'use strict';
@@ -306,18 +363,47 @@ async function fetchJSON(p){
   } catch(e) { return null; }
 }
 
-async function init(){
-  document.getElementById('ts').textContent = 'UPDATED ' +
+async
+
+function renderHeroThemes(themes){
+  const top = themes.top_themes_today || [];
+  const rising = themes.rising_themes || [];
+  const emoji = {
+    GEOPOLITICS:"🌍", POLITICS:"🏛️", MACRO:"📈", TRADE:"📦",
+    TECH:"💻", ENERGY:"⚡", FINANCE:"💰", CRYPTO:"₿",
+    HEALTH:"🏥", DISASTER:"🌪️"
+  };
+
+  const html = top.slice(0, 3).map(t => {
+    const isRising = rising.includes(t.category);
+    const arrow = isRising ? '<span style="color:var(--green);font-size:9px">▲</span>' : '';
+    return `<div style="display:flex;align-items:center;gap:8px;font-family:var(--fm);font-size:11px">
+      <span style="font-size:14px">${emoji[t.category]||'•'}</span>
+      <span style="color:var(--t1);font-weight:500;flex:1">${t.category}</span>
+      <span style="color:var(--cyan);font-weight:600">${t.score.toFixed(1)}</span>
+      ${arrow}
+    </div>`;
+  }).join('');
+
+  document.getElementById('hero-themes').innerHTML = html ||
+    '<div style="font-family:var(--fm);font-size:10px;color:var(--t3)">No active themes</div>';
+}
+
+function init(){
+  const tsEl = document.getElementById('unified-ts') || document.getElementById('ts');
+  if (tsEl) tsEl.textContent = 'UPDATED ' +
     new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
 
-  const [pred, trends, weights, weekly] = await Promise.all([
+  const [pred, trends, weights, weekly, themes] = await Promise.all([
     fetchJSON('predictions.json'),
     fetchJSON('trends.json'),
     fetchJSON('ticker_weights.json'),
     fetchJSON('reports/weekly_report.json'),
+    fetchJSON('macro_themes.json'),
   ]);
 
   if (pred) renderHero(pred);
+  if (themes) renderHeroThemes(themes);
   if (pred) renderActions(pred);
   if (pred) renderTickerGrid(pred);
   if (trends) renderHotNews(trends);
@@ -378,7 +464,7 @@ function renderActions(pred){
     const target = p.target ? `$${p.target.toFixed(0)}` : '—';
     const stop = p.stop ? `$${p.stop.toFixed(0)}` : '—';
     const reason = (p.reasons && p.reasons[0]) || '—';
-    return `<div class="act-card ${p.action}" onclick="window.location='./predict.html'">
+    return `<div class="act-card ${p.action}" onclick="openTickerModal('${p.ticker}')">
       <div class="act-top">
         <span class="act-ticker">${p.ticker}</span>
         <span class="act-tag tag-${p.action}">${p.action}</span>
@@ -398,7 +484,7 @@ function renderActions(pred){
 
 function renderTickerGrid(pred){
   const html = (pred.predictions || []).map(p => {
-    return `<div class="tick-mini" onclick="window.location='./ticker_detail.html'">
+    return `<div class="tick-mini" onclick="openTickerModal('${p.ticker}')">
       <div class="tick-mini-name">${p.ticker}</div>
       <div class="tick-mini-action tag-${p.action}">${p.action}</div>
     </div>`;
@@ -480,15 +566,5 @@ function renderTopSignals(weekly){
 init();
 })();
 </script>
-
-<script>
-(function(){
-  var ts = document.getElementById('unified-ts');
-  if (ts) {
-    ts.textContent = 'UPDATED ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-  }
-})();
-</script>
-
 </body>
 </html>

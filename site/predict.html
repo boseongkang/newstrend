@@ -326,7 +326,8 @@ function confBarColor(c){
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init(){
-  document.getElementById('ts').textContent =
+  const _tsEl = document.getElementById('unified-ts') || document.getElementById('ts');
+  if (_tsEl) _tsEl.textContent =
     'UPDATED '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
 
   P = await fetchJSON('predictions.json');
