@@ -133,6 +133,11 @@ jobs:
           git commit -m "news: preserve $NEW_COUNT new days $(date -u +%Y-%m-%d)"
           git push origin data-cache
 
+          # Cleanup
+          cd "$GITHUB_WORKSPACE"
+          git worktree remove --force /tmp/news-archive 2>/dev/null || true
+          git worktree prune
+
       - name: Convert csv/jsonl to *_tokens.jsonl
         run: |
           set -euo pipefail
@@ -249,11 +254,12 @@ jobs:
           git config --global user.name  "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          # 깨끗한 시작
+          # 깨끗한 시작 - 이전 worktree 정리
           rm -rf /tmp/cache-worktree
+          git worktree remove --force /tmp/news-archive 2>/dev/null || true
           git worktree prune || true
 
-          # data-cache 브랜치 fetch
+          # data-cache 브랜치 fetch (최신화)
           git fetch origin data-cache:refs/remotes/origin/data-cache 2>/dev/null || true
 
           # worktree 추가 (실패시 명시적 에러)
@@ -283,6 +289,11 @@ jobs:
 
           git commit -m "prices: $(date -u +%Y-%m-%d)"
           git push origin data-cache
+
+          # Cleanup
+          cd "$GITHUB_WORKSPACE"
+          git worktree remove --force /tmp/cache-worktree 2>/dev/null || true
+          git worktree prune
 
       - name: Commit predictions history to main
         run: |
