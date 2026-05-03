@@ -337,8 +337,8 @@ function testBadge(p){
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init(){
   const _tsEl = document.getElementById('unified-ts') || document.getElementById('ts');
-  if (_tsEl) _tsEl.textContent =
-    'UPDATED '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  if (_tsEl) _tsEl.textContent = 'UPDATED '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
 
   const [sc, t] = await Promise.all([fetchJSON('signal_corr.json'), fetchJSON('trends.json')]);
   SC = sc; T = t;
