@@ -245,15 +245,29 @@ jobs:
 
       - name: Save price CSVs to data-cache
         run: |
+          set -e
           git config --global user.name  "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          mkdir -p /tmp/cache-worktree
-          if git ls-remote --heads origin data-cache | grep -q data-cache; then
-            git worktree add /tmp/cache-worktree data-cache 2>/dev/null || \
-            git worktree add /tmp/cache-worktree -b data-cache origin/data-cache 2>/dev/null || true
+          # 깨끗한 시작
+          rm -rf /tmp/cache-worktree
+          git worktree prune || true
+
+          # data-cache 브랜치 fetch
+          git fetch origin data-cache:refs/remotes/origin/data-cache 2>/dev/null || true
+
+          # worktree 추가 (실패시 명시적 에러)
+          if git show-ref --verify --quiet refs/remotes/origin/data-cache; then
+            git worktree add /tmp/cache-worktree origin/data-cache
+            (cd /tmp/cache-worktree && git checkout -B data-cache)
           else
-            git worktree add /tmp/cache-worktree -b data-cache 2>/dev/null || true
+            git worktree add /tmp/cache-worktree -b data-cache
+          fi
+
+          # 검증
+          if [ ! -d /tmp/cache-worktree/.git ] && [ ! -f /tmp/cache-worktree/.git ]; then
+            echo "ERROR: worktree creation failed"
+            exit 1
           fi
 
           mkdir -p /tmp/cache-worktree/data/prices
@@ -262,10 +276,13 @@ jobs:
           cd /tmp/cache-worktree
           rm -f .gitignore
           git add data/prices/
-          if ! git diff --cached --quiet; then
-            git commit -m "prices: $(date -u +%Y-%m-%d)"
-            git push origin data-cache
+          if git diff --cached --quiet; then
+            echo "No price changes to push"
+            exit 0
           fi
+
+          git commit -m "prices: $(date -u +%Y-%m-%d)"
+          git push origin data-cache
 
       - name: Commit predictions history to main
         run: |
