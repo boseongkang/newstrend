@@ -78,18 +78,34 @@ jobs:
 
       - name: Preserve raw news to data-cache
         run: |
+          set -e
           git config --global user.name  "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          mkdir -p /tmp/news-archive
-          if git ls-remote --heads origin data-cache | grep -q data-cache; then
-            git worktree add /tmp/news-archive data-cache 2>/dev/null || \
-            git worktree add /tmp/news-archive -b data-cache origin/data-cache 2>/dev/null || true
+          # 깨끗한 시작 - 기존 worktree 정리
+          rm -rf /tmp/news-archive
+          git worktree prune || true
+
+          # data-cache 브랜치 fetch
+          git fetch origin data-cache:refs/remotes/origin/data-cache 2>/dev/null || true
+
+          # worktree 추가 (실패하면 명시적으로 에러)
+          if git show-ref --verify --quiet refs/remotes/origin/data-cache; then
+            git worktree add /tmp/news-archive origin/data-cache
+            (cd /tmp/news-archive && git checkout -B data-cache)
           else
-            git worktree add /tmp/news-archive -b data-cache 2>/dev/null || true
+            git worktree add /tmp/news-archive -b data-cache
           fi
 
+          # 검증
+          if [ ! -d /tmp/news-archive/.git ] && [ ! -f /tmp/news-archive/.git ]; then
+            echo "ERROR: worktree creation failed"
+            exit 1
+          fi
+
+          # raw JSONL 누적 (없는 파일만 복사)
           mkdir -p /tmp/news-archive/data/news_archive
+          NEW_COUNT=0
           for f in data/warehouse/daily/*.jsonl; do
             [ -f "$f" ] || continue
             name=$(basename "$f")
@@ -100,19 +116,22 @@ jobs:
             if [ ! -f "$dst" ]; then
               cp "$f" "$dst"
               echo "Archived: $name"
+              NEW_COUNT=$((NEW_COUNT + 1))
             fi
           done
 
+          echo "New files: $NEW_COUNT"
+          if [ "$NEW_COUNT" -eq 0 ]; then
+            echo "No new news to preserve"
+            exit 0
+          fi
+
+          # worktree 안에서 git 명령
           cd /tmp/news-archive
           rm -f .gitignore
           git add data/news_archive/
-          if ! git diff --cached --quiet; then
-            FILES=$(git diff --cached --name-only | wc -l)
-            git commit -m "news: preserve $FILES new days $(date -u +%Y-%m-%d)"
-            git push origin data-cache || true
-          else
-            echo "No new news to preserve"
-          fi
+          git commit -m "news: preserve $NEW_COUNT new days $(date -u +%Y-%m-%d)"
+          git push origin data-cache
 
       - name: Convert csv/jsonl to *_tokens.jsonl
         run: |
