@@ -107,21 +107,108 @@ jobs:
       - name: Overwrite index with custom dashboard
         run: cp site/index_custom.html site/index.html
 
-      - name: Fetch latest prices
+      - name: Restore price CSVs from data-cache
         run: |
-          python scripts/fetch_prices.py \
-            --days 180 \
-            --out site/data/prices.json
+          mkdir -p data/prices
+          git fetch origin data-cache 2>/dev/null || true
+          if git show-ref --verify refs/remotes/origin/data-cache 2>/dev/null; then
+            git restore --worktree --source=origin/data-cache -- data/prices/ 2>/dev/null || true
+            git reset HEAD data/prices/ 2>/dev/null || true
+          fi
+
+      - name: Fetch prices (incremental)
+        run: |
+          python scripts/fetch_prices_v2.py \
+            --price-dir data/prices \
+            --out-json  site/data/prices.json \
+            --out-meta  site/data/prices_meta.json \
+            --last-days 365 || true
+
+      - name: Run technical analysis
+        run: |
+          python scripts/analyze_prices.py \
+            --prices      site/data/prices.json \
+            --trends      site/data/trends.json \
+            --out-json    site/data/technical_analysis.json \
+            --out-summary site/data/ta_summary.json \
+            --out-csv-dir run || true
+          gzip -f -k site/data/technical_analysis.json || true
 
       - name: Build signal correlations
         run: |
           python scripts/build_signal_corr.py \
             --trends site/data/trends.json \
             --prices site/data/prices.json \
-            --out site/data/signal_corr.json \
+            --out    site/data/signal_corr.json \
             --top-terms 200 \
             --min-corr 0.25 \
             --min-events 3 || true
+
+      - name: Analyze ticker patterns
+        run: |
+          python scripts/analyze_ticker.py \
+            --trends     site/data/trends.json \
+            --prices     site/data/prices.json \
+            --out-dir    site/data/ticker_analysis \
+            --tickers    AAPL,MSFT,NVDA,GOOGL,META,AMZN,TSLA,AMD,INTC,AVGO,QCOM,ASML,MU,NXPI,JPM,BAC,GS,MS,BLK,XOM,CVX,SPY,QQQ,IWM,DIA,TLT,GLD,USO \
+            --min-events 3 \
+            --z-thresh   0.8 \
+            --lag-range  2 || true
+
+      - name: Learn ticker weights
+        run: |
+          python scripts/learn_ticker_weights.py \
+            --prices       site/data/prices.json \
+            --ta           site/data/technical_analysis.json \
+            --trends       site/data/trends.json \
+            --analysis-dir site/data/ticker_analysis \
+            --out          site/data/ticker_weights.json \
+            --hold-days    5 || true
+
+      - name: Generate predictions
+        run: |
+          python scripts/predict.py \
+            --ta           site/data/technical_analysis.json \
+            --signals      site/data/signal_corr.json \
+            --trends       site/data/trends.json \
+            --analysis-dir site/data/ticker_analysis \
+            --weights      site/data/ticker_weights.json \
+            --out          site/data/predictions.json || true
+
+      - name: Generate weekly report
+        run: |
+          python scripts/weekly_report.py \
+            --prices       site/data/prices.json \
+            --pred-dir     site/data/predictions_history \
+            --current-pred site/data/predictions.json \
+            --analysis-dir site/data/ticker_analysis \
+            --out-dir      site/data/reports \
+            --lookback-days 14 \
+            --hold-days    5 || true
+
+      - name: Save price CSVs to data-cache
+        run: |
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          mkdir -p /tmp/cache-worktree
+          if git ls-remote --heads origin data-cache | grep -q data-cache; then
+            git worktree add /tmp/cache-worktree data-cache 2>/dev/null || \
+            git worktree add /tmp/cache-worktree -b data-cache origin/data-cache 2>/dev/null || true
+          else
+            git worktree add /tmp/cache-worktree -b data-cache 2>/dev/null || true
+          fi
+
+          mkdir -p /tmp/cache-worktree/data/prices
+          cp -r data/prices/. /tmp/cache-worktree/data/prices/ 2>/dev/null || true
+
+          cd /tmp/cache-worktree
+          rm -f .gitignore
+          git add data/prices/
+          if ! git diff --cached --quiet; then
+            git commit -m "prices: $(date -u +%Y-%m-%d)"
+            git push origin data-cache
+          fi
 
       - name: Commit predictions history to main
         run: |
