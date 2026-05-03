@@ -3,212 +3,125 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Newstrend · Portfolio Signals</title>
+<title>Newstrend · My Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg0:#070b10; --bg1:#0c1220; --bg2:#101828; --bg3:#162035;
-  --b1:#1a2840; --b2:#223050;
-  --cyan:#00d4ff; --amber:#ffb300; --green:#00e676; --red:#ff4444;
-  --purple:#b39ddb; --blue:#4d9fff;
-  --t1:#c8d8e8; --t2:#6a8aa8; --t3:#344a60;
-  --font-mono:'IBM Plex Mono',monospace;
-  --font-sans:'IBM Plex Sans',sans-serif;
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;--bg3:#0a1018;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--purple:#b380ff;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg0);color:var(--t1);font-family:var(--font-sans);font-size:13px;
-     height:100dvh;overflow:hidden;display:flex;flex-direction:column}
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
-
-header{height:42px;display:flex;align-items:center;gap:20px;padding:0 16px;
-  background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0}
-.brand{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--cyan);
-       letter-spacing:.06em;white-space:nowrap}
-.brand em{color:var(--t3);font-style:normal;font-weight:300}
-nav{display:flex;gap:2px}
-nav a{font-family:var(--font-mono);font-size:10px;font-weight:500;letter-spacing:.1em;
-      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:5px 11px;
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
+.unified-header{height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:100}
+.brand{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300;margin-left:6px}
+nav{display:flex;gap:2px;flex-wrap:wrap}
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:6px 12px;
       border:1px solid transparent;transition:all .12s}
 nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
-.hdr-right{margin-left:auto;display:flex;align-items:center;gap:14px}
-.live{display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10px;
-      color:var(--green);letter-spacing:.1em}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--green);
-     animation:blink 2.4s ease-in-out infinite}
+.hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10px;color:var(--green)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-#ts{font-family:var(--font-mono);font-size:10px;color:var(--t3)}
+#unified-ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
 
-main{flex:1;display:grid;grid-template-columns:280px 1fr;gap:1px;
-     background:var(--b1);overflow:hidden;min-height:0}
-.col{background:var(--bg0);display:flex;flex-direction:column;overflow:hidden;min-height:0}
+main{max-width:1300px;margin:20px auto;padding:0 24px}
 
-.phdr{height:36px;display:flex;align-items:center;justify-content:space-between;
-      padding:0 12px;background:var(--bg1);border-bottom:1px solid var(--b1);flex-shrink:0}
-.plabel{font-family:var(--font-mono);font-size:10px;font-weight:600;
-        letter-spacing:.12em;text-transform:uppercase;color:var(--t2)}
-.pbadge{font-family:var(--font-mono);font-size:10px;color:var(--amber);
-        background:rgba(255,179,0,.1);padding:2px 7px;border:1px solid rgba(255,179,0,.25)}
-.sec-lbl{padding:5px 12px;font-family:var(--font-mono);font-size:8px;font-weight:600;
-         letter-spacing:.14em;text-transform:uppercase;color:var(--t3);
-         border-bottom:1px solid var(--b1);background:var(--bg1);flex-shrink:0}
+/* SUMMARY STRIP */
+.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--b1);
+         border:1px solid var(--b1);margin-bottom:20px}
+.sum-cell{background:var(--bg2);padding:14px;text-align:center}
+.sum-label{font-family:var(--fm);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+           color:var(--t3);margin-bottom:5px}
+.sum-val{font-family:var(--fm);font-size:18px;font-weight:600;color:var(--t1)}
+.sum-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:3px}
 
-/* ── LEFT: holdings input ── */
-#holdings-form{padding:10px;border-bottom:1px solid var(--b1);flex-shrink:0}
-.ticker-input-wrap{display:flex;gap:6px;margin-bottom:8px}
-#ticker-input{flex:1;background:var(--bg2);border:1px solid var(--b2);color:var(--t1);
-              font-family:var(--font-mono);font-size:11px;padding:6px 10px;outline:none;
-              transition:border .12s;text-transform:uppercase}
-#ticker-input::placeholder{color:var(--t3);text-transform:none}
-#ticker-input:focus{border-color:var(--cyan)}
-#add-btn{font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.08em;
-         padding:6px 14px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.35);
-         color:var(--cyan);cursor:pointer;transition:all .12s;white-space:nowrap}
-#add-btn:hover{background:rgba(0,212,255,.2)}
-.hint{font-family:var(--font-mono);font-size:9px;color:var(--t3)}
+/* ADD HOLDING form */
+.add-section{background:var(--bg1);border:1px solid var(--b1);padding:16px 20px;
+             margin-bottom:20px}
+.add-form{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr auto;gap:8px;align-items:end}
+.add-field label{font-family:var(--fm);font-size:9px;letter-spacing:.1em;
+                 text-transform:uppercase;color:var(--t3);display:block;margin-bottom:4px}
+.add-field input,.add-field select{
+  width:100%;background:var(--bg2);border:1px solid var(--b2);color:var(--t1);
+  padding:8px 10px;font-family:var(--fm);font-size:12px}
+.add-field input:focus,.add-field select:focus{outline:none;border-color:var(--cyan)}
+.btn-add{background:var(--cyan);color:var(--bg0);border:1px solid var(--cyan);
+         font-family:var(--fm);font-size:10px;font-weight:600;letter-spacing:.06em;
+         padding:8px 18px;cursor:pointer;transition:all .12s}
+.btn-add:hover{background:transparent;color:var(--cyan)}
 
-/* holding chips */
-#holdings-chips{display:flex;flex-wrap:wrap;gap:5px;padding:8px 10px;
-                border-bottom:1px solid var(--b1);flex-shrink:0;min-height:36px}
-.chip{font-family:var(--font-mono);font-size:10px;font-weight:600;
-      padding:3px 8px;border:1px solid rgba(0,212,255,.3);
-      background:rgba(0,212,255,.07);color:var(--cyan);
-      display:flex;align-items:center;gap:5px;cursor:default}
-.chip-x{color:var(--t3);cursor:pointer;font-size:11px;transition:color .1s}
-.chip-x:hover{color:var(--red)}
+/* HOLDINGS LIST */
+.holdings{display:flex;flex-direction:column;gap:10px}
+.hcard{background:var(--bg1);border:1px solid var(--b1);border-left:5px solid;
+       padding:16px 20px;display:grid;grid-template-columns:auto 1fr auto auto auto;
+       gap:18px;align-items:center;transition:all .15s;position:relative}
+.hcard.action-BUY{border-left-color:var(--green)}
+.hcard.action-WATCH{border-left-color:var(--cyan)}
+.hcard.action-HOLD{border-left-color:var(--t3)}
+.hcard.action-REDUCE{border-left-color:var(--amber)}
+.hcard.action-SELL{border-left-color:var(--red)}
+.hcard.alert{box-shadow:0 0 12px rgba(255,68,68,0.15)}
 
-/* signal rows */
-#portfolio-signals{flex:1;overflow-y:auto;padding:4px 0}
+.h-tic{font-family:var(--fm);font-size:18px;font-weight:600;color:var(--t1);width:75px}
+.h-prices{display:flex;gap:18px;flex-wrap:wrap}
+.h-pblock{}
+.h-plabel{font-family:var(--fm);font-size:8px;letter-spacing:.1em;text-transform:uppercase;
+          color:var(--t3);margin-bottom:2px}
+.h-pval{font-family:var(--fm);font-size:13px;font-weight:500;color:var(--t1)}
+.h-pl{font-family:var(--fm);font-size:14px;font-weight:600}
+.h-pl.up{color:var(--green)}
+.h-pl.down{color:var(--red)}
 
-.port-row{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.03);
-          cursor:pointer;transition:background .1s}
-.port-row:hover{background:rgba(255,255,255,.025)}
-.port-row.sel{background:rgba(0,212,255,.05);border-left:2px solid var(--cyan)}
-.pr-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
-.pr-ticker{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--t1);
-           min-width:50px}
-.pr-count{font-family:var(--font-mono);font-size:9px;color:var(--t3);margin-left:auto}
-.pr-alert{font-family:var(--font-mono);font-size:9px;padding:2px 6px;border:1px solid}
-.alert-on{color:var(--amber);border-color:rgba(255,179,0,.35);background:rgba(255,179,0,.08)}
-.alert-off{color:var(--t3);border-color:var(--b2)}
-.pr-signals{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
-.sig-chip{font-family:var(--font-mono);font-size:9px;padding:2px 6px;border:1px solid}
-.sc-bull{color:var(--green);border-color:rgba(0,230,118,.3);background:rgba(0,230,118,.07)}
-.sc-bear{color:var(--red);border-color:rgba(255,68,68,.3);background:rgba(255,68,68,.07)}
-.sc-neu{color:var(--t3);border-color:var(--b2)}
+.h-action{font-family:var(--fm);font-size:11px;font-weight:600;padding:5px 14px;
+          border:1px solid;text-align:center;letter-spacing:.06em}
+.h-action.BUY{color:var(--green);border-color:var(--green);background:rgba(0,230,118,.08)}
+.h-action.WATCH{color:var(--cyan);border-color:var(--cyan);background:rgba(0,212,255,.08)}
+.h-action.HOLD{color:var(--t2);border-color:var(--b2)}
+.h-action.REDUCE{color:var(--amber);border-color:var(--amber);background:rgba(255,179,0,.08)}
+.h-action.SELL{color:var(--red);border-color:var(--red);background:rgba(255,68,68,.08)}
 
-/* ── RIGHT: signal detail for selected ticker ── */
-#detail-scroll{flex:1;overflow-y:auto;padding:0}
+.h-recommend{font-family:var(--fm);font-size:10px;max-width:320px;color:var(--t1)}
+.h-recommend .label{font-size:8px;color:var(--t3);letter-spacing:.1em;
+                    text-transform:uppercase;margin-bottom:3px}
+.h-recommend .text{line-height:1.5}
+.h-recommend .text.alert{color:var(--red);font-weight:500}
+.h-recommend .text.good{color:var(--green);font-weight:500}
 
-/* ticker header */
-#det-header{padding:14px 16px 12px;border-bottom:1px solid var(--b1);flex-shrink:0}
-#det-name{font-family:var(--font-mono);font-size:18px;font-weight:600;
-          color:var(--cyan);margin-bottom:4px}
-#det-meta{font-family:var(--font-mono);font-size:10px;color:var(--t3)}
+.btn-x{background:none;border:1px solid var(--b2);color:var(--t3);font-family:var(--fm);
+       font-size:11px;cursor:pointer;padding:5px 10px;transition:all .12s}
+.btn-x:hover{color:var(--red);border-color:var(--red)}
 
-/* active signal cards */
-.act-card{padding:12px 16px;border-bottom:1px solid var(--b1)}
-.ac-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.ac-term{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--t1)}
-.ac-arrow{font-size:13px}
-.ac-z{font-family:var(--font-mono);font-size:10px;color:var(--amber)}
-.ac-lag{font-family:var(--font-mono);font-size:9px;padding:2px 6px;
-        border:1px solid rgba(0,212,255,.3);color:var(--cyan);background:rgba(0,212,255,.07)}
-.ac-conf-wrap{height:3px;background:var(--b1);margin-bottom:8px}
-.ac-conf-bar{height:100%;transition:width .4s}
-.ac-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px}
-.ac-stat{background:var(--bg1);padding:5px 8px;text-align:center}
-.ac-stat-l{font-family:var(--font-mono);font-size:8px;color:var(--t3);
-           letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
-.ac-stat-v{font-family:var(--font-mono);font-size:12px;font-weight:600}
+.alert-banner{background:rgba(255,68,68,0.1);border:1px solid var(--red);padding:12px 16px;
+              margin-bottom:16px;font-family:var(--fm);font-size:11px;color:var(--red);
+              display:none;align-items:center;gap:10px}
+.alert-banner.show{display:flex}
 
-/* no signals state */
-.no-signals{font-family:var(--font-mono);font-size:10px;color:var(--t3);padding:16px}
+.empty{text-align:center;padding:50px;color:var(--t3);font-family:var(--fm);font-size:11px;
+       background:var(--bg1);border:1px dashed var(--b2)}
+.empty .e-icon{font-size:32px;margin-bottom:12px;opacity:0.4}
 
-/* empty */
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
-       height:200px;gap:10px;color:var(--t3)}
-.empty-ico{font-size:28px;opacity:.3}
-.empty-txt{font-family:var(--font-mono);font-size:10px;text-align:center;line-height:1.7}
-.spinner{width:16px;height:16px;border:2px solid var(--b2);border-top-color:var(--cyan);
-         border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+.section-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
+               text-transform:uppercase;color:var(--t1);margin-bottom:12px;
+               padding-bottom:6px;border-bottom:1px solid var(--b1)}
 
-/* ── PREDICT INTEGRATION ── */
-.pred-badge{font-family:var(--font-mono);font-size:10px;font-weight:600;
-            padding:2px 8px;border:1px solid;letter-spacing:.06em}
-.pred-BUY   {color:var(--green);border-color:rgba(0,230,118,.4);background:rgba(0,230,118,.1)}
-.pred-WATCH {color:var(--cyan);border-color:rgba(0,212,255,.4);background:rgba(0,212,255,.08)}
-.pred-HOLD  {color:var(--t2);border-color:var(--b2);background:transparent}
-.pred-REDUCE{color:var(--amber);border-color:rgba(255,179,0,.4);background:rgba(255,179,0,.08)}
-.pred-SELL  {color:var(--red);border-color:rgba(255,68,68,.4);background:rgba(255,68,68,.1)}
-.pred-card{padding:12px 14px;border-bottom:1px solid var(--b1)}
-.pred-card-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.pred-ticker-big{font-family:var(--font-mono);font-size:16px;font-weight:600;color:var(--cyan)}
-.pred-price{font-family:var(--font-mono);font-size:11px;color:var(--t2)}
-.pred-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-bottom:8px}
-.pred-stat{background:var(--bg1);padding:6px 8px;text-align:center}
-.pred-stat-l{font-family:var(--font-mono);font-size:8px;color:var(--t3);
-             letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
-.pred-stat-v{font-family:var(--font-mono);font-size:13px;font-weight:600}
-.pred-conf-wrap{height:3px;background:var(--b1);margin-bottom:8px}
-.pred-conf-bar{height:100%;transition:width .4s}
-.pred-reasons{display:flex;flex-direction:column;gap:3px;margin-top:6px}
-.pred-reason{font-family:var(--font-mono);font-size:9px;color:var(--t2);
-             padding:3px 6px;background:var(--bg0);display:flex;gap:6px;line-height:1.4}
-.pred-risk{color:var(--amber)}
-.pr-pred{margin-left:auto;display:flex;align-items:center;gap:6px}
+.tip{font-family:var(--fm);font-size:9px;color:var(--t3);margin-top:10px}
 
-
-/* === UNIFIED HEADER STYLE === */
-.unified-header{
-  height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
-  background:var(--bg1, #0c1220);border-bottom:1px solid var(--b1, #1a2840);
-  position:sticky;top:0;z-index:100;font-family:var(--fs, 'IBM Plex Sans', sans-serif);
+@media(max-width:900px){
+  .add-form{grid-template-columns:1fr 1fr}
+  .summary{grid-template-columns:repeat(2,1fr)}
+  .hcard{grid-template-columns:1fr;gap:10px}
 }
-.unified-header .brand{
-  font-family:var(--fm, 'IBM Plex Mono', monospace);
-  font-size:14px;font-weight:600;color:var(--cyan, #00d4ff);letter-spacing:.06em;
-}
-.unified-header .brand em{
-  color:var(--t3, #344a60);font-style:normal;font-weight:300;margin-left:6px;
-}
-.unified-header nav{display:flex;gap:2px;flex-wrap:wrap;}
-.unified-header nav a{
-  font-family:var(--fm, 'IBM Plex Mono', monospace);
-  font-size:10px;font-weight:500;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--t2, #6a8aa8);text-decoration:none;
-  padding:6px 12px;border:1px solid transparent;transition:all .12s;
-}
-.unified-header nav a:hover,
-.unified-header nav a.on{
-  color:var(--cyan, #00d4ff);border-color:var(--b2, #223050);
-  background:var(--bg2, #101828);
-}
-.unified-header .hdr-right{
-  margin-left:auto;display:flex;gap:14px;align-items:center;
-}
-.unified-header .live{
-  display:flex;align-items:center;gap:5px;
-  font-family:var(--fm, 'IBM Plex Mono', monospace);
-  font-size:10px;color:var(--green, #00e676);
-}
-.unified-header .live .dot{
-  width:6px;height:6px;border-radius:50%;background:var(--green, #00e676);
-  animation:hdr-blink 2.4s infinite;
-}
-@keyframes hdr-blink{0%,100%{opacity:1}50%{opacity:.25}}
-.unified-header .ts{
-  font-family:var(--fm, 'IBM Plex Mono', monospace);
-  font-size:10px;color:var(--t3, #344a60);
-}
-
 </style>
 </head>
 <body>
-
 <header class="unified-header">
   <div class="brand">NEWSTREND <em>// MY HOLDINGS</em></div>
   <nav>
@@ -224,426 +137,330 @@ main{flex:1;display:grid;grid-template-columns:280px 1fr;gap:1px;
   </nav>
   <div class="hdr-right">
     <div class="live"><div class="dot"></div>LIVE</div>
-    <div class="ts" id="unified-ts">—</div>
+    <div id="unified-ts">—</div>
   </div>
 </header>
 
-
 <main>
-  <!-- ── LEFT ── -->
-  <div class="col">
-    <div class="phdr">
-      <div class="plabel">MY HOLDINGS</div>
-      <div class="pbadge" id="port-badge">0 TICKERS</div>
-    </div>
-
-    <div id="holdings-form">
-      <div class="ticker-input-wrap">
-        <input type="text" id="ticker-input" placeholder="Enter ticker (e.g. NVDA)" maxlength="8">
-        <button id="add-btn" onclick="addTicker()">+ ADD</button>
-      </div>
-      <div class="hint">Saved locally in your browser</div>
-    </div>
-
-    <div id="holdings-chips"></div>
-
-    <div class="sec-lbl">ACTIVE SIGNALS FOR HOLDINGS</div>
-    <div id="portfolio-signals">
-      <div class="empty">
-        <div class="empty-ico">◈</div>
-        <div class="empty-txt">Add tickers above to see<br>relevant word signals</div>
-      </div>
-    </div>
+  <!-- 알림 배너 -->
+  <div class="alert-banner" id="alert-banner">
+    <span style="font-size:14px">⚠</span>
+    <span id="alert-text">—</span>
   </div>
 
-  <!-- ── RIGHT ── -->
-  <div class="col">
-    <div id="pred-card-area"></div>
-    <div id="det-header" style="display:none">
-      <div id="det-name">—</div>
-      <div id="det-meta">—</div>
-    </div>
-    <div id="detail-scroll">
-      <div class="empty" id="det-empty">
-        <div class="empty-ico">◈</div>
-        <div class="empty-txt">Select a ticker from your portfolio<br>to see all associated word signals</div>
+  <!-- 포트폴리오 요약 -->
+  <div class="summary" id="summary">
+    <div class="sum-cell"><div class="sum-label">Holdings</div><div class="sum-val" id="s-count">0</div></div>
+    <div class="sum-cell"><div class="sum-label">Cost Basis</div><div class="sum-val" id="s-cost">$0</div></div>
+    <div class="sum-cell"><div class="sum-label">Current Value</div><div class="sum-val" id="s-value">$0</div></div>
+    <div class="sum-cell"><div class="sum-label">Total P/L</div><div class="sum-val" id="s-pl">$0</div></div>
+    <div class="sum-cell"><div class="sum-label">Active Alerts</div><div class="sum-val" id="s-alerts" style="color:var(--amber)">0</div></div>
+  </div>
+
+  <!-- 종목 추가 -->
+  <div class="add-section">
+    <div class="section-title">+ ADD HOLDING</div>
+    <form class="add-form" id="add-form" onsubmit="addHolding(event)">
+      <div class="add-field">
+        <label>TICKER</label>
+        <input type="text" id="i-ticker" required maxlength="5" placeholder="AAPL"
+               style="text-transform:uppercase">
       </div>
-    </div>
+      <div class="add-field">
+        <label>SHARES</label>
+        <input type="number" id="i-shares" required min="0.01" step="any" placeholder="10">
+      </div>
+      <div class="add-field">
+        <label>BUY PRICE</label>
+        <input type="number" id="i-price" required min="0.01" step="any" placeholder="250.00">
+      </div>
+      <div class="add-field">
+        <label>STOP %</label>
+        <input type="number" id="i-stop" min="1" max="50" step="0.5" value="7"
+               placeholder="7" title="손절 % (예: 7 = -7%)">
+      </div>
+      <div class="add-field">
+        <label>TARGET %</label>
+        <input type="number" id="i-target" min="1" max="100" step="0.5" value="15"
+               placeholder="15" title="목표 % (예: 15 = +15%)">
+      </div>
+      <button type="submit" class="btn-add">ADD</button>
+    </form>
+    <div class="tip">데이터는 브라우저에 로컬 저장됨. 종목 추가 후 자동으로 BUY/SELL 신호가 매칭됩니다.</div>
+  </div>
+
+  <!-- 보유 종목 리스트 -->
+  <div class="section-title">📊 MY HOLDINGS</div>
+  <div class="holdings" id="holdings">
+    <div class="empty"><div class="e-icon">📂</div>아직 보유 종목이 없습니다<br>위에서 추가해 주세요</div>
   </div>
 </main>
 
 <script>
 (function(){
 'use strict';
+const V = Date.now();
+const STORAGE_KEY = 'newstrend_portfolio_v2';
 
-const V = Date.now(), BASE = './data/';
-const STORAGE_KEY = 'nt_portfolio_v1';
-let SC = null, T = null, P = null;
-let holdings = [];
-let selTicker = null;
+let _data = {};
 
 async function fetchJSON(p){
-  try{
-    const r = await fetch(BASE+p+'?v='+V,{cache:'no-store'});
+  try {
+    const r = await fetch(`./data/${p}?v=${V}`, {cache:'no-store'});
     if(!r.ok) return null;
     return r.json();
-  }catch(e){ return null; }
+  } catch(e) { return null; }
 }
 
-const sign = n => n >= 0 ? '+' : '';
-const pct  = n => (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
-const confBarColor = c =>
-  c >= 0.7 ? '#00e676' : c >= 0.45 ? '#00d4ff' : c >= 0.25 ? '#ffb300' : '#344a60';
-
-// ── Persistence ───────────────────────────────────────────────────────────────
 function loadHoldings(){
-  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-  catch{ return []; }
-}
-function saveHoldings(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(holdings));
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  } catch(e) { return []; }
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+function saveHoldings(h){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(h));
+}
+
+window.addHolding = function(e){
+  e.preventDefault();
+  const t = document.getElementById('i-ticker').value.toUpperCase().trim();
+  const s = parseFloat(document.getElementById('i-shares').value);
+  const p = parseFloat(document.getElementById('i-price').value);
+  const stop = parseFloat(document.getElementById('i-stop').value || 7);
+  const target = parseFloat(document.getElementById('i-target').value || 15);
+
+  if (!t || !s || !p) return;
+
+  const holdings = loadHoldings();
+  // 중복 체크 - 같은 종목 평균가 처리
+  const existing = holdings.find(h => h.ticker === t);
+  if (existing) {
+    const totalShares = existing.shares + s;
+    const totalCost = existing.shares * existing.buyPrice + s * p;
+    existing.buyPrice = totalCost / totalShares;
+    existing.shares = totalShares;
+    existing.stopPct = stop;
+    existing.targetPct = target;
+  } else {
+    holdings.push({
+      ticker: t, shares: s, buyPrice: p,
+      stopPct: stop, targetPct: target,
+      addedAt: new Date().toISOString(),
+    });
+  }
+  saveHoldings(holdings);
+  document.getElementById('add-form').reset();
+  document.getElementById('i-stop').value = 7;
+  document.getElementById('i-target').value = 15;
+  render();
+};
+
+window.removeHolding = function(ticker){
+  if (!confirm(`Remove ${ticker} from portfolio?`)) return;
+  const h = loadHoldings().filter(x => x.ticker !== ticker);
+  saveHoldings(h);
+  render();
+};
+
 async function init(){
-  const _tsEl = document.getElementById('unified-ts') || document.getElementById('ts');
-  if (_tsEl) _tsEl.textContent = 'UPDATED '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const tsEl = document.getElementById('unified-ts');
+  if (tsEl) tsEl.textContent = 'UPDATED ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
 
-
-  holdings = loadHoldings();
-
-  const [sc, t, p] = await Promise.all([
-    fetchJSON('signal_corr.json'),
-    fetchJSON('trends.json'),
+  const [pred, prices, themes] = await Promise.all([
     fetchJSON('predictions.json'),
+    fetchJSON('prices.json'),
+    fetchJSON('macro_themes.json'),
   ]);
-  SC = sc; T = t; P = p;
-
-  renderChips();
-  renderPortfolioSignals();
-
-  // Enter key on input
-  document.getElementById('ticker-input').addEventListener('keydown', e => {
-    if(e.key === 'Enter') addTicker();
-  });
+  _data = { pred, prices, themes };
+  render();
 }
 
-// ── Holdings management ───────────────────────────────────────────────────────
-function addTicker(){
-  const inp = document.getElementById('ticker-input');
-  const val = inp.value.trim().toUpperCase().replace(/[^A-Z0-9.^]/g, '');
-  if(!val) return;
-  if(!holdings.includes(val)){
-    holdings.push(val);
-    saveHoldings();
-    renderChips();
-    renderPortfolioSignals();
+function getCurrentPrice(ticker){
+  const t = _data.prices?.tickers?.[ticker];
+  if (!t || !t.closes || !t.closes.length) return null;
+  // 마지막 비-null 값
+  for (let i = t.closes.length - 1; i >= 0; i--) {
+    if (t.closes[i] != null) return t.closes[i];
   }
-  inp.value = '';
-  inp.focus();
+  return null;
 }
 
-function removeTicker(t){
-  holdings = holdings.filter(h => h !== t);
-  saveHoldings();
-  if(selTicker === t) selTicker = null;
-  renderChips();
-  renderPortfolioSignals();
-  if(selTicker) renderDetail(selTicker);
-  else clearDetail();
+function getPrediction(ticker){
+  return (_data.pred?.predictions || []).find(p => p.ticker === ticker);
 }
 
-function renderChips(){
-  const wrap = document.getElementById('holdings-chips');
-  document.getElementById('port-badge').textContent = holdings.length + ' TICKERS';
-  if(!holdings.length){
-    wrap.innerHTML = '<span style="font-family:var(--font-mono);font-size:9px;color:var(--t3);padding:4px">No holdings added</span>';
+function generateRecommendation(holding, currentPrice, prediction){
+  const buyPrice = holding.buyPrice;
+  const pct = ((currentPrice - buyPrice) / buyPrice) * 100;
+  const stopHit = pct <= -holding.stopPct;
+  const targetHit = pct >= holding.targetPct;
+  const action = prediction?.action || 'HOLD';
+
+  // 우선순위: 손절 > 목표 도달 > 신호
+  if (stopHit) {
+    return {
+      level: 'alert',
+      action: 'SELL',
+      text: `🛑 손절가 도달 (${pct.toFixed(1)}%) — 즉시 매도 검토. 추가 손실 방지가 우선.`,
+    };
+  }
+  if (targetHit) {
+    return {
+      level: 'good',
+      action: 'REDUCE',
+      text: `🎯 목표가 도달 (+${pct.toFixed(1)}%) — 일부 익절 권장. 트레일링 스탑 설정 고려.`,
+    };
+  }
+
+  // 신호 기반
+  if (action === 'SELL' || action === 'REDUCE') {
+    if (pct > 0) {
+      return {
+        level: 'alert',
+        action: action,
+        text: `⚠ 시스템 ${action} 신호 (현재 +${pct.toFixed(1)}%) — 일부 매도해 수익 실현 검토.`,
+      };
+    } else {
+      return {
+        level: 'alert',
+        action: 'SELL',
+        text: `⚠ 시스템 ${action} 신호 + 손실 중 (${pct.toFixed(1)}%) — 손절 검토.`,
+      };
+    }
+  }
+  if (action === 'BUY') {
+    return {
+      level: 'good',
+      action: 'BUY',
+      text: `📈 시스템 BUY 신호. 분할매수 또는 보유 유지. 목표가 $${(buyPrice * (1 + holding.targetPct/100)).toFixed(2)}.`,
+    };
+  }
+  if (action === 'WATCH') {
+    return {
+      level: 'neutral',
+      action: 'WATCH',
+      text: `👁 시스템 WATCH 신호. 가격 움직임 주시. 손절 $${(buyPrice * (1 - holding.stopPct/100)).toFixed(2)}.`,
+    };
+  }
+  return {
+    level: 'neutral',
+    action: 'HOLD',
+    text: `보유 유지. 손절 $${(buyPrice * (1 - holding.stopPct/100)).toFixed(2)} / 목표 $${(buyPrice * (1 + holding.targetPct/100)).toFixed(2)}.`,
+  };
+}
+
+function render(){
+  const holdings = loadHoldings();
+  const list = document.getElementById('holdings');
+
+  if (!holdings.length) {
+    list.innerHTML = '<div class="empty"><div class="e-icon">📂</div>아직 보유 종목이 없습니다<br>위에서 추가해 주세요</div>';
+    document.getElementById('s-count').textContent = '0';
+    document.getElementById('s-cost').textContent = '$0';
+    document.getElementById('s-value').textContent = '$0';
+    document.getElementById('s-pl').textContent = '$0';
+    document.getElementById('s-alerts').textContent = '0';
+    document.getElementById('alert-banner').classList.remove('show');
     return;
   }
-  wrap.innerHTML = holdings.map(t =>
-    `<div class="chip">${t}
-      <span class="chip-x" onclick="removeTicker('${t}')">✕</span>
-    </div>`
-  ).join('');
-}
 
-// ── Portfolio signal list ─────────────────────────────────────────────────────
-function renderPortfolioSignals(){
-  const box = document.getElementById('portfolio-signals');
-  if(!holdings.length){
-    box.innerHTML = '<div class="empty"><div class="empty-ico">◈</div><div class="empty-txt">Add tickers above</div></div>';
-    return;
-  }
-  if(!SC){
-    box.innerHTML = '<div class="empty"><div class="empty-txt">signal_corr.json not loaded</div></div>';
-    return;
-  }
+  let totalCost = 0, totalValue = 0, alertCount = 0;
+  const alerts = [];
 
-  const pairs = SC.pairs || [];
-  const zscores = T?.zscores || {};
+  const html = holdings.map(h => {
+    const cur = getCurrentPrice(h.ticker);
+    const pred = getPrediction(h.ticker);
+    const cost = h.shares * h.buyPrice;
+    totalCost += cost;
 
-  // For each holding, find all signal pairs
-  const predMap = {};
-  (P?.predictions || []).forEach(p => { predMap[p.ticker] = p; });
+    if (cur === null) {
+      return `<div class="hcard action-HOLD">
+        <div class="h-tic">${h.ticker}</div>
+        <div class="h-recommend">
+          <div class="label">상태</div>
+          <div class="text">가격 데이터 없음 (지원되지 않는 종목)</div>
+        </div>
+        <div></div><div></div>
+        <button class="btn-x" onclick="removeHolding('${h.ticker}')">✕</button>
+      </div>`;
+    }
 
-  const rows = holdings.map(ticker => {
-    const tickerPairs = pairs.filter(p => p.ticker === ticker);
-    const leading     = tickerPairs.filter(p => p.best_lag <= -1 && p.confidence >= 0.3);
-    const active = leading.filter(p => (zscores[p.term] || 0) >= 1.5)
-                          .sort((a,b) => b.confidence - a.confidence);
-    const pred = predMap[ticker] || null;
-    return { ticker, tickerPairs, leading, active, pred };
-  }).sort((a,b) => {
-    // BUY/WATCH 먼저, 그 다음 active signal 수
-    const order = {BUY:0,WATCH:1,HOLD:2,REDUCE:3,SELL:4};
-    const ao = order[a.pred?.action] ?? 5;
-    const bo = order[b.pred?.action] ?? 5;
-    if(ao !== bo) return ao - bo;
-    return b.active.length - a.active.length;
-  });
+    const value = h.shares * cur;
+    totalValue += value;
+    const pl = value - cost;
+    const plPct = (pl / cost) * 100;
+    const action = pred?.action || 'HOLD';
+    const rec = generateRecommendation(h, cur, pred);
 
-  box.innerHTML = rows.map(({ ticker, tickerPairs, leading, active }) => {
-    const isSel = selTicker === ticker;
-    const hasAlert = active.length > 0;
-    const alertCls = hasAlert ? 'alert-on' : 'alert-off';
-    const alertTxt = hasAlert ? `${active.length} ACTIVE` : 'NO SIGNAL';
+    if (rec.level === 'alert') {
+      alertCount++;
+      alerts.push(`${h.ticker}: ${rec.action}`);
+    }
 
-    // Show top 3 signal chips
-    const chips = leading.slice(0, 4).map(p => {
-      const isBull = p.avg_ret_1d >= 0;
-      return `<span class="sig-chip ${isBull ? 'sc-bull':'sc-bear'}">
-        ${p.term} ${isBull?'▲':'▼'} lag${p.best_lag}d
-      </span>`;
-    }).join('');
-
-    const pred = rows.find(r => r.ticker === ticker)?.pred;
-    const predBadge = pred
-      ? `<span class="pred-badge pred-${pred.action}">${pred.action}</span>
-         <span style="font-family:var(--font-mono);font-size:9px;color:var(--t3)">
-           ${(pred.confidence*100).toFixed(0)}%</span>`
-      : '';
-    const priceStr = pred?.price ? `$${pred.price.toFixed(2)}` : '';
-
-    return `<div class="port-row${isSel?' sel':''}" data-ticker="${ticker}" onclick="selectTicker('${ticker}')">
-      <div class="pr-top">
-        <span class="pr-ticker">${ticker}</span>
-        <span style="font-family:var(--font-mono);font-size:10px;color:var(--t2)">${priceStr}</span>
-        <div class="pr-pred">${predBadge}</div>
+    return `<div class="hcard action-${rec.action} ${rec.level === 'alert' ? 'alert' : ''}">
+      <div class="h-tic">${h.ticker}</div>
+      <div class="h-prices">
+        <div class="h-pblock">
+          <div class="h-plabel">BUY</div>
+          <div class="h-pval">$${h.buyPrice.toFixed(2)}</div>
+        </div>
+        <div class="h-pblock">
+          <div class="h-plabel">CURRENT</div>
+          <div class="h-pval">$${cur.toFixed(2)}</div>
+        </div>
+        <div class="h-pblock">
+          <div class="h-plabel">SHARES</div>
+          <div class="h-pval">${h.shares}</div>
+        </div>
+        <div class="h-pblock">
+          <div class="h-plabel">P/L</div>
+          <div class="h-pl ${pl >= 0 ? 'up' : 'down'}">${pl >= 0 ? '+' : ''}$${pl.toFixed(0)} (${plPct >= 0 ? '+' : ''}${plPct.toFixed(1)}%)</div>
+        </div>
+        <div class="h-pblock">
+          <div class="h-plabel">STOP / TGT</div>
+          <div class="h-pval" style="font-size:11px;color:var(--t2)">
+            $${(h.buyPrice * (1 - h.stopPct/100)).toFixed(2)} / $${(h.buyPrice * (1 + h.targetPct/100)).toFixed(2)}
+          </div>
+        </div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
-        <div>${chips}</div>
-        ${hasAlert ? `<span class="pr-alert alert-on">${active.length} NEWS</span>` : ''}
+      <div class="h-action ${rec.action}">${rec.action}</div>
+      <div class="h-recommend">
+        <div class="label">RECOMMENDATION</div>
+        <div class="text ${rec.level}">${rec.text}</div>
       </div>
+      <button class="btn-x" onclick="removeHolding('${h.ticker}')">✕</button>
     </div>`;
   }).join('');
-}
 
-// ── Select ticker → detail ────────────────────────────────────────────────────
-function selectTicker(ticker){
-  selTicker = ticker;
-  document.querySelectorAll('.port-row').forEach(el =>
-    el.classList.toggle('sel', el.dataset.ticker === ticker)
-  );
-  renderDetail(ticker);
-}
+  list.innerHTML = html;
 
-function clearDetail(){
-  document.getElementById('det-header').style.display = 'none';
-  document.getElementById('detail-scroll').innerHTML =
-    `<div class="empty" id="det-empty">
-      <div class="empty-ico">◈</div>
-      <div class="empty-txt">Select a ticker to view signals</div>
-    </div>`;
-}
+  // 요약
+  const totalPL = totalValue - totalCost;
+  const totalPLPct = totalCost > 0 ? (totalPL / totalCost) * 100 : 0;
 
-function renderDetail(ticker){
-  if(!SC) return;
-  const pairs   = SC.pairs || [];
-  const zscores = T?.zscores || {};
+  document.getElementById('s-count').textContent = holdings.length;
+  document.getElementById('s-cost').textContent = '$' + totalCost.toFixed(0);
+  document.getElementById('s-value').textContent = '$' + totalValue.toFixed(0);
+  const plEl = document.getElementById('s-pl');
+  plEl.textContent = (totalPL >= 0 ? '+' : '') + '$' + totalPL.toFixed(0);
+  plEl.style.color = totalPL >= 0 ? 'var(--green)' : 'var(--red)';
+  const sub = totalPLPct >= 0 ? '+' + totalPLPct.toFixed(1) + '%' : totalPLPct.toFixed(1) + '%';
+  plEl.innerHTML = plEl.textContent + ` <span style="font-size:11px;color:var(--t3)">${sub}</span>`;
 
-  const tickerPairs = pairs
-    .filter(p => p.ticker === ticker)
-    .sort((a,b) => b.confidence - a.confidence);
+  document.getElementById('s-alerts').textContent = alertCount;
 
-  // header
-  const hdr = document.getElementById('det-header');
-  hdr.style.display = 'block';
-  document.getElementById('det-name').textContent = ticker;
-
-  const nLeading = tickerPairs.filter(p => p.best_lag <= -1).length;
-  const nActive  = tickerPairs.filter(p => p.best_lag <= -1 && (zscores[p.term]||0) >= 1.5).length;
-  document.getElementById('det-meta').textContent =
-    `${tickerPairs.length} total pairs · ${nLeading} leading signals · ${nActive} active today`;
-
-  // Predict card 렌더
-  renderPredCard(ticker);
-
-  const scroll = document.getElementById('detail-scroll');
-
-  if(!tickerPairs.length){
-    scroll.innerHTML = `<div class="no-signals">No signal pairs found for ${ticker}.<br>
-      This ticker may not have enough news co-occurrence data yet.</div>`;
-    return;
+  if (alertCount > 0) {
+    document.getElementById('alert-banner').classList.add('show');
+    document.getElementById('alert-text').textContent =
+      `${alertCount}개 종목에 즉시 검토 필요한 신호 — ${alerts.join(', ')}`;
+  } else {
+    document.getElementById('alert-banner').classList.remove('show');
   }
-
-  // Group: active (z≥1.5 AND leading), leading (lag≤-1), other
-  const active  = tickerPairs.filter(p => p.best_lag <= -1 && (zscores[p.term]||0) >= 1.5);
-  const leading = tickerPairs.filter(p => p.best_lag <= -1 && (zscores[p.term]||0) < 1.5);
-  const other   = tickerPairs.filter(p => p.best_lag > -1);
-
-  let html = '';
-
-  if(active.length){
-    html += `<div class="sec-lbl" style="color:var(--amber)">🔴 ACTIVE NOW — hot word + leading signal</div>`;
-    html += active.map(p => signalCard(p, zscores, 'rgba(255,179,0,.06)')).join('');
-  }
-
-  if(leading.length){
-    html += `<div class="sec-lbl">LEADING SIGNALS (lag ≤ -1d)</div>`;
-    html += leading.map(p => signalCard(p, zscores, '')).join('');
-  }
-
-  if(other.length){
-    html += `<div class="sec-lbl">COINCIDENT / LAGGING</div>`;
-    html += other.slice(0, 10).map(p => signalCard(p, zscores, '')).join('');
-  }
-
-  scroll.innerHTML = html;
 }
 
-function signalCard(p, zscores, bg){
-  const isBull   = p.avg_ret_1d >= 0;
-  const dirColor = isBull ? 'var(--green)' : 'var(--red)';
-  const dirBorder= isBull ? 'rgba(0,230,118,.3)' : 'rgba(255,68,68,.3)';
-  const zToday   = zscores[p.term] || 0;
-  const confPct  = Math.round(p.confidence * 100);
-  const bColor   = confBarColor(p.confidence);
-  const testStr  = p.test_hit != null
-    ? `TEST ${(p.test_hit*100).toFixed(0)}%` : 'NO TEST';
-  const testColor= p.test_hit == null ? 'var(--t3)' :
-                   p.test_hit >= 0.65 ? 'var(--green)' :
-                   p.test_hit >= 0.5  ? 'var(--amber)' : 'var(--red)';
-
-  return `<div class="act-card" style="background:${bg}">
-    <div class="ac-top">
-      <span class="ac-term">${p.term}</span>
-      <span class="ac-arrow" style="color:${p.best_lag <= -1 ? 'var(--cyan)':'var(--t3)'}">→</span>
-      <span style="font-family:var(--font-mono);font-size:12px;font-weight:600;
-                   color:${dirColor};border:1px solid ${dirBorder};padding:1px 6px">
-        ${p.ticker}</span>
-      <span class="ac-lag">lag ${p.best_lag > 0?'+':''}${p.best_lag}d</span>
-      ${zToday >= 1.5 ? `<span style="font-family:var(--font-mono);font-size:9px;
-        color:var(--amber)">z=${sign(zToday)}${zToday.toFixed(1)} TODAY</span>` : ''}
-      <span style="font-family:var(--font-mono);font-size:9px;color:${testColor};
-                   margin-left:auto">${testStr}</span>
-    </div>
-    <div class="ac-conf-wrap">
-      <div class="ac-conf-bar" style="width:${confPct}%;background:${bColor}"></div>
-    </div>
-    <div class="ac-stats">
-      <div class="ac-stat">
-        <div class="ac-stat-l">CONF</div>
-        <div class="ac-stat-v" style="color:${bColor}">${p.confidence.toFixed(2)}</div>
-      </div>
-      <div class="ac-stat">
-        <div class="ac-stat-l">CORR</div>
-        <div class="ac-stat-v" style="color:var(--t2)">${p.corr >= 0?'+':''}${p.corr.toFixed(3)}</div>
-      </div>
-      <div class="ac-stat">
-        <div class="ac-stat-l">HIT</div>
-        <div class="ac-stat-v" style="color:${p.hit_rate >= 0.6?'var(--green)':p.hit_rate>=0.5?'var(--amber)':'var(--red)'}">
-          ${(p.hit_rate*100).toFixed(0)}%</div>
-      </div>
-      <div class="ac-stat">
-        <div class="ac-stat-l">1D RET</div>
-        <div class="ac-stat-v" style="color:${isBull?'var(--green)':'var(--red)'}">
-          ${pct(p.avg_ret_1d)}</div>
-      </div>
-    </div>
-  </div>`;
-}
-
-
-// ── Predict card render ────────────────────────────────────────────────────────
-function renderPredCard(ticker){
-  const predMap = {};
-  (P?.predictions || []).forEach(p => { predMap[p.ticker] = p; });
-  const pred = predMap[ticker];
-
-  const box = document.getElementById('pred-card-area');
-  if(!box) return;
-
-  if(!pred){
-    box.innerHTML = `<div style="padding:10px 12px;font-family:var(--font-mono);
-      font-size:9px;color:var(--t3)">No prediction data for ${ticker}</div>`;
-    return;
-  }
-
-  const ac = {BUY:'var(--green)',WATCH:'var(--cyan)',HOLD:'var(--t2)',
-              REDUCE:'var(--amber)',SELL:'var(--red)'}[pred.action]||'var(--t2)';
-  const bc = pred.confidence >= 0.7 ? '#00e676' : pred.confidence >= 0.5 ? '#00d4ff' :
-             pred.confidence >= 0.35 ? '#ffb300' : '#344a60';
-  const s  = pred.signals || {};
-  const sign = n => n >= 0 ? '+' : '';
-
-  const rsiColor = s.rsi14 < 30 ? 'var(--green)' : s.rsi14 > 70 ? 'var(--red)' : 'var(--t2)';
-
-  box.innerHTML = `
-    <div class="pred-card">
-      <div class="pred-card-top">
-        <span class="pred-ticker-big">${ticker}</span>
-        <span class="pred-badge pred-${pred.action}">${pred.action}</span>
-        <span class="pred-price">$${pred.price?.toFixed(2) ?? '—'}</span>
-        <span style="font-family:var(--font-mono);font-size:9px;color:var(--t3);margin-left:auto">
-          ${pred.horizon ?? '3-5d'} horizon</span>
-      </div>
-      <div class="pred-conf-wrap">
-        <div class="pred-conf-bar" style="width:${Math.round(pred.confidence*100)}%;background:${bc}"></div>
-      </div>
-      <div class="pred-stats">
-        <div class="pred-stat">
-          <div class="pred-stat-l">CONF</div>
-          <div class="pred-stat-v" style="color:${bc}">${pred.confidence.toFixed(2)}</div>
-        </div>
-        <div class="pred-stat">
-          <div class="pred-stat-l">RSI 14</div>
-          <div class="pred-stat-v" style="color:${rsiColor}">${s.rsi14?.toFixed(0) ?? '—'}</div>
-        </div>
-        <div class="pred-stat">
-          <div class="pred-stat-l">TARGET</div>
-          <div class="pred-stat-v" style="color:var(--green);font-size:11px">
-            ${pred.target ? '$'+pred.target.toFixed(1) : '—'}</div>
-        </div>
-        <div class="pred-stat">
-          <div class="pred-stat-l">STOP</div>
-          <div class="pred-stat-v" style="color:var(--red);font-size:11px">
-            ${pred.stop ? '$'+pred.stop.toFixed(1) : '—'}</div>
-        </div>
-      </div>
-      <div class="pred-reasons">
-        ${(pred.reasons||[]).map(r =>
-          `<div class="pred-reason"><span style="color:var(--green)">▲</span>${r}</div>`
-        ).join('')}
-        ${(pred.risks||[]).slice(0,2).map(r =>
-          `<div class="pred-reason pred-risk"><span>⚠</span>${r}</div>`
-        ).join('')}
-      </div>
-    </div>`;
-}
-
-// ── Entry ─────────────────────────────────────────────────────────────────────
 init();
 })();
 </script>
-
-<script>
-(function(){
-  var ts = document.getElementById('unified-ts');
-  if (ts) {
-    ts.textContent = 'UPDATED ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-  }
-})();
-</script>
-
 </body>
 </html>

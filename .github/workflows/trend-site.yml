@@ -76,6 +76,44 @@ jobs:
           test -d data/warehouse/daily
           ls -lt data/warehouse/daily | head -n 8 || true
 
+      - name: Preserve raw news to data-cache
+        run: |
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          mkdir -p /tmp/news-archive
+          if git ls-remote --heads origin data-cache | grep -q data-cache; then
+            git worktree add /tmp/news-archive data-cache 2>/dev/null || \
+            git worktree add /tmp/news-archive -b data-cache origin/data-cache 2>/dev/null || true
+          else
+            git worktree add /tmp/news-archive -b data-cache 2>/dev/null || true
+          fi
+
+          mkdir -p /tmp/news-archive/data/news_archive
+          for f in data/warehouse/daily/*.jsonl; do
+            [ -f "$f" ] || continue
+            name=$(basename "$f")
+            case "$name" in
+              *_tokens.jsonl) continue ;;
+            esac
+            dst="/tmp/news-archive/data/news_archive/$name"
+            if [ ! -f "$dst" ]; then
+              cp "$f" "$dst"
+              echo "Archived: $name"
+            fi
+          done
+
+          cd /tmp/news-archive
+          rm -f .gitignore
+          git add data/news_archive/
+          if ! git diff --cached --quiet; then
+            FILES=$(git diff --cached --name-only | wc -l)
+            git commit -m "news: preserve $FILES new days $(date -u +%Y-%m-%d)"
+            git push origin data-cache || true
+          else
+            echo "No new news to preserve"
+          fi
+
       - name: Convert csv/jsonl to *_tokens.jsonl
         run: |
           set -euo pipefail
