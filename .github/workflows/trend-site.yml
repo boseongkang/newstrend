@@ -312,16 +312,30 @@ jobs:
           git config --global user.name  "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
+          # 1) 변경사항 없으면 종료
           git add site/data/predictions_history/ site/data/reports/ 2>/dev/null || true
-
           if git diff --cached --quiet; then
             echo "No history changes to commit"
             exit 0
           fi
 
+          # 2) 다른 unstaged 변경 모두 stash (rebase 가능하게)
+          git stash --include-untracked --keep-index 2>/dev/null || true
+
+          # 3) commit
           git commit -m "data: archive predictions $(date -u +%Y-%m-%d)"
-          git pull --rebase origin main || true
-          git push origin HEAD:main
+
+          # 4) 재시도 로직: rebase + push, 충돌 시 최대 5회 재시도
+          for i in 1 2 3 4 5; do
+            git pull --rebase --strategy-option=ours origin main && \
+            git push origin HEAD:main && break
+            echo "Attempt $i failed, retrying..."
+            sleep $((RANDOM % 5 + 1))
+          done
+
+          # 5) stash 복구 (무시해도 됨)
+          git stash pop 2>/dev/null || true
+          echo "Done"
 
       - name: Build macro themes
         run: |
