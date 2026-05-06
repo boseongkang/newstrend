@@ -249,6 +249,13 @@ jobs:
             --prev   site/data/backtest.json \
             --out    site/data/backtest_v2.json || true
 
+      - name: Run daily verification
+        run: |
+          python scripts/daily_verify.py \
+            --pred-dir site/data/predictions_history \
+            --prices   site/data/prices.json \
+            --out      site/data/verification/daily.json || true
+
       - name: Generate weekly report
         run: |
           python scripts/weekly_report.py \

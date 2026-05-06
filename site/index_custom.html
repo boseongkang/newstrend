@@ -239,7 +239,7 @@ main{max-width:1400px;margin:0 auto;padding:20px 24px}
 
 <main>
   <!-- HERO: 시장 상태 한 줄 요약 -->
-  <div class="hero" id="hero" style="grid-template-columns:1fr 1px 1fr 1px 1fr 1px 1.4fr">
+  <div class="hero" id="hero" style="grid-template-columns:1fr 1px 1fr 1px 1fr 1px 1.2fr 1px 1fr">
     <div class="hero-block">
       <div class="hero-label">Market Regime</div>
       <div class="hero-value" id="hero-regime">—</div>
@@ -264,6 +264,12 @@ main{max-width:1400px;margin:0 auto;padding:20px 24px}
       <div id="hero-themes" style="display:flex;flex-direction:column;gap:5px;margin-top:8px">
         <div style="font-family:var(--fm);font-size:10px;color:var(--t3)">Loading...</div>
       </div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-block">
+      <div class="hero-label">Yesterday Hit Rate</div>
+      <div class="hero-value" id="hero-verify">—</div>
+      <div class="hero-sub" id="hero-verify-sub">—</div>
     </div>
   </div>
 
@@ -389,21 +395,55 @@ function renderHeroThemes(themes){
     '<div style="font-family:var(--fm);font-size:10px;color:var(--t3)">No active themes</div>';
 }
 
+
+function renderHeroVerify(verify){
+  const yesterday = verify.yesterday;
+  const overall = verify.overall_hit_rate || 0;
+  const totalDays = verify.total_days || 0;
+
+  const verifyEl = document.getElementById('hero-verify');
+  const subEl = document.getElementById('hero-verify-sub');
+
+  if (!yesterday || yesterday.summary.total === 0) {
+    verifyEl.textContent = '—';
+    subEl.textContent = 'Awaiting data';
+    return;
+  }
+
+  const yhr = yesterday.summary.hit_rate || 0;
+  const color = yhr >= 65 ? 'var(--green)' : yhr >= 55 ? 'var(--cyan)' :
+                yhr >= 45 ? 'var(--amber)' : 'var(--red)';
+  verifyEl.style.color = color;
+  verifyEl.textContent = yhr.toFixed(0) + '%';
+
+  // BUY/WATCH 정확도 강조
+  const ba = verify.by_action || {};
+  const buyHr = ba.BUY?.hit_rate;
+  const watchHr = ba.WATCH?.hit_rate;
+  let actionStr = '';
+  if (buyHr !== undefined) actionStr += `BUY ${buyHr.toFixed(0)}%`;
+  if (watchHr !== undefined) actionStr += (actionStr ? ' · ' : '') + `WATCH ${watchHr.toFixed(0)}%`;
+
+  subEl.innerHTML = `${yesterday.summary.total} signals · ${totalDays}d total<br>${actionStr || `Avg ${overall.toFixed(0)}%`}`;
+}
+
 async function init(){
   const tsEl = document.getElementById('unified-ts') || document.getElementById('ts');
   if (tsEl) tsEl.textContent = 'UPDATED ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
 
 
-  const [pred, trends, weights, weekly, themes] = await Promise.all([
+  const [pred, trends, weights, weekly, themes, verify] = await Promise.all([
     fetchJSON('predictions.json'),
     fetchJSON('trends.json'),
     fetchJSON('ticker_weights.json'),
     fetchJSON('reports/weekly_report.json'),
     fetchJSON('macro_themes.json'),
+    fetchJSON('verification/daily.json'),
   ]);
 
   if (pred) renderHero(pred);
   if (themes) renderHeroThemes(themes);
+  if (verify) renderHeroVerify(verify);
   if (pred) renderActions(pred);
   if (pred) renderTickerGrid(pred);
   if (trends) renderHotNews(trends);
