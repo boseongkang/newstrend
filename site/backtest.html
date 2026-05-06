@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · Backtest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--purple:#b380ff;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
+.unified-header{height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:100}
+.brand{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300;margin-left:6px}
+nav{display:flex;gap:2px;flex-wrap:wrap}
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:6px 12px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10px;color:var(--green)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#unified-ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+main{max-width:1300px;margin:20px auto;padding:0 24px}
+
+/* Hero KPIs */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--b1);
+          border:1px solid var(--b1);margin-bottom:24px}
+.kpi-cell{background:var(--bg1);padding:18px 14px;text-align:center}
+.kpi-label{font-family:var(--fm);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+           color:var(--t3);margin-bottom:8px}
+.kpi-val{font-family:var(--fm);font-size:22px;font-weight:600;color:var(--t1)}
+.kpi-val.up{color:var(--green)}
+.kpi-val.down{color:var(--red)}
+.kpi-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:4px}
+
+/* Rules section */
+.rules{background:var(--bg1);border:1px solid var(--b1);padding:18px 22px;margin-bottom:20px}
+.rules-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
+             text-transform:uppercase;margin-bottom:12px;color:var(--t1)}
+.rule-list{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.rule{background:var(--bg2);padding:10px 12px;border-left:3px solid var(--cyan)}
+.rule-num{font-family:var(--fm);font-size:9px;color:var(--cyan);font-weight:600;letter-spacing:.1em}
+.rule-text{font-family:var(--fm);font-size:11px;color:var(--t1);margin-top:3px}
+
+/* Section blocks */
+.section{background:var(--bg1);border:1px solid var(--b1);margin-bottom:20px}
+.sec-hdr{padding:14px 20px;border-bottom:1px solid var(--b1);display:flex;
+         align-items:center;justify-content:space-between}
+.sec-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--t1)}
+.sec-meta{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.sec-body{padding:18px 20px}
+
+.equity-chart{height:280px}
+.exit-bars{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b1)}
+.exit-bar{background:var(--bg2);padding:14px;text-align:center}
+.exit-pct{font-family:var(--fm);font-size:24px;font-weight:600}
+.exit-pct.stop{color:var(--red)}
+.exit-pct.take{color:var(--green)}
+.exit-pct.time{color:var(--t2)}
+.exit-label{font-family:var(--fm);font-size:9px;letter-spacing:.1em;color:var(--t3);margin-top:6px;
+            text-transform:uppercase}
+.exit-count{font-family:var(--fm);font-size:11px;color:var(--t1);margin-top:3px}
+
+/* Ticker table */
+.ttable{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:11px}
+.ttable th{padding:10px 12px;text-align:left;color:var(--t3);font-weight:500;
+           font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+           border-bottom:1px solid var(--b1)}
+.ttable td{padding:8px 12px;border-bottom:1px solid var(--b1);color:var(--t1)}
+.ttable tr:hover td{background:var(--bg2)}
+.ttable .num{text-align:right;font-feature-settings:"tnum"}
+.ttable .ticker{font-weight:600;color:var(--t1)}
+.ttable .up{color:var(--green)}
+.ttable .down{color:var(--red)}
+.ttable .meh{color:var(--amber)}
+.tier-A{border-left:3px solid var(--green)}
+.tier-B{border-left:3px solid var(--cyan)}
+.tier-C{border-left:3px solid var(--amber)}
+.tier-X{border-left:3px solid var(--red)}
+
+/* Trade log */
+.trade-table{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:10px}
+.trade-table th,.trade-table td{padding:6px 10px;border-bottom:1px solid var(--b1);text-align:left}
+.trade-table th{color:var(--t3);font-weight:500;font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+.trade-table td{color:var(--t1)}
+.tag-stop{color:var(--red);font-size:9px;padding:2px 6px;border:1px solid var(--red);background:rgba(255,68,68,0.08)}
+.tag-take{color:var(--green);font-size:9px;padding:2px 6px;border:1px solid var(--green);background:rgba(0,230,118,0.08)}
+.tag-time{color:var(--t2);font-size:9px;padding:2px 6px;border:1px solid var(--b2)}
+
+.empty{text-align:center;padding:30px;color:var(--t3);font-family:var(--fm);font-size:11px}
+.spinner{width:18px;height:18px;border:2px solid var(--b2);border-top-color:var(--cyan);
+         border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:1024px){
+  .kpi-grid{grid-template-columns:repeat(3,1fr)}
+  .rule-list{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<header class="unified-header">
+  <div class="brand">NEWSTREND <em>// BACKTEST RESULTS</em></div>
+  <nav>
+    <a href="./index.html">DASHBOARD</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="../../../Downloads/predict.html">PREDICT</a>
+    <a href="./ticker_detail.html">TICKER</a>
+    <a href="../../../Downloads/report.html">REPORT</a>
+    <a href="./weekly.html">WEEKLY</a>
+    <a href="../../../Downloads/portfolio.html">PORTFOLIO</a>
+    <a href="../../../Downloads/rising.html">RISING</a>
+    <a href="../../../Downloads/macro.html">MACRO</a>
+    <a href="./backtest.html" class="on">BACKTEST</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="live"><div class="dot"></div>LIVE</div>
+    <div id="unified-ts">—</div>
+  </div>
+</header>
+
+<main>
+  <h2 style="font-family:var(--fm);font-size:14px;font-weight:600;letter-spacing:.08em;
+             margin-bottom:14px;color:var(--t1)">
+    📊 SAFETY-FIRST SYSTEM BACKTEST
+  </h2>
+
+  <div class="kpi-grid" id="kpi-grid"><div class="empty"><div class="spinner"></div></div></div>
+
+  <div class="rules">
+    <div class="rules-title">⚙ 5 SAFETY RULES APPLIED</div>
+    <div class="rule-list">
+      <div class="rule"><div class="rule-num">RULE 1</div><div class="rule-text">Stop-loss -3%</div></div>
+      <div class="rule"><div class="rule-num">RULE 2</div><div class="rule-text">Take-profit +5% trailing</div></div>
+      <div class="rule"><div class="rule-num">RULE 3</div><div class="rule-text">Blacklist losers</div></div>
+      <div class="rule"><div class="rule-num">RULE 4</div><div class="rule-text">Min news score 1.5</div></div>
+      <div class="rule"><div class="rule-num">RULE 5</div><div class="rule-text">Skip overheated market</div></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px">
+    <div class="section">
+      <div class="sec-hdr">
+        <div class="sec-title">📈 EQUITY CURVE</div>
+        <div class="sec-meta">cumulative return</div>
+      </div>
+      <div class="sec-body">
+        <div class="equity-chart"><canvas id="equity-chart"></canvas></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-hdr">
+        <div class="sec-title">EXIT BREAKDOWN</div>
+      </div>
+      <div class="sec-body" style="padding:0">
+        <div class="exit-bars" id="exit-bars">
+          <div class="exit-bar"><div class="exit-pct stop" id="b-stop">—</div>
+            <div class="exit-label">Stop loss</div><div class="exit-count" id="b-stop-n">—</div></div>
+          <div class="exit-bar"><div class="exit-pct take" id="b-take">—</div>
+            <div class="exit-label">Trailing</div><div class="exit-count" id="b-take-n">—</div></div>
+          <div class="exit-bar"><div class="exit-pct time" id="b-time">—</div>
+            <div class="exit-label">5d Time-out</div><div class="exit-count" id="b-time-n">—</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-hdr">
+      <div class="sec-title">🎯 BY TICKER (Tier classification)</div>
+      <div class="sec-meta">A: 75%+ wins · B: 60%+ · C: 50%+ · X: blacklisted</div>
+    </div>
+    <div class="sec-body" style="padding:0">
+      <table class="ttable" id="ttable">
+        <thead><tr>
+          <th>Tier</th>
+          <th>Ticker</th>
+          <th class="num">Trades</th>
+          <th class="num">Win %</th>
+          <th class="num">Avg Ret</th>
+          <th class="num">Total Ret</th>
+          <th class="num">MDD</th>
+          <th class="num">Stop</th>
+          <th class="num">Take</th>
+          <th class="num">Sharpe</th>
+        </tr></thead>
+        <tbody><tr><td colspan="10" class="empty">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-hdr">
+      <div class="sec-title">📋 RECENT TRADES (last 30)</div>
+    </div>
+    <div class="sec-body" style="padding:0">
+      <table class="trade-table" id="trade-log">
+        <thead><tr>
+          <th>Date</th>
+          <th>Ticker</th>
+          <th>Signal</th>
+          <th class="num">RSI</th>
+          <th class="num">Score</th>
+          <th>Words</th>
+          <th class="num">Entry</th>
+          <th class="num">Exit</th>
+          <th class="num">Return</th>
+          <th>Exit Reason</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+(function(){
+'use strict';
+const V = Date.now();
+
+async function fetchJSON(p){
+  try {
+    const r = await fetch(`./data/${p}?v=${V}`, {cache:'no-store'});
+    if(!r.ok) return null;
+    return r.json();
+  } catch(e) { return null; }
+}
+
+async function init(){
+  const tsEl = document.getElementById('unified-ts');
+  if (tsEl) tsEl.textContent = 'UPDATED ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+  const data = await fetchJSON('backtest_v2.json');
+  if (!data) {
+    document.getElementById('kpi-grid').innerHTML =
+      '<div class="empty">Run: python scripts/backtest_v2.py</div>';
+    return;
+  }
+
+  renderKPIs(data);
+  renderEquityCurve(data);
+  renderExitBars(data);
+  renderTickerTable(data);
+  renderTradeLog(data);
+}
+
+function renderKPIs(data){
+  const s = data.summary;
+  const upDown = (n) => n >= 0 ? 'up' : 'down';
+  const sign = (n) => n >= 0 ? '+' : '';
+
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi-cell">
+      <div class="kpi-label">Total Trades</div>
+      <div class="kpi-val">${s.total_trades}</div>
+      <div class="kpi-sub">over backtest period</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-label">Win Rate</div>
+      <div class="kpi-val ${s.win_rate >= 60 ? 'up' : 'down'}">${s.win_rate.toFixed(1)}%</div>
+      <div class="kpi-sub">vs random 50%</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-label">Avg Return</div>
+      <div class="kpi-val ${upDown(s.avg_ret)}">${sign(s.avg_ret)}${s.avg_ret.toFixed(2)}%</div>
+      <div class="kpi-sub">per trade</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-label">Cumulative</div>
+      <div class="kpi-val ${upDown(s.cum_ret)}">${sign(s.cum_ret)}${s.cum_ret.toFixed(1)}%</div>
+      <div class="kpi-sub">compounded</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-label">Max Drawdown</div>
+      <div class="kpi-val ${s.mdd <= 15 ? 'up' : 'down'}">${s.mdd.toFixed(1)}%</div>
+      <div class="kpi-sub">worst peak-to-trough</div>
+    </div>
+    <div class="kpi-cell">
+      <div class="kpi-label">Risk-Reward</div>
+      <div class="kpi-val ${s.cum_ret/s.mdd >= 5 ? 'up' : 'down'}">${(s.cum_ret/s.mdd).toFixed(1)}x</div>
+      <div class="kpi-sub">return per drawdown</div>
+    </div>`;
+}
+
+function renderEquityCurve(data){
+  const trades = data.all_trades || [];
+  if (!trades.length) return;
+
+  // 시간순 정렬
+  const sorted = [...trades].sort((a,b) => a.date.localeCompare(b.date));
+
+  const labels = [];
+  const equity = [1.0];
+  let cur = 1.0;
+  for (const t of sorted) {
+    cur *= (1 + t.ret/100);
+    equity.push(cur);
+    labels.push(t.date);
+  }
+  labels.unshift(sorted[0].date);
+
+  const ctx = document.getElementById('equity-chart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Portfolio Value (start = 1.0)',
+        data: equity,
+        borderColor: '#00d4ff',
+        backgroundColor: 'rgba(0,212,255,0.08)',
+        borderWidth: 2,
+        fill: true,
+        pointRadius: 0,
+        tension: 0.2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {display:false},
+        tooltip: {
+          backgroundColor: '#0c1220',
+          borderColor: '#1a2840',
+          borderWidth: 1,
+          titleFont: {family:'IBM Plex Mono', size:10},
+          bodyFont: {family:'IBM Plex Mono', size:10},
+          callbacks: {
+            label: (ctx) => `${((ctx.parsed.y - 1) * 100).toFixed(2)}%`,
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {color:'#6a8aa8', font:{family:'IBM Plex Mono', size:9},
+                  maxTicksLimit:8},
+          grid: {color:'#1a2840'},
+        },
+        y: {
+          ticks: {color:'#6a8aa8', font:{family:'IBM Plex Mono', size:9},
+                  callback: (v) => ((v-1)*100).toFixed(0) + '%'},
+          grid: {color:'#1a2840'},
+        },
+      },
+    }
+  });
+}
+
+function renderExitBars(data){
+  const s = data.summary;
+  const total = s.total_trades || 1;
+  const stopPct = (s.stop_count / total * 100).toFixed(0);
+  const takePct = (s.take_count / total * 100).toFixed(0);
+  const timePct = (s.timeout_count / total * 100).toFixed(0);
+
+  document.getElementById('b-stop').textContent = stopPct + '%';
+  document.getElementById('b-take').textContent = takePct + '%';
+  document.getElementById('b-time').textContent = timePct + '%';
+  document.getElementById('b-stop-n').textContent = `${s.stop_count} trades`;
+  document.getElementById('b-take-n').textContent = `${s.take_count} trades`;
+  document.getElementById('b-time-n').textContent = `${s.timeout_count} trades`;
+}
+
+function tier(winRate, totalRet){
+  if (totalRet < 0) return 'X';
+  if (winRate >= 75) return 'A';
+  if (winRate >= 60) return 'B';
+  if (winRate >= 50) return 'C';
+  return 'X';
+}
+
+function renderTickerTable(data){
+  const tbody = document.querySelector('#ttable tbody');
+  const rows = Object.values(data.by_ticker || {})
+    .filter(r => r.trades >= 2)
+    .sort((a,b) => b.total_ret - a.total_ret);
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="10" class="empty">No data</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => {
+    const t = tier(r.win_rate, r.total_ret);
+    const upDown = (n) => n >= 0 ? 'up' : 'down';
+    const sign = (n) => n >= 0 ? '+' : '';
+    return `<tr class="tier-${t}">
+      <td><span style="font-family:var(--fm);font-size:9px;font-weight:600;color:var(--cyan)">${t}</span></td>
+      <td class="ticker">${r.ticker}</td>
+      <td class="num">${r.trades}</td>
+      <td class="num">${r.win_rate.toFixed(1)}%</td>
+      <td class="num ${upDown(r.avg_ret)}">${sign(r.avg_ret)}${r.avg_ret.toFixed(2)}%</td>
+      <td class="num ${upDown(r.total_ret)}">${sign(r.total_ret)}${r.total_ret.toFixed(2)}%</td>
+      <td class="num">${r.mdd.toFixed(1)}%</td>
+      <td class="num">${r.stop_count || 0}</td>
+      <td class="num">${r.take_count || 0}</td>
+      <td class="num ${upDown(r.sharpe)}">${sign(r.sharpe)}${r.sharpe.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderTradeLog(data){
+  const tbody = document.querySelector('#trade-log tbody');
+  const trades = (data.all_trades || []).slice(-30).reverse();
+
+  if (!trades.length) {
+    tbody.innerHTML = '<tr><td colspan="10" class="empty">No trades</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = trades.map(t => {
+    const tag = t.exit_reason === 'STOP_LOSS' ? '<span class="tag-stop">STOP</span>' :
+                t.exit_reason === 'TRAILING' ? '<span class="tag-take">TAKE</span>' :
+                '<span class="tag-time">TIME</span>';
+    const retClass = t.ret >= 0 ? 'up' : 'down';
+    const sign = t.ret >= 0 ? '+' : '';
+    const words = (t.words || []).slice(0,2).join(', ') || '—';
+    return `<tr>
+      <td>${t.date}</td>
+      <td class="ticker">${t.ticker}</td>
+      <td>${t.action}</td>
+      <td class="num">${t.rsi}</td>
+      <td class="num">${t.score}</td>
+      <td style="color:var(--t2);font-size:9px">${words}</td>
+      <td class="num">$${t.entry}</td>
+      <td class="num">$${t.exit}</td>
+      <td class="num ${retClass}" style="font-weight:600">${sign}${t.ret.toFixed(2)}%</td>
+      <td>${tag}</td>
+    </tr>`;
+  }).join('');
+}
+
+init();
+})();
+</script>
+</body>
+</html>

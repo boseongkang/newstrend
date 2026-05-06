@@ -58,6 +58,26 @@ def load_ta(path: str) -> dict:
 
 
 
+
+
+def load_backtest_results(path: str = "site/data/backtest_v2.json") -> dict:
+    """backtest_v2.json 로드 → 종목 분류 정보."""
+    try:
+        d = json.loads(Path(path).read_text())
+        result = {"blacklist": set(), "tier": {}}
+        for tk, data in d.get("by_ticker", {}).items():
+            wr = data.get("win_rate", 50)
+            tr = data.get("total_ret", 0)
+            if tr < 0 and data.get("trades", 0) >= 5:
+                result["blacklist"].add(tk)
+            if wr >= 75: result["tier"][tk] = "A"
+            elif wr >= 60: result["tier"][tk] = "B"
+            elif wr >= 50: result["tier"][tk] = "C"
+            else: result["tier"][tk] = "X"
+        return result
+    except Exception:
+        return {"blacklist": set(), "tier": {}}
+
 def load_ticker_weights(path: str) -> dict:
     """ticker_weights.json 로드 → {ticker: {ta_weight, news_weight, regime_weight}}."""
     try:
@@ -478,6 +498,9 @@ def main():
     ta_news  = load_ticker_analysis(args.analysis_dir, tickers_list)
     weights  = load_ticker_weights(args.weights)
     print(f"Loaded weights for {len(weights)} tickers")
+    backtest = load_backtest_results()
+    if backtest["blacklist"]:
+        print(f"📛 Blacklist (backtest losers): {sorted(backtest['blacklist'])}")
 
     # 뉴스 날짜 수
     try:

@@ -237,6 +237,18 @@ jobs:
             --weights      site/data/ticker_weights.json \
             --out          site/data/predictions.json || true
 
+      - name: Run backtest (V1 + V2)
+        run: |
+          python scripts/backtest.py \
+            --trends site/data/trends.json \
+            --prices site/data/prices.json \
+            --out    site/data/backtest.json || true
+          python scripts/backtest_v2.py \
+            --trends site/data/trends.json \
+            --prices site/data/prices.json \
+            --prev   site/data/backtest.json \
+            --out    site/data/backtest_v2.json || true
+
       - name: Generate weekly report
         run: |
           python scripts/weekly_report.py \

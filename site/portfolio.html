@@ -134,6 +134,7 @@ main{max-width:1300px;margin:20px auto;padding:0 24px}
     <a href="./portfolio.html" class="on">PORTFOLIO</a>
     <a href="./rising.html">RISING</a>
     <a href="./macro.html">MACRO</a>
+    <a href="./backtest.html">BACKTEST</a>
   </nav>
   <div class="hdr-right">
     <div class="live"><div class="dot"></div>LIVE</div>
@@ -267,12 +268,13 @@ async function init(){
   const tsEl = document.getElementById('unified-ts');
   if (tsEl) tsEl.textContent = 'UPDATED ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
 
-  const [pred, prices, themes] = await Promise.all([
+  const [pred, prices, themes, backtest] = await Promise.all([
     fetchJSON('predictions.json'),
     fetchJSON('prices.json'),
     fetchJSON('macro_themes.json'),
+    fetchJSON('backtest_v2.json'),
   ]);
-  _data = { pred, prices, themes };
+  _data = { pred, prices, themes, backtest };
   render();
 }
 
@@ -297,19 +299,31 @@ function generateRecommendation(holding, currentPrice, prediction){
   const targetHit = pct >= holding.targetPct;
   const action = prediction?.action || 'HOLD';
 
+  // 백테스트 데이터에서 종목 등급 확인
+  const btTicker = _data.backtest?.by_ticker?.[holding.ticker];
+  let tierBadge = '';
+  if (btTicker) {
+    const wr = btTicker.win_rate;
+    const tr = btTicker.total_ret;
+    if (tr < 0) tierBadge = ' [⚠ X-Tier: 백테스트 손실]';
+    else if (wr >= 75) tierBadge = ' [✓ A-Tier]';
+    else if (wr >= 60) tierBadge = ' [B-Tier]';
+    else tierBadge = ' [C-Tier]';
+  }
+
   // 우선순위: 손절 > 목표 도달 > 신호
   if (stopHit) {
     return {
       level: 'alert',
       action: 'SELL',
-      text: `🛑 손절가 도달 (${pct.toFixed(1)}%) — 즉시 매도 검토. 추가 손실 방지가 우선.`,
+      text: `🛑 손절가 도달 (${pct.toFixed(1)}%) — 즉시 매도 검토. 추가 손실 방지가 우선.${tierBadge}`,
     };
   }
   if (targetHit) {
     return {
       level: 'good',
       action: 'REDUCE',
-      text: `🎯 목표가 도달 (+${pct.toFixed(1)}%) — 일부 익절 권장. 트레일링 스탑 설정 고려.`,
+      text: `🎯 목표가 도달 (+${pct.toFixed(1)}%) — 일부 익절 권장.${tierBadge}`,
     };
   }
 
@@ -333,7 +347,7 @@ function generateRecommendation(holding, currentPrice, prediction){
     return {
       level: 'good',
       action: 'BUY',
-      text: `📈 시스템 BUY 신호. 분할매수 또는 보유 유지. 목표가 $${(buyPrice * (1 + holding.targetPct/100)).toFixed(2)}.`,
+      text: `📈 시스템 BUY 신호. 분할매수 또는 보유 유지.${tierBadge}`,
     };
   }
   if (action === 'WATCH') {
@@ -346,7 +360,7 @@ function generateRecommendation(holding, currentPrice, prediction){
   return {
     level: 'neutral',
     action: 'HOLD',
-    text: `보유 유지. 손절 $${(buyPrice * (1 - holding.stopPct/100)).toFixed(2)} / 목표 $${(buyPrice * (1 + holding.targetPct/100)).toFixed(2)}.`,
+    text: `보유 유지.${tierBadge}`,
   };
 }
 
