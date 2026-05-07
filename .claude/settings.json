@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "default": "ask",
+    "allow": [],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(sudo:*)",
+      "Bash(curl* | sh)",
+      "Bash(wget* | sh)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(npm publish:*)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.gnupg/**)",
+      "Read(/etc/**)",
+      "Read(/usr/**)",
+      "Read(/System/**)",
+      "Write(~/.ssh/**)",
+      "Write(~/.zshrc)",
+      "Write(/etc/**)"
+    ]
+  },
+  "auto_approve": false,
+  "confirm_destructive": true
+}
