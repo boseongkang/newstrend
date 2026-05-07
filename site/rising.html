@@ -321,7 +321,8 @@ function buildRising(){
   const cons    = T.consistency   || {};
   const proxy   = T.source_proxy  || {};
 
-  allRising = Object.keys(zscores)
+  const seedKeys = (T.top && T.top.length) ? T.top : Object.keys(zscores);
+  allRising = seedKeys
     .filter(t => slopes[t] > 0.02 || bursts[t] > 0.5 || zscores[t] > 0.5)
     .map(t => {
       const counts = (series[t] || []).map(Number);

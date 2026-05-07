@@ -291,7 +291,8 @@ function renderSnap(){
   const slopes  = T.slopes  || {};
   const today   = T.today   || {};
 
-  const terms = Object.keys(zscores)
+  const seedKeys = (T.top && T.top.length) ? T.top : Object.keys(zscores);
+  const terms = seedKeys
     .sort((a,b) => Math.abs(zscores[b]) - Math.abs(zscores[a]))
     .slice(0, 40);
 

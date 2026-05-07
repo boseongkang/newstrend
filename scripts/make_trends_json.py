@@ -93,6 +93,10 @@ STOP_WORDS = {
     "view","views","read","open","take","make","want","need","help",
     "high","wide","deep","fast","slow","hard","easy","true","full",
     "device","department","store","stores","comes","preferred","using","including",
+    # ── Round-8: web boilerplate + publisher aggregators ──────────────────────
+    "browser","sites","mediagazer","techmeme","memeorandum",
+    "summary","generated","edited","discussing","commentators",
+    "support","post","unlike","down","rights","roadshows",
 
 }
 
