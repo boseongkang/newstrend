@@ -166,6 +166,16 @@ jobs:
           test -s site/report.html
           test -s site/rising.html
 
+      - name: Build trends.json (rich schema)
+        run: |
+          python scripts/make_trends_json.py \
+            --tokens-dir data/warehouse/daily \
+            --out site/data/trends.json \
+            --last-days 180 \
+            --topk 200 \
+            --min-len 4
+          test -s site/data/trends.json
+
       - name: Overwrite index with custom dashboard
         run: cp site/index_custom.html site/index.html
 
@@ -320,7 +330,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           # 1) 변경사항 없으면 종료
-          git add site/data/predictions_history/ site/data/reports/ 2>/dev/null || true
+          git add site/data/predictions_history/ site/data/reports/ site/data/trends.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No history changes to commit"
             exit 0
