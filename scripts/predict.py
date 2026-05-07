@@ -99,6 +99,36 @@ def load_ticker_analysis(analysis_dir: str, tickers: list) -> dict:
                 pass
     return result
 
+def load_sentiment(path: str) -> dict:
+    """ticker_sentiment.json → {ticker: latest-day signal} or empty dict.
+
+    FinBERT layer (Phase 2-E). Provides per-ticker sentiment as an additive
+    bonus to the TA-driven score. Word-counting news bonus stays separate.
+    """
+    p = Path(path)
+    if not p.exists():
+        return {}
+    try:
+        d = json.loads(p.read_text())
+    except Exception:
+        return {}
+    dates = d.get("dates", [])
+    if not dates:
+        return {}
+    i = -1
+    out = {}
+    for tk, td in d.get("tickers", {}).items():
+        out[tk] = {
+            "filtered_score": td.get("filtered_score", [None])[i],
+            "score":          td.get("score", [0])[i],
+            "total":          td.get("total", [0])[i],
+            "bullish":        td.get("bullish", [0])[i],
+            "bearish":        td.get("bearish", [0])[i],
+            "date":           dates[i],
+        }
+    return out
+
+
 def load_signals(path: str) -> list:
     try:
         d = json.loads(Path(path).read_text())
@@ -253,7 +283,9 @@ def decide_action(rsi_state: str, macd_bias: str, bb_state: str,
                   ta_signals: list,
                   news: dict,
                   price_days: int,
-                  market_regime: str = "NEUTRAL") -> tuple[str, float, list, list]:
+                  market_regime: str = "NEUTRAL",
+                  sentiment: dict | None = None,
+                  sentiment_weight: float = 1.5) -> tuple[str, float, list, list]:
     """
     반환: (action, confidence, reasons, risks)
     action: BUY / HOLD / SELL / WATCH
@@ -373,6 +405,18 @@ def decide_action(rsi_state: str, macd_bias: str, bb_state: str,
             score -= boost * 0.5
             risks.append(f"News signal: {news['active_terms'][0]} → bearish")
 
+    # ── FinBERT sentiment bonus (Phase 2-E; parallel layer to word-count news) ──
+    if sentiment and sentiment.get("filtered_score") is not None and sentiment_weight > 0:
+        s_score = sentiment["filtered_score"]
+        s_total = sentiment.get("total", 0)
+        conf_scale = min(s_total / 30, 1.0)   # full strength at ≥30 articles
+        contribution = s_score * sentiment_weight * conf_scale
+        score += contribution
+        if contribution >= 0.4:
+            reasons.append(f"FinBERT bullish ({s_score:+.2f}, n={s_total})")
+        elif contribution <= -0.4:
+            risks.append(f"FinBERT bearish ({s_score:+.2f}, n={s_total})")
+
     # ── 데이터 신뢰도 ─────────────────────────────────────────────────────────
     news_days = news.get("news_days", 0)
     if news_days < 30:
@@ -486,6 +530,10 @@ def main():
     ap.add_argument("--tickers", default=None)
     ap.add_argument("--analysis-dir", default="site/data/ticker_analysis",
                     help="ticker_analysis JSON 디렉토리")
+    ap.add_argument("--sentiment-path", default="site/data/ticker_sentiment.json",
+                    help="FinBERT ticker sentiment (Phase 2-E)")
+    ap.add_argument("--sentiment-weight", type=float, default=1.5,
+                    help="0=disable, 1.5=conservative, 2.5=hybrid, 4.0=aggressive")
     ap.add_argument("--weights", default="site/data/ticker_weights.json",
                     help="종목별 TA/News 가중치")
     ap.add_argument("--min-conf", type=float, default=0.0)
@@ -493,6 +541,7 @@ def main():
 
     ta_data  = load_ta(args.ta)
     pairs    = load_signals(args.signals)
+    sentiment_today = load_sentiment(args.sentiment_path)
     tickers_list = [t.strip().upper() for t in args.tickers.split(",")]\
                    if args.tickers else list(ta_data.keys())
     ta_news  = load_ticker_analysis(args.analysis_dir, tickers_list)
@@ -602,7 +651,9 @@ def main():
         action, conf, reasons, risks = decide_action(
             rsi_state, macd_bias, bb_state, trend, vol_state,
             ta_sigs, news, price_days,
-            market_regime=market_regime.get("regime", "NEUTRAL")
+            market_regime=market_regime.get("regime", "NEUTRAL"),
+            sentiment=sentiment_today.get(ticker),
+            sentiment_weight=args.sentiment_weight,
         )
 
         # 종목별 가중치로 뉴스 영향 조정
@@ -671,6 +722,7 @@ def main():
                 "atr14":       atr14,
             },
             "news":    news if news.get("available") else {"available": False},
+            "sentiment": sentiment_today.get(ticker) or {"available": False},
             "reasons": reasons,
             "risks":   risks,
             "descriptions": {
