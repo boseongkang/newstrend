@@ -150,6 +150,7 @@ class SECFetcher:
         self._min_gap = 1.0 / rate_limit_hz
         self._last_call = 0.0
         self._facts_cache: dict[str, dict] = {}
+        self._subs_cache: dict[str, dict] = {}
         self.stats = {"requests": 0, "retries": 0, "cache_hits": 0, "errors": 0}
 
     # ── CIK 매핑 ─────────────────────────────────────────────────────────────
@@ -229,6 +230,51 @@ class SECFetcher:
         data = self._get(url)
         self._facts_cache[ticker] = data
         return data
+
+    def get_submissions(self, ticker: str) -> dict:
+        """Return full submissions JSON (회사 메타 + filing 인덱스), in-process cached."""
+        ticker = ticker.upper()
+        if ticker in self._subs_cache:
+            self.stats["cache_hits"] += 1
+            return self._subs_cache[ticker]
+        cik = self.resolve_cik(ticker)
+        url = f"{BASE_URL}/submissions/CIK{cik}.json"
+        data = self._get(url)
+        self._subs_cache[ticker] = data
+        return data
+
+    def get_company_metadata(self, ticker: str) -> dict:
+        """submissions 응답에서 sector/exchange/filer 분류 등 큐레이션된 필드만 추출.
+
+        ETF/Investment Trust는 SIC 등이 빈 문자열로 옴 — 그대로 None으로 정규화.
+        외국 발행자(20-F)도 메타데이터는 풍부함 (companyfacts가 비어도).
+        """
+        d = self.get_submissions(ticker)
+
+        def _str_or_none(v):
+            if v is None:
+                return None
+            s = str(v).strip()
+            return s or None
+
+        return {
+            "ticker":     ticker.upper(),
+            "cik":        d.get("cik"),
+            "name":       _str_or_none(d.get("name")),
+            "entity_type": _str_or_none(d.get("entityType")),     # operating/investment/other
+            "sic":        _str_or_none(d.get("sic")),
+            "sic_description": _str_or_none(d.get("sicDescription")),
+            "owner_org":  _str_or_none(d.get("ownerOrg")),         # SEC 고수준 sector
+            "exchanges":  list(d.get("exchanges") or []),
+            "all_tickers": list(d.get("tickers") or []),
+            "category":   _str_or_none(d.get("category")),         # 예: "Large accelerated filer"
+            "fiscal_year_end": _str_or_none(d.get("fiscalYearEnd")),  # MMDD
+            "state_of_incorporation": _str_or_none(d.get("stateOfIncorporation")),
+            "former_names": [
+                {"name": fn.get("name"), "from": fn.get("from"), "to": fn.get("to")}
+                for fn in (d.get("formerNames") or [])[:3]
+            ],
+        }
 
     def get_metric(self, ticker: str, metric_name: str) -> list[dict]:
         """Logical metric → deduped, calendar-sorted records.
@@ -467,6 +513,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--n", type=int, default=8, help="--metric 출력 행 수")
     ap.add_argument("--raw", action="store_true", help="companyfacts JSON 그대로 stdout")
     ap.add_argument("--json", action="store_true", help="summary JSON 출력")
+    ap.add_argument("--metadata", action="store_true", help="submissions API 메타데이터 출력")
     args = ap.parse_args(argv)
 
     fetcher = SECFetcher()
@@ -475,6 +522,10 @@ def main(argv: list[str] | None = None) -> int:
 
     for tk in args.tickers:
         try:
+            if args.metadata:
+                m = fetcher.get_company_metadata(tk)
+                json.dump(m, sys.stdout, indent=2, default=str); print()
+                continue
             if args.raw:
                 json.dump(fetcher.get_company_facts(tk), sys.stdout, indent=2)
                 continue

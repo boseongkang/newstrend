@@ -70,6 +70,10 @@ def cache_path_for(cik: str) -> Path:
     return RAW_CACHE_DIR / f"CIK{cik}.json"
 
 
+def subs_cache_path_for(cik: str) -> Path:
+    return RAW_CACHE_DIR / f"subs_CIK{cik}.json"
+
+
 def is_cache_fresh(path: Path, ttl_hours: float = CACHE_TTL_HOURS) -> bool:
     if not path.exists():
         return False
@@ -112,6 +116,26 @@ def fetch_with_cache(
     return facts, "fetched"
 
 
+def fetch_subs_with_cache(
+    fetcher: SECFetcher, ticker: str, refresh: bool = False
+) -> tuple[dict, str]:
+    """submissions API 응답 디스크 캐시 (별도 파일, 같은 24h TTL).
+
+    Returns (subs, source). 캐시 hit 시 fetcher의 _subs_cache 를 warm.
+    """
+    cik = fetcher.resolve_cik(ticker)
+    path = subs_cache_path_for(cik)
+    if not refresh and is_cache_fresh(path):
+        subs = json.loads(path.read_text())
+        fetcher._subs_cache[ticker.upper()] = subs
+        return subs, "cache"
+
+    subs = fetcher.get_submissions(ticker)
+    RAW_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(subs))
+    return subs, "fetched"
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # 종목별 빌드
 # ══════════════════════════════════════════════════════════════════════════════
@@ -131,38 +155,71 @@ def _slim_record(r: dict) -> dict:
 def build_one(fetcher: SECFetcher, ticker: str, refresh: bool = False) -> dict:
     """단일 종목의 site/data/fundamentals/{T}.json payload를 만듦.
 
-    데이터 누락(빈 us-gaap 등)일 경우 status='empty' 로 표시하고 빈 시계열로 반환.
+    Status:
+      'ok'             — companyfacts + submissions 둘 다 있음
+      'metadata_only'  — submissions만, companyfacts가 404 또는 us-gaap 빈
+                         (예: ETF QQQ, IFRS 발행자 TSM)
+      'empty'          — 양쪽 다 실패 (submissions도 404 — 매우 드뭄)
+
+    KeyError (CIK 미매핑)는 그대로 raise — 호출자에서 unresolved로 처리.
     """
-    facts, source = fetch_with_cache(fetcher, ticker, refresh=refresh)
+    # ── METADATA (먼저) — submissions은 거의 항상 있고 작음
+    metadata: dict | None = None
+    meta_source: str | None = None
+    try:
+        _, meta_source = fetch_subs_with_cache(fetcher, ticker, refresh=refresh)
+        metadata = fetcher.get_company_metadata(ticker)
+    except FileNotFoundError:
+        pass  # submissions 404 — 가능성 거의 없음, 메타 없이 계속
+    except Exception:
+        pass  # 네트워크/JSON 에러 — 메타 없이 계속
 
-    summary = fetcher.get_summary_metrics(ticker)
+    # ── FINANCIALS (companyfacts 시도, 실패해도 메타로 fallback 가능)
+    summary: dict | None = None
+    quarterly: dict[str, list[dict]] = {m: [] for m in QUARTERLY_METRICS}
+    annual:    dict[str, list[dict]] = {m: [] for m in ANNUAL_METRICS}
+    facts_source: str | None = None
+    facts_status = "missing"
 
-    # 시계열 추출 — 여기서 한 번 더 in-memory cache hit
-    quarterly: dict[str, list[dict]] = {}
-    for m in QUARTERLY_METRICS:
-        recs = fetcher.get_quarterly_data(ticker, m, n=QUARTERLY_DEPTH)
-        quarterly[m] = [_slim_record(r) for r in recs]
+    try:
+        _, facts_source = fetch_with_cache(fetcher, ticker, refresh=refresh)
+        summary = fetcher.get_summary_metrics(ticker)
+        for m in QUARTERLY_METRICS:
+            recs = fetcher.get_quarterly_data(ticker, m, n=QUARTERLY_DEPTH)
+            quarterly[m] = [_slim_record(r) for r in recs]
+        for m in ANNUAL_METRICS:
+            recs = fetcher.get_annual_data(ticker, m, n=ANNUAL_DEPTH)
+            annual[m] = [_slim_record(r) for r in recs]
+        has_data = bool(summary["raw"]["revenue"] or summary["raw"]["assets"])
+        facts_status = "ok" if has_data else "empty"
+    except FileNotFoundError:
+        facts_status = "not_found"        # 예: QQQ companyfacts 404
 
-    annual: dict[str, list[dict]] = {}
-    for m in ANNUAL_METRICS:
-        recs = fetcher.get_annual_data(ticker, m, n=ANNUAL_DEPTH)
-        annual[m] = [_slim_record(r) for r in recs]
+    # ── 종합 status
+    if facts_status == "ok":
+        status = "ok"
+    elif metadata:
+        status = "metadata_only"
+    else:
+        status = "empty"                  # 양쪽 다 실패
 
-    has_data = bool(summary["raw"]["revenue"] or summary["raw"]["assets"])
-    status = "ok" if has_data else "empty"
+    name = (metadata or {}).get("name") or (summary or {}).get("entity")
+    cik  = (metadata or {}).get("cik")  or (summary or {}).get("cik")
 
     return {
-        "ticker":     ticker.upper(),
-        "entity":     summary["entity"],
-        "cik":        summary["cik"],
-        "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "source":     source,
-        "status":     status,
-        "fy_end":     summary["fy_end"],
-        "as_of":      summary["as_of"],
-        "summary":    summary,
-        "quarterly":  quarterly,
-        "annual":     annual,
+        "ticker":       ticker.upper(),
+        "entity":       name,
+        "cik":          cik,
+        "fetched_at":   datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "source":       {"facts": facts_source, "submissions": meta_source},
+        "status":       status,
+        "facts_status": facts_status,
+        "fy_end":       (summary or {}).get("fy_end"),
+        "as_of":        (summary or {}).get("as_of"),
+        "metadata":     metadata,
+        "summary":      summary,
+        "quarterly":    quarterly,
+        "annual":       annual,
     }
 
 
@@ -171,25 +228,38 @@ def build_one(fetcher: SECFetcher, ticker: str, refresh: bool = False) -> dict:
 # ══════════════════════════════════════════════════════════════════════════════
 
 def aggregate_index(per_ticker: dict[str, dict], skipped: dict[str, str]) -> dict:
-    """site/data/fundamentals.json — 한 줄 요약 집계."""
+    """site/data/fundamentals.json — 한 줄 요약 집계.
+
+    metadata-only 종목도 포함 (sector 분석에 필요). financial slice는 None.
+    """
     rows = {}
+    ok_count = 0
+    meta_only_count = 0
     for tk, payload in per_ticker.items():
-        s = payload["summary"]
+        s = payload.get("summary")
         rows[tk] = {
             "entity":     payload["entity"],
             "cik":        payload["cik"],
+            "status":     payload["status"],
             "fy_end":     payload["fy_end"],
             "as_of":      payload["as_of"],
-            "raw":        s["raw"],
-            "ratios":     s["ratios"],
-            "tags_used":  s["tags_used"],
+            "metadata":   payload.get("metadata"),
+            "raw":        s["raw"]    if s else None,
+            "ratios":     s["ratios"] if s else None,
+            "tags_used":  s.get("tags_used") if s else None,
         }
+        if payload["status"] == "ok":
+            ok_count += 1
+        elif payload["status"] == "metadata_only":
+            meta_only_count += 1
+
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "universe_size": len(per_ticker) + len(skipped),
-        "fetched_ok":    len(per_ticker),
-        "skipped":       skipped,                 # {ticker: reason}
-        "tickers":       rows,
+        "universe_size":          len(per_ticker) + len(skipped),
+        "fetched_ok":             ok_count,
+        "fetched_metadata_only":  meta_only_count,
+        "skipped":                skipped,         # {ticker: reason}
+        "tickers":                rows,
     }
 
 
@@ -247,17 +317,21 @@ def main(argv: list[str] | None = None) -> int:
             continue
 
         if payload["status"] == "empty":
-            skipped[tk] = "empty us-gaap"
-            print(f"[{i:3d}/{len(universe)}] {tk:6s} SKIP empty (ETF/ADR?)", file=sys.stderr)
+            skipped[tk] = f"empty (facts={payload['facts_status']}, no meta)"
+            print(f"[{i:3d}/{len(universe)}] {tk:6s} SKIP empty", file=sys.stderr)
             manifest[tk] = {"cik": payload["cik"], "ok": False,
-                            "error": "empty us-gaap",
+                            "error": "empty (no facts, no meta)",
                             "ts": payload["fetched_at"]}
             continue
 
         per_ticker[tk] = payload
-        manifest[tk] = {"cik": payload["cik"], "ok": True,
-                        "source": payload["source"],
-                        "ts": payload["fetched_at"]}
+        manifest[tk] = {
+            "cik":    payload["cik"],
+            "ok":     True,
+            "status": payload["status"],
+            "source": payload["source"],
+            "ts":     payload["fetched_at"],
+        }
 
         # 종목별 파일 즉시 저장 — 큰 universe에서 중간 실패해도 진행분 보존
         if not args.no_write:
@@ -265,11 +339,20 @@ def main(argv: list[str] | None = None) -> int:
                 json.dumps(payload, indent=2, default=str)
             )
 
-        rev = (payload["summary"]["raw"].get("revenue") or 0) / 1e9
-        ni = (payload["summary"]["raw"].get("net_income") or 0) / 1e9
-        print(f"[{i:3d}/{len(universe)}] {tk:6s} OK  "
-              f"rev=${rev:>7.1f}B  ni=${ni:>6.1f}B  src={payload['source']}",
-              file=sys.stderr)
+        if payload["status"] == "ok":
+            rev = (payload["summary"]["raw"].get("revenue") or 0) / 1e9
+            ni  = (payload["summary"]["raw"].get("net_income") or 0) / 1e9
+            sec = (payload.get("metadata") or {}).get("owner_org") or "—"
+            print(f"[{i:3d}/{len(universe)}] {tk:6s} OK   "
+                  f"rev=${rev:>7.1f}B  ni=${ni:>6.1f}B  sec={sec[:18]:<18}  "
+                  f"src={payload['source']['facts']}", file=sys.stderr)
+        else:  # metadata_only
+            meta = payload.get("metadata") or {}
+            etype = meta.get("entity_type") or "?"
+            sec = meta.get("owner_org") or "—"
+            print(f"[{i:3d}/{len(universe)}] {tk:6s} META {etype:<10s}  "
+                  f"sec={sec[:18]:<18}  facts={payload['facts_status']}",
+                  file=sys.stderr)
 
     elapsed = time.time() - t0
 
@@ -280,8 +363,10 @@ def main(argv: list[str] | None = None) -> int:
             AGGREGATE_FILE.write_text(json.dumps(agg, indent=2, default=str))
             print(f"\n[build] wrote {AGGREGATE_FILE.relative_to(ROOT)}", file=sys.stderr)
 
+    ok_n   = sum(1 for p in per_ticker.values() if p["status"] == "ok")
+    meta_n = sum(1 for p in per_ticker.values() if p["status"] == "metadata_only")
     print(
-        f"\n[build] done  ok={len(per_ticker)}  skipped={len(skipped)}  "
+        f"\n[build] done  ok={ok_n}  metadata_only={meta_n}  skipped={len(skipped)}  "
         f"elapsed={elapsed:.1f}s  http_stats={fetcher.stats}",
         file=sys.stderr,
     )
