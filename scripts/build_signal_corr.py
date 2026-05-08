@@ -34,14 +34,42 @@ def pearson(xs, ys):
     return round(num / (dx * dy), 4)
 
 
+def _erfcc(x):
+    """Complementary error function — Numerical Recipes Chebyshev approximation,
+    accurate to ≤1.2e-7 over the real line. Pure math, no scipy."""
+    z = abs(x)
+    t = 1.0 / (1.0 + 0.5 * z)
+    r = t * math.exp(
+        -z * z - 1.26551223
+        + t * ( 1.00002368
+        + t * ( 0.37409196
+        + t * ( 0.09678418
+        + t * (-0.18628806
+        + t * ( 0.27886807
+        + t * (-1.13520398
+        + t * ( 1.48851587
+        + t * (-0.82215223
+        + t *   0.17087277))))))))
+    )
+    return r if x >= 0 else 2.0 - r
+
+
 def p_value_approx(r, n):
-    """Two-tailed p-value approximation via t-distribution (df = n-2)."""
+    """Two-tailed p-value for Pearson correlation under H0: r=0.
+
+    Uses t = r·√(n-2)/√(1-r²) (df = n-2). For df ≥ 30 the t-distribution
+    is well-approximated by the standard normal, so we evaluate the
+    survival function via erfcc. Pure math (no scipy).
+
+    Note: the previous (pre-2026-05-08) implementation accidentally cancelled
+    the √(n-2) factor and was effectively sample-size-blind — it rejected
+    even strongly significant moderate correlations (e.g. r=0.30, n=120 → 1.0).
+    """
     if r is None or n < 4 or abs(r) >= 1.0:
         return 1.0
-    t = r * math.sqrt(n - 2) / math.sqrt(1 - r ** 2 + 1e-12)
-    # Rough approximation using logistic transform calibrated on t-dist
-    x = abs(t) / math.sqrt(n - 2)
-    p = 2 * (1 / (1 + math.exp(6 * (x - 0.5))))
+    t = abs(r) * math.sqrt(n - 2) / math.sqrt(1 - r * r + 1e-12)
+    # 2-sided: P(|Z| > t) = erfcc(t/√2)
+    p = _erfcc(t / math.sqrt(2.0))
     return round(min(1.0, max(0.0, p)), 4)
 
 
