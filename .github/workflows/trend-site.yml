@@ -401,6 +401,10 @@ jobs:
         run: |
           python scripts/ml_baseline.py || true
 
+      - name: Weekly — meta-analysis + improvement plan
+        run: |
+          python scripts/weekly_analyzer.py || true
+
       - name: Commit self-correcting outputs to main
         run: |
           git config --global user.name  "github-actions[bot]"
@@ -412,7 +416,9 @@ jobs:
                   site/data/calibration_history.json \
                   site/data/gap_analysis.json \
                   site/data/gap_history.json \
-                  site/data/ml_baseline.json 2>/dev/null || true
+                  site/data/ml_baseline.json \
+                  site/data/weekly_analysis.json \
+                  site/data/weekly_history.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No self-correcting changes to commit"
             exit 0

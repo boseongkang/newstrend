@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · Weekly Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--purple:#b380ff;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
+.unified-header{height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:100}
+.brand{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300;margin-left:6px}
+nav{display:flex;gap:2px;flex-wrap:wrap}
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:6px 12px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10px;color:var(--green)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#unified-ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+main{max-width:1300px;margin:20px auto;padding:0 24px}
+h1{font-family:var(--fm);font-size:14px;font-weight:600;letter-spacing:.14em;
+   text-transform:uppercase;margin-bottom:6px}
+.subtitle{font-family:var(--fm);font-size:11px;color:var(--t3);margin-bottom:20px}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1);
+          border:1px solid var(--b1);margin-bottom:24px}
+.kpi{background:var(--bg1);padding:18px 14px;text-align:center}
+.kpi-label{font-family:var(--fm);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+           color:var(--t3);margin-bottom:8px}
+.kpi-val{font-family:var(--fm);font-size:24px;font-weight:600;color:var(--t1);font-feature-settings:"tnum"}
+.kpi-val.up{color:var(--green)}.kpi-val.down{color:var(--red)}
+.kpi-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:4px}
+
+.section{background:var(--bg1);border:1px solid var(--b1);margin-bottom:20px}
+.sec-hdr{padding:14px 20px;border-bottom:1px solid var(--b1);display:flex;
+         align-items:center;justify-content:space-between}
+.sec-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--t1)}
+.sec-meta{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.sec-body{padding:18px 20px}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+
+.issue{background:var(--bg2);padding:12px 14px;border-left:3px solid var(--red);margin-bottom:8px}
+.issue.s2{border-left-color:var(--amber)}
+.issue.s3{border-left-color:var(--cyan)}
+.issue-head{display:flex;align-items:center;gap:10px;font-family:var(--fm);font-size:11px;font-weight:600}
+.issue-sev{font-family:var(--fm);font-size:10px;color:var(--red);background:rgba(255,68,68,.1);padding:2px 8px;border:1px solid var(--red)}
+.issue-sev.s2{color:var(--amber);border-color:var(--amber);background:rgba(255,179,0,.1)}
+.issue-sev.s3{color:var(--cyan);border-color:var(--cyan);background:rgba(0,212,255,.1)}
+.issue-target{font-family:var(--fm);font-size:11px;color:var(--t1)}
+.issue-reason{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:6px}
+
+.plan-item{background:var(--bg2);padding:14px 16px;margin-bottom:8px;display:flex;gap:14px;align-items:flex-start}
+.plan-num{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);min-width:30px}
+.plan-body{flex:1}
+.plan-target{font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1);margin-bottom:4px}
+.plan-issue{font-family:var(--fm);font-size:10px;color:var(--t3);margin-bottom:6px}
+.plan-sugg{font-family:var(--fs);font-size:12px;color:var(--cyan);line-height:1.5}
+
+.validation{background:var(--bg2);padding:18px 20px;display:flex;align-items:center;gap:24px}
+.validation.improved{border-left:4px solid var(--green)}
+.validation.worsened{border-left:4px solid var(--red)}
+.validation.flat{border-left:4px solid var(--amber)}
+.validation.unavailable{border-left:4px solid var(--t3)}
+.val-icon{font-family:var(--fm);font-size:42px;font-weight:600}
+.val-icon.improved{color:var(--green)}
+.val-icon.worsened{color:var(--red)}
+.val-icon.flat{color:var(--amber)}
+.val-detail{flex:1}
+.val-line{font-family:var(--fm);font-size:13px;color:var(--t1);margin-bottom:4px}
+.val-sub{font-family:var(--fm);font-size:11px;color:var(--t2)}
+
+.tag{font-family:var(--fm);font-size:9px;padding:2px 8px;letter-spacing:.06em;text-transform:uppercase}
+.tag-strat{color:var(--cyan);background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25)}
+
+.empty{text-align:center;padding:30px;color:var(--t3);font-family:var(--fm);font-size:11px}
+.spinner{width:18px;height:18px;border:2px solid var(--b2);border-top-color:var(--cyan);
+         border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:1024px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .split{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="unified-header">
+  <div class="brand">NEWSTREND <em>// WEEKLY REPORT</em></div>
+  <nav>
+    <a href="./index.html">DASHBOARD</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
+    <a href="./hidden_gems.html">GEMS</a>
+    <a href="./domino.html">DOMINO</a>
+    <a href="./insider_activity.html">INSIDER</a>
+    <a href="./backtest.html">BACKTEST</a>
+    <a href="./paper_trading.html">PAPER</a>
+    <a href="./accuracy.html">ACCURACY</a>
+    <a href="./system_evolution.html">EVOLUTION</a>
+    <a href="./gap_minimization.html">GAP</a>
+    <a href="./weekly_report.html" class="on">WEEKLY_R</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="live"><span class="dot"></span>WEEKLY CYCLE</div>
+    <div id="unified-ts">—</div>
+  </div>
+</header>
+
+<main>
+  <h1 id="title">Weekly Synthesis</h1>
+  <div class="subtitle" id="subtitle">Auto-generated weekly meta-report · this-week summary + improvement plan + last-week validation</div>
+
+  <div class="kpi-grid" id="kpi-grid"><div class="kpi"><div class="empty"><div class="spinner"></div>Loading…</div></div></div>
+
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">Last-Week Plan Validation</span>
+      <span class="sec-meta" id="val-meta">Did the previous week's calibration close the gap?</span></div>
+    <div class="sec-body" style="padding:0"><div id="validation"></div></div>
+  </div>
+
+  <div class="split">
+    <div class="section">
+      <div class="sec-hdr"><span class="sec-title">Top Issues This Week</span>
+        <span class="sec-meta" id="issues-meta">|gap| ≥ 5% or directional acc ≤ 40%</span></div>
+      <div class="sec-body" id="issues"><div class="empty">—</div></div>
+    </div>
+    <div class="section">
+      <div class="sec-hdr"><span class="sec-title">Improvement Plan</span>
+        <span class="sec-meta" id="plan-meta">Actionable next-week items</span></div>
+      <div class="sec-body" id="plan"><div class="empty">—</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">Strategy Snapshots</span>
+      <span class="sec-meta">Equity-curve summary at end of week</span></div>
+    <div class="sec-body" style="padding:0"><table id="strat-table" style="width:100%;border-collapse:collapse;font-family:var(--fm);font-size:11px">
+      <thead><tr style="background:var(--bg2)">
+        <th style="padding:10px;text-align:left;color:var(--t3);font-size:9px;letter-spacing:.1em">STRATEGY</th>
+        <th style="padding:10px;text-align:right;color:var(--t3);font-size:9px;letter-spacing:.1em">RETURN</th>
+        <th style="padding:10px;text-align:right;color:var(--t3);font-size:9px;letter-spacing:.1em">VALUE</th>
+        <th style="padding:10px;text-align:right;color:var(--t3);font-size:9px;letter-spacing:.1em">TRADES</th>
+        <th style="padding:10px;text-align:right;color:var(--t3);font-size:9px;letter-spacing:.1em">OPEN</th>
+        <th style="padding:10px;text-align:right;color:var(--t3);font-size:9px;letter-spacing:.1em">WIN%</th>
+      </tr></thead>
+      <tbody><tr><td colspan="6" class="empty">—</td></tr></tbody>
+    </table></div>
+  </div>
+</main>
+
+<script>
+const fmt = (v, d=2) => v == null ? '—' : (Math.round(v*Math.pow(10,d))/Math.pow(10,d)).toFixed(d);
+const fmtSign = (v, d=2) => v == null ? '—' : (v >= 0 ? '+' : '') + fmt(v, d);
+const fmtPct  = (v, d=2) => v == null ? '—' : fmt(v, d) + '%';
+const fmtMoney = v => v == null ? '—' : '$' + Math.round(v).toLocaleString();
+async function loadJSON(p){
+  const r = await fetch(`./data/${p}?v=${Date.now()}`, {cache:'no-store'});
+  if(!r.ok) throw new Error(`Failed ${p}: ${r.status}`);
+  return r.json();
+}
+
+function renderKPIs(d){
+  const w = d.week_summary || {};
+  const gs = d.gap_summary || {};
+  const v = d.last_week_validation || {};
+  const dirAccPct = w.directional_acc == null ? null : w.directional_acc * 100;
+  const kpis = [
+    {label: 'ISO Week', val: d.week || '—', sub: `${w.n || 0} actionable predictions`},
+    {label: 'Avg |Gap|', val: fmtPct(w.avg_abs_gap_pct), cls: w.avg_abs_gap_pct == null ? '' : w.avg_abs_gap_pct < 4 ? 'up' : w.avg_abs_gap_pct < 6 ? '' : 'down', sub: `signed ${fmtSign(w.avg_signed_gap_pct,2)}%`},
+    {label: 'Directional Acc', val: dirAccPct == null ? '—' : dirAccPct.toFixed(1) + '%', cls: dirAccPct != null && dirAccPct > 50 ? 'up' : 'down', sub: w.n == null ? '—' : `n=${w.n}`},
+    {label: 'Δ vs Last Week', val: v.available ? fmtSign(v.delta_abs_gap_pct, 2) + 'pp' : 'no prior',
+     cls: !v.available ? '' : v.direction === 'improved' ? 'up' : v.direction === 'worsened' ? 'down' : '',
+     sub: v.direction || 'no_data'},
+  ];
+  document.getElementById('kpi-grid').innerHTML = kpis.map(k => `
+    <div class="kpi"><div class="kpi-label">${k.label}</div>
+      <div class="kpi-val ${k.cls||''}">${k.val}</div>
+      <div class="kpi-sub">${k.sub || ''}</div></div>`).join('');
+  document.getElementById('title').textContent = `Weekly Synthesis · ${d.week || ''}`;
+}
+
+function renderValidation(v){
+  const c = document.getElementById('validation');
+  if(!v || !v.available){
+    c.innerHTML = `<div class="validation unavailable"><div class="val-icon" style="color:var(--t3)">·</div>
+      <div class="val-detail">
+        <div class="val-line">No prior-week comparison yet</div>
+        <div class="val-sub">${v ? v.reason : 'gap_history.json missing'}</div>
+      </div></div>`;
+    return;
+  }
+  const sym = v.direction === 'improved' ? '↘' : v.direction === 'worsened' ? '↗' : '→';
+  const dirCls = v.direction;
+  const this_w = v.this_week, last_w = v.last_week;
+  c.innerHTML = `<div class="validation ${dirCls}">
+    <div class="val-icon ${dirCls}">${sym}</div>
+    <div class="val-detail">
+      <div class="val-line">${last_w.week} → ${this_w.week} · |gap| ${fmt(last_w.avg_abs_gap_pct)}% → ${fmt(this_w.avg_abs_gap_pct)}% (${fmtSign(v.delta_abs_gap_pct)}pp${v.improvement_pct != null ? ', ' + (v.improvement_pct >= 0 ? '+' : '') + v.improvement_pct + '%' : ''})</div>
+      <div class="val-sub">Directional acc: ${(last_w.directional_acc*100).toFixed(0)}% → ${(this_w.directional_acc*100).toFixed(0)}% · status: <strong style="color:${dirCls==='improved'?'#00e676':dirCls==='worsened'?'#ff4444':'#ffb300'}">${v.direction.toUpperCase()}</strong></div>
+    </div></div>`;
+}
+
+function renderIssues(issues){
+  const c = document.getElementById('issues');
+  if(!issues || !issues.length){ c.innerHTML = '<div class="empty">No issues flagged this week — system inside thresholds.</div>'; return; }
+  c.innerHTML = issues.map((iss, i) => {
+    const sevCls = i === 0 ? '' : i === 1 ? 's2' : 's3';
+    return `<div class="issue ${sevCls}">
+      <div class="issue-head">
+        <span class="issue-sev ${sevCls}">SEV ${fmt(iss.severity, 1)}</span>
+        <span class="issue-target">${iss.dimension} → <strong>${iss.bucket}</strong> (n=${iss.n})</span>
+      </div>
+      <div class="issue-reason">${iss.reason}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('issues-meta').textContent = `${issues.length} flagged`;
+}
+
+function renderPlan(plan){
+  const c = document.getElementById('plan');
+  if(!plan || !plan.length){ c.innerHTML = '<div class="empty">No actions queued — keep current calibration.</div>'; return; }
+  c.innerHTML = plan.map((p, i) => `
+    <div class="plan-item">
+      <div class="plan-num">${i+1}.</div>
+      <div class="plan-body">
+        <div class="plan-target">${p.target}</div>
+        <div class="plan-issue">${p.issue}</div>
+        <div class="plan-sugg">${p.suggestion}</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('plan-meta').textContent = `${plan.length} suggestions`;
+}
+
+function renderStrategies(d){
+  const tbody = document.querySelector('#strat-table tbody');
+  const m = (d.trade_summary || {}).strategies || {};
+  const rows = Object.entries(m);
+  if(!rows.length){ tbody.innerHTML = '<tr><td colspan="6" class="empty">No paper trading data</td></tr>'; return; }
+  tbody.innerHTML = rows.map(([name, s]) => {
+    const ret = s.total_return_pct;
+    const cls = ret == null ? '' : ret > 0 ? 'up' : ret < 0 ? 'down' : '';
+    const wr = s.win_rate == null ? '—' : (s.win_rate*100).toFixed(0) + '%';
+    return `<tr style="border-bottom:1px solid var(--b1)">
+      <td style="padding:10px"><span class="tag tag-strat">${name}</span></td>
+      <td style="padding:10px;text-align:right;color:${cls==='up'?'#00e676':cls==='down'?'#ff4444':'inherit'}">${fmtSign(ret)}%</td>
+      <td style="padding:10px;text-align:right">${fmtMoney(s.current_value)}</td>
+      <td style="padding:10px;text-align:right">${s.n_trades_total ?? '—'}</td>
+      <td style="padding:10px;text-align:right">${s.n_open ?? '—'}</td>
+      <td style="padding:10px;text-align:right">${wr}</td>
+    </tr>`;
+  }).join('');
+}
+
+(async () => {
+  try {
+    const d = await loadJSON('weekly_analysis.json');
+    document.getElementById('unified-ts').textContent = d.updated;
+    renderKPIs(d);
+    renderValidation(d.last_week_validation);
+    renderIssues(d.top_issues);
+    renderPlan(d.improvement_plan);
+    renderStrategies(d);
+  } catch (e) {
+    document.querySelector('main').innerHTML = `<div class="empty" style="padding:60px">Error loading weekly_analysis.json: ${e.message}<br><br>Run: <code>python3 scripts/weekly_analyzer.py</code></div>`;
+  }
+})();
+</script>
+</body>
+</html>
