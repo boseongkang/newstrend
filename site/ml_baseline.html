@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · ML Baseline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--purple:#b380ff;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
+.unified-header{height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:100}
+.brand{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300;margin-left:6px}
+nav{display:flex;gap:2px;flex-wrap:wrap}
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:6px 12px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10px;color:var(--green)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#unified-ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+main{max-width:1200px;margin:20px auto;padding:0 24px}
+h1{font-family:var(--fm);font-size:14px;font-weight:600;letter-spacing:.14em;
+   text-transform:uppercase;margin-bottom:6px}
+.subtitle{font-family:var(--fm);font-size:11px;color:var(--t3);margin-bottom:20px}
+
+.mode-banner{background:var(--bg1);border:1px solid var(--b1);padding:14px 20px;
+             margin-bottom:20px;display:flex;align-items:center;gap:18px}
+.mode-pill{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
+           padding:5px 12px;text-transform:uppercase}
+.mode-pill.active{color:var(--green);background:rgba(0,230,118,.08);border:1px solid var(--green)}
+.mode-pill.advisory{color:var(--amber);background:rgba(255,179,0,.08);border:1px solid var(--amber)}
+.mode-text{font-family:var(--fm);font-size:11px;color:var(--t2);flex:1}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1);
+          border:1px solid var(--b1);margin-bottom:24px}
+.kpi{background:var(--bg1);padding:18px 14px;text-align:center}
+.kpi-label{font-family:var(--fm);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+           color:var(--t3);margin-bottom:8px}
+.kpi-val{font-family:var(--fm);font-size:22px;font-weight:600;color:var(--t1);font-feature-settings:"tnum"}
+.kpi-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:4px}
+
+.section{background:var(--bg1);border:1px solid var(--b1);margin-bottom:20px}
+.sec-hdr{padding:14px 20px;border-bottom:1px solid var(--b1);display:flex;
+         align-items:center;justify-content:space-between}
+.sec-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--t1)}
+.sec-meta{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.sec-body{padding:18px 20px}
+
+.bartable{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:11px}
+.bartable th{padding:10px 12px;text-align:left;color:var(--t3);font-weight:500;
+             font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+             border-bottom:1px solid var(--b1)}
+.bartable td{padding:7px 12px;border-bottom:1px solid var(--b1);color:var(--t1)}
+.bartable .num{text-align:right;font-feature-settings:"tnum"}
+.bartable .up{color:var(--green)}
+.bartable .down{color:var(--red)}
+.bartable tr.winner td{background:rgba(0,230,118,.05)}
+
+.bar-wrap{position:relative;background:var(--bg2);height:18px;width:100%;border-radius:1px;overflow:hidden}
+.bar-fill{position:absolute;left:0;top:0;bottom:0;background:var(--cyan);opacity:.6}
+.bar-text{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;
+          justify-content:flex-end;padding:0 6px;font-size:10px;color:var(--t1)}
+
+.note{font-family:var(--fm);font-size:10px;color:var(--t3);padding:12px 16px;
+      background:rgba(255,179,0,.05);border-left:3px solid var(--amber);margin-bottom:16px}
+
+.empty{text-align:center;padding:30px;color:var(--t3);font-family:var(--fm);font-size:11px}
+.spinner{width:18px;height:18px;border:2px solid var(--b2);border-top-color:var(--cyan);
+         border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:1024px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header class="unified-header">
+  <div class="brand">NEWSTREND <em>// ML BASELINE</em></div>
+  <nav>
+    <a href="./index.html">DASHBOARD</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
+    <a href="./hidden_gems.html">GEMS</a>
+    <a href="./domino.html">DOMINO</a>
+    <a href="./insider_activity.html">INSIDER</a>
+    <a href="./backtest.html">BACKTEST</a>
+    <a href="./paper_trading.html">PAPER</a>
+    <a href="./accuracy.html">ACCURACY</a>
+    <a href="./system_evolution.html">EVOLUTION</a>
+    <a href="./gap_minimization.html">GAP</a>
+    <a href="./weekly_report.html">WEEKLY_R</a>
+    <a href="./ml_baseline.html" class="on">ML</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="live"><span class="dot"></span>BENCHMARKING</div>
+    <div id="unified-ts">—</div>
+  </div>
+</header>
+
+<main>
+  <h1>4-Model Baseline · 5-Day Forward Return</h1>
+  <div class="subtitle" id="subtitle">Time-ordered 70/30 split · regression target · advisory until n_train ≥ 100</div>
+
+  <div class="mode-banner" id="mode-banner"><div class="empty"><div class="spinner"></div>Loading…</div></div>
+
+  <div class="kpi-grid" id="kpi-grid"></div>
+
+  <div id="advisory-note" class="note" style="display:none"></div>
+
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">Model Comparison</span>
+      <span class="sec-meta">Test set: directional accuracy, MAE %, RMSE %, R²</span></div>
+    <div class="sec-body" style="padding:0">
+      <table class="bartable" id="models-table">
+        <thead><tr>
+          <th>Model</th>
+          <th class="num">Train MAE</th>
+          <th class="num">Test MAE</th>
+          <th class="num">Test RMSE</th>
+          <th class="num">Test R²</th>
+          <th>Test Dir-Acc</th>
+        </tr></thead>
+        <tbody><tr><td colspan="6" class="empty">—</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">RandomForest Top Feature Importance</span>
+      <span class="sec-meta">First 15 features ranked</span></div>
+    <div class="sec-body" style="padding:0">
+      <table class="bartable" id="features-table">
+        <thead><tr><th>Feature</th><th>Importance</th></tr></thead>
+        <tbody><tr><td colspan="2" class="empty">—</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+const fmt = (v, d=3) => v == null ? '—' : (Math.round(v*Math.pow(10,d))/Math.pow(10,d)).toFixed(d);
+const fmtPct = (v, d=2) => v == null ? '—' : fmt(v, d) + '%';
+const fmtSign = (v, d=3) => v == null ? '—' : (v >= 0 ? '+' : '') + fmt(v, d);
+async function loadJSON(p){
+  const r = await fetch(`./data/${p}?v=${Date.now()}`, {cache:'no-store'});
+  if(!r.ok) throw new Error(`Failed ${p}: ${r.status}`);
+  return r.json();
+}
+
+function renderModeBanner(d){
+  const banner = document.getElementById('mode-banner');
+  const mode = d.mode || 'advisory';
+  const cls = mode === 'active' ? 'active' : 'advisory';
+  const desc = mode === 'active'
+    ? `n_train=${d.data_summary?.n_train} ≥ ${d.config?.min_data} — model recommendations are within statistical confidence.`
+    : `n_train=${d.data_summary?.n_train} < ${d.config?.min_data} — model is in data-collection mode; all metrics are tracked but treated as advisory.`;
+  banner.innerHTML = `<div class="mode-pill ${cls}">${mode}</div><div class="mode-text">${desc}</div>`;
+}
+
+function renderKPIs(d){
+  const ds = d.data_summary || {};
+  const winner = d.winner || {};
+  const kpis = [
+    {label: 'n_total / n_train / n_test', val: `${ds.n_total_with_target ?? '—'} / ${ds.n_train ?? '—'} / ${ds.n_test ?? '—'}`,
+     sub: ds.train_date_range ? `${ds.train_date_range[0]} → ${ds.test_date_range?.[1] || '?'}` : ''},
+    {label: 'Features', val: `${ds.n_features_categorical ?? 0} cat + ${ds.n_features_numeric ?? 0} num`, sub: 'one-hot + standard-scaled'},
+    {label: 'Winner', val: winner.model || '—', sub: 'argmax(test directional accuracy)'},
+    {label: 'Best Test Dir-Acc', val: winner.directional_accuracy == null ? '—' : (winner.directional_accuracy*100).toFixed(1) + '%',
+     sub: winner.r2 == null ? '' : `R² ${fmtSign(winner.r2)}`},
+  ];
+  document.getElementById('kpi-grid').innerHTML = kpis.map(k => `
+    <div class="kpi"><div class="kpi-label">${k.label}</div>
+      <div class="kpi-val">${k.val}</div>
+      <div class="kpi-sub">${k.sub || ''}</div></div>`).join('');
+
+  if (d.mode === 'advisory') {
+    const note = document.getElementById('advisory-note');
+    note.style.display = 'block';
+    note.textContent = `Advisory mode: with limited training data, model performance metrics are noisy. Negative R² simply means models perform worse than a constant-mean baseline on this small test set — typical for early-stage online learning. Directional accuracy above 50 % is the meaningful signal.`;
+  }
+}
+
+function renderModels(d){
+  const tbody = document.querySelector('#models-table tbody');
+  const models = d.models || {};
+  const rows = Object.entries(models);
+  if(!rows.length){ tbody.innerHTML = '<tr><td colspan="6" class="empty">No models</td></tr>'; return; }
+  const winnerName = (d.winner || {}).model;
+  tbody.innerHTML = rows.map(([name, info]) => {
+    if(info.error) return `<tr><td>${name}</td><td colspan="5" class="empty">${info.error}</td></tr>`;
+    const tr = info.train || {}, te = info.test || {};
+    const accPct = (te.directional_accuracy == null ? null : te.directional_accuracy * 100);
+    const isWinner = name === winnerName;
+    return `<tr class="${isWinner ? 'winner' : ''}">
+      <td><strong>${name}</strong>${isWinner ? ' <span style="color:var(--green);font-size:9px;letter-spacing:.1em">★ WINNER</span>' : ''}</td>
+      <td class="num">${fmtPct(tr.mae_pct)}</td>
+      <td class="num">${fmtPct(te.mae_pct)}</td>
+      <td class="num">${fmtPct(te.rmse_pct)}</td>
+      <td class="num ${te.r2 == null ? '' : te.r2 > 0 ? 'up' : 'down'}">${fmtSign(te.r2)}</td>
+      <td><div class="bar-wrap"><div class="bar-fill" style="width:${accPct == null ? 0 : Math.min(100, accPct)}%;background:${accPct > 50 ? '#00e676' : '#ff4444'}"></div><div class="bar-text">${accPct == null ? '—' : accPct.toFixed(1) + '%'}</div></div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderFeatures(d){
+  const tbody = document.querySelector('#features-table tbody');
+  const rf = d.models?.RandomForest;
+  const imp = rf?.top_feature_importance || {};
+  const rows = Object.entries(imp);
+  if(!rows.length){ tbody.innerHTML = '<tr><td colspan="2" class="empty">RF feature importance not available</td></tr>'; return; }
+  const max = Math.max(...rows.map(([_, v]) => v), 0.001);
+  tbody.innerHTML = rows.map(([name, val]) => `
+    <tr>
+      <td>${name}</td>
+      <td><div class="bar-wrap"><div class="bar-fill" style="width:${(val/max)*100}%"></div><div class="bar-text">${val.toFixed(4)}</div></div></td>
+    </tr>`).join('');
+}
+
+(async () => {
+  try {
+    const d = await loadJSON('ml_baseline.json');
+    document.getElementById('unified-ts').textContent = d.updated;
+    renderModeBanner(d);
+    renderKPIs(d);
+    renderModels(d);
+    renderFeatures(d);
+  } catch (e) {
+    document.querySelector('main').innerHTML = `<div class="empty" style="padding:60px">Error loading ml_baseline.json: ${e.message}<br><br>Run: <code>python3 scripts/ml_baseline.py</code></div>`;
+  }
+})();
+</script>
+</body>
+</html>
