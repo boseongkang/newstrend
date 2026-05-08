@@ -50,10 +50,13 @@ from fundamentals_analyzer import score_ticker as score_fundamentals  # noqa: E4
 FUNDAMENTALS_DIR  = ROOT / "site" / "data" / "fundamentals"
 SENTIMENT_PATH    = ROOT / "site" / "data" / "ticker_sentiment.json"
 PREDICTIONS_PATH  = ROOT / "site" / "data" / "predictions.json"
+INSIDER_PATH      = ROOT / "site" / "data" / "insider.json"
 OUT_PATH          = ROOT / "site" / "data" / "hidden_gems.json"
 
-# ── 가중치 + 게이트 ─────────────────────────────────────────────────────────
-W_P1, W_P2, W_P3, W_P4 = 0.25, 0.10, 0.25, 0.40
+# ── 가중치 + 게이트 (5-Pillar, Phase 5 — 2026-05-08) ─────────────────────────
+# P1 sentiment / P2 sector_rel / P3 TA / P4 fundamentals / P5 insider trading
+W_P1, W_P2, W_P3, W_P4, W_P5 = 0.20, 0.10, 0.20, 0.30, 0.20
+assert abs(W_P1 + W_P2 + W_P3 + W_P4 + W_P5 - 1.0) < 1e-9
 GATE_FUND_MIN          = 0.40
 NEUTRAL                = 0.5
 DEFAULT_TOP_N          = 30
@@ -92,6 +95,21 @@ def load_sentiment_scores() -> dict[str, float]:
             continue
         out[tk.upper()] = max(0.0, min(1.0, (fs + 1.0) / 2.0))
     return out
+
+
+def load_insider_scores() -> dict[str, dict]:
+    """site/data/insider.json (insider_analyzer.py 산출) → {ticker: {score, ...}}.
+
+    Pillar 5 (Phase 5, 2026-05-08). SEC Form 4 insider trading.
+    asymmetric: P>0 → ≥0.5, P=0 또는 unmapped → 0.5 (페널티 X).
+    """
+    if not INSIDER_PATH.exists():
+        return {}
+    try:
+        d = json.loads(INSIDER_PATH.read_text())
+    except Exception:
+        return {}
+    return d.get("tickers") or {}
 
 
 def load_ta_scores() -> dict[str, float]:
@@ -212,6 +230,14 @@ def _build_reasons_risks(payload: dict, fund_score: dict, sub: dict) -> tuple[li
     elif sub["P3"] <= 0.35:
         risks.append("TA setup negative (REDUCE/SELL)")
 
+    # 6.5) Insider trading (Pillar 5)
+    n_buyers = sub.get("insider_n_distinct_buyers_30d_max", 0)
+    n_p      = sub.get("insider_n_purchases", 0)
+    if n_buyers >= 2:
+        reasons.append(f"Insider cluster: {n_buyers} distinct insiders buying (last 30d)")
+    elif n_p >= 1 and sub["P5"] >= 0.60:
+        reasons.append(f"Insider buying — {sub.get('insider_summary','')[:60]}")
+
     # 7) Leverage risk (sector-aware: Finance는 다른 cap)
     de = ratios.get("debt_to_equity")
     if de is not None and metadata.get("owner_org") != "02 Finance" and de > 2.0:
@@ -259,6 +285,7 @@ def find_gems(top_n: int = DEFAULT_TOP_N) -> dict:
     # ── 3) 외부 신호 로드 ──
     p1_map = load_sentiment_scores()
     p3_map = load_ta_scores()
+    p5_map = load_insider_scores()
 
     # ── 4) Sector-relative percentile (Pillar 2) ──
     by_sector: dict[str, list[tuple[str, float]]] = {}
@@ -287,9 +314,12 @@ def find_gems(top_n: int = DEFAULT_TOP_N) -> dict:
         p2 = p2_map.get(tk, NEUTRAL)
         p3 = p3_map.get(tk, NEUTRAL)
         p4 = fund_scores[tk]["fundamental_score"]
+        p5_payload = p5_map.get(tk) or {}
+        p5 = p5_payload.get("score", NEUTRAL)
         obs = obscurity_map.get(tk, NEUTRAL)
 
-        quality = W_P1 * p1 + W_P2 * p2 + W_P3 * p3 + W_P4 * p4
+        quality = (W_P1 * p1 + W_P2 * p2 + W_P3 * p3
+                   + W_P4 * p4 + W_P5 * p5)
         hidden = quality * (0.5 + 0.5 * obs)
 
         sub = {
@@ -297,9 +327,15 @@ def find_gems(top_n: int = DEFAULT_TOP_N) -> dict:
             "P2": round(p2, 3),
             "P3": round(p3, 3),
             "P4": round(p4, 3),
+            "P5": round(p5, 3),
             "obscurity": round(obs, 3),
             "quality":   round(quality, 3),
             "has_ta":    tk in p3_map,
+            "has_insider": bool(p5_payload),
+            "insider_status": p5_payload.get("status"),
+            "insider_n_purchases": p5_payload.get("n_purchases", 0) or 0,
+            "insider_n_distinct_buyers_30d_max": p5_payload.get("n_distinct_buyers_30d_max", 0) or 0,
+            "insider_summary": p5_payload.get("summary"),
         }
         reasons, risks = _build_reasons_risks(payloads[tk], fund_scores[tk], sub)
 
@@ -333,7 +369,7 @@ def find_gems(top_n: int = DEFAULT_TOP_N) -> dict:
         "generated_at":  datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "universe_size": len(payloads),
         "passing_gate":  len(qualifying),
-        "weights":       {"P1": W_P1, "P2": W_P2, "P3": W_P3, "P4": W_P4},
+        "weights":       {"P1": W_P1, "P2": W_P2, "P3": W_P3, "P4": W_P4, "P5": W_P5},
         "gates": {
             "fundamental_score_min": GATE_FUND_MIN,
             "no_loss":               True,
@@ -343,6 +379,7 @@ def find_gems(top_n: int = DEFAULT_TOP_N) -> dict:
         "obscurity_proxy": "revenue_percentile_inverted (price coverage 29/81 → revenue used as size)",
         "p3_source":       "predictions.json action+confidence (29 ticker), else 0.5 neutral",
         "p1_source":       "ticker_sentiment.json filtered_score (62 ticker)",
+        "p5_source":       "insider.json (SEC Form 4 90d, asymmetric P>0→≥0.5)",
         "excluded":        gate_out,
         "top_picks":       rows[:top_n],
     }
@@ -369,13 +406,13 @@ def main(argv: list[str] | None = None) -> int:
               f"excluded={len(result['excluded'])}")
         print()
         print(f"{'rank':>4s} {'ticker':<8s} {'score':>6s} {'qual':>6s} {'obs':>6s} "
-              f"{'P1':>5s} {'P2':>5s} {'P3':>5s} {'P4':>5s}  {'sector':<22s}  rev")
-        print("-" * 130)
+              f"{'P1':>5s} {'P2':>5s} {'P3':>5s} {'P4':>5s} {'P5':>5s}  {'sector':<22s}  rev")
+        print("-" * 136)
         for r in result["top_picks"]:
             s = r["scores"]
             print(f"{r['rank']:>4d} {r['ticker']:<8s} "
                   f"{r['hidden_gems_score']:>6.3f} {s['quality']:>6.3f} {s['obscurity']:>6.3f} "
-                  f"{s['P1']:>5.2f} {s['P2']:>5.2f} {s['P3']:>5.2f} {s['P4']:>5.2f}  "
+                  f"{s['P1']:>5.2f} {s['P2']:>5.2f} {s['P3']:>5.2f} {s['P4']:>5.2f} {s['P5']:>5.2f}  "
                   f"{(r['metadata']['sector'] or '?')[:22]:<22s}  ${r['metadata']['revenue_b']:.1f}B")
         # Sample reasons for top 3
         print()

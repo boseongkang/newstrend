@@ -101,7 +101,7 @@ main{max-width:1400px;margin:0 auto;padding:20px 24px}
 .metric-row .rev{color:var(--t1)}
 
 /* PILLARS BARS */
-.pillars{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.pillars{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
 .pillar{display:flex;flex-direction:column;gap:3px}
 .pillar-label{font-family:var(--fm);font-size:8px;color:var(--t3);
               letter-spacing:.1em;text-transform:uppercase}
@@ -139,6 +139,7 @@ main{max-width:1400px;margin:0 auto;padding:20px 24px}
     <a href="./signals.html">SIGNALS</a>
     <a href="./predict.html">PREDICT</a>
     <a href="./hidden_gems.html" class="on">GEMS</a>
+    <a href="./insider_activity.html">INSIDERS</a>
     <a href="./ticker_detail.html">TICKER</a>
     <a href="./report.html">REPORT</a>
     <a href="./weekly.html">WEEKLY</a>
@@ -171,8 +172,8 @@ main{max-width:1400px;margin:0 auto;padding:20px 24px}
     </div>
     <div class="hero-block">
       <div class="hero-label">WEIGHTS</div>
-      <div class="hero-value" id="h-weights" style="font-size:13px">P1 25 / P2 10 / P3 25 / P4 40</div>
-      <div class="hero-sub">sentiment / sector / TA / fundamentals</div>
+      <div class="hero-value" id="h-weights" style="font-size:13px">P1 20 / P2 10 / P3 20 / P4 30 / P5 20</div>
+      <div class="hero-sub">sentiment / sector / TA / fundamentals / insider</div>
     </div>
     <div class="hero-block">
       <div class="hero-label">GENERATED</div>
@@ -188,6 +189,7 @@ main{max-width:1400px;margin:0 auto;padding:20px 24px}
     <select id="f-sort">
       <option value="score">Score (composite)</option>
       <option value="fund">P4 Fundamentals</option>
+      <option value="insider">P5 Insider</option>
       <option value="obs">Obscurity</option>
       <option value="rev_asc">Revenue (smallest first)</option>
       <option value="rev_desc">Revenue (largest first)</option>
@@ -237,6 +239,7 @@ function render(){
   picks.sort((a,b) => {
     if(sortKey === "score") return b.hidden_gems_score - a.hidden_gems_score;
     if(sortKey === "fund")  return (b.scores.P4||0) - (a.scores.P4||0);
+    if(sortKey === "insider") return (b.scores.P5||0.5) - (a.scores.P5||0.5);
     if(sortKey === "obs")   return (b.scores.obscurity||0) - (a.scores.obscurity||0);
     if(sortKey === "rev_asc")  return (a.metadata.revenue_b||0) - (b.metadata.revenue_b||0);
     if(sortKey === "rev_desc") return (b.metadata.revenue_b||0) - (a.metadata.revenue_b||0);
@@ -284,6 +287,7 @@ function render(){
         ${pillarBar("P2 sector",    s.P2)}
         ${pillarBar("P3 TA",        s.P3)}
         ${pillarBar("P4 fund",      s.P4)}
+        ${pillarBar("P5 insider",   s.P5)}
         ${pillarBar("obscurity",    s.obscurity, true)}
       </div>
       <div class="notes">
@@ -338,7 +342,7 @@ async function load(){
   if(DATA.weights){
     const w = DATA.weights;
     document.getElementById("h-weights").textContent =
-      `P1 ${Math.round(w.P1*100)} / P2 ${Math.round(w.P2*100)} / P3 ${Math.round(w.P3*100)} / P4 ${Math.round(w.P4*100)}`;
+      `P1 ${Math.round(w.P1*100)} / P2 ${Math.round(w.P2*100)} / P3 ${Math.round(w.P3*100)} / P4 ${Math.round(w.P4*100)} / P5 ${Math.round((w.P5||0)*100)}`;
   }
   if(DATA.generated_at){
     document.getElementById("h-generated").textContent = DATA.generated_at.replace("T"," ").replace(/Z$|\+00:00$/, " UTC");

@@ -1,12 +1,13 @@
 {
-  "generated_at": "2026-05-08T08:19:18+00:00",
+  "generated_at": "2026-05-08T19:34:25+00:00",
   "universe_size": 83,
   "passing_gate": 49,
   "weights": {
-    "P1": 0.25,
+    "P1": 0.2,
     "P2": 0.1,
-    "P3": 0.25,
-    "P4": 0.4
+    "P3": 0.2,
+    "P4": 0.3,
+    "P5": 0.2
   },
   "gates": {
     "fundamental_score_min": 0.4,
@@ -17,6 +18,7 @@
   "obscurity_proxy": "revenue_percentile_inverted (price coverage 29/81 \u2192 revenue used as size)",
   "p3_source": "predictions.json action+confidence (29 ticker), else 0.5 neutral",
   "p1_source": "ticker_sentiment.json filtered_score (62 ticker)",
+  "p5_source": "insider.json (SEC Form 4 90d, asymmetric P>0\u2192\u22650.5)",
   "excluded": {
     "ADI": "fund<0.4",
     "AMZN": "fund<0.4",
@@ -57,15 +59,21 @@
     {
       "ticker": "FSLR",
       "entity": "FIRST SOLAR, INC.",
-      "hidden_gems_score": 0.573,
+      "hidden_gems_score": 0.556,
       "scores": {
         "P1": 0.5,
         "P2": 0.818,
         "P3": 0.5,
         "P4": 0.681,
+        "P5": 0.5,
         "obscurity": 0.896,
-        "quality": 0.604,
-        "has_ta": false
+        "quality": 0.586,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (73 discretionary S)"
       },
       "metadata": {
         "sector": "04 Manufacturing",
@@ -88,15 +96,21 @@
     {
       "ticker": "BMRN",
       "entity": "BIOMARIN PHARMACEUTICAL INC",
-      "hidden_gems_score": 0.566,
+      "hidden_gems_score": 0.552,
       "scores": {
         "P1": 0.5,
         "P2": 0.6,
         "P3": 0.5,
         "P4": 0.641,
+        "P5": 0.5,
         "obscurity": 1.0,
-        "quality": 0.566,
-        "has_ta": false
+        "quality": 0.552,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (3 discretionary S)"
       },
       "metadata": {
         "sector": "03 Life Sciences",
@@ -118,15 +132,21 @@
     {
       "ticker": "ARM",
       "entity": "ARM HOLDINGS PLC /UK",
-      "hidden_gems_score": 0.555,
+      "hidden_gems_score": 0.544,
       "scores": {
         "P1": 0.5,
         "P2": 0.727,
         "P3": 0.5,
         "P4": 0.609,
+        "P5": 0.5,
         "obscurity": 0.958,
-        "quality": 0.566,
-        "has_ta": false
+        "quality": 0.555,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (0 discretionary S)"
       },
       "metadata": {
         "sector": "04 Manufacturing",
@@ -148,15 +168,21 @@
     {
       "ticker": "FTNT",
       "entity": "Fortinet, Inc.",
-      "hidden_gems_score": 0.523,
+      "hidden_gems_score": 0.511,
       "scores": {
         "P1": 0.5,
         "P2": 0.714,
         "P3": 0.5,
         "P4": 0.64,
+        "P5": 0.5,
         "obscurity": 0.812,
-        "quality": 0.577,
-        "has_ta": false
+        "quality": 0.563,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (0 discretionary S)"
       },
       "metadata": {
         "sector": "06 Technology",
@@ -181,15 +207,21 @@
     {
       "ticker": "COIN",
       "entity": "Coinbase Global, Inc.",
-      "hidden_gems_score": 0.512,
+      "hidden_gems_score": 0.506,
       "scores": {
         "P1": 0.5,
         "P2": 1.0,
         "P3": 0.5,
         "P4": 0.572,
+        "P5": 0.5,
         "obscurity": 0.771,
-        "quality": 0.579,
-        "has_ta": false
+        "quality": 0.572,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (0 discretionary S)"
       },
       "metadata": {
         "sector": "09 Crypto Assets",
@@ -212,15 +244,21 @@
     {
       "ticker": "VRTX",
       "entity": "VERTEX PHARMACEUTICALS INC / MA",
-      "hidden_gems_score": 0.505,
+      "hidden_gems_score": 0.492,
       "scores": {
         "P1": 0.5,
         "P2": 0.8,
         "P3": 0.5,
         "P4": 0.654,
+        "P5": 0.5,
         "obscurity": 0.708,
-        "quality": 0.592,
-        "has_ta": false
+        "quality": 0.576,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (0 discretionary S)"
       },
       "metadata": {
         "sector": "03 Life Sciences",
@@ -243,15 +281,21 @@
     {
       "ticker": "KLAC",
       "entity": "KLA CORP",
-      "hidden_gems_score": 0.482,
+      "hidden_gems_score": 0.478,
       "scores": {
         "P1": 0.5,
         "P2": 1.0,
         "P3": 0.5,
         "P4": 0.554,
+        "P5": 0.5,
         "obscurity": 0.688,
-        "quality": 0.572,
-        "has_ta": false
+        "quality": 0.566,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "no_filings",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "No Form 4 filings (foreign issuer / no insiders)"
       },
       "metadata": {
         "sector": "08 Industrial Applications and Services",
@@ -274,15 +318,21 @@
     {
       "ticker": "BLK",
       "entity": "BlackRock, Inc.",
-      "hidden_gems_score": 0.473,
+      "hidden_gems_score": 0.464,
       "scores": {
         "P1": 0.75,
         "P2": 1.0,
-        "P3": 0.462,
+        "P3": 0.5,
         "P4": 0.592,
+        "P5": 0.5,
         "obscurity": 0.479,
-        "quality": 0.64,
-        "has_ta": true
+        "quality": 0.628,
+        "has_ta": true,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (24 discretionary S)"
       },
       "metadata": {
         "sector": "02 Finance",
@@ -304,15 +354,21 @@
     {
       "ticker": "CDNS",
       "entity": "CADENCE DESIGN SYSTEMS INC",
-      "hidden_gems_score": 0.457,
+      "hidden_gems_score": 0.455,
       "scores": {
         "P1": 0.5,
         "P2": 0.286,
         "P3": 0.5,
         "P4": 0.522,
+        "P5": 0.5,
         "obscurity": 0.875,
-        "quality": 0.487,
-        "has_ta": false
+        "quality": 0.485,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (0 discretionary S)"
       },
       "metadata": {
         "sector": "06 Technology",
@@ -332,36 +388,6 @@
       "rank": 9
     },
     {
-      "ticker": "MRVL",
-      "entity": "Marvell Technology, Inc.",
-      "hidden_gems_score": 0.453,
-      "scores": {
-        "P1": 0.5,
-        "P2": 0.455,
-        "P3": 0.5,
-        "P4": 0.557,
-        "obscurity": 0.75,
-        "quality": 0.518,
-        "has_ta": false
-      },
-      "metadata": {
-        "sector": "04 Manufacturing",
-        "exchanges": [
-          "Nasdaq"
-        ],
-        "revenue_b": 8.19,
-        "fund_summary": "moderate quality (ROE 19%, op 16%); rev CAGR +11%/y; low leverage (D/E 0.56)"
-      },
-      "reasons": [
-        "Solid quality (ROE 19%)",
-        "Mid-cap discovery \u2014 revenue $8.2B (smaller than 75% of universe)"
-      ],
-      "risks": [
-        "No price data \u2014 research only (universe gap)"
-      ],
-      "rank": 10
-    },
-    {
       "ticker": "PAYX",
       "entity": "PAYCHEX INC",
       "hidden_gems_score": 0.453,
@@ -370,9 +396,15 @@
         "P2": 0.4,
         "P3": 0.5,
         "P4": 0.497,
+        "P5": 0.5,
         "obscurity": 0.854,
         "quality": 0.489,
-        "has_ta": false
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (0 discretionary S)"
       },
       "metadata": {
         "sector": "07 Trade & Services",
@@ -390,63 +422,113 @@
         "High leverage (D/E 3.36)",
         "No price data \u2014 research only (universe gap)"
       ],
-      "rank": 11
+      "rank": 10
     },
     {
-      "ticker": "AMD",
-      "entity": "ADVANCED MICRO DEVICES INC",
-      "hidden_gems_score": 0.447,
+      "ticker": "MRVL",
+      "entity": "Marvell Technology, Inc.",
+      "hidden_gems_score": 0.448,
       "scores": {
-        "P1": 1.0,
-        "P2": 0.636,
+        "P1": 0.5,
+        "P2": 0.455,
         "P3": 0.5,
-        "P4": 0.579,
-        "obscurity": 0.333,
-        "quality": 0.67,
-        "has_ta": true
+        "P4": 0.557,
+        "P5": 0.5,
+        "obscurity": 0.75,
+        "quality": 0.513,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (4 discretionary S)"
       },
       "metadata": {
         "sector": "04 Manufacturing",
         "exchanges": [
           "Nasdaq"
         ],
-        "revenue_b": 34.64,
-        "fund_summary": "weak quality (ROE 7%, op 11%); rev CAGR +14%/y"
+        "revenue_b": 8.19,
+        "fund_summary": "moderate quality (ROE 19%, op 16%); rev CAGR +11%/y; low leverage (D/E 0.56)"
       },
       "reasons": [
-        "Growing revenue (CAGR +14%/y, 3-yr)",
-        "Bullish FinBERT sentiment"
+        "Solid quality (ROE 19%)",
+        "Mid-cap discovery \u2014 revenue $8.2B (smaller than 75% of universe)"
       ],
-      "risks": [],
-      "rank": 12
+      "risks": [
+        "No price data \u2014 research only (universe gap)"
+      ],
+      "rank": 11
     },
     {
-      "ticker": "GILD",
-      "entity": "GILEAD SCIENCES, INC.",
-      "hidden_gems_score": 0.436,
+      "ticker": "DDOG",
+      "entity": "Datadog, Inc.",
+      "hidden_gems_score": 0.435,
       "scores": {
         "P1": 0.5,
-        "P2": 1.0,
+        "P2": 0.071,
         "P3": 0.5,
-        "P4": 0.687,
-        "obscurity": 0.396,
-        "quality": 0.625,
-        "has_ta": false
+        "P4": 0.44,
+        "P5": 0.5,
+        "obscurity": 0.979,
+        "quality": 0.439,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (7 discretionary S)"
       },
       "metadata": {
-        "sector": "03 Life Sciences",
+        "sector": "06 Technology",
         "exchanges": [
           "Nasdaq"
         ],
-        "revenue_b": 29.44,
-        "fund_summary": "strong quality (ROE 36%, op 34%); rev CAGR +3%/y"
+        "revenue_b": 3.43,
+        "fund_summary": "weak quality (ROE 3%, op -1%); rev CAGR +27%/y; low leverage (D/E 0.74)"
       },
       "reasons": [
-        "Strong quality (ROE 36%, op margin 34%)",
-        "Top of sector (03 Life Sciences) by fundamentals"
+        "Among smallest in universe (revenue $3.4B)"
       ],
       "risks": [
-        "Slow growth (rev CAGR +3%/y)",
+        "No price data \u2014 research only (universe gap)"
+      ],
+      "rank": 12
+    },
+    {
+      "ticker": "ILMN",
+      "entity": "ILLUMINA, INC.",
+      "hidden_gems_score": 0.434,
+      "scores": {
+        "P1": 0.5,
+        "P2": 0.0,
+        "P3": 0.5,
+        "P4": 0.423,
+        "P5": 0.607,
+        "obscurity": 0.938,
+        "quality": 0.448,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "ok",
+        "insider_n_purchases": 1,
+        "insider_n_distinct_buyers_30d_max": 1,
+        "insider_summary": "$0.02M weighted buys (1 P txs)"
+      },
+      "metadata": {
+        "sector": "08 Industrial Applications and Services",
+        "exchanges": [
+          "Nasdaq"
+        ],
+        "revenue_b": 4.34,
+        "fund_summary": "moderate quality (ROE 32%, op 19%); rev CAGR -2%/y"
+      },
+      "reasons": [
+        "Solid quality (ROE 32%)",
+        "Mid-cap discovery \u2014 revenue $4.3B (smaller than 94% of universe)",
+        "Insider buying \u2014 $0.02M weighted buys (1 P txs)"
+      ],
+      "risks": [
+        "Slow growth (rev CAGR -2%/y)",
         "No price data \u2014 research only (universe gap)"
       ],
       "rank": 13
@@ -454,15 +536,21 @@
     {
       "ticker": "INTU",
       "entity": "INTUIT INC.",
-      "hidden_gems_score": 0.435,
+      "hidden_gems_score": 0.425,
       "scores": {
         "P1": 0.5,
         "P2": 0.643,
         "P3": 0.5,
         "P4": 0.625,
+        "P5": 0.5,
         "obscurity": 0.542,
-        "quality": 0.564,
-        "has_ta": false
+        "quality": 0.552,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (0 discretionary S)"
       },
       "metadata": {
         "sector": "06 Technology",
@@ -483,107 +571,57 @@
       "rank": 14
     },
     {
-      "ticker": "AVGO",
-      "entity": "Broadcom Inc.",
-      "hidden_gems_score": 0.432,
+      "ticker": "AMD",
+      "entity": "ADVANCED MICRO DEVICES INC",
+      "hidden_gems_score": 0.425,
       "scores": {
-        "P1": 0.8,
-        "P2": 0.909,
+        "P1": 1.0,
+        "P2": 0.636,
         "P3": 0.5,
-        "P4": 0.847,
-        "obscurity": 0.146,
-        "quality": 0.755,
-        "has_ta": true
+        "P4": 0.579,
+        "P5": 0.5,
+        "obscurity": 0.333,
+        "quality": 0.637,
+        "has_ta": true,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (1 discretionary S)"
       },
       "metadata": {
         "sector": "04 Manufacturing",
         "exchanges": [
           "Nasdaq"
         ],
-        "revenue_b": 63.89,
-        "fund_summary": "strong quality (ROE 29%, op 40%); rev CAGR +24%/y; moderate leverage (D/E 1.13)"
+        "revenue_b": 34.64,
+        "fund_summary": "weak quality (ROE 7%, op 11%); rev CAGR +14%/y"
       },
       "reasons": [
-        "Strong quality (ROE 29%, op margin 40%)",
-        "Growing revenue (CAGR +24%/y, 3-yr)",
-        "Top of sector (04 Manufacturing) by fundamentals",
+        "Growing revenue (CAGR +14%/y, 3-yr)",
         "Bullish FinBERT sentiment"
       ],
       "risks": [],
       "rank": 15
     },
     {
-      "ticker": "DDOG",
-      "entity": "Datadog, Inc.",
-      "hidden_gems_score": 0.429,
-      "scores": {
-        "P1": 0.5,
-        "P2": 0.071,
-        "P3": 0.5,
-        "P4": 0.44,
-        "obscurity": 0.979,
-        "quality": 0.433,
-        "has_ta": false
-      },
-      "metadata": {
-        "sector": "06 Technology",
-        "exchanges": [
-          "Nasdaq"
-        ],
-        "revenue_b": 3.43,
-        "fund_summary": "weak quality (ROE 3%, op -1%); rev CAGR +27%/y; low leverage (D/E 0.74)"
-      },
-      "reasons": [
-        "Among smallest in universe (revenue $3.4B)"
-      ],
-      "risks": [
-        "No price data \u2014 research only (universe gap)"
-      ],
-      "rank": 16
-    },
-    {
-      "ticker": "LRCX",
-      "entity": "LAM RESEARCH CORP",
-      "hidden_gems_score": 0.427,
-      "scores": {
-        "P1": 0.5,
-        "P2": 0.5,
-        "P3": 0.5,
-        "P4": 0.618,
-        "obscurity": 0.562,
-        "quality": 0.547,
-        "has_ta": false
-      },
-      "metadata": {
-        "sector": "06 Technology",
-        "exchanges": [
-          "Nasdaq"
-        ],
-        "revenue_b": 18.44,
-        "fund_summary": "strong quality (ROE 51%, op 32%); rev CAGR +2%/y; low leverage (D/E 0.96)"
-      },
-      "reasons": [
-        "Strong quality (ROE 51%, op margin 32%)",
-        "Below-mega-cap \u2014 revenue $18.4B"
-      ],
-      "risks": [
-        "Slow growth (rev CAGR +2%/y)",
-        "No price data \u2014 research only (universe gap)"
-      ],
-      "rank": 17
-    },
-    {
       "ticker": "HOOD",
       "entity": "Robinhood Markets, Inc.",
-      "hidden_gems_score": 0.423,
+      "hidden_gems_score": 0.425,
       "scores": {
         "P1": 0.5,
         "P2": 0.0,
         "P3": 0.5,
         "P4": 0.478,
+        "P5": 0.5,
         "obscurity": 0.917,
-        "quality": 0.441,
-        "has_ta": false
+        "quality": 0.443,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (0 discretionary S)"
       },
       "metadata": {
         "sector": "09 Crypto Assets",
@@ -601,50 +639,135 @@
         "High leverage (D/E 3.69)",
         "No price data \u2014 research only (universe gap)"
       ],
-      "rank": 18
+      "rank": 16
     },
     {
-      "ticker": "ASML",
-      "entity": "ASML HOLDING NV",
-      "hidden_gems_score": 0.419,
+      "ticker": "GILD",
+      "entity": "GILEAD SCIENCES, INC.",
+      "hidden_gems_score": 0.423,
       "scores": {
         "P1": 0.5,
-        "P2": 0.857,
+        "P2": 1.0,
         "P3": 0.5,
-        "P4": 0.684,
-        "obscurity": 0.375,
-        "quality": 0.609,
-        "has_ta": true
+        "P4": 0.687,
+        "P5": 0.5,
+        "obscurity": 0.396,
+        "quality": 0.606,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (0 discretionary S)"
+      },
+      "metadata": {
+        "sector": "03 Life Sciences",
+        "exchanges": [
+          "Nasdaq"
+        ],
+        "revenue_b": 29.44,
+        "fund_summary": "strong quality (ROE 36%, op 34%); rev CAGR +3%/y"
+      },
+      "reasons": [
+        "Strong quality (ROE 36%, op margin 34%)",
+        "Top of sector (03 Life Sciences) by fundamentals"
+      ],
+      "risks": [
+        "Slow growth (rev CAGR +3%/y)",
+        "No price data \u2014 research only (universe gap)"
+      ],
+      "rank": 17
+    },
+    {
+      "ticker": "LRCX",
+      "entity": "LAM RESEARCH CORP",
+      "hidden_gems_score": 0.418,
+      "scores": {
+        "P1": 0.5,
+        "P2": 0.5,
+        "P3": 0.5,
+        "P4": 0.618,
+        "P5": 0.5,
+        "obscurity": 0.562,
+        "quality": 0.535,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (5 discretionary S)"
       },
       "metadata": {
         "sector": "06 Technology",
         "exchanges": [
-          "Nasdaq",
-          "OTC"
+          "Nasdaq"
         ],
-        "revenue_b": 32.67,
-        "fund_summary": "strong quality (ROE 49%, op 35%); rev CAGR +16%/y; moderate leverage (D/E 1.58)"
+        "revenue_b": 18.44,
+        "fund_summary": "strong quality (ROE 51%, op 32%); rev CAGR +2%/y; low leverage (D/E 0.96)"
       },
       "reasons": [
-        "Strong quality (ROE 49%, op margin 35%)",
-        "Growing revenue (CAGR +16%/y, 3-yr)",
-        "Top of sector (06 Technology) by fundamentals"
+        "Strong quality (ROE 51%, op margin 32%)",
+        "Below-mega-cap \u2014 revenue $18.4B"
       ],
-      "risks": [],
+      "risks": [
+        "Slow growth (rev CAGR +2%/y)",
+        "No price data \u2014 research only (universe gap)"
+      ],
+      "rank": 18
+    },
+    {
+      "ticker": "SNPS",
+      "entity": "SYNOPSYS INC",
+      "hidden_gems_score": 0.418,
+      "scores": {
+        "P1": 0.5,
+        "P2": 0.214,
+        "P3": 0.5,
+        "P4": 0.483,
+        "P5": 0.5,
+        "obscurity": 0.792,
+        "quality": 0.466,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (0 discretionary S)"
+      },
+      "metadata": {
+        "sector": "06 Technology",
+        "exchanges": [
+          "Nasdaq"
+        ],
+        "revenue_b": 7.05,
+        "fund_summary": "weak quality (ROE 4%, op 13%); rev CAGR +15%/y; low leverage (D/E 0.55)"
+      },
+      "reasons": [
+        "Mid-cap discovery \u2014 revenue $7.1B (smaller than 79% of universe)"
+      ],
+      "risks": [
+        "No price data \u2014 research only (universe gap)"
+      ],
       "rank": 19
     },
     {
       "ticker": "BKNG",
       "entity": "Booking Holdings Inc.",
-      "hidden_gems_score": 0.418,
+      "hidden_gems_score": 0.414,
       "scores": {
         "P1": 0.5,
         "P2": 1.0,
         "P3": 0.5,
         "P4": 0.559,
+        "P5": 0.5,
         "obscurity": 0.458,
-        "quality": 0.574,
-        "has_ta": false
+        "quality": 0.568,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (0 discretionary S)"
       },
       "metadata": {
         "sector": "01 Energy & Transportation",
@@ -667,15 +790,21 @@
     {
       "ticker": "REGN",
       "entity": "REGENERON PHARMACEUTICALS, INC.",
-      "hidden_gems_score": 0.416,
+      "hidden_gems_score": 0.412,
       "scores": {
         "P1": 0.5,
         "P2": 0.4,
         "P3": 0.5,
         "P4": 0.556,
+        "P5": 0.5,
         "obscurity": 0.625,
-        "quality": 0.512,
-        "has_ta": false
+        "quality": 0.507,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (0 discretionary S)"
       },
       "metadata": {
         "sector": "03 Life Sciences",
@@ -695,28 +824,36 @@
       "rank": 21
     },
     {
-      "ticker": "SNPS",
-      "entity": "SYNOPSYS INC",
-      "hidden_gems_score": 0.416,
+      "ticker": "LYFT",
+      "entity": "Lyft, Inc.",
+      "hidden_gems_score": 0.41,
       "scores": {
         "P1": 0.5,
-        "P2": 0.214,
+        "P2": 0.0,
         "P3": 0.5,
-        "P4": 0.483,
-        "obscurity": 0.792,
-        "quality": 0.465,
-        "has_ta": false
+        "P4": 0.401,
+        "P5": 0.637,
+        "obscurity": 0.833,
+        "quality": 0.448,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "ok",
+        "insider_n_purchases": 1,
+        "insider_n_distinct_buyers_30d_max": 1,
+        "insider_summary": "$0.20M weighted buys (1 P txs)"
       },
       "metadata": {
-        "sector": "06 Technology",
+        "sector": "01 Energy & Transportation",
         "exchanges": [
           "Nasdaq"
         ],
-        "revenue_b": 7.05,
-        "fund_summary": "weak quality (ROE 4%, op 13%); rev CAGR +15%/y; low leverage (D/E 0.55)"
+        "revenue_b": 6.32,
+        "fund_summary": "moderate quality (ROE 87%, op -3%); rev CAGR +16%/y; moderate leverage (D/E 1.76)"
       },
       "reasons": [
-        "Mid-cap discovery \u2014 revenue $7.1B (smaller than 79% of universe)"
+        "Solid quality (ROE 87%)",
+        "Mid-cap discovery \u2014 revenue $6.3B (smaller than 83% of universe)",
+        "Insider buying \u2014 $0.20M weighted buys (1 P txs)"
       ],
       "risks": [
         "No price data \u2014 research only (universe gap)"
@@ -724,138 +861,95 @@
       "rank": 22
     },
     {
-      "ticker": "NVDA",
-      "entity": "NVIDIA CORP",
-      "hidden_gems_score": 0.407,
+      "ticker": "ASML",
+      "entity": "ASML HOLDING NV",
+      "hidden_gems_score": 0.406,
       "scores": {
-        "P1": 0.588,
-        "P2": 1.0,
+        "P1": 0.5,
+        "P2": 0.857,
         "P3": 0.5,
-        "P4": 0.984,
-        "obscurity": 0.062,
-        "quality": 0.766,
-        "has_ta": true
+        "P4": 0.684,
+        "P5": 0.5,
+        "obscurity": 0.375,
+        "quality": 0.591,
+        "has_ta": true,
+        "has_insider": true,
+        "insider_status": "no_filings",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "No Form 4 filings (foreign issuer / no insiders)"
+      },
+      "metadata": {
+        "sector": "06 Technology",
+        "exchanges": [
+          "Nasdaq",
+          "OTC"
+        ],
+        "revenue_b": 32.67,
+        "fund_summary": "strong quality (ROE 49%, op 35%); rev CAGR +16%/y; moderate leverage (D/E 1.58)"
+      },
+      "reasons": [
+        "Strong quality (ROE 49%, op margin 35%)",
+        "Growing revenue (CAGR +16%/y, 3-yr)",
+        "Top of sector (06 Technology) by fundamentals"
+      ],
+      "risks": [],
+      "rank": 23
+    },
+    {
+      "ticker": "AVGO",
+      "entity": "Broadcom Inc.",
+      "hidden_gems_score": 0.404,
+      "scores": {
+        "P1": 0.8,
+        "P2": 0.909,
+        "P3": 0.5,
+        "P4": 0.847,
+        "P5": 0.5,
+        "obscurity": 0.146,
+        "quality": 0.705,
+        "has_ta": true,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (79 discretionary S)"
       },
       "metadata": {
         "sector": "04 Manufacturing",
         "exchanges": [
           "Nasdaq"
         ],
-        "revenue_b": 215.94,
-        "fund_summary": "strong quality (ROE 76%, op 60%); rev CAGR +100%/y; low leverage (D/E 0.31)"
+        "revenue_b": 63.89,
+        "fund_summary": "strong quality (ROE 29%, op 40%); rev CAGR +24%/y; moderate leverage (D/E 1.13)"
       },
       "reasons": [
-        "Strong quality (ROE 76%, op margin 60%)",
-        "Growing revenue (CAGR +100%/y, 3-yr)",
-        "Top of sector (04 Manufacturing) by fundamentals"
+        "Strong quality (ROE 29%, op margin 40%)",
+        "Growing revenue (CAGR +24%/y, 3-yr)",
+        "Top of sector (04 Manufacturing) by fundamentals",
+        "Bullish FinBERT sentiment"
       ],
       "risks": [],
-      "rank": 23
-    },
-    {
-      "ticker": "ILMN",
-      "entity": "ILLUMINA, INC.",
-      "hidden_gems_score": 0.406,
-      "scores": {
-        "P1": 0.5,
-        "P2": 0.0,
-        "P3": 0.5,
-        "P4": 0.423,
-        "obscurity": 0.938,
-        "quality": 0.419,
-        "has_ta": false
-      },
-      "metadata": {
-        "sector": "08 Industrial Applications and Services",
-        "exchanges": [
-          "Nasdaq"
-        ],
-        "revenue_b": 4.34,
-        "fund_summary": "moderate quality (ROE 32%, op 19%); rev CAGR -2%/y"
-      },
-      "reasons": [
-        "Solid quality (ROE 32%)",
-        "Mid-cap discovery \u2014 revenue $4.3B (smaller than 94% of universe)"
-      ],
-      "risks": [
-        "Slow growth (rev CAGR -2%/y)",
-        "No price data \u2014 research only (universe gap)"
-      ],
       "rank": 24
-    },
-    {
-      "ticker": "PDD",
-      "entity": "PDD Holdings Inc.",
-      "hidden_gems_score": 0.401,
-      "scores": {
-        "P1": 0.5,
-        "P2": 1.0,
-        "P3": 0.5,
-        "P4": 0.844,
-        "obscurity": 0.167,
-        "quality": 0.688,
-        "has_ta": false
-      },
-      "metadata": {
-        "sector": "07 Trade & Services",
-        "exchanges": [
-          "Nasdaq"
-        ],
-        "revenue_b": 61.75,
-        "fund_summary": "moderate quality (ROE 24%, op 22%); rev CAGR +48%/y; low leverage (D/E 0.52)"
-      },
-      "reasons": [
-        "Solid quality (ROE 24%)",
-        "Growing revenue (CAGR +48%/y, 3-yr)",
-        "Top of sector (07 Trade & Services) by fundamentals"
-      ],
-      "risks": [
-        "No price data \u2014 research only (universe gap)"
-      ],
-      "rank": 25
-    },
-    {
-      "ticker": "ADBE",
-      "entity": "ADOBE INC.",
-      "hidden_gems_score": 0.399,
-      "scores": {
-        "P1": 0.5,
-        "P2": 0.429,
-        "P3": 0.5,
-        "P4": 0.597,
-        "obscurity": 0.5,
-        "quality": 0.532,
-        "has_ta": false
-      },
-      "metadata": {
-        "sector": "06 Technology",
-        "exchanges": [
-          "Nasdaq"
-        ],
-        "revenue_b": 23.77,
-        "fund_summary": "strong quality (ROE 62%, op 37%); rev CAGR +11%/y; moderate leverage (D/E 1.60)"
-      },
-      "reasons": [
-        "Strong quality (ROE 62%, op margin 37%)",
-        "Below-mega-cap \u2014 revenue $23.8B"
-      ],
-      "risks": [
-        "No price data \u2014 research only (universe gap)"
-      ],
-      "rank": 26
     },
     {
       "ticker": "TXN",
       "entity": "TEXAS INSTRUMENTS INC",
-      "hidden_gems_score": 0.399,
+      "hidden_gems_score": 0.395,
       "scores": {
         "P1": 0.5,
         "P2": 0.364,
         "P3": 0.5,
         "P4": 0.544,
+        "P5": 0.5,
         "obscurity": 0.583,
-        "quality": 0.504,
-        "has_ta": false
+        "quality": 0.5,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (31 discretionary S)"
       },
       "metadata": {
         "sector": "04 Manufacturing",
@@ -873,6 +967,79 @@
         "Slow growth (rev CAGR -4%/y)",
         "No price data \u2014 research only (universe gap)"
       ],
+      "rank": 25
+    },
+    {
+      "ticker": "MELI",
+      "entity": "MERCADOLIBRE INC",
+      "hidden_gems_score": 0.393,
+      "scores": {
+        "P1": 0.5,
+        "P2": 0.6,
+        "P3": 0.5,
+        "P4": 0.563,
+        "P5": 0.633,
+        "obscurity": 0.417,
+        "quality": 0.556,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "ok",
+        "insider_n_purchases": 1,
+        "insider_n_distinct_buyers_30d_max": 1,
+        "insider_summary": "$0.15M weighted buys (1 P txs)"
+      },
+      "metadata": {
+        "sector": "07 Trade & Services",
+        "exchanges": [
+          "Nasdaq"
+        ],
+        "revenue_b": 28.89,
+        "fund_summary": "moderate quality (ROE 30%, op 11%); rev CAGR +39%/y; high leverage (D/E 5.32)"
+      },
+      "reasons": [
+        "Growing revenue (CAGR +39%/y, 3-yr)",
+        "Insider buying \u2014 $0.15M weighted buys (1 P txs)"
+      ],
+      "risks": [
+        "High leverage (D/E 5.32)",
+        "No price data \u2014 research only (universe gap)"
+      ],
+      "rank": 26
+    },
+    {
+      "ticker": "ADBE",
+      "entity": "ADOBE INC.",
+      "hidden_gems_score": 0.391,
+      "scores": {
+        "P1": 0.5,
+        "P2": 0.429,
+        "P3": 0.5,
+        "P4": 0.597,
+        "P5": 0.5,
+        "obscurity": 0.5,
+        "quality": 0.522,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (5 discretionary S)"
+      },
+      "metadata": {
+        "sector": "06 Technology",
+        "exchanges": [
+          "Nasdaq"
+        ],
+        "revenue_b": 23.77,
+        "fund_summary": "strong quality (ROE 62%, op 37%); rev CAGR +11%/y; moderate leverage (D/E 1.60)"
+      },
+      "reasons": [
+        "Strong quality (ROE 62%, op margin 37%)",
+        "Below-mega-cap \u2014 revenue $23.8B"
+      ],
+      "risks": [
+        "No price data \u2014 research only (universe gap)"
+      ],
       "rank": 27
     },
     {
@@ -884,9 +1051,15 @@
         "P2": 0.2,
         "P3": 0.5,
         "P4": 0.491,
+        "P5": 0.5,
         "obscurity": 0.667,
-        "quality": 0.466,
-        "has_ta": false
+        "quality": 0.467,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (0 discretionary S)"
       },
       "metadata": {
         "sector": "07 Trade & Services",
@@ -907,63 +1080,75 @@
       "rank": 28
     },
     {
-      "ticker": "AMAT",
-      "entity": "APPLIED MATERIALS INC /DE",
-      "hidden_gems_score": 0.383,
+      "ticker": "PDD",
+      "entity": "PDD Holdings Inc.",
+      "hidden_gems_score": 0.381,
       "scores": {
         "P1": 0.5,
-        "P2": 0.545,
+        "P2": 1.0,
         "P3": 0.5,
-        "P4": 0.571,
-        "obscurity": 0.438,
-        "quality": 0.533,
-        "has_ta": false
-      },
-      "metadata": {
-        "sector": "04 Manufacturing",
-        "exchanges": [
-          "Nasdaq"
-        ],
-        "revenue_b": 28.37,
-        "fund_summary": "strong quality (ROE 32%, op 29%); rev CAGR +3%/y; low leverage (D/E 0.73)"
-      },
-      "reasons": [
-        "Strong quality (ROE 32%, op margin 29%)"
-      ],
-      "risks": [
-        "Slow growth (rev CAGR +3%/y)",
-        "No price data \u2014 research only (universe gap)"
-      ],
-      "rank": 29
-    },
-    {
-      "ticker": "MELI",
-      "entity": "MERCADOLIBRE INC",
-      "hidden_gems_score": 0.379,
-      "scores": {
-        "P1": 0.5,
-        "P2": 0.6,
-        "P3": 0.5,
-        "P4": 0.563,
-        "obscurity": 0.417,
-        "quality": 0.535,
-        "has_ta": false
+        "P4": 0.844,
+        "P5": 0.5,
+        "obscurity": 0.167,
+        "quality": 0.653,
+        "has_ta": false,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (2 discretionary S)"
       },
       "metadata": {
         "sector": "07 Trade & Services",
         "exchanges": [
           "Nasdaq"
         ],
-        "revenue_b": 28.89,
-        "fund_summary": "moderate quality (ROE 30%, op 11%); rev CAGR +39%/y; high leverage (D/E 5.32)"
+        "revenue_b": 61.75,
+        "fund_summary": "moderate quality (ROE 24%, op 22%); rev CAGR +48%/y; low leverage (D/E 0.52)"
       },
       "reasons": [
-        "Growing revenue (CAGR +39%/y, 3-yr)"
+        "Solid quality (ROE 24%)",
+        "Growing revenue (CAGR +48%/y, 3-yr)",
+        "Top of sector (07 Trade & Services) by fundamentals"
       ],
       "risks": [
-        "High leverage (D/E 5.32)",
         "No price data \u2014 research only (universe gap)"
       ],
+      "rank": 29
+    },
+    {
+      "ticker": "NVDA",
+      "entity": "NVIDIA CORP",
+      "hidden_gems_score": 0.379,
+      "scores": {
+        "P1": 0.588,
+        "P2": 1.0,
+        "P3": 0.5,
+        "P4": 0.984,
+        "P5": 0.5,
+        "obscurity": 0.062,
+        "quality": 0.713,
+        "has_ta": true,
+        "has_insider": true,
+        "insider_status": "neutral_rsu_churn",
+        "insider_n_purchases": 0,
+        "insider_n_distinct_buyers_30d_max": 0,
+        "insider_summary": "RSU churn / no insider buys (2 discretionary S)"
+      },
+      "metadata": {
+        "sector": "04 Manufacturing",
+        "exchanges": [
+          "Nasdaq"
+        ],
+        "revenue_b": 215.94,
+        "fund_summary": "strong quality (ROE 76%, op 60%); rev CAGR +100%/y; low leverage (D/E 0.31)"
+      },
+      "reasons": [
+        "Strong quality (ROE 76%, op margin 60%)",
+        "Growing revenue (CAGR +100%/y, 3-yr)",
+        "Top of sector (04 Manufacturing) by fundamentals"
+      ],
+      "risks": [],
       "rank": 30
     }
   ]

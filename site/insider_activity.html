@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · Insider Activity (Pillar 5)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;--bg3:#0a1018;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--purple:#b380ff;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg1)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+
+header{height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:10}
+.brand{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300;margin-left:6px}
+nav{display:flex;gap:2px}
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:6px 12px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+#ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+main{max-width:1400px;margin:0 auto;padding:20px 24px}
+
+/* HERO */
+.hero{background:linear-gradient(135deg, var(--bg2) 0%, var(--bg1) 100%);
+      border:1px solid var(--b1);padding:18px 24px;margin-bottom:18px;
+      display:grid;grid-template-columns:repeat(5,1fr);gap:18px;align-items:stretch}
+.hero-block{}
+.hero-label{font-family:var(--fm);font-size:9px;letter-spacing:.16em;
+            text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.hero-value{font-family:var(--fm);font-size:20px;font-weight:600;color:var(--t1)}
+.hero-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:2px}
+
+.intro{font-family:var(--fm);font-size:11px;color:var(--t2);
+       padding:12px 18px;background:var(--bg3);border-left:2px solid var(--cyan);
+       margin-bottom:18px;line-height:1.6}
+.intro b{color:var(--cyan);font-weight:500}
+.intro span.P{color:var(--green)}
+.intro span.S{color:var(--red)}
+
+/* SECTION */
+.section{background:var(--bg1);border:1px solid var(--b1);margin-bottom:18px}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;
+         padding:14px 20px;border-bottom:1px solid var(--b1)}
+.sec-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--t1)}
+.sec-meta{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+/* CARD GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(380px, 1fr));
+      gap:14px;padding:18px}
+
+.card{background:var(--bg2);border:1px solid var(--b1);padding:14px;
+      transition:border-color .15s, transform .15s}
+.card:hover{border-color:var(--cyan);transform:translateY(-1px)}
+.card.cluster{border-left:3px solid var(--green)}
+.card.solo{border-left:3px solid var(--cyan)}
+
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;
+          gap:10px;margin-bottom:8px}
+.ticker{font-family:var(--fm);font-size:18px;font-weight:600;color:var(--t1)}
+.entity{font-family:var(--fs);font-size:10px;color:var(--t3);margin-top:2px}
+.score-block{text-align:right}
+.score-val{font-family:var(--fm);font-size:18px;font-weight:600;color:var(--cyan)}
+.score-label{font-family:var(--fm);font-size:8px;color:var(--t3);
+             letter-spacing:.1em;text-transform:uppercase}
+
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+         margin:10px 0;padding:10px;background:var(--bg3);
+         border:1px solid var(--b1);border-radius:2px}
+.metric{}
+.metric-label{font-family:var(--fm);font-size:8px;color:var(--t3);
+              letter-spacing:.1em;text-transform:uppercase}
+.metric-val{font-family:var(--fm);font-size:13px;color:var(--t1);margin-top:2px}
+.metric-val.green{color:var(--green)}
+.metric-val.amber{color:var(--amber)}
+
+.summary{font-family:var(--fm);font-size:11px;color:var(--t2);
+         padding:8px 0;margin-bottom:8px;line-height:1.5}
+
+.buyers{font-family:var(--fm);font-size:10px;color:var(--t2);
+        padding:8px;background:var(--bg3);border:1px solid var(--b1);border-radius:2px}
+.buyer-row{display:flex;justify-content:space-between;gap:8px;padding:3px 0;
+           border-bottom:1px dashed var(--b1)}
+.buyer-row:last-child{border-bottom:none}
+.buyer-name{color:var(--t1);font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.buyer-title{color:var(--t3);font-size:9px}
+.buyer-val{color:var(--green);text-align:right;white-space:nowrap}
+
+.badge{display:inline-block;font-family:var(--fm);font-size:9px;
+       padding:2px 7px;letter-spacing:.08em;text-transform:uppercase;
+       border-radius:2px;margin-right:5px}
+.badge.cluster{background:#003b1f;color:var(--green);border:1px solid #006030}
+.badge.role{background:var(--bg3);color:var(--t2);border:1px solid var(--b1)}
+.badge.role.ceo{background:#3b2400;color:var(--amber);border-color:#604000}
+
+/* TABLE — full universe */
+.tbl-wrap{overflow-x:auto;padding:6px 18px 18px}
+table{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:11px}
+th{font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
+   color:var(--t3);text-align:left;padding:8px 10px;border-bottom:1px solid var(--b2)}
+th.right,td.right{text-align:right}
+td{padding:7px 10px;border-bottom:1px solid var(--bg3);color:var(--t2)}
+td.tk{color:var(--t1);font-weight:500}
+td.high{color:var(--green);font-weight:500}
+tr:hover{background:var(--bg3)}
+
+.controls{display:flex;align-items:center;gap:14px;padding:10px 18px;
+          background:var(--bg2);border-bottom:1px solid var(--b1)}
+.controls label{font-family:var(--fm);font-size:9px;color:var(--t3);
+                letter-spacing:.1em;text-transform:uppercase}
+.controls select{font-family:var(--fm);font-size:11px;padding:5px 10px;
+                 background:var(--bg3);color:var(--t1);border:1px solid var(--b1)}
+
+.status{padding:30px;text-align:center;color:var(--t3);font-family:var(--fm);font-size:11px}
+
+@media(max-width:880px){
+  .hero{grid-template-columns:repeat(2,1fr)}
+  nav{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">NEWSTREND<em>· insider activity</em></div>
+  <nav>
+    <a href="./index.html">DASHBOARD</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
+    <a href="./hidden_gems.html">GEMS</a>
+    <a href="./insider_activity.html" class="on">INSIDERS</a>
+    <a href="./ticker_detail.html">TICKER</a>
+    <a href="./report.html">REPORT</a>
+    <a href="./weekly.html">WEEKLY</a>
+    <a href="./portfolio.html">PORTFOLIO</a>
+    <a href="./rising.html">RISING</a>
+    <a href="./macro.html">MACRO</a>
+    <a href="./backtest.html">BACKTEST</a>
+  </nav>
+  <div class="hdr-right">
+    <span id="ts">—</span>
+  </div>
+</header>
+
+<main>
+  <div class="hero" id="hero">
+    <div class="hero-block">
+      <div class="hero-label">UNIVERSE</div>
+      <div class="hero-value" id="h-universe">—</div>
+      <div class="hero-sub">SEC Form 4 covered tickers</div>
+    </div>
+    <div class="hero-block">
+      <div class="hero-label">WITH BUYS (P&gt;0)</div>
+      <div class="hero-value" id="h-buyers">—</div>
+      <div class="hero-sub">tickers w/ insider purchases (90d)</div>
+    </div>
+    <div class="hero-block">
+      <div class="hero-label">CLUSTER SIGNALS</div>
+      <div class="hero-value" id="h-clusters">—</div>
+      <div class="hero-sub">≥2 distinct insiders / 30d</div>
+    </div>
+    <div class="hero-block">
+      <div class="hero-label">TOP P5 SCORE</div>
+      <div class="hero-value" id="h-top">—</div>
+      <div class="hero-sub" id="h-top-sub">—</div>
+    </div>
+    <div class="hero-block">
+      <div class="hero-label">GENERATED</div>
+      <div class="hero-value" id="h-generated" style="font-size:13px">—</div>
+      <div class="hero-sub">UTC · daily refresh</div>
+    </div>
+  </div>
+
+  <div class="intro">
+    <b>Pillar 5 — Insider Trading Alpha.</b> SEC Form 4 raw 거래 데이터에서
+    <span class="P">P (open-market 매수)</span> 가 진짜 양의 알파(~+12% / 12mo, 학술 검증).
+    <span class="S">S (매도)</span> 는 대부분 RSU vest noise이므로 weak signal.
+    10b5-1 사전 plan 매도는 0.3× 다운-웨이트.
+    Cluster (≥2 distinct insiders / 30d) = 가장 강력한 시그널.
+  </div>
+
+  <div class="section">
+    <div class="sec-hdr">
+      <div class="sec-title">▎Top Insider Buying Signals</div>
+      <div class="sec-meta" id="signals-count">—</div>
+    </div>
+    <div class="grid" id="cards"><div class="status">Loading…</div></div>
+  </div>
+
+  <div class="section">
+    <div class="sec-hdr">
+      <div class="sec-title">▎Full Universe — Sortable</div>
+      <div class="sec-meta">P5 score, raw counts</div>
+    </div>
+    <div class="controls">
+      <label for="f-sort">Sort by</label>
+      <select id="f-sort">
+        <option value="score">P5 score (high → low)</option>
+        <option value="purchases">Purchases (count)</option>
+        <option value="cluster">Cluster size</option>
+        <option value="value">Weighted buy value</option>
+        <option value="ticker">Ticker (A → Z)</option>
+      </select>
+      <label for="f-filter">Filter</label>
+      <select id="f-filter">
+        <option value="all">All tickers</option>
+        <option value="buyers">P &gt; 0 only</option>
+        <option value="cluster">Cluster (≥2) only</option>
+      </select>
+    </div>
+    <div class="tbl-wrap">
+      <table id="tbl">
+        <thead><tr>
+          <th>Ticker</th>
+          <th class="right">P5 Score</th>
+          <th>Status</th>
+          <th class="right">P (buys)</th>
+          <th class="right">Cluster</th>
+          <th class="right">Wgt Buy ($)</th>
+          <th>Summary</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+let DATA = null;       // insider.json index
+let CARDS = [];        // per-ticker payloads (lazy fetched)
+
+const fmt2 = v => (v == null) ? "—" : Number(v).toFixed(2);
+const fmt3 = v => (v == null) ? "—" : Number(v).toFixed(3);
+const fmtUSD = v => {
+  if (v == null) return "—";
+  if (Math.abs(v) >= 1e9) return `$${(v/1e9).toFixed(2)}B`;
+  if (Math.abs(v) >= 1e6) return `$${(v/1e6).toFixed(2)}M`;
+  if (Math.abs(v) >= 1e3) return `$${(v/1e3).toFixed(0)}K`;
+  return `$${v.toFixed(0)}`;
+};
+const escapeHtml = s => (s||"").replace(/[&<>"']/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+async function loadIndex(){
+  try{
+    const r = await fetch("./data/insider.json");
+    if(!r.ok) throw new Error(r.statusText);
+    DATA = await r.json();
+  }catch(e){
+    document.getElementById("cards").innerHTML =
+      `<div class="status">Failed to load insider.json: ${e}</div>`;
+    return;
+  }
+  renderHero();
+  renderCards();
+  renderTable();
+}
+
+function renderHero(){
+  const tickers = DATA.tickers || {};
+  const all = Object.entries(tickers);
+  const buyers  = all.filter(([_,v]) => (v.n_purchases||0) > 0);
+  const clusters = all.filter(([_,v]) => (v.n_distinct_buyers_30d_max||0) >= 2);
+  const sorted = buyers.sort((a,b) => b[1].score - a[1].score);
+  document.getElementById("h-universe").textContent = all.length;
+  document.getElementById("h-buyers").textContent = buyers.length;
+  document.getElementById("h-clusters").textContent = clusters.length;
+  if(sorted.length){
+    const [tk, v] = sorted[0];
+    document.getElementById("h-top").textContent = `${tk} ${fmt3(v.score)}`;
+    document.getElementById("h-top-sub").textContent = (v.summary||"").slice(0,60);
+  }
+  if(DATA.generated_at){
+    document.getElementById("h-generated").textContent = DATA.generated_at.replace("T"," ").replace(/Z$|\+00:00$/, " UTC");
+    document.getElementById("ts").textContent = DATA.generated_at.replace("T"," ").slice(0,16) + " UTC";
+  }
+}
+
+async function fetchTickerDetail(ticker){
+  try{
+    const r = await fetch(`./data/insider/${ticker}.json`);
+    if(!r.ok) return null;
+    return await r.json();
+  }catch(e){ return null; }
+}
+
+async function renderCards(){
+  // Top P5>0.55 tickers, with cluster preference
+  const tickers = DATA.tickers || {};
+  let entries = Object.entries(tickers)
+    .filter(([_,v]) => v.score > 0.55 || (v.n_distinct_buyers_30d_max||0) >= 2)
+    .sort((a,b) => b[1].score - a[1].score)
+    .slice(0, 12);
+
+  if(!entries.length){
+    document.getElementById("cards").innerHTML =
+      `<div class="status">No active insider buying signals in the last 90 days.</div>`;
+    document.getElementById("signals-count").textContent = "0 signals";
+    return;
+  }
+
+  // Fetch detail JSON for each
+  const details = await Promise.all(entries.map(([tk,_]) => fetchTickerDetail(tk)));
+
+  document.getElementById("signals-count").textContent = `${entries.length} signals`;
+
+  document.getElementById("cards").innerHTML = entries.map(([tk, idx], i) => {
+    const detail = details[i];
+    const isCluster = (idx.n_distinct_buyers_30d_max||0) >= 2;
+    const klass = isCluster ? "cluster" : "solo";
+    const summary = idx.summary || "";
+
+    const buyersHtml = (detail && detail.top_buyers && detail.top_buyers.length)
+      ? `<div class="buyers">${detail.top_buyers.map(b => `
+            <div class="buyer-row">
+              <div class="buyer-name">${escapeHtml(b.name||"")}
+                <span class="buyer-title">${escapeHtml(b.title||b.role||"")}</span>
+              </div>
+              <div class="buyer-val">${fmtUSD(b.value)}</div>
+            </div>`).join("")}</div>`
+      : "";
+
+    const clusterBadge = isCluster
+      ? `<span class="badge cluster">CLUSTER ${idx.n_distinct_buyers_30d_max}×</span>`
+      : "";
+
+    return `
+    <div class="card ${klass}" data-ticker="${tk}">
+      <div class="card-top">
+        <div>
+          <div class="ticker">${tk} ${clusterBadge}</div>
+          <div class="entity">${escapeHtml((detail && detail.components && detail.components.n_filings) ? `${detail.components.n_filings} filings · ${detail.components.n_transactions} txs` : "")}</div>
+        </div>
+        <div class="score-block">
+          <div class="score-val">${fmt3(idx.score)}</div>
+          <div class="score-label">P5 score</div>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">P (buys)</div>
+          <div class="metric-val green">${idx.n_purchases||0}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Cluster</div>
+          <div class="metric-val ${isCluster?'green':''}">${idx.n_distinct_buyers_30d_max||0}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Wgt Buy</div>
+          <div class="metric-val amber">${fmtUSD(idx.weighted_buy_value)}</div>
+        </div>
+      </div>
+      <div class="summary">${escapeHtml(summary)}</div>
+      ${buyersHtml}
+    </div>`;
+  }).join("");
+}
+
+function renderTable(){
+  const sortKey = document.getElementById("f-sort").value;
+  const filter  = document.getElementById("f-filter").value;
+  let rows = Object.entries(DATA.tickers || {});
+
+  if(filter === "buyers")  rows = rows.filter(([_,v]) => (v.n_purchases||0) > 0);
+  if(filter === "cluster") rows = rows.filter(([_,v]) => (v.n_distinct_buyers_30d_max||0) >= 2);
+
+  rows.sort(([ta, a], [tb, b]) => {
+    if(sortKey === "score")     return b.score - a.score;
+    if(sortKey === "purchases") return (b.n_purchases||0) - (a.n_purchases||0);
+    if(sortKey === "cluster")   return (b.n_distinct_buyers_30d_max||0) - (a.n_distinct_buyers_30d_max||0);
+    if(sortKey === "value")     return (b.weighted_buy_value||0) - (a.weighted_buy_value||0);
+    if(sortKey === "ticker")    return ta.localeCompare(tb);
+    return 0;
+  });
+
+  const tbody = document.getElementById("tbody");
+  if(!rows.length){
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--t3);padding:30px">No tickers match.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(([tk, v]) => {
+    const high = v.score > 0.55 ? "high" : "";
+    return `<tr>
+      <td class="tk">${tk}</td>
+      <td class="right ${high}">${fmt3(v.score)}</td>
+      <td>${escapeHtml(v.status||"")}</td>
+      <td class="right">${v.n_purchases||0}</td>
+      <td class="right ${(v.n_distinct_buyers_30d_max||0) >= 2 ? 'high' : ''}">${v.n_distinct_buyers_30d_max||0}</td>
+      <td class="right">${fmtUSD(v.weighted_buy_value)}</td>
+      <td>${escapeHtml((v.summary||"").slice(0,80))}</td>
+    </tr>`;
+  }).join("");
+}
+
+document.getElementById("f-sort").addEventListener("change", renderTable);
+document.getElementById("f-filter").addEventListener("change", renderTable);
+
+loadIndex();
+</script>
+</body>
+</html>

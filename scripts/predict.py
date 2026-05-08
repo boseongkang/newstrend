@@ -158,6 +158,23 @@ def load_fundamentals(per_ticker_dir: str) -> dict:
     return out
 
 
+def load_insider_signals(insider_index_path: str) -> dict[str, dict]:
+    """site/data/insider.json (insider_analyzer.py 산출 인덱스) → {ticker: {...}}.
+
+    Pillar 5 layer (Phase 5, 2026-05-08). SEC Form 4 insider trading 시그널.
+    asymmetric philosophy: P>0 → ≥0.5, P=0 → 0.5 (RSU churn 페널티 X).
+    contribution은 단방향 boost — P=0 종목은 영향 0.
+    """
+    p = Path(insider_index_path)
+    if not p.exists():
+        return {}
+    try:
+        d = json.loads(p.read_text())
+        return d.get("tickers") or {}
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
 def load_signals(path: str) -> list:
     try:
         d = json.loads(Path(path).read_text())
@@ -316,7 +333,9 @@ def decide_action(rsi_state: str, macd_bias: str, bb_state: str,
                   sentiment: dict | None = None,
                   sentiment_weight: float = 1.5,
                   fundamental: dict | None = None,
-                  fundamental_weight: float = 0.5) -> tuple[str, float, list, list]:
+                  fundamental_weight: float = 0.5,
+                  insider: dict | None = None,
+                  insider_weight: float = 0.5) -> tuple[str, float, list, list]:
     """
     반환: (action, confidence, reasons, risks)
     action: BUY / HOLD / SELL / WATCH
@@ -458,6 +477,20 @@ def decide_action(rsi_state: str, macd_bias: str, bb_state: str,
         elif contribution <= -0.4:
             risks.append(f"Weak fundamentals ({f_score:.2f}: {fundamental.get('summary','')[:60]})")
 
+    # ── Pillar 5 insider trading bonus (Phase 5; SEC Form 4) ────────────────────
+    # asymmetric: 매수만 boost, P=0 종목은 contribution=0 (RSU churn 페널티 X)
+    if insider and insider.get("score") is not None and insider_weight > 0:
+        i_score = insider["score"]                                     # 0.5..1.0 floor 적용됨
+        contribution = (i_score - 0.5) * 2.0 * insider_weight          # 0..+w (단방향)
+        score += contribution
+        if contribution >= 0.3:
+            n_buyers = insider.get("n_distinct_buyers_30d_max", 0) or 0
+            summary  = (insider.get("summary") or "")[:60]
+            if n_buyers >= 2:
+                reasons.append(f"Insider cluster: {n_buyers} buyers — {summary}")
+            else:
+                reasons.append(f"Insider buying: {summary}")
+
     # ── 데이터 신뢰도 ─────────────────────────────────────────────────────────
     news_days = news.get("news_days", 0)
     if news_days < 30:
@@ -575,6 +608,10 @@ def main():
                     help="FinBERT ticker sentiment (Phase 2-E)")
     ap.add_argument("--sentiment-weight", type=float, default=1.5,
                     help="0=disable, 1.5=conservative, 2.5=hybrid, 4.0=aggressive")
+    ap.add_argument("--insider-index", default="site/data/insider.json",
+                    help="Pillar 5 SEC Form 4 insider index (Phase 5)")
+    ap.add_argument("--insider-weight", type=float, default=0.5,
+                    help="Pillar 5 weight (default 0.5 = conservative first integration; 0 = disable)")
     ap.add_argument("--fundamentals-dir", default="site/data/fundamentals",
                     help="Pillar 4 SEC EDGAR fundamentals dir (Phase 3)")
     ap.add_argument("--fundamental-weight", type=float, default=0.5,
@@ -589,6 +626,8 @@ def main():
     sentiment_today = load_sentiment(args.sentiment_path)
     fundamentals_today = load_fundamentals(args.fundamentals_dir)
     print(f"Fundamentals: {len(fundamentals_today)} tickers scored (Phase 3)")
+    insider_today = load_insider_signals(args.insider_index)
+    print(f"Insider signals: {len(insider_today)} tickers (Phase 5)")
     tickers_list = [t.strip().upper() for t in args.tickers.split(",")]\
                    if args.tickers else list(ta_data.keys())
     ta_news  = load_ticker_analysis(args.analysis_dir, tickers_list)
@@ -703,6 +742,8 @@ def main():
             sentiment_weight=args.sentiment_weight,
             fundamental=fundamentals_today.get(ticker),
             fundamental_weight=args.fundamental_weight,
+            insider=insider_today.get(ticker),
+            insider_weight=args.insider_weight,
         )
 
         # 종목별 가중치로 뉴스 영향 조정
@@ -773,6 +814,7 @@ def main():
             "news":    news if news.get("available") else {"available": False},
             "sentiment": sentiment_today.get(ticker) or {"available": False},
             "fundamental": fundamentals_today.get(ticker) or {"available": False},
+            "insider":     insider_today.get(ticker) or {"available": False},
             "reasons": reasons,
             "risks":   risks,
             "descriptions": {
