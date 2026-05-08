@@ -75,6 +75,7 @@ METRIC_TAGS: dict[str, list[str]] = {
         "Revenues",
         "RevenueFromContractWithCustomerExcludingAssessedTax",
         "RevenueFromContractWithCustomerIncludingAssessedTax",
+        "RevenuesNetOfInterestExpense",   # banks (GS는 이것만 가짐, MS는 Revenues가 2014에서 정지)
         "SalesRevenueNet",
         "SalesRevenueGoodsNet",
     ],

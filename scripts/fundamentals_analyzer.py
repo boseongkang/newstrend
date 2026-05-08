@@ -42,7 +42,12 @@ OP_MARGIN_CAP       = 0.40
 PROFIT_MARGIN_CAP   = 0.30
 REV_CAGR_CAP        = 0.30   # 연 30% 이상 성장이면 만점
 NI_CAGR_CAP         = 0.30
-DE_CAP              = 3.0    # D/E 3.0 이상이면 health=0
+DE_CAP_DEFAULT      = 3.0    # 일반 산업: D/E 3.0 이상 → de_score=0
+DE_CAP_BY_SECTOR    = {       # SEC owner_org → sector-specific cap
+    # 은행은 deposits=liabilities 라 D/E ~8-15x가 정상.
+    "02 Finance":  12.0,
+    # TODO Phase 5+: REIT (05 Real Estate), Insurance, Utilities calibration.
+}
 CURRENT_LO          = 0.5    # current_ratio (cr - 0.5) / 1.5 → [0,1]
 CURRENT_RANGE       = 1.5
 
@@ -103,11 +108,17 @@ def calculate_quality_score(payload: dict) -> tuple[float | None, list[dict]]:
     if all(v is None for v in (roe, op_m, pm)):
         return None, []
 
-    parts = [
-        {"name": "roe",            "score": _norm(roe, ROE_CAP),            "value": roe},
-        {"name": "operating_margin", "score": _norm(op_m, OP_MARGIN_CAP),   "value": op_m},
-        {"name": "profit_margin",  "score": _norm(pm, PROFIT_MARGIN_CAP),   "value": pm},
-    ]
+    # None인 metric은 제외 — 미보고를 0점으로 페널티주지 않음.
+    # 예: 은행은 OperatingIncomeLoss 안 씀 (NIM 사용) → op_m=None → ROE+PM만으로 평가.
+    parts: list[dict] = []
+    if roe is not None:
+        parts.append({"name": "roe",              "score": _norm(roe, ROE_CAP),          "value": roe})
+    if op_m is not None:
+        parts.append({"name": "operating_margin", "score": _norm(op_m, OP_MARGIN_CAP),   "value": op_m})
+    if pm is not None:
+        parts.append({"name": "profit_margin",    "score": _norm(pm, PROFIT_MARGIN_CAP), "value": pm})
+    if not parts:
+        return None, []
     return mean(p["score"] for p in parts), parts
 
 
@@ -135,9 +146,10 @@ def calculate_growth_score(payload: dict) -> tuple[float | None, list[dict]]:
 
 
 def calculate_health_score(payload: dict) -> tuple[float | None, list[dict]]:
-    summary = payload.get("summary") or {}
-    ratios = summary.get("ratios") or {}
-    raw    = summary.get("raw") or {}
+    summary  = payload.get("summary") or {}
+    ratios   = summary.get("ratios") or {}
+    raw      = summary.get("raw") or {}
+    metadata = payload.get("metadata") or {}
     d_to_e = ratios.get("debt_to_equity")
     cr     = ratios.get("current_ratio")
     ni     = raw.get("net_income")
@@ -145,8 +157,16 @@ def calculate_health_score(payload: dict) -> tuple[float | None, list[dict]]:
     if d_to_e is None and cr is None:
         return None, []
 
-    de_score = (1.0 - _norm(d_to_e, DE_CAP)) if d_to_e is not None else NEUTRAL_FILL
-    cr_score = max(0.0, min(CURRENT_RANGE, (cr or 0) - CURRENT_LO)) / CURRENT_RANGE
+    # Sector-aware D/E cap — 은행은 deposits=liabilities 구조라 일반 cap이면 항상 0.
+    owner_org = metadata.get("owner_org")
+    de_cap = DE_CAP_BY_SECTOR.get(owner_org, DE_CAP_DEFAULT)
+    de_score = (1.0 - _norm(d_to_e, de_cap)) if d_to_e is not None else NEUTRAL_FILL
+
+    # None인 current_ratio는 NEUTRAL_FILL — 미보고(은행/금융) 시 페널티 X.
+    cr_score = (
+        max(0.0, min(CURRENT_RANGE, cr - CURRENT_LO)) / CURRENT_RANGE
+        if cr is not None else NEUTRAL_FILL
+    )
     base = mean([de_score, cr_score])
 
     if ni is not None and ni < 0:
@@ -162,6 +182,11 @@ def calculate_health_score(payload: dict) -> tuple[float | None, list[dict]]:
         {"name": "current_ratio",  "score": cr_score, "value": cr},
         {"name": "ni_sign",        "score": None,    "value": ni_note},
     ]
+    # 투명성: sector-cap이 default와 다를 때 rationale에 노출
+    if owner_org and de_cap != DE_CAP_DEFAULT:
+        parts.append({"name":  "de_cap_sector_override",
+                      "score": None,
+                      "value": f"{owner_org} → cap={de_cap}"})
     return base, parts
 
 
