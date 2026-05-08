@@ -4,6 +4,10 @@ on:
   schedule:
     - cron: "23 * * * *"
 
+concurrency:
+  group: update-warehouse
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -149,8 +153,7 @@ jobs:
             --date "$DT" \
             --topk 800 --minlen 2 --mincount 2 \
             --max-ngram 1 \
-            --stop configs/stopwords_en.txt \
-            --alias configs/alias_en.yml
+            --stop config/stopwords_en.txt
 
 
       - name: Upload warehouse artifact
