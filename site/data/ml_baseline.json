@@ -1,0 +1,106 @@
+{
+  "updated": "2026-05-08T21:59:21Z",
+  "mode": "advisory",
+  "config": {
+    "min_data": 100,
+    "train_frac": 0.7,
+    "target": "fwd_5d_return"
+  },
+  "data_summary": {
+    "n_total_with_target": 58,
+    "n_train": 41,
+    "n_test": 17,
+    "train_date_range": [
+      "2026-04-17",
+      "2026-04-27"
+    ],
+    "test_date_range": [
+      "2026-04-27",
+      "2026-04-27"
+    ],
+    "n_features_categorical": 8,
+    "n_features_numeric": 18
+  },
+  "models": {
+    "LinearRegression": {
+      "train": {
+        "mae_pct": 2.1246,
+        "rmse_pct": 2.8354,
+        "r2": 0.8245,
+        "directional_accuracy": 0.7561
+      },
+      "test": {
+        "mae_pct": 14.479,
+        "rmse_pct": 17.5881,
+        "r2": -5.6855,
+        "directional_accuracy": 0.4118
+      }
+    },
+    "Ridge": {
+      "train": {
+        "mae_pct": 2.3966,
+        "rmse_pct": 3.3655,
+        "r2": 0.7528,
+        "directional_accuracy": 0.7073
+      },
+      "test": {
+        "mae_pct": 6.0338,
+        "rmse_pct": 8.5272,
+        "r2": -0.5715,
+        "directional_accuracy": 0.3529
+      }
+    },
+    "RandomForest": {
+      "train": {
+        "mae_pct": 2.2197,
+        "rmse_pct": 3.4074,
+        "r2": 0.7466,
+        "directional_accuracy": 0.8049
+      },
+      "test": {
+        "mae_pct": 5.2654,
+        "rmse_pct": 7.3636,
+        "r2": -0.1719,
+        "directional_accuracy": 0.5882
+      },
+      "top_feature_importance": {
+        "ta_hv20": 0.7133,
+        "ta_bb_position_lower_mid": 0.0613,
+        "ta_rsi14": 0.0496,
+        "ta_atr14": 0.0467,
+        "ta_bb_position_lower_third": 0.0249,
+        "news_best_conf": 0.0244,
+        "ta_trend_bull": 0.0236,
+        "sent_filtered": 0.0099,
+        "ta_trend_strong_bull": 0.0069,
+        "confidence": 0.0058,
+        "ins_n_buyers": 0.0055,
+        "ta_bb_position_above_upper": 0.0049,
+        "ins_p_score": 0.0036,
+        "fund_score": 0.0031,
+        "ins_score": 0.0026
+      }
+    },
+    "GradientBoosting": {
+      "train": {
+        "mae_pct": 0.1477,
+        "rmse_pct": 0.1831,
+        "r2": 0.9993,
+        "directional_accuracy": 1.0
+      },
+      "test": {
+        "mae_pct": 5.5088,
+        "rmse_pct": 7.4342,
+        "r2": -0.1945,
+        "directional_accuracy": 0.5882
+      }
+    }
+  },
+  "winner": {
+    "model": "RandomForest",
+    "mae_pct": 5.2654,
+    "rmse_pct": 7.3636,
+    "r2": -0.1719,
+    "directional_accuracy": 0.5882
+  }
+}

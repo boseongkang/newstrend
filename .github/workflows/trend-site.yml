@@ -389,6 +389,14 @@ jobs:
         run: |
           python scripts/adaptive_calibration.py || true
 
+      - name: ML — feature engineering
+        run: |
+          python scripts/feature_engineering.py || true
+
+      - name: ML — baseline benchmark (4-model)
+        run: |
+          python scripts/ml_baseline.py || true
+
       - name: Commit self-correcting outputs to main
         run: |
           git config --global user.name  "github-actions[bot]"
@@ -397,7 +405,8 @@ jobs:
           git add site/data/paper_trading_history.json \
                   site/data/prediction_accuracy.json \
                   site/data/pillar_weights.json \
-                  site/data/calibration_history.json 2>/dev/null || true
+                  site/data/calibration_history.json \
+                  site/data/ml_baseline.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No self-correcting changes to commit"
             exit 0
