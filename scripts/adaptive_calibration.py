@@ -39,6 +39,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "site" / "data"
 ACCURACY_FILE = DATA_DIR / "prediction_accuracy.json"
+GAP_FILE = DATA_DIR / "gap_analysis.json"
 PAPER_FILE = DATA_DIR / "paper_trading_history.json"
 WEIGHTS_FILE = DATA_DIR / "pillar_weights.json"
 HISTORY_FILE = DATA_DIR / "calibration_history.json"
@@ -126,22 +127,40 @@ def _pillar_alpha(accuracy: dict, pkey: str) -> dict:
     }
 
 
-def _recommend_pillar_weight(stats: dict, prev_weight: float) -> dict:
+def _recommend_pillar_weight(stats: dict, prev_weight: float, gap_delta: float = 0.0) -> dict:
+    """Combine accuracy-derived alpha with gap-derived ΔW into a final weight.
+
+    The gap delta nudges the raw weight before shrinkage so that pillars
+    where high-tertile predictions over-shoot reality (positive gap)
+    shrink, and pillars where they under-shoot grow. Both signals then
+    pass through the same shrinkage + EMA gate.
+    """
     n = stats["n"]
     alpha = stats["alpha_pct"]
     if alpha is None or n == 0:
+        # No accuracy alpha; gap delta alone moves us, but only at micro scale
+        # because the prior pulls hard when n=0.
+        raw_acc = PRIOR_WEIGHT
+        raw = _clamp(PRIOR_WEIGHT + gap_delta, *WEIGHT_CLAMP)
+        shrunk = PRIOR_WEIGHT  # full prior anchor when accuracy n=0
+        ema = EMA_ALPHA * shrunk + (1.0 - EMA_ALPHA) * prev_weight
         return {
-            "raw_weight": PRIOR_WEIGHT,
-            "shrunk_weight": PRIOR_WEIGHT,
-            "ema_weight": prev_weight,  # decay nothing
+            "raw_weight_acc": round(raw_acc, 4),
+            "gap_delta": round(gap_delta, 4),
+            "raw_weight": round(raw, 4),
+            "shrunk_weight": round(shrunk, 4),
+            "ema_weight": round(ema, 4),
             "applied": False,
             "reason": "no_signal" if n == 0 else "missing_tertile_pair",
         }
-    raw = _clamp(PRIOR_WEIGHT + alpha * ALPHA_SCALE / 100.0, *WEIGHT_CLAMP)
+    raw_acc = _clamp(PRIOR_WEIGHT + alpha * ALPHA_SCALE / 100.0, *WEIGHT_CLAMP)
+    raw = _clamp(raw_acc + gap_delta, *WEIGHT_CLAMP)
     shrunk = raw * (n / (n + SHRINK_K)) + PRIOR_WEIGHT * (SHRINK_K / (n + SHRINK_K))
     ema = EMA_ALPHA * shrunk + (1.0 - EMA_ALPHA) * prev_weight
     applied = n >= MIN_N_PILLAR
     return {
+        "raw_weight_acc": round(raw_acc, 4),
+        "gap_delta": round(gap_delta, 4),
         "raw_weight": round(raw, 4),
         "shrunk_weight": round(shrunk, 4),
         "ema_weight": round(ema, 4),
@@ -244,6 +263,8 @@ def run() -> None:
     if not ACCURACY_FILE.exists():
         raise SystemExit(f"Missing {ACCURACY_FILE} — run prediction_tracker.py first")
     accuracy = json.loads(ACCURACY_FILE.read_text())
+    gap = json.loads(GAP_FILE.read_text()) if GAP_FILE.exists() else {}
+    gap_gradients = (gap.get("gradients") or {}) if gap else {}
     prev = _load_prev_calibration()
 
     # Resolve previous weights / threshold for EMA
@@ -258,7 +279,8 @@ def run() -> None:
     pillars: dict[str, dict] = {}
     for pkey in PILLAR_KEYS:
         stats = _pillar_alpha(accuracy, pkey)
-        rec = _recommend_pillar_weight(stats, prev_weights.get(pkey, PRIOR_WEIGHT))
+        gap_delta = (gap_gradients.get(pkey) or {}).get("delta", 0.0) or 0.0
+        rec = _recommend_pillar_weight(stats, prev_weights.get(pkey, PRIOR_WEIGHT), gap_delta)
         pillars[pkey] = {**stats, **rec}
 
     # ── confidence threshold ───────────────────────────────────────────
@@ -288,6 +310,10 @@ def run() -> None:
             "n_records": accuracy.get("n_records"),
             "n_actionable_5d": accuracy.get("n_actionable_5d"),
             "snapshot_count": (accuracy.get("coverage") or {}).get("snapshot_count"),
+            "gap_n_actionable": gap.get("n_actionable") if gap else 0,
+            "gap_avg_abs_pct": (gap.get("summary") or {}).get("avg_abs_gap_pct") if gap else None,
+            "gap_avg_signed_pct": (gap.get("summary") or {}).get("avg_signed_gap_pct") if gap else None,
+            "gap_pillars_with_gradient": sum(1 for v in gap_gradients.values() if (v or {}).get("delta") not in (None, 0)),
         },
         "pillars": pillars,
         "confidence_threshold": {

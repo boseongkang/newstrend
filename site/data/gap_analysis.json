@@ -1,0 +1,204 @@
+{
+  "updated": "2026-05-08T22:04:42Z",
+  "horizon_days": 5,
+  "n_records": 293,
+  "n_actionable": 58,
+  "summary": {
+    "avg_abs_gap_pct": 4.716,
+    "avg_signed_gap_pct": -2.079,
+    "directional_acc": 0.397
+  },
+  "predicted_return_heuristic": {
+    "BUY": 0.04,
+    "WATCH": 0.015,
+    "HOLD": 0.0,
+    "REDUCE": -0.015,
+    "SELL": -0.04
+  },
+  "aggregations": {
+    "by_action": {
+      "BUY": {
+        "n": 8,
+        "avg_abs_gap_pct": 3.205,
+        "avg_signed_gap_pct": 0.157,
+        "directional_acc": 0.75
+      },
+      "HOLD": {
+        "n": 25,
+        "avg_abs_gap_pct": 4.272,
+        "avg_signed_gap_pct": -2.032,
+        "directional_acc": 0.24
+      },
+      "REDUCE": {
+        "n": 10,
+        "avg_abs_gap_pct": 6.086,
+        "avg_signed_gap_pct": -3.441,
+        "directional_acc": 0.5
+      },
+      "SELL": {
+        "n": 2,
+        "avg_abs_gap_pct": 17.731,
+        "avg_signed_gap_pct": -17.731,
+        "directional_acc": 0.0
+      },
+      "WATCH": {
+        "n": 13,
+        "avg_abs_gap_pct": 3.444,
+        "avg_signed_gap_pct": -0.091,
+        "directional_acc": 0.462
+      }
+    },
+    "by_confidence": {
+      "[0.0, 0.5)": {
+        "n": 33,
+        "avg_abs_gap_pct": 4.7,
+        "avg_signed_gap_pct": -2.535,
+        "directional_acc": 0.364
+      },
+      "[0.5, 0.7)": {
+        "n": 7,
+        "avg_abs_gap_pct": 6.308,
+        "avg_signed_gap_pct": -2.659,
+        "directional_acc": 0.286
+      },
+      "[0.7, 0.8)": {
+        "n": 8,
+        "avg_abs_gap_pct": 5.812,
+        "avg_signed_gap_pct": -3.044,
+        "directional_acc": 0.25
+      },
+      "[0.8, 1.0]": {
+        "n": 10,
+        "avg_abs_gap_pct": 2.776,
+        "avg_signed_gap_pct": 0.601,
+        "directional_acc": 0.7
+      }
+    },
+    "by_sector": {
+      "Communication Services": {
+        "n": 4,
+        "avg_abs_gap_pct": 5.295,
+        "avg_signed_gap_pct": 0.598,
+        "directional_acc": 0.5
+      },
+      "Consumer Cyclical": {
+        "n": 4,
+        "avg_abs_gap_pct": 5.317,
+        "avg_signed_gap_pct": -1.777,
+        "directional_acc": 0.0
+      },
+      "Technology": {
+        "n": 20,
+        "avg_abs_gap_pct": 8.109,
+        "avg_signed_gap_pct": -6.261,
+        "directional_acc": 0.3
+      }
+    },
+    "by_regime": {
+      "RISK-OFF": {
+        "n": 29,
+        "avg_abs_gap_pct": 4.943,
+        "avg_signed_gap_pct": -2.181,
+        "directional_acc": 0.379
+      },
+      "RISK-ON": {
+        "n": 29,
+        "avg_abs_gap_pct": 4.489,
+        "avg_signed_gap_pct": -1.978,
+        "directional_acc": 0.414
+      }
+    },
+    "by_volatility": {
+      "high": {
+        "n": 23,
+        "avg_abs_gap_pct": 7.505,
+        "avg_signed_gap_pct": -5.849,
+        "directional_acc": 0.304
+      },
+      "low": {
+        "n": 11,
+        "avg_abs_gap_pct": 1.644,
+        "avg_signed_gap_pct": 1.124,
+        "directional_acc": 0.545
+      },
+      "mid": {
+        "n": 24,
+        "avg_abs_gap_pct": 3.451,
+        "avg_signed_gap_pct": 0.065,
+        "directional_acc": 0.417
+      }
+    },
+    "by_dow": {
+      "Fri": {
+        "n": 29,
+        "avg_abs_gap_pct": 4.943,
+        "avg_signed_gap_pct": -2.181,
+        "directional_acc": 0.379
+      },
+      "Mon": {
+        "n": 29,
+        "avg_abs_gap_pct": 4.489,
+        "avg_signed_gap_pct": -1.978,
+        "directional_acc": 0.414
+      }
+    }
+  },
+  "by_pillar_tertile": {
+    "news_best_conf": {
+      "tertile_bounds": {
+        "t1": 0.1012,
+        "t2": 0.43
+      },
+      "buckets": {
+        "high": {
+          "n": 13,
+          "avg_abs_gap_pct": 4.566,
+          "avg_signed_gap_pct": -1.695,
+          "directional_acc": 0.308
+        },
+        "low": {
+          "n": 13,
+          "avg_abs_gap_pct": 4.675,
+          "avg_signed_gap_pct": -2.897,
+          "directional_acc": 0.385
+        },
+        "mid": {
+          "n": 13,
+          "avg_abs_gap_pct": 4.095,
+          "avg_signed_gap_pct": -0.82,
+          "directional_acc": 0.462
+        }
+      }
+    }
+  },
+  "gradients": {
+    "news_best_conf": {
+      "delta": -0.0601,
+      "diff_pp": -1.202,
+      "low_signed_gap_pct": -2.897,
+      "high_signed_gap_pct": -1.695,
+      "n_low": 13,
+      "n_high": 13
+    }
+  },
+  "convergence": {
+    "weeks": [
+      {
+        "week": "2026-W16",
+        "n": 29,
+        "avg_abs_gap_pct": 4.943,
+        "avg_signed_gap_pct": -2.181,
+        "directional_acc": 0.379
+      },
+      {
+        "week": "2026-W18",
+        "n": 29,
+        "avg_abs_gap_pct": 4.489,
+        "avg_signed_gap_pct": -1.978,
+        "directional_acc": 0.414
+      }
+    ],
+    "trend": "decreasing",
+    "improvement_pct": 9.18
+  }
+}

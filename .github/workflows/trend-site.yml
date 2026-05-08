@@ -385,6 +385,10 @@ jobs:
         run: |
           python scripts/prediction_tracker.py || true
 
+      - name: Self-correcting — gap analyzer
+        run: |
+          python scripts/gap_analyzer.py || true
+
       - name: Self-correcting — adaptive calibration
         run: |
           python scripts/adaptive_calibration.py || true
@@ -406,6 +410,8 @@ jobs:
                   site/data/prediction_accuracy.json \
                   site/data/pillar_weights.json \
                   site/data/calibration_history.json \
+                  site/data/gap_analysis.json \
+                  site/data/gap_history.json \
                   site/data/ml_baseline.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No self-correcting changes to commit"

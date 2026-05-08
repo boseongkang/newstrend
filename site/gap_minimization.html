@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · Gap Minimization</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="./vendor/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--purple:#b380ff;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
+.unified-header{height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:100}
+.brand{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300;margin-left:6px}
+nav{display:flex;gap:2px;flex-wrap:wrap}
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:6px 12px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10px;color:var(--green)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#unified-ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+main{max-width:1300px;margin:20px auto;padding:0 24px}
+h1{font-family:var(--fm);font-size:14px;font-weight:600;letter-spacing:.14em;
+   text-transform:uppercase;margin-bottom:6px}
+.subtitle{font-family:var(--fm);font-size:11px;color:var(--t3);margin-bottom:20px}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1);
+          border:1px solid var(--b1);margin-bottom:24px}
+.kpi{background:var(--bg1);padding:18px 14px;text-align:center}
+.kpi-label{font-family:var(--fm);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+           color:var(--t3);margin-bottom:8px}
+.kpi-val{font-family:var(--fm);font-size:24px;font-weight:600;color:var(--t1);font-feature-settings:"tnum"}
+.kpi-val.up{color:var(--green)}
+.kpi-val.down{color:var(--red)}
+.kpi-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:4px}
+
+.section{background:var(--bg1);border:1px solid var(--b1);margin-bottom:20px}
+.sec-hdr{padding:14px 20px;border-bottom:1px solid var(--b1);display:flex;
+         align-items:center;justify-content:space-between}
+.sec-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--t1)}
+.sec-meta{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.sec-body{padding:18px 20px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.chart-box{height:280px}
+
+.bartable{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:11px}
+.bartable th{padding:10px 12px;text-align:left;color:var(--t3);font-weight:500;
+             font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+             border-bottom:1px solid var(--b1)}
+.bartable td{padding:7px 12px;border-bottom:1px solid var(--b1);color:var(--t1)}
+.bartable .num{text-align:right;font-feature-settings:"tnum"}
+.bartable .up{color:var(--green)}
+.bartable .down{color:var(--red)}
+.bar-wrap{position:relative;background:var(--bg2);height:18px;width:100%;border-radius:1px;overflow:hidden}
+.bar-fill{position:absolute;left:0;top:0;bottom:0;opacity:.55}
+.bar-text{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;
+          justify-content:flex-end;padding:0 6px;font-size:10px;color:var(--t1);font-feature-settings:"tnum"}
+
+.tag{font-family:var(--fm);font-size:9px;padding:2px 8px;letter-spacing:.06em;text-transform:uppercase}
+.tag-pos{color:var(--green);background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3)}
+.tag-neg{color:var(--red);background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.3)}
+.tag-zero{color:var(--t2);background:transparent;border:1px solid var(--b2)}
+
+.note{font-family:var(--fm);font-size:10px;color:var(--t3);padding:12px 16px;
+      background:rgba(0,212,255,.04);border-left:3px solid var(--cyan);margin-bottom:16px;line-height:1.6}
+
+.empty{text-align:center;padding:30px;color:var(--t3);font-family:var(--fm);font-size:11px}
+.spinner{width:18px;height:18px;border:2px solid var(--b2);border-top-color:var(--cyan);
+         border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:1024px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .split{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="unified-header">
+  <div class="brand">NEWSTREND <em>// GAP MINIMIZATION</em></div>
+  <nav>
+    <a href="./index.html">DASHBOARD</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
+    <a href="./hidden_gems.html">GEMS</a>
+    <a href="./domino.html">DOMINO</a>
+    <a href="./insider_activity.html">INSIDER</a>
+    <a href="./backtest.html">BACKTEST</a>
+    <a href="./paper_trading.html">PAPER</a>
+    <a href="./accuracy.html">ACCURACY</a>
+    <a href="./system_evolution.html">EVOLUTION</a>
+    <a href="./gap_minimization.html" class="on">GAP</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="live"><span class="dot"></span>CONVERGING</div>
+    <div id="unified-ts">—</div>
+  </div>
+</header>
+
+<main>
+  <h1>Predicted vs Actual — Gap Tracking</h1>
+  <div class="subtitle" id="subtitle">5d horizon · linear-regression-style residual minimization</div>
+
+  <div class="kpi-grid" id="kpi-grid"><div class="kpi"><div class="empty"><div class="spinner"></div>Loading…</div></div></div>
+
+  <div id="hint-note" class="note" style="display:none"></div>
+
+  <div class="split">
+    <div class="section">
+      <div class="sec-hdr"><span class="sec-title">Weekly Convergence</span>
+        <span class="sec-meta" id="conv-meta">—</span></div>
+      <div class="sec-body"><div class="chart-box"><canvas id="chart-convergence"></canvas></div></div>
+    </div>
+    <div class="section">
+      <div class="sec-hdr"><span class="sec-title">Gap by Action</span>
+        <span class="sec-meta">|predicted - actual| × 100</span></div>
+      <div class="sec-body"><div class="chart-box"><canvas id="chart-action"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">Pillar Gradient (proposed Δweight)</span>
+      <span class="sec-meta" id="grad-meta">low_signed_gap − high_signed_gap → ΔW (clamped ±10%)</span></div>
+    <div class="sec-body" style="padding:0">
+      <table class="bartable" id="grad-table">
+        <thead><tr>
+          <th>Pillar</th>
+          <th class="num">N (low/high)</th>
+          <th class="num">Low Gap</th>
+          <th class="num">High Gap</th>
+          <th class="num">Diff (pp)</th>
+          <th>ΔW</th>
+        </tr></thead>
+        <tbody><tr><td colspan="6" class="empty">—</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="section">
+      <div class="sec-hdr"><span class="sec-title">By Confidence</span><span class="sec-meta" id="conf-meta">—</span></div>
+      <div class="sec-body" style="padding:0"><table class="bartable" id="conf-table">
+        <thead><tr><th>Band</th><th class="num">N</th><th>|Gap|</th><th class="num">Signed</th></tr></thead>
+        <tbody><tr><td colspan="4" class="empty">—</td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="section">
+      <div class="sec-hdr"><span class="sec-title">By Sector</span><span class="sec-meta" id="sec-meta">—</span></div>
+      <div class="sec-body" style="padding:0"><table class="bartable" id="sec-table">
+        <thead><tr><th>Sector</th><th class="num">N</th><th>|Gap|</th><th class="num">Signed</th></tr></thead>
+        <tbody><tr><td colspan="4" class="empty">—</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="section">
+      <div class="sec-hdr"><span class="sec-title">By Regime</span><span class="sec-meta" id="reg-meta">—</span></div>
+      <div class="sec-body" style="padding:0"><table class="bartable" id="reg-table">
+        <thead><tr><th>Regime</th><th class="num">N</th><th>|Gap|</th><th class="num">Signed</th></tr></thead>
+        <tbody><tr><td colspan="4" class="empty">—</td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="section">
+      <div class="sec-hdr"><span class="sec-title">By Volatility (HV20 tertile)</span><span class="sec-meta" id="vol-meta">—</span></div>
+      <div class="sec-body" style="padding:0"><table class="bartable" id="vol-table">
+        <thead><tr><th>HV20</th><th class="num">N</th><th>|Gap|</th><th class="num">Signed</th></tr></thead>
+        <tbody><tr><td colspan="4" class="empty">—</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const fmt = (v, d=2) => v == null ? '—' : (Math.round(v * Math.pow(10,d)) / Math.pow(10,d)).toFixed(d);
+const fmtSign = (v, d=2) => v == null ? '—' : (v >= 0 ? '+' : '') + fmt(v, d);
+const dirCls = v => v == null ? '' : v > 0.1 ? 'down' : v < -0.1 ? 'up' : '';
+// for gap: smaller is better; positive signed gap = system over-predicts (red); negative = under-predicts (red too); zero = good
+
+async function loadJSON(p){
+  const r = await fetch(`./data/${p}?v=${Date.now()}`, {cache:'no-store'});
+  if(!r.ok) throw new Error(`Failed ${p}: ${r.status}`);
+  return r.json();
+}
+
+function renderKPIs(d){
+  const s = d.summary || {};
+  const conv = d.convergence || {};
+  const weeks = conv.weeks || [];
+  const latest = weeks[weeks.length-1];
+  const prev = weeks.length >= 2 ? weeks[weeks.length-2] : null;
+  const change = (latest && prev) ? (latest.avg_abs_gap_pct - prev.avg_abs_gap_pct) : null;
+
+  const kpis = [
+    {label: 'Avg |Gap| (5d)', val: fmt(s.avg_abs_gap_pct) + '%', sub: `${d.n_actionable || 0} actionable predictions`},
+    {label: 'Signed Bias',    val: fmtSign(s.avg_signed_gap_pct) + '%',
+     cls: s.avg_signed_gap_pct == null ? '' : Math.abs(s.avg_signed_gap_pct) < 0.5 ? 'up' : 'down',
+     sub: s.avg_signed_gap_pct < 0 ? 'system pessimistic' : s.avg_signed_gap_pct > 0 ? 'system optimistic' : 'balanced'},
+    {label: 'Directional Acc', val: s.directional_acc == null ? '—' : (s.directional_acc*100).toFixed(1) + '%',
+     cls: s.directional_acc != null && s.directional_acc > 0.5 ? 'up' : 'down',
+     sub: 'predicted sign vs actual sign'},
+    {label: 'Wk Trend', val: change == null ? '—' : fmtSign(change) + 'pp',
+     cls: change == null ? '' : change < 0 ? 'up' : change > 0 ? 'down' : '',
+     sub: conv.trend || 'n/a' + (conv.improvement_pct != null ? ` · ${conv.improvement_pct}%` : '')},
+  ];
+  document.getElementById('kpi-grid').innerHTML = kpis.map(k => `
+    <div class="kpi">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-val ${k.cls||''}">${k.val}</div>
+      <div class="kpi-sub">${k.sub || ''}</div>
+    </div>`).join('');
+
+  document.getElementById('subtitle').textContent =
+    `${d.n_records || 0} predictions × ${(d.predicted_return_heuristic ? Object.keys(d.predicted_return_heuristic).length : 0)} action types · `
+    + `predicted = action × confidence × magnitude (BUY=±${(d.predicted_return_heuristic?.BUY*100).toFixed(1)}%, SELL=±${(Math.abs(d.predicted_return_heuristic?.SELL || 0)*100).toFixed(1)}%)`;
+
+  if(weeks.length < 4){
+    const note = document.getElementById('hint-note');
+    note.style.display = 'block';
+    note.innerHTML = `Only ${weeks.length} week${weeks.length===1?'':'s'} of data so far. Convergence trend stabilizes after ~4 weeks. Current bias is ${fmtSign(s.avg_signed_gap_pct, 2)}%, meaning the system ${s.avg_signed_gap_pct < 0 ? 'systematically under-predicts (signals more bearish than reality)' : 'systematically over-predicts (signals more bullish than reality)'}.`;
+  }
+}
+
+function renderConvergenceChart(weeks){
+  if(!weeks || !weeks.length) return;
+  const labels = weeks.map(w => w.week);
+  const abs = weeks.map(w => w.avg_abs_gap_pct);
+  const signed = weeks.map(w => w.avg_signed_gap_pct);
+  const ctx = document.getElementById('chart-convergence').getContext('2d');
+  new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[
+      {label:'|Gap| %', data:abs, borderColor:'#00d4ff', backgroundColor:'rgba(0,212,255,.1)', borderWidth:1.6, pointRadius:3, tension:0.18, fill:true},
+      {label:'Signed Gap %', data:signed, borderColor:'#ffb300', backgroundColor:'transparent', borderWidth:1.4, pointRadius:2, borderDash:[4,4], tension:0.18},
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'#c8d8e8',font:{family:'IBM Plex Mono',size:10}}},
+        tooltip:{backgroundColor:'#0c1220',borderColor:'#1a2840',borderWidth:1,titleColor:'#c8d8e8',bodyColor:'#c8d8e8'},
+      },
+      scales:{
+        x:{ticks:{color:'#6a8aa8',font:{family:'IBM Plex Mono',size:9}},grid:{color:'#1a2840'}},
+        y:{ticks:{color:'#6a8aa8',font:{family:'IBM Plex Mono',size:9}, callback:v=>v+'%'},grid:{color:'#1a2840'}},
+      }
+    }
+  });
+  document.getElementById('conv-meta').textContent = `${weeks.length} week${weeks.length===1?'':'s'} of measurements`;
+}
+
+function renderActionChart(byAction){
+  if(!byAction) return;
+  const keys = Object.keys(byAction);
+  const ctx = document.getElementById('chart-action').getContext('2d');
+  new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: keys.map(k => `${k} (n=${byAction[k].n})`),
+      datasets:[
+        {label:'|Gap| %', data: keys.map(k => byAction[k].avg_abs_gap_pct),
+         backgroundColor:'rgba(0,212,255,.55)', borderColor:'#00d4ff', borderWidth:1, yAxisID:'y'},
+        {label:'Signed Gap %', data: keys.map(k => byAction[k].avg_signed_gap_pct),
+         backgroundColor:'rgba(255,179,0,.45)', borderColor:'#ffb300', borderWidth:1, yAxisID:'y1'},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'#c8d8e8',font:{family:'IBM Plex Mono',size:10}}},
+        tooltip:{backgroundColor:'#0c1220',borderColor:'#1a2840',borderWidth:1,titleColor:'#c8d8e8',bodyColor:'#c8d8e8'},
+      },
+      scales:{
+        x:{ticks:{color:'#6a8aa8',font:{family:'IBM Plex Mono',size:9}},grid:{display:false}},
+        y:{position:'left',beginAtZero:true,ticks:{color:'#00d4ff',font:{family:'IBM Plex Mono',size:9},callback:v=>v+'%'},grid:{color:'#1a2840'},title:{display:true,text:'|Gap|',color:'#00d4ff',font:{family:'IBM Plex Mono',size:10}}},
+        y1:{position:'right',ticks:{color:'#ffb300',font:{family:'IBM Plex Mono',size:9},callback:v=>v+'%'},grid:{display:false},title:{display:true,text:'Signed',color:'#ffb300',font:{family:'IBM Plex Mono',size:10}}},
+      }
+    }
+  });
+}
+
+function renderGradTable(grads, byPillar){
+  const tbody = document.querySelector('#grad-table tbody');
+  if(!grads || !Object.keys(grads).length){ tbody.innerHTML = '<tr><td colspan="6" class="empty">No pillar gradients computable yet (need both low and high tertiles populated)</td></tr>'; return; }
+  const rows = Object.entries(grads).filter(([_, g]) => g.delta != null);
+  rows.sort((a,b) => Math.abs(b[1].delta || 0) - Math.abs(a[1].delta || 0));
+  tbody.innerHTML = rows.map(([pkey, g]) => {
+    const tag = g.delta > 0 ? `<span class="tag tag-pos">+${fmt(g.delta, 4)}</span>`
+              : g.delta < 0 ? `<span class="tag tag-neg">${fmt(g.delta, 4)}</span>`
+              : `<span class="tag tag-zero">0</span>`;
+    return `<tr>
+      <td>${pkey}</td>
+      <td class="num">${g.n_low ?? '—'} / ${g.n_high ?? '—'}</td>
+      <td class="num">${g.low_signed_gap_pct == null ? '—' : fmtSign(g.low_signed_gap_pct)+'%'}</td>
+      <td class="num">${g.high_signed_gap_pct == null ? '—' : fmtSign(g.high_signed_gap_pct)+'%'}</td>
+      <td class="num">${g.diff_pp == null ? '—' : fmtSign(g.diff_pp)}</td>
+      <td>${tag}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderTable(tableId, data, metaId){
+  const tbody = document.querySelector('#'+tableId+' tbody');
+  if(!data || !Object.keys(data).length){ tbody.innerHTML = '<tr><td colspan="4" class="empty">No data</td></tr>'; return; }
+  const rows = Object.entries(data).sort((a,b) => (b[1].n||0) - (a[1].n||0));
+  const maxAbs = Math.max(...rows.map(([_,v]) => v.avg_abs_gap_pct||0), 1);
+  tbody.innerHTML = rows.map(([k, v]) => `
+    <tr>
+      <td>${k}</td>
+      <td class="num">${v.n}</td>
+      <td><div class="bar-wrap"><div class="bar-fill" style="width:${Math.min(100,(v.avg_abs_gap_pct||0)/maxAbs*100)}%;background:${(v.avg_abs_gap_pct||0)<3?'#00e676':(v.avg_abs_gap_pct||0)<6?'#ffb300':'#ff4444'}"></div><div class="bar-text">${fmt(v.avg_abs_gap_pct)}%</div></div></td>
+      <td class="num ${dirCls(v.avg_signed_gap_pct)}">${fmtSign(v.avg_signed_gap_pct)}%</td>
+    </tr>`).join('');
+  if(metaId) document.getElementById(metaId).textContent = `${rows.length} groups · sorted by N`;
+}
+
+(async () => {
+  try {
+    const d = await loadJSON('gap_analysis.json');
+    document.getElementById('unified-ts').textContent = d.updated;
+    renderKPIs(d);
+    renderConvergenceChart((d.convergence || {}).weeks);
+    renderActionChart((d.aggregations || {}).by_action);
+    renderGradTable(d.gradients, d.by_pillar_tertile);
+    const ag = d.aggregations || {};
+    renderTable('conf-table', ag.by_confidence, 'conf-meta');
+    renderTable('sec-table',  ag.by_sector,     'sec-meta');
+    renderTable('reg-table',  ag.by_regime,     'reg-meta');
+    renderTable('vol-table',  ag.by_volatility, 'vol-meta');
+  } catch (e) {
+    document.querySelector('main').innerHTML = `<div class="empty" style="padding:60px">Error loading gap_analysis.json: ${e.message}<br><br>Run: <code>python3 scripts/gap_analyzer.py</code></div>`;
+  }
+})();
+</script>
+</body>
+</html>
