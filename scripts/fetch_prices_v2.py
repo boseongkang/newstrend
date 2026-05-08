@@ -41,14 +41,28 @@ except ImportError:
 
 
 # ── 티커 목록 ──────────────────────────────────────────────────────────────────
-TICKERS = [
-    "AAPL","MSFT","NVDA","GOOGL","META","AMZN","TSLA",
-    "AMD","INTC","AVGO","QCOM","ASML","MU","NXPI",
-    "JPM","BAC","GS","MS","BLK",
-    "XOM","CVX",
-    "SPY","QQQ","IWM","DIA",
-    "TLT","HYG","GLD","USO",
-]
+# Source of truth = config/prices_tickers.txt (also driven by build_fundamentals).
+# Add macro ETFs separately so price universe = fundamentals universe + index/macro.
+ETF_TICKERS = ["SPY","QQQ","IWM","DIA","TLT","HYG","GLD","USO"]
+
+def _load_tickers() -> list[str]:
+    cfg = Path(__file__).resolve().parent.parent / "config" / "prices_tickers.txt"
+    if cfg.exists():
+        from_cfg = [
+            t.strip().upper()
+            for t in cfg.read_text().splitlines()
+            if t.strip() and not t.lstrip().startswith("#")
+        ]
+        return sorted(set(from_cfg) | set(ETF_TICKERS))
+    # Legacy fallback (config/prices_tickers.txt 없을 때만)
+    return sorted(set([
+        "AAPL","MSFT","NVDA","GOOGL","META","AMZN","TSLA",
+        "AMD","INTC","AVGO","QCOM","ASML","MU","NXPI",
+        "JPM","BAC","GS","MS","BLK",
+        "XOM","CVX",
+    ]) | set(ETF_TICKERS))
+
+TICKERS = _load_tickers()
 
 CSV_FIELDS = ["date","open","high","low","close","volume","adj_close"]
 

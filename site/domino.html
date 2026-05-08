@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · Domino Effect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;--bg3:#0a1018;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--purple:#b380ff;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg1)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+
+/* HEADER */
+header{height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:10}
+.brand{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300;margin-left:6px}
+nav{display:flex;gap:2px}
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:6px 12px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+#ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+main{max-width:1400px;margin:0 auto;padding:20px 24px}
+
+/* HERO STRIP */
+.hero{background:linear-gradient(135deg, var(--bg2) 0%, var(--bg1) 100%);
+      border:1px solid var(--b1);padding:18px 24px;margin-bottom:18px;
+      display:grid;grid-template-columns:repeat(6,1fr);gap:18px;align-items:stretch}
+.hero-block{}
+.hero-label{font-family:var(--fm);font-size:9px;letter-spacing:.16em;
+            text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.hero-value{font-family:var(--fm);font-size:18px;font-weight:600;color:var(--t1)}
+.hero-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:2px}
+.grade-A{color:var(--green)}.grade-B{color:var(--cyan)}.grade-C{color:var(--amber)}.grade-D{color:var(--red)}
+
+.evolve-msg{font-family:var(--fm);font-size:10px;color:var(--t3);margin-top:10px;
+            padding:10px 14px;background:var(--bg3);border-left:2px solid var(--cyan);
+            border-radius:0 4px 4px 0;line-height:1.5}
+.evolve-msg b{color:var(--cyan);font-weight:500}
+
+/* SECTION */
+.section{background:var(--bg1);border:1px solid var(--b1);margin-bottom:18px}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;
+         padding:14px 20px;border-bottom:1px solid var(--b1)}
+.sec-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--t1)}
+.sec-meta{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.sec-body{padding:14px 20px}
+
+/* GRAPH */
+#graph{width:100%;height:480px;background:var(--bg3);border:1px solid var(--b1);
+       border-radius:0;overflow:hidden}
+.node-term{fill:var(--amber);stroke:#7a5500;stroke-width:1px;cursor:pointer}
+.node-stock{fill:var(--cyan);stroke:#005f7a;stroke-width:1px;cursor:pointer}
+.node-etf{fill:var(--purple);stroke:#5a3a90;stroke-width:1px;cursor:pointer}
+.node-active{stroke:#fff;stroke-width:2.5px}
+.node-label{font-family:var(--fm);font-size:9px;fill:var(--t1);pointer-events:none;
+            text-anchor:middle;dominant-baseline:central}
+.edge-bull{stroke:var(--green);stroke-opacity:.55}
+.edge-bear{stroke:var(--red);stroke-opacity:.55}
+.edge-corr{stroke:var(--t2);stroke-opacity:.35;stroke-dasharray:3 3}
+.edge.dim{stroke-opacity:.12}
+.edge.highlight{stroke-opacity:1;stroke-width:2.5}
+.tooltip{position:absolute;background:rgba(12,18,32,.96);border:1px solid var(--cyan);
+         padding:8px 12px;font-family:var(--fm);font-size:10px;color:var(--t1);
+         pointer-events:none;display:none;line-height:1.5;max-width:280px;z-index:30}
+.legend{display:flex;gap:14px;font-family:var(--fm);font-size:9px;color:var(--t2);
+        padding:6px 14px;border-top:1px solid var(--b1)}
+.legend span{display:inline-flex;align-items:center;gap:4px}
+.legend .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+/* CHAINS LIST */
+.chain-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
+.chain-card{background:var(--bg2);border:1px solid var(--b1);border-left:3px solid;
+            padding:12px 14px;font-family:var(--fm);font-size:11px}
+.chain-card.bull{border-left-color:var(--green)}
+.chain-card.bear{border-left-color:var(--red)}
+.chain-card.active{box-shadow:inset 0 0 0 1px var(--cyan);background:var(--bg3)}
+.chain-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.chain-term{color:var(--amber);font-weight:600;font-size:13px}
+.chain-arrow{color:var(--t3);margin:0 6px}
+.chain-ticker{color:var(--t1);font-weight:600;font-size:13px}
+.chain-meta{font-size:9px;color:var(--t3);letter-spacing:.05em}
+.chain-z{font-size:9px;color:var(--cyan);margin-left:4px}
+.chain-meta-row{display:flex;justify-content:space-between;font-size:10px;color:var(--t2);
+                margin-bottom:6px}
+.chain-hop2{margin-top:6px;padding-top:6px;border-top:1px solid var(--b1);font-size:10px;
+            color:var(--t2)}
+.chain-hop2-label{color:var(--t3);font-size:9px;letter-spacing:.1em;margin-bottom:3px}
+.chain-hop2-item{display:flex;justify-content:space-between;padding:2px 0;color:var(--t2)}
+.chain-hop2-item .nbr{color:var(--t1)}
+.chain-hop2-item.bull .arrow{color:var(--green)}
+.chain-hop2-item.bear .arrow{color:var(--red)}
+
+/* QUALITY HISTORY */
+.quality-row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;
+             padding:8px 0;border-bottom:1px dashed var(--b1)}
+.quality-row:last-child{border-bottom:none}
+.quality-bar-wrap{position:relative;height:8px;background:var(--b1);border-radius:4px;overflow:hidden}
+.quality-bar{position:absolute;top:0;left:0;height:100%;border-radius:4px}
+.quality-bar.A{background:var(--green)}.quality-bar.B{background:var(--cyan)}
+.quality-bar.C{background:var(--amber)}.quality-bar.D{background:var(--red)}
+.quality-week{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.quality-stats{font-family:var(--fm);font-size:10px;color:var(--t1);text-align:right}
+
+/* CONTROLS */
+.toggle-row{display:flex;gap:10px;font-family:var(--fm);font-size:10px;color:var(--t2);
+            padding:6px 0}
+.toggle-row label{cursor:pointer}
+.toggle-row input{margin-right:4px}
+.empty{padding:30px;text-align:center;font-family:var(--fm);font-size:11px;color:var(--t2)}
+
+@media(max-width:780px){
+  .hero{grid-template-columns:repeat(2,1fr);gap:14px}
+  nav{flex-wrap:wrap}
+  #graph{height:340px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">NEWSTREND<em>· domino effect · time-aware v1</em></div>
+  <nav>
+    <a href="./index.html">DASHBOARD</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
+    <a href="./hidden_gems.html">GEMS</a>
+    <a href="./domino.html" class="on">DOMINO</a>
+    <a href="./ticker_detail.html">TICKER</a>
+    <a href="./report.html">REPORT</a>
+    <a href="./weekly.html">WEEKLY</a>
+    <a href="./portfolio.html">PORTFOLIO</a>
+    <a href="./rising.html">RISING</a>
+    <a href="./macro.html">MACRO</a>
+    <a href="./backtest.html">BACKTEST</a>
+  </nav>
+  <div class="hdr-right"><span id="ts">—</span></div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="hero-block">
+      <div class="hero-label">SYSTEM GRADE</div>
+      <div class="hero-value" id="h-grade">—</div>
+      <div class="hero-sub" id="h-grade-sub">data window · auto-graded</div>
+    </div>
+    <div class="hero-block">
+      <div class="hero-label">STOCK CHAINS</div>
+      <div class="hero-value" id="h-stock">—</div>
+      <div class="hero-sub">term → ticker, leading</div>
+    </div>
+    <div class="hero-block">
+      <div class="hero-label">MACRO CHAINS</div>
+      <div class="hero-value" id="h-macro">—</div>
+      <div class="hero-sub">term → ETF</div>
+    </div>
+    <div class="hero-block">
+      <div class="hero-label">SECTOR REACH</div>
+      <div class="hero-value" id="h-sector">—</div>
+      <div class="hero-sub">distinct sectors hit</div>
+    </div>
+    <div class="hero-block">
+      <div class="hero-label">ACTIVE NOW</div>
+      <div class="hero-value" id="h-active">—</div>
+      <div class="hero-sub">terms bursting (z ≥ 1.5)</div>
+    </div>
+    <div class="hero-block">
+      <div class="hero-label">NEXT MILESTONE</div>
+      <div class="hero-value" id="h-eta" style="font-size:13px">—</div>
+      <div class="hero-sub" id="h-eta-sub">need 4+ weekly snapshots to project</div>
+    </div>
+  </div>
+
+  <div class="evolve-msg">
+    <b>Time is the asset.</b> Every day this system ingests fresh news + price data;
+    every week a quality snapshot lands in <code>domino_history.json</code>.
+    Today's grade is a snapshot — the trajectory matters more.
+    Run <code>python scripts/find_domino_chains.py</code> after each daily update to evolve.
+  </div>
+
+  <!-- DOMINO GRAPH -->
+  <div class="section">
+    <div class="sec-hdr">
+      <span class="sec-title">Active Domino Network</span>
+      <span class="sec-meta" id="graph-meta">—</span>
+    </div>
+    <div class="sec-body">
+      <div class="toggle-row">
+        <label><input type="checkbox" id="t-all" /> show all chains (not just active today)</label>
+        <label><input type="checkbox" id="t-hop2" checked /> show hop-2 (ticker → ticker)</label>
+      </div>
+      <div id="graph"></div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--amber)"></span>term</span>
+        <span><span class="dot" style="background:var(--cyan)"></span>stock</span>
+        <span><span class="dot" style="background:var(--purple)"></span>ETF / macro</span>
+        <span><span class="dot" style="background:var(--green)"></span>bullish edge</span>
+        <span><span class="dot" style="background:var(--red)"></span>bearish edge</span>
+        <span><span style="display:inline-block;width:14px;border-bottom:1px dashed var(--t2)"></span> hop-2 price corr</span>
+        <span style="margin-left:auto">click node = isolate · drag = pin</span>
+      </div>
+    </div>
+  </div>
+  <div class="tooltip" id="tooltip"></div>
+
+  <!-- ACTIVE CHAINS -->
+  <div class="section">
+    <div class="sec-hdr">
+      <span class="sec-title">Firing Today</span>
+      <span class="sec-meta" id="active-count">—</span>
+    </div>
+    <div class="sec-body">
+      <div class="chain-grid" id="active-grid"><div class="empty">No active chains right now.</div></div>
+    </div>
+  </div>
+
+  <!-- ALL STOCK CHAINS -->
+  <div class="section">
+    <div class="sec-hdr">
+      <span class="sec-title">All Stock Chains (catalog)</span>
+      <span class="sec-meta" id="all-count">—</span>
+    </div>
+    <div class="sec-body">
+      <div class="chain-grid" id="all-grid"></div>
+    </div>
+  </div>
+
+  <!-- QUALITY HISTORY -->
+  <div class="section">
+    <div class="sec-hdr">
+      <span class="sec-title">Maturation Trajectory</span>
+      <span class="sec-meta">weekly snapshots · grade A target = 30 stock + 10 macro + 5 sector</span>
+    </div>
+    <div class="sec-body" id="history"><div class="empty">Loading…</div></div>
+  </div>
+</main>
+
+<script>
+let DATA = null;
+const tooltip = document.getElementById("tooltip");
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c =>
+    ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+
+async function load(){
+  try{
+    const r = await fetch("./data/domino.json", {cache:"no-store"});
+    DATA = await r.json();
+  }catch(e){
+    document.getElementById("graph").innerHTML = `<div class="empty">Failed to load domino.json: ${e}</div>`;
+    return;
+  }
+
+  const q = DATA.quality || {};
+  const ge = document.getElementById("h-grade");
+  ge.textContent = q.grade || "—";
+  ge.className = "hero-value grade-" + (q.grade || "D");
+  document.getElementById("h-grade-sub").textContent = `${q.data_window_days || 0}d window · auto-graded`;
+  document.getElementById("h-stock").textContent = q.stock_signals ?? "—";
+  document.getElementById("h-macro").textContent = q.macro_signals ?? "—";
+  document.getElementById("h-sector").textContent = q.sector_diversity ?? "—";
+  document.getElementById("h-active").textContent = Object.keys(DATA.active_terms || {}).length;
+  if(q.expected_grade_a_date && q.expected_grade_a_date !== "achieved"){
+    document.getElementById("h-eta").textContent = q.expected_grade_a_date;
+    document.getElementById("h-eta-sub").textContent = `projected from ${q.history_weeks || 0} weekly snapshots`;
+  }else if(q.expected_grade_a_date === "achieved"){
+    document.getElementById("h-eta").textContent = "Grade A reached";
+    document.getElementById("h-eta-sub").textContent = "current trajectory";
+  }else{
+    const need = q.needs_for_next || {};
+    document.getElementById("h-eta").textContent =
+      `+${need.stock||0} stock · +${need.macro||0} macro`;
+    document.getElementById("h-eta-sub").textContent =
+      `to reach Grade ${q.next_grade || '—'} · need ${q.history_weeks || 0}/4 snapshots for ETA`;
+  }
+
+  document.getElementById("ts").textContent = (DATA.generated_at || "").replace("T"," ").slice(0,16) + " UTC";
+
+  renderGraph();
+  renderActive();
+  renderAll();
+  renderHistory();
+}
+
+// ── Graph (D3 force-directed) ────────────────────────────────────────────────
+
+function renderGraph(){
+  const showAll  = document.getElementById("t-all").checked;
+  const showHop2 = document.getElementById("t-hop2").checked;
+
+  const stockChains = DATA.stock_chains || [];
+  const macroChains = DATA.macro_chains || [];
+  const filterFn = c => showAll || c.is_active_today;
+
+  const nodes = new Map();
+  const links = [];
+
+  function addTerm(term, z){
+    if(!nodes.has(term)) nodes.set(term, {id: term, type: "term", z: z || 0, n_out: 0});
+    if(z != null && z > nodes.get(term).z) nodes.get(term).z = z;
+  }
+  function addTicker(tk, kind){
+    if(!nodes.has(tk)) nodes.set(tk, {id: tk, type: kind, n_in: 0, sector: null});
+  }
+
+  stockChains.filter(filterFn).forEach(c => {
+    addTerm(c.term, c.today_z);
+    addTicker(c.hop1.ticker, "stock");
+    nodes.get(c.hop1.ticker).sector = c.hop1.sector;
+    nodes.get(c.hop1.ticker).n_in = (nodes.get(c.hop1.ticker).n_in || 0) + 1;
+    nodes.get(c.term).n_out = (nodes.get(c.term).n_out || 0) + 1;
+    links.push({
+      source: c.term, target: c.hop1.ticker,
+      kind: c.hop1.direction === "bull" ? "bull" : "bear",
+      etype: "hop1", lag: c.hop1.lag, hit: c.hop1.hit_rate, corr: c.hop1.corr,
+      active: c.is_active_today,
+    });
+    if(showHop2){
+      (c.hop2 || []).slice(0, 4).forEach(h2 => {
+        addTicker(h2.ticker, h2.ticker.match(/^(SPY|QQQ|IWM|DIA|TLT|HYG|GLD|USO)$/) ? "etf" : "stock");
+        if(h2.sector) nodes.get(h2.ticker).sector = h2.sector;
+        links.push({
+          source: c.hop1.ticker, target: h2.ticker,
+          kind: "corr", etype: "hop2",
+          ticker_corr: h2.ticker_corr, implied: h2.implied_dir,
+          active: c.is_active_today,
+        });
+      });
+    }
+  });
+
+  macroChains.filter(filterFn).forEach(m => {
+    addTerm(m.term, null);
+    addTicker(m.ticker, "etf");
+    links.push({
+      source: m.term, target: m.ticker,
+      kind: m.direction === "bull" ? "bull" : "bear",
+      etype: "hop1", lag: m.lag, hit: m.hit_rate, corr: m.corr,
+      active: m.is_active_today,
+    });
+  });
+
+  const nodeArr = Array.from(nodes.values());
+  document.getElementById("graph-meta").textContent =
+    `${nodeArr.length} nodes · ${links.length} edges` +
+    (showAll ? " · catalog mode" : " · active today only");
+
+  const container = document.getElementById("graph");
+  container.innerHTML = "";
+  const W = container.clientWidth || 1200;
+  const H = container.clientHeight || 480;
+
+  const svg = d3.select(container).append("svg")
+    .attr("width", W).attr("height", H)
+    .attr("viewBox", [0, 0, W, H]);
+
+  const sim = d3.forceSimulation(nodeArr)
+    .force("link", d3.forceLink(links).id(d => d.id).distance(d => d.etype === "hop2" ? 50 : 90))
+    .force("charge", d3.forceManyBody().strength(-180))
+    .force("center", d3.forceCenter(W/2, H/2))
+    .force("collide", d3.forceCollide(d => nodeRadius(d) + 4));
+
+  const linkSel = svg.append("g").attr("class", "links")
+    .selectAll("line").data(links).enter().append("line")
+    .attr("class", d => `edge edge-${d.kind}`)
+    .attr("stroke-width", d => d.etype === "hop2" ? 1 : 1.5)
+    .attr("stroke-dasharray", d => d.etype === "hop2" ? "3 3" : null);
+
+  const nodeSel = svg.append("g").attr("class", "nodes")
+    .selectAll("g").data(nodeArr).enter().append("g")
+    .style("cursor", "pointer")
+    .on("mouseover", (e, d) => showTooltip(e, tooltipFor(d, links)))
+    .on("mousemove", e => moveTooltip(e))
+    .on("mouseout", hideTooltip)
+    .on("click", (e, d) => isolate(d.id))
+    .call(d3.drag()
+      .on("start", (e,d) => { if(!e.active) sim.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+      .on("drag",  (e,d) => { d.fx=e.x; d.fy=e.y; })
+      .on("end",   (e,d) => { if(!e.active) sim.alphaTarget(0); }));
+
+  nodeSel.append("circle")
+    .attr("r", nodeRadius)
+    .attr("class", d => "node-" + d.type + (
+      d.type === "term" && d.z >= 1.5 ? " node-active" : ""
+    ));
+
+  nodeSel.append("text")
+    .attr("class", "node-label")
+    .attr("dy", d => nodeRadius(d) + 12)
+    .text(d => d.id);
+
+  sim.on("tick", () => {
+    linkSel
+      .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+      .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+    nodeSel.attr("transform", d => `translate(${d.x},${d.y})`);
+  });
+
+  // Reset isolation when clicking on background
+  svg.on("click", (e) => { if(e.target.tagName === "svg") resetIsolation(linkSel, nodeSel); });
+
+  // Save selections globally for isolate handler
+  svg.node().__sel__ = { linkSel, nodeSel };
+}
+
+function nodeRadius(d){
+  if(d.type === "term")  return Math.min(14, 6 + (d.n_out || 0) * 1.2 + (d.z || 0));
+  if(d.type === "etf")   return Math.min(12, 5 + (d.n_in || 0) * 1.0);
+  return Math.min(14, 6 + (d.n_in || 0) * 1.2);
+}
+
+function tooltipFor(d, links){
+  if(d.type === "term"){
+    const out = links.filter(l => (l.source.id || l.source) === d.id);
+    return `<b>${d.id}</b> (term)<br>z-score: ${d.z ? d.z.toFixed(2) : "—"}<br>outbound: ${out.length}`;
+  }
+  const inb = links.filter(l => (l.target.id || l.target) === d.id);
+  const oub = links.filter(l => (l.source.id || l.source) === d.id);
+  return `<b>${d.id}</b> (${d.type})<br>${d.sector ? "sector: " + d.sector + "<br>" : ""}inbound: ${inb.length} · outbound: ${oub.length}`;
+}
+function showTooltip(e, html){
+  tooltip.innerHTML = html;
+  tooltip.style.display = "block";
+  moveTooltip(e);
+}
+function moveTooltip(e){
+  const x = e.clientX + 14, y = e.clientY + 14;
+  tooltip.style.left = (x + window.scrollX) + "px";
+  tooltip.style.top  = (y + window.scrollY) + "px";
+}
+function hideTooltip(){ tooltip.style.display = "none"; }
+
+function isolate(id){
+  const svg = d3.select("#graph svg");
+  const sel = svg.node().__sel__;
+  if(!sel) return;
+  const { linkSel, nodeSel } = sel;
+  linkSel.classed("dim", l => !((l.source.id||l.source)===id || (l.target.id||l.target)===id))
+         .classed("highlight", l => ((l.source.id||l.source)===id || (l.target.id||l.target)===id));
+  nodeSel.style("opacity", n => {
+    if(n.id === id) return 1;
+    const linked = linkSel.data().some(l =>
+      ((l.source.id||l.source)===id && (l.target.id||l.target)===n.id) ||
+      ((l.target.id||l.target)===id && (l.source.id||l.source)===n.id));
+    return linked ? 1 : 0.25;
+  });
+}
+function resetIsolation(linkSel, nodeSel){
+  linkSel.classed("dim", false).classed("highlight", false);
+  nodeSel.style("opacity", 1);
+}
+
+// ── Active chains list ────────────────────────────────────────────────────────
+
+function renderActive(){
+  const active = (DATA.stock_chains || []).filter(c => c.is_active_today);
+  const macro = (DATA.macro_chains || []).filter(m => m.is_active_today);
+  const grid = document.getElementById("active-grid");
+  document.getElementById("active-count").textContent =
+    `${active.length} stock · ${macro.length} macro`;
+  if(active.length + macro.length === 0){
+    grid.innerHTML = `<div class="empty">No bursting term overlapped a known chain today. The system listens.</div>`;
+    return;
+  }
+  let html = active.map(renderChainCard).join("");
+  html += macro.map(renderMacroCard).join("");
+  grid.innerHTML = html;
+}
+
+function renderAll(){
+  const all = DATA.stock_chains || [];
+  document.getElementById("all-count").textContent = `${all.length} stock chains catalogued`;
+  document.getElementById("all-grid").innerHTML = all.map(renderChainCard).join("");
+}
+
+function renderChainCard(c){
+  const dir = c.hop1.direction;
+  const cls = `chain-card ${dir} ${c.is_active_today ? "active" : ""}`;
+  const arrow = dir === "bull" ? "↑" : "↓";
+  const hop2 = (c.hop2 || []).slice(0, 4).map(h => {
+    const a = h.implied_dir === "bull" ? "↑" : "↓";
+    return `<div class="chain-hop2-item ${h.implied_dir}"><span class="nbr">${h.ticker}</span><span>${(h.ticker_corr*100).toFixed(0)}%<span class="arrow"> ${a}</span></span></div>`;
+  }).join("");
+  return `
+  <div class="${cls}">
+    <div class="chain-top">
+      <span><span class="chain-term">${escapeHtml(c.term)}</span>${c.is_active_today ? `<span class="chain-z">z=${(c.today_z || 0).toFixed(2)}</span>` : ""}<span class="chain-arrow">→</span><span class="chain-ticker">${c.hop1.ticker}</span> ${arrow}</span>
+      <span class="chain-meta">lag ${c.hop1.lag}d</span>
+    </div>
+    <div class="chain-meta-row">
+      <span>${c.hop1.sector ? escapeHtml(c.hop1.sector) : "—"}</span>
+      <span>r=${c.hop1.corr.toFixed(2)} · hit ${(c.hop1.hit_rate*100).toFixed(0)}% · 1d ${(c.hop1.avg_ret_1d || 0).toFixed(2)}%</span>
+    </div>
+    ${hop2 ? `<div class="chain-hop2"><div class="chain-hop2-label">hop-2 neighbors (price corr)</div>${hop2}</div>` : ""}
+  </div>`;
+}
+
+function renderMacroCard(m){
+  const dir = m.direction; const arrow = dir === "bull" ? "↑" : "↓";
+  return `
+  <div class="chain-card ${dir} active">
+    <div class="chain-top">
+      <span><span class="chain-term">${escapeHtml(m.term)}</span><span class="chain-arrow">→</span><span class="chain-ticker">${m.ticker}</span> ${arrow}</span>
+      <span class="chain-meta">macro · lag ${m.lag}d</span>
+    </div>
+    <div class="chain-meta-row">
+      <span>ETF / macro</span>
+      <span>r=${m.corr.toFixed(2)} · hit ${(m.hit_rate*100).toFixed(0)}%</span>
+    </div>
+  </div>`;
+}
+
+// ── Maturation history ────────────────────────────────────────────────────────
+
+async function renderHistory(){
+  const histDiv = document.getElementById("history");
+  let snapshots = [];
+  try{
+    const r = await fetch("./data/domino_history.json", {cache:"no-store"});
+    if(r.ok) snapshots = (await r.json()).snapshots || [];
+  }catch(e){}
+  if(!snapshots.length){
+    histDiv.innerHTML = `<div class="empty">First weekly snapshot will appear after the next pipeline run.</div>`;
+    return;
+  }
+  const target = 30;
+  histDiv.innerHTML = snapshots.slice(-12).map(s => {
+    const pct = Math.min(100, (s.stock_signals / target) * 100);
+    return `
+    <div class="quality-row">
+      <span class="quality-week">${s.week}</span>
+      <div class="quality-bar-wrap"><div class="quality-bar ${s.grade}" style="width:${pct}%"></div></div>
+      <span class="quality-stats">grade ${s.grade} · ${s.stock_signals} stock · ${s.macro_signals} macro</span>
+    </div>`;
+  }).join("");
+}
+
+document.getElementById("t-all").addEventListener("change", renderGraph);
+document.getElementById("t-hop2").addEventListener("change", renderGraph);
+load();
+</script>
+</body>
+</html>

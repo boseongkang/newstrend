@@ -216,6 +216,12 @@ jobs:
             --min-corr 0.25 \
             --min-events 3 || true
 
+      - name: Build fundamentals (SEC EDGAR Pillar 4)
+        env:
+          SEC_USER_AGENT: "Newstrend-CI ci@newstrend.local"
+        run: |
+          python scripts/build_fundamentals.py || true
+
       - name: Analyze ticker patterns
         run: |
           python scripts/analyze_ticker.py \
@@ -246,6 +252,14 @@ jobs:
             --analysis-dir site/data/ticker_analysis \
             --weights      site/data/ticker_weights.json \
             --out          site/data/predictions.json || true
+
+      - name: Find hidden gems (4-Pillar synthesis)
+        run: |
+          python scripts/find_hidden_gems.py --top 30 || true
+
+      - name: Build domino chains (time-aware quality + weekly snapshot)
+        run: |
+          python scripts/find_domino_chains.py || true
 
       - name: Run backtest (V1 + V2)
         run: |
