@@ -129,6 +129,35 @@ def load_sentiment(path: str) -> dict:
     return out
 
 
+def load_fundamentals(per_ticker_dir: str) -> dict:
+    """fundamentals_analyzer.score_ticker 출력을 ticker별로 dict화.
+
+    Pillar 4 layer (Phase 3, 2026-05-08). 가격/뉴스와 직교적 품질 신호.
+    metadata-only ticker (TSM/QQQ) 와 universe 외 ticker (SPY 등)는 자동 제외.
+    """
+    import sys
+    scripts_dir = str(Path(__file__).resolve().parent)
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    try:
+        from fundamentals_analyzer import score_ticker
+    except ImportError:
+        return {}
+    d = Path(per_ticker_dir)
+    if not d.exists():
+        return {}
+    out = {}
+    for p in d.glob("*.json"):
+        try:
+            payload = json.loads(p.read_text())
+            res = score_ticker(payload)
+            if res["fundamental_score"] is not None:
+                out[res["ticker"]] = res
+        except Exception:
+            continue
+    return out
+
+
 def load_signals(path: str) -> list:
     try:
         d = json.loads(Path(path).read_text())
@@ -285,7 +314,9 @@ def decide_action(rsi_state: str, macd_bias: str, bb_state: str,
                   price_days: int,
                   market_regime: str = "NEUTRAL",
                   sentiment: dict | None = None,
-                  sentiment_weight: float = 1.5) -> tuple[str, float, list, list]:
+                  sentiment_weight: float = 1.5,
+                  fundamental: dict | None = None,
+                  fundamental_weight: float = 0.5) -> tuple[str, float, list, list]:
     """
     반환: (action, confidence, reasons, risks)
     action: BUY / HOLD / SELL / WATCH
@@ -417,6 +448,16 @@ def decide_action(rsi_state: str, macd_bias: str, bb_state: str,
         elif contribution <= -0.4:
             risks.append(f"FinBERT bearish ({s_score:+.2f}, n={s_total})")
 
+    # ── Pillar 4 fundamentals bonus (Phase 3; SEC EDGAR quality/growth/health) ──
+    if fundamental and fundamental.get("fundamental_score") is not None and fundamental_weight > 0:
+        f_score = fundamental["fundamental_score"]                    # 0..1
+        contribution = (f_score - 0.5) * 2.0 * fundamental_weight     # -w..+w (0.5=neutral)
+        score += contribution
+        if contribution >= 0.4:
+            reasons.append(f"Strong fundamentals ({f_score:.2f}: {fundamental.get('summary','')[:60]})")
+        elif contribution <= -0.4:
+            risks.append(f"Weak fundamentals ({f_score:.2f}: {fundamental.get('summary','')[:60]})")
+
     # ── 데이터 신뢰도 ─────────────────────────────────────────────────────────
     news_days = news.get("news_days", 0)
     if news_days < 30:
@@ -534,6 +575,10 @@ def main():
                     help="FinBERT ticker sentiment (Phase 2-E)")
     ap.add_argument("--sentiment-weight", type=float, default=1.5,
                     help="0=disable, 1.5=conservative, 2.5=hybrid, 4.0=aggressive")
+    ap.add_argument("--fundamentals-dir", default="site/data/fundamentals",
+                    help="Pillar 4 SEC EDGAR fundamentals dir (Phase 3)")
+    ap.add_argument("--fundamental-weight", type=float, default=0.5,
+                    help="0=disable, 0.5=conservative, 1.0=balanced, 2.0=aggressive")
     ap.add_argument("--weights", default="site/data/ticker_weights.json",
                     help="종목별 TA/News 가중치")
     ap.add_argument("--min-conf", type=float, default=0.0)
@@ -542,6 +587,8 @@ def main():
     ta_data  = load_ta(args.ta)
     pairs    = load_signals(args.signals)
     sentiment_today = load_sentiment(args.sentiment_path)
+    fundamentals_today = load_fundamentals(args.fundamentals_dir)
+    print(f"Fundamentals: {len(fundamentals_today)} tickers scored (Phase 3)")
     tickers_list = [t.strip().upper() for t in args.tickers.split(",")]\
                    if args.tickers else list(ta_data.keys())
     ta_news  = load_ticker_analysis(args.analysis_dir, tickers_list)
@@ -654,6 +701,8 @@ def main():
             market_regime=market_regime.get("regime", "NEUTRAL"),
             sentiment=sentiment_today.get(ticker),
             sentiment_weight=args.sentiment_weight,
+            fundamental=fundamentals_today.get(ticker),
+            fundamental_weight=args.fundamental_weight,
         )
 
         # 종목별 가중치로 뉴스 영향 조정
@@ -723,6 +772,7 @@ def main():
             },
             "news":    news if news.get("available") else {"available": False},
             "sentiment": sentiment_today.get(ticker) or {"available": False},
+            "fundamental": fundamentals_today.get(ticker) or {"available": False},
             "reasons": reasons,
             "risks":   risks,
             "descriptions": {
