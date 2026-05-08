@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · Prediction Accuracy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="./vendor/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--purple:#b380ff;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
+.unified-header{height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:100}
+.brand{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300;margin-left:6px}
+nav{display:flex;gap:2px;flex-wrap:wrap}
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:6px 12px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10px;color:var(--green)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#unified-ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+main{max-width:1300px;margin:20px auto;padding:0 24px}
+h1{font-family:var(--fm);font-size:14px;font-weight:600;letter-spacing:.14em;
+   text-transform:uppercase;margin-bottom:6px}
+.subtitle{font-family:var(--fm);font-size:11px;color:var(--t3);margin-bottom:20px}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--b1);
+          border:1px solid var(--b1);margin-bottom:24px}
+.kpi{background:var(--bg1);padding:18px 14px;text-align:center}
+.kpi-label{font-family:var(--fm);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+           color:var(--t3);margin-bottom:8px}
+.kpi-val{font-family:var(--fm);font-size:22px;font-weight:600;color:var(--t1);font-feature-settings:"tnum"}
+.kpi-val.up{color:var(--green)}
+.kpi-val.down{color:var(--red)}
+.kpi-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:4px}
+
+.section{background:var(--bg1);border:1px solid var(--b1);margin-bottom:20px}
+.sec-hdr{padding:14px 20px;border-bottom:1px solid var(--b1);display:flex;
+         align-items:center;justify-content:space-between}
+.sec-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--t1)}
+.sec-meta{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.sec-body{padding:18px 20px}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.chart-box{height:260px}
+
+.bartable{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:11px}
+.bartable th{padding:8px 10px;text-align:left;color:var(--t3);font-weight:500;
+             font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+             border-bottom:1px solid var(--b1)}
+.bartable td{padding:7px 10px;border-bottom:1px solid var(--b1);color:var(--t1)}
+.bartable .num{text-align:right;font-feature-settings:"tnum"}
+.bartable .up{color:var(--green)}
+.bartable .down{color:var(--red)}
+.bar-wrap{position:relative;background:var(--bg2);height:18px;width:100%;border-radius:1px;overflow:hidden}
+.bar-fill{position:absolute;left:0;top:0;bottom:0;background:var(--cyan);opacity:.55}
+.bar-text{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;
+          justify-content:flex-end;padding:0 6px;font-size:10px;color:var(--t1);
+          font-feature-settings:"tnum"}
+
+.note{font-family:var(--fm);font-size:10px;color:var(--t3);padding:10px 16px;
+      background:rgba(255,179,0,.05);border-left:3px solid var(--amber);margin-bottom:16px}
+
+.empty{text-align:center;padding:30px;color:var(--t3);font-family:var(--fm);font-size:11px}
+.spinner{width:18px;height:18px;border:2px solid var(--b2);border-top-color:var(--cyan);
+         border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:1024px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .split{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="unified-header">
+  <div class="brand">NEWSTREND <em>// PREDICTION ACCURACY</em></div>
+  <nav>
+    <a href="./index.html">DASHBOARD</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
+    <a href="./hidden_gems.html">GEMS</a>
+    <a href="./domino.html">DOMINO</a>
+    <a href="./insider_activity.html">INSIDER</a>
+    <a href="./backtest.html">BACKTEST</a>
+    <a href="./paper_trading.html">PAPER</a>
+    <a href="./accuracy.html" class="on">ACCURACY</a>
+    <a href="./system_evolution.html">EVOLUTION</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="live"><span class="dot"></span>FEEDBACK LOOP</div>
+    <div id="unified-ts">—</div>
+  </div>
+</header>
+
+<main>
+  <h1>Prediction vs Realized Return</h1>
+  <div class="subtitle" id="subtitle">5-day forward return on archived predictions</div>
+
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi"><div class="empty"><div class="spinner"></div>Loading…</div></div>
+  </div>
+
+  <div id="low-n-note" class="note" style="display:none"></div>
+
+  <div class="split">
+    <div class="section">
+      <div class="sec-hdr"><span class="sec-title">By Action</span><span class="sec-meta" id="action-meta">—</span></div>
+      <div class="sec-body"><div class="chart-box"><canvas id="chart-action"></canvas></div></div>
+    </div>
+    <div class="section">
+      <div class="sec-hdr"><span class="sec-title">By Confidence Band</span><span class="sec-meta" id="conf-meta">—</span></div>
+      <div class="sec-body"><div class="chart-box"><canvas id="chart-conf"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">By Pillar Tertile</span>
+      <span class="sec-meta">High-vs-Low average return; positive = pillar predictive</span></div>
+    <div class="sec-body" style="padding:0">
+      <table class="bartable" id="pillar-table">
+        <thead><tr><th>Pillar</th><th class="num">N</th><th class="num">Low Acc</th><th class="num">High Acc</th><th class="num">Low Ret</th><th class="num">High Ret</th><th>Lift</th></tr></thead>
+        <tbody><tr><td colspan="7" class="empty">—</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="section">
+      <div class="sec-hdr"><span class="sec-title">By Sector</span><span class="sec-meta" id="sector-meta">—</span></div>
+      <div class="sec-body" style="padding:0">
+        <table class="bartable" id="sector-table">
+          <thead><tr><th>Sector</th><th class="num">N</th><th>Accuracy</th><th class="num">Avg Ret</th></tr></thead>
+          <tbody><tr><td colspan="4" class="empty">—</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-hdr"><span class="sec-title">By Day-of-Week</span><span class="sec-meta" id="dow-meta">—</span></div>
+      <div class="sec-body" style="padding:0">
+        <table class="bartable" id="dow-table">
+          <thead><tr><th>DOW</th><th class="num">N</th><th>Accuracy</th><th class="num">Avg Ret</th></tr></thead>
+          <tbody><tr><td colspan="4" class="empty">—</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const fmtPct = (v, sign=true) => v == null ? '—' : (sign && v >= 0 ? '+' : '') + (Math.round(v*1000)/1000).toFixed(2) + '%';
+const fmtAcc = v => v == null ? '—' : (v*100).toFixed(1) + '%';
+const dirCls = v => v == null ? '' : v > 0 ? 'up' : v < 0 ? 'down' : '';
+
+async function loadJSON(p){
+  const r = await fetch(`./data/${p}?v=${Date.now()}`, {cache:'no-store'});
+  if(!r.ok) throw new Error(`Failed ${p}: ${r.status}`);
+  return r.json();
+}
+
+function renderKPI(d){
+  const agg = d.aggregations || {};
+  const all = agg.by_action || {};
+  let nDir = 0, correctDir = 0, retSum = 0;
+  for(const v of Object.values(all)){ nDir += v.n; correctDir += v.n_correct; retSum += v.avg_return_pct * v.n; }
+  const overallAcc = nDir ? correctDir/nDir : null;
+  const overallRet = nDir ? retSum/nDir : null;
+
+  const buy = all.BUY || {};
+  const watch = all.WATCH || {};
+
+  const kpis = [
+    {label:'Total Predictions', val: d.n_records, sub:`${d.coverage?.snapshot_count || 0} snapshots`},
+    {label:'Actionable (5d)', val: d.n_actionable_5d, sub:`${d.n_pending_5d || 0} pending`},
+    {label:'Overall Accuracy', val: fmtAcc(overallAcc), cls: overallAcc != null && overallAcc > 0.5 ? 'up' : '', sub: nDir + ' calls'},
+    {label:'Avg Return (5d)', val: fmtPct(overallRet), cls: dirCls(overallRet), sub:'directional only'},
+    {label:'BUY Accuracy', val: fmtAcc(buy.accuracy), cls: buy.accuracy != null && buy.accuracy > 0.5 ? 'up' : '', sub: `n=${buy.n||0} avg ${fmtPct(buy.avg_return_pct)}`},
+  ];
+  const grid = document.getElementById('kpi-grid');
+  grid.innerHTML = kpis.map(k => `
+    <div class="kpi">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-val ${k.cls||''}">${k.val ?? '—'}</div>
+      <div class="kpi-sub">${k.sub || ''}</div>
+    </div>`).join('');
+  document.getElementById('subtitle').textContent =
+    `${d.coverage?.snapshot_count || 0} archived snapshots · 5-day forward horizon · ${d.n_actionable_5d}/${d.n_records} actionable`;
+
+  if (d.n_actionable_5d < 60) {
+    const note = document.getElementById('low-n-note');
+    note.style.display = 'block';
+    note.textContent = `Statistical caveat — only ${d.n_actionable_5d} actionable predictions so far. Confidence intervals on every bucket are wide. Patterns will sharpen as more snapshots accumulate.`;
+  }
+}
+
+function renderBarChart(canvasId, data, key){
+  const labels = Object.keys(data);
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  const accVals = labels.map(k => (data[k].accuracy ?? 0)*100);
+  const retVals = labels.map(k => data[k].avg_return_pct ?? 0);
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels.map(l => `${l} (n=${data[l].n})`),
+      datasets: [
+        {label:'Accuracy %', data: accVals, backgroundColor:'rgba(0,212,255,.55)', borderColor:'#00d4ff', borderWidth:1, yAxisID:'y'},
+        {label:'Avg Return %', data: retVals, backgroundColor:'rgba(0,230,118,.45)', borderColor:'#00e676', borderWidth:1, yAxisID:'y1'},
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: {
+        legend: { labels: { color:'#c8d8e8', font:{family:'IBM Plex Mono',size:10}}},
+        tooltip: { backgroundColor:'#0c1220', borderColor:'#1a2840', borderWidth:1, titleColor:'#c8d8e8', bodyColor:'#c8d8e8' },
+      },
+      scales: {
+        x: { ticks: { color:'#6a8aa8', font:{family:'IBM Plex Mono',size:9}}, grid: { display:false } },
+        y: { position:'left', beginAtZero:true,
+             ticks: { color:'#00d4ff', font:{family:'IBM Plex Mono',size:9}, callback:v=>v+'%' },
+             grid: { color:'#1a2840' },
+             title: { display:true, text:'Accuracy', color:'#00d4ff', font:{family:'IBM Plex Mono',size:10}} },
+        y1:{ position:'right', beginAtZero:false,
+             ticks: { color:'#00e676', font:{family:'IBM Plex Mono',size:9}, callback:v=>v.toFixed(1)+'%' },
+             grid: { display:false },
+             title: { display:true, text:'Avg Return', color:'#00e676', font:{family:'IBM Plex Mono',size:10}} },
+      }
+    }
+  });
+}
+
+function renderPillarTable(byPillar){
+  const tbody = document.querySelector('#pillar-table tbody');
+  const rows = Object.entries(byPillar || {});
+  if(!rows.length){ tbody.innerHTML = '<tr><td colspan="7" class="empty">No pillar data with full tertile coverage yet</td></tr>'; return; }
+  tbody.innerHTML = rows.map(([pkey, p]) => {
+    const b = p.buckets;
+    const lo = b.low || {}, mid = b.mid || {}, hi = b.high || {};
+    const totalN = Object.values(b).reduce((s,v) => s + (v?.n || 0), 0);
+    const lift = (hi.avg_return_pct != null && lo.avg_return_pct != null) ? hi.avg_return_pct - lo.avg_return_pct : null;
+    const liftCls = dirCls(lift);
+    const liftBar = lift != null ? Math.min(100, Math.abs(lift)*10) : 0;
+    return `<tr>
+      <td>${pkey}</td>
+      <td class="num">${totalN}</td>
+      <td class="num">${fmtAcc(lo.accuracy)}</td>
+      <td class="num">${fmtAcc(hi.accuracy)}</td>
+      <td class="num ${dirCls(lo.avg_return_pct)}">${fmtPct(lo.avg_return_pct)}</td>
+      <td class="num ${dirCls(hi.avg_return_pct)}">${fmtPct(hi.avg_return_pct)}</td>
+      <td><div class="bar-wrap" style="max-width:200px"><div class="bar-fill" style="width:${liftBar}%;background:${lift>=0?'#00e676':'#ff4444'};opacity:.5"></div><div class="bar-text ${liftCls}">${lift!=null?fmtPct(lift):'—'}</div></div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderRowTable(tableId, data, metaId){
+  const tbody = document.querySelector('#'+tableId+' tbody');
+  const rows = Object.entries(data || {}).sort((a,b) => (b[1].n||0) - (a[1].n||0));
+  if(!rows.length){ tbody.innerHTML = '<tr><td colspan="4" class="empty">No data</td></tr>'; return; }
+  const maxAcc = Math.max(...rows.map(([_,v]) => (v.accuracy||0)*100), 50);
+  tbody.innerHTML = rows.map(([k, v]) => {
+    const accPct = (v.accuracy||0)*100;
+    return `<tr>
+      <td>${k}</td>
+      <td class="num">${v.n}</td>
+      <td><div class="bar-wrap"><div class="bar-fill" style="width:${(accPct/maxAcc)*100}%"></div><div class="bar-text">${fmtAcc(v.accuracy)}</div></div></td>
+      <td class="num ${dirCls(v.avg_return_pct)}">${fmtPct(v.avg_return_pct)}</td>
+    </tr>`;
+  }).join('');
+  if(metaId) document.getElementById(metaId).textContent = `${rows.length} groups · sorted by N`;
+}
+
+(async () => {
+  try {
+    const d = await loadJSON('prediction_accuracy.json');
+    document.getElementById('unified-ts').textContent = d.updated;
+    renderKPI(d);
+    const agg = d.aggregations || {};
+    if(agg.by_action) renderBarChart('chart-action', agg.by_action);
+    if(agg.by_confidence) renderBarChart('chart-conf', agg.by_confidence);
+    document.getElementById('action-meta').textContent =
+      `BUY/WATCH→ret>0; SELL/REDUCE→ret<0`;
+    document.getElementById('conf-meta').textContent =
+      `Threshold sweep — high band drives calibration`;
+    renderPillarTable(d.by_pillar_tertile);
+    renderRowTable('sector-table', agg.by_sector, 'sector-meta');
+    renderRowTable('dow-table', agg.by_dow, 'dow-meta');
+  } catch (e) {
+    document.querySelector('main').innerHTML = `<div class="empty" style="padding:60px">Error loading prediction_accuracy.json: ${e.message}<br><br>Run: <code>python3 scripts/prediction_tracker.py</code></div>`;
+  }
+})();
+</script>
+</body>
+</html>

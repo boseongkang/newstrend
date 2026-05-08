@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · Paper Trading</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="./vendor/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--purple:#b380ff;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
+.unified-header{height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:100}
+.brand{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300;margin-left:6px}
+nav{display:flex;gap:2px;flex-wrap:wrap}
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:6px 12px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10px;color:var(--green)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#unified-ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+main{max-width:1300px;margin:20px auto;padding:0 24px}
+h1{font-family:var(--fm);font-size:14px;font-weight:600;letter-spacing:.14em;
+   text-transform:uppercase;margin-bottom:6px}
+.subtitle{font-family:var(--fm);font-size:11px;color:var(--t3);margin-bottom:20px}
+
+/* Strategy KPI cards */
+.strat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b1);
+            border:1px solid var(--b1);margin-bottom:24px}
+.strat{background:var(--bg1);padding:18px 16px}
+.strat-name{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.12em;
+            text-transform:uppercase;color:var(--cyan);margin-bottom:2px}
+.strat-label{font-family:var(--fm);font-size:9px;color:var(--t3);margin-bottom:14px;letter-spacing:.05em}
+.strat-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.strat-key{font-family:var(--fm);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)}
+.strat-val{font-family:var(--fm);font-size:13px;color:var(--t1);font-feature-settings:"tnum"}
+.strat-val.up{color:var(--green)}
+.strat-val.down{color:var(--red)}
+.strat-val.big{font-size:20px;font-weight:600}
+
+/* Section blocks */
+.section{background:var(--bg1);border:1px solid var(--b1);margin-bottom:20px}
+.sec-hdr{padding:14px 20px;border-bottom:1px solid var(--b1);display:flex;
+         align-items:center;justify-content:space-between}
+.sec-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--t1)}
+.sec-meta{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.sec-body{padding:18px 20px}
+.equity-chart{height:340px}
+
+/* Tables */
+.ttable{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:11px}
+.ttable th{padding:10px 12px;text-align:left;color:var(--t3);font-weight:500;
+           font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+           border-bottom:1px solid var(--b1)}
+.ttable td{padding:8px 12px;border-bottom:1px solid var(--b1);color:var(--t1)}
+.ttable tr:hover td{background:var(--bg2)}
+.ttable .num{text-align:right;font-feature-settings:"tnum"}
+.ttable .ticker{font-weight:600;color:var(--t1)}
+.ttable .up{color:var(--green)}
+.ttable .down{color:var(--red)}
+.tag{font-family:var(--fm);font-size:9px;padding:2px 8px;letter-spacing:.06em;text-transform:uppercase}
+.tag-buy{color:var(--green);background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3)}
+.tag-sell{color:var(--red);background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.3)}
+.tag-strat{color:var(--cyan);background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25)}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.empty{text-align:center;padding:30px;color:var(--t3);font-family:var(--fm);font-size:11px}
+.spinner{width:18px;height:18px;border:2px solid var(--b2);border-top-color:var(--cyan);
+         border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:1024px){
+  .strat-grid{grid-template-columns:1fr}
+  .split{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="unified-header">
+  <div class="brand">NEWSTREND <em>// PAPER TRADING</em></div>
+  <nav>
+    <a href="./index.html">DASHBOARD</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
+    <a href="./hidden_gems.html">GEMS</a>
+    <a href="./domino.html">DOMINO</a>
+    <a href="./insider_activity.html">INSIDER</a>
+    <a href="./backtest.html">BACKTEST</a>
+    <a href="./paper_trading.html" class="on">PAPER</a>
+    <a href="./accuracy.html">ACCURACY</a>
+    <a href="./system_evolution.html">EVOLUTION</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="live"><span class="dot"></span>SELF-CORRECTING</div>
+    <div id="unified-ts">—</div>
+  </div>
+</header>
+
+<main>
+  <h1>Self-Contained Paper Trading</h1>
+  <div class="subtitle" id="subtitle">Backfilled from archived predictions · MVP: 3 strategies · No external API</div>
+
+  <div class="strat-grid" id="strat-grid">
+    <div class="empty"><div class="spinner"></div>Loading…</div>
+  </div>
+
+  <div class="section">
+    <div class="sec-hdr">
+      <span class="sec-title">Equity Curves</span>
+      <span class="sec-meta" id="curve-meta">—</span>
+    </div>
+    <div class="sec-body">
+      <div class="equity-chart"><canvas id="equity-chart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="section">
+      <div class="sec-hdr">
+        <span class="sec-title">Open Positions</span>
+        <span class="sec-meta" id="positions-meta">—</span>
+      </div>
+      <div class="sec-body" style="padding:0">
+        <table class="ttable" id="positions-table">
+          <thead><tr>
+            <th>Strategy</th><th>Ticker</th>
+            <th class="num">Entry</th><th class="num">Last</th>
+            <th class="num">Unreal %</th><th class="num">Conf</th>
+          </tr></thead>
+          <tbody><tr><td colspan="6" class="empty">—</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-hdr">
+        <span class="sec-title">Recent Trades</span>
+        <span class="sec-meta" id="trades-meta">—</span>
+      </div>
+      <div class="sec-body" style="padding:0">
+        <table class="ttable" id="trades-table">
+          <thead><tr>
+            <th>Date</th><th>Strategy</th><th>Action</th>
+            <th>Ticker</th><th class="num">Price</th><th class="num">Ret %</th>
+          </tr></thead>
+          <tbody><tr><td colspan="6" class="empty">—</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const STRAT_COLORS = {
+  main_system: '#00d4ff',
+  conservative: '#00e676',
+  aggressive:   '#ffb300',
+};
+const fmtMoney = v => '$' + (Math.round(v*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtPct   = (v, sign=true) => v == null ? '—' : (sign && v >= 0 ? '+' : '') + (Math.round(v*1000)/1000).toFixed(2) + '%';
+const dirClass = v => v == null ? '' : v > 0 ? 'up' : v < 0 ? 'down' : '';
+
+async function loadJSON(p){
+  const r = await fetch(`./data/${p}?v=${Date.now()}`, {cache:'no-store'});
+  if(!r.ok) throw new Error(`Failed ${p}: ${r.status}`);
+  return r.json();
+}
+
+function renderStrategies(d){
+  const grid = document.getElementById('strat-grid');
+  grid.innerHTML = '';
+  const initial = d.initial_cash || 10000;
+  for(const [name, st] of Object.entries(d.strategies)){
+    const m = st.metrics;
+    const ret = m.total_return_pct;
+    const cls = ret > 0 ? 'up' : ret < 0 ? 'down' : '';
+    const winRate = m.win_rate == null ? '—' : (m.win_rate*100).toFixed(0)+'%';
+    const div = document.createElement('div');
+    div.className = 'strat';
+    div.innerHTML = `
+      <div class="strat-name" style="color:${STRAT_COLORS[name]||'#00d4ff'}">${name.replace('_',' ')}</div>
+      <div class="strat-label">${st.label}</div>
+      <div class="strat-row"><span class="strat-key">Total Return</span>
+        <span class="strat-val big ${cls}">${fmtPct(ret)}</span></div>
+      <div class="strat-row"><span class="strat-key">Current Value</span>
+        <span class="strat-val">${fmtMoney(m.current_value)}</span></div>
+      <div class="strat-row"><span class="strat-key">Cash</span>
+        <span class="strat-val">${fmtMoney(st.cash)}</span></div>
+      <div class="strat-row"><span class="strat-key">Open / Trades</span>
+        <span class="strat-val">${m.n_open} / ${m.n_trades_total}</span></div>
+      <div class="strat-row"><span class="strat-key">Win Rate</span>
+        <span class="strat-val">${winRate} <span style="color:var(--t3)">(${m.n_wins}/${m.n_completed})</span></span></div>
+      <div class="strat-row"><span class="strat-key">Avg Trade Ret</span>
+        <span class="strat-val ${dirClass(m.avg_return_pct)}">${fmtPct(m.avg_return_pct)}</span></div>`;
+    grid.appendChild(div);
+  }
+  document.getElementById('subtitle').textContent =
+    `Period ${d.start_date} → ${d.end_date} · ${d.n_snapshots} snapshots · `
+    + `Initial $${initial.toLocaleString()} · Position $${d.config.position_size}, max ${d.config.max_positions}, `
+    + `stop ${(d.config.stop_loss*100).toFixed(0)}%, take +${(d.config.take_profit*100).toFixed(0)}%`;
+}
+
+function renderEquityChart(d){
+  const initial = d.initial_cash || 10000;
+  const stratNames = Object.keys(d.strategies);
+  const labels = (d.strategies[stratNames[0]].value_history || []).map(v => v.date);
+  const datasets = stratNames.map(name => ({
+    label: name,
+    data: (d.strategies[name].value_history || []).map(v => v.total),
+    borderColor: STRAT_COLORS[name] || '#fff',
+    backgroundColor: 'transparent',
+    borderWidth: 1.6,
+    pointRadius: 0,
+    tension: 0.18,
+  }));
+  // baseline line at initial
+  datasets.push({
+    label: '$' + initial + ' baseline',
+    data: labels.map(_ => initial),
+    borderColor: '#344a60',
+    borderDash: [4, 4],
+    borderWidth: 1,
+    pointRadius: 0,
+  });
+  const ctx = document.getElementById('equity-chart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color:'#c8d8e8', font: { family:'IBM Plex Mono', size:10 } } },
+        tooltip: {
+          backgroundColor: '#0c1220', borderColor: '#1a2840', borderWidth: 1,
+          titleColor:'#c8d8e8', bodyColor:'#c8d8e8',
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)} (${(((ctx.parsed.y/initial)-1)*100).toFixed(2)}%)`
+          }
+        },
+      },
+      scales: {
+        x: { ticks: { color:'#6a8aa8', font: { family:'IBM Plex Mono', size:9 }, maxRotation:0, autoSkip: true, maxTicksLimit: 10 }, grid: { color:'#1a2840' } },
+        y: { ticks: { color:'#6a8aa8', font: { family:'IBM Plex Mono', size:9 },
+                     callback: v => '$' + v.toLocaleString() }, grid: { color:'#1a2840' } }
+      },
+    }
+  });
+  document.getElementById('curve-meta').textContent = `${labels.length} trading days · daily mark-to-market`;
+}
+
+function renderPositions(d){
+  const tbody = document.querySelector('#positions-table tbody');
+  const rows = [];
+  for(const [name, st] of Object.entries(d.strategies)){
+    for(const p of st.open_positions || []){
+      rows.push({...p, strategy: name});
+    }
+  }
+  rows.sort((a,b) => (b.unrealized_pct||0) - (a.unrealized_pct||0));
+  if(!rows.length){ tbody.innerHTML = '<tr><td colspan="6" class="empty">No open positions</td></tr>'; }
+  else {
+    tbody.innerHTML = rows.map(p => `
+      <tr>
+        <td><span class="tag tag-strat" style="border-color:${STRAT_COLORS[p.strategy]};color:${STRAT_COLORS[p.strategy]}">${p.strategy}</span></td>
+        <td class="ticker">${p.ticker}</td>
+        <td class="num">${p.entry_price?.toFixed(2) ?? '—'}</td>
+        <td class="num">${p.current_price?.toFixed(2) ?? '—'}</td>
+        <td class="num ${dirClass(p.unrealized_pct)}">${fmtPct(p.unrealized_pct)}</td>
+        <td class="num">${p.entry_confidence != null ? p.entry_confidence.toFixed(2) : '—'}</td>
+      </tr>`).join('');
+  }
+  document.getElementById('positions-meta').textContent = `${rows.length} open positions across strategies`;
+}
+
+function renderTrades(d){
+  const tbody = document.querySelector('#trades-table tbody');
+  const rows = [];
+  for(const [name, st] of Object.entries(d.strategies)){
+    for(const t of st.trades || []){ rows.push({...t, strategy: name}); }
+  }
+  rows.sort((a,b) => b.date.localeCompare(a.date));
+  const top = rows.slice(0, 30);
+  if(!top.length){ tbody.innerHTML = '<tr><td colspan="6" class="empty">No trades</td></tr>'; }
+  else {
+    tbody.innerHTML = top.map(t => `
+      <tr>
+        <td>${t.date}</td>
+        <td><span class="tag tag-strat" style="border-color:${STRAT_COLORS[t.strategy]};color:${STRAT_COLORS[t.strategy]}">${t.strategy}</span></td>
+        <td><span class="tag ${t.action === 'BUY' ? 'tag-buy' : 'tag-sell'}">${t.action}</span></td>
+        <td class="ticker">${t.ticker}</td>
+        <td class="num">${t.price?.toFixed(2) ?? '—'}</td>
+        <td class="num ${dirClass(t.return_pct)}">${t.return_pct == null ? '—' : fmtPct(t.return_pct)}</td>
+      </tr>`).join('');
+  }
+  document.getElementById('trades-meta').textContent = `${rows.length} total trades · showing latest 30`;
+}
+
+(async () => {
+  try {
+    const d = await loadJSON('paper_trading_history.json');
+    document.getElementById('unified-ts').textContent = d.updated;
+    renderStrategies(d);
+    renderEquityChart(d);
+    renderPositions(d);
+    renderTrades(d);
+  } catch (e) {
+    document.querySelector('main').innerHTML = `<div class="empty" style="padding:60px">Error loading paper_trading_history.json: ${e.message}<br><br>Run: <code>python3 scripts/paper_trade.py</code></div>`;
+  }
+})();
+</script>
+</body>
+</html>

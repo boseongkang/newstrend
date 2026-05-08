@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · System Evolution</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="./vendor/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--purple:#b380ff;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
+.unified-header{height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:100}
+.brand{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300;margin-left:6px}
+nav{display:flex;gap:2px;flex-wrap:wrap}
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:6px 12px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10px;color:var(--green)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#unified-ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+main{max-width:1300px;margin:20px auto;padding:0 24px}
+h1{font-family:var(--fm);font-size:14px;font-weight:600;letter-spacing:.14em;
+   text-transform:uppercase;margin-bottom:6px}
+.subtitle{font-family:var(--fm);font-size:11px;color:var(--t3);margin-bottom:20px}
+
+.mode-banner{background:var(--bg1);border:1px solid var(--b1);padding:14px 20px;
+             margin-bottom:24px;display:flex;align-items:center;gap:18px}
+.mode-pill{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
+           padding:5px 12px;text-transform:uppercase}
+.mode-pill.active{color:var(--green);background:rgba(0,230,118,.08);border:1px solid var(--green)}
+.mode-pill.advisory{color:var(--amber);background:rgba(255,179,0,.08);border:1px solid var(--amber)}
+.mode-text{font-family:var(--fm);font-size:11px;color:var(--t2);flex:1}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1);
+          border:1px solid var(--b1);margin-bottom:24px}
+.kpi{background:var(--bg1);padding:18px 14px;text-align:center}
+.kpi-label{font-family:var(--fm);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+           color:var(--t3);margin-bottom:8px}
+.kpi-val{font-family:var(--fm);font-size:22px;font-weight:600;color:var(--t1);font-feature-settings:"tnum"}
+.kpi-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:4px}
+
+.section{background:var(--bg1);border:1px solid var(--b1);margin-bottom:20px}
+.sec-hdr{padding:14px 20px;border-bottom:1px solid var(--b1);display:flex;
+         align-items:center;justify-content:space-between}
+.sec-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--t1)}
+.sec-meta{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.sec-body{padding:18px 20px}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.chart-box{height:280px}
+
+.bartable{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:11px}
+.bartable th{padding:10px 12px;text-align:left;color:var(--t3);font-weight:500;
+             font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+             border-bottom:1px solid var(--b1)}
+.bartable td{padding:7px 12px;border-bottom:1px solid var(--b1);color:var(--t1)}
+.bartable .num{text-align:right;font-feature-settings:"tnum"}
+.bartable .up{color:var(--green)}
+.bartable .down{color:var(--red)}
+
+.tag{font-family:var(--fm);font-size:9px;padding:2px 8px;letter-spacing:.06em;text-transform:uppercase}
+.tag-applied{color:var(--green);background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3)}
+.tag-advisory{color:var(--amber);background:rgba(255,179,0,.08);border:1px solid rgba(255,179,0,.3)}
+
+.empty{text-align:center;padding:30px;color:var(--t3);font-family:var(--fm);font-size:11px}
+.spinner{width:18px;height:18px;border:2px solid var(--b2);border-top-color:var(--cyan);
+         border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.note{font-family:var(--fm);font-size:10px;color:var(--t3);padding:12px 16px;
+      background:rgba(0,212,255,.04);border-left:3px solid var(--cyan);margin-bottom:16px;line-height:1.6}
+
+@media(max-width:1024px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .split{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="unified-header">
+  <div class="brand">NEWSTREND <em>// SYSTEM EVOLUTION</em></div>
+  <nav>
+    <a href="./index.html">DASHBOARD</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
+    <a href="./hidden_gems.html">GEMS</a>
+    <a href="./domino.html">DOMINO</a>
+    <a href="./insider_activity.html">INSIDER</a>
+    <a href="./backtest.html">BACKTEST</a>
+    <a href="./paper_trading.html">PAPER</a>
+    <a href="./accuracy.html">ACCURACY</a>
+    <a href="./system_evolution.html" class="on">EVOLUTION</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="live"><span class="dot"></span>ADAPTIVE</div>
+    <div id="unified-ts">—</div>
+  </div>
+</header>
+
+<main>
+  <h1>Adaptive Calibration</h1>
+  <div class="subtitle" id="subtitle">Pillar weight + confidence threshold evolution from realized prediction accuracy</div>
+
+  <div class="mode-banner" id="mode-banner">
+    <div class="empty"><div class="spinner"></div>Loading…</div>
+  </div>
+
+  <div class="kpi-grid" id="kpi-grid"></div>
+
+  <div id="evolution-note" class="note" style="display:none"></div>
+
+  <div class="split">
+    <div class="section">
+      <div class="sec-hdr"><span class="sec-title">Confidence Threshold Evolution</span>
+        <span class="sec-meta" id="thr-meta">—</span></div>
+      <div class="sec-body"><div class="chart-box"><canvas id="chart-threshold"></canvas></div></div>
+    </div>
+    <div class="section">
+      <div class="sec-hdr"><span class="sec-title">Pillar Weights (EMA-smoothed)</span>
+        <span class="sec-meta" id="pw-meta">—</span></div>
+      <div class="sec-body"><div class="chart-box"><canvas id="chart-pillars"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">Latest Threshold Sweep</span>
+      <span class="sec-meta" id="sweep-meta">argmax(score) within MIN_N gate becomes recommendation</span></div>
+    <div class="sec-body" style="padding:0">
+      <table class="bartable" id="sweep-table">
+        <thead><tr><th>Threshold</th><th class="num">N</th><th class="num">Accuracy</th><th class="num">Avg Ret</th><th class="num">Score</th><th>Status</th></tr></thead>
+        <tbody><tr><td colspan="6" class="empty">—</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">Pillar Status (current)</span>
+      <span class="sec-meta">applied=true means N≥30 gate met</span></div>
+    <div class="sec-body" style="padding:0">
+      <table class="bartable" id="pillar-status-table">
+        <thead><tr><th>Pillar</th><th class="num">N</th><th class="num">Alpha (pp)</th><th class="num">EMA Weight</th><th>Status</th><th>Reason</th></tr></thead>
+        <tbody><tr><td colspan="6" class="empty">—</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">Calibration Runs Log</span>
+      <span class="sec-meta" id="runs-meta">—</span></div>
+    <div class="sec-body" style="padding:0">
+      <table class="bartable" id="runs-table">
+        <thead><tr><th>Run</th><th>Updated</th><th>Mode</th><th class="num">N Records</th><th class="num">Actionable</th><th class="num">Threshold EMA</th></tr></thead>
+        <tbody><tr><td colspan="6" class="empty">—</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+const PILLAR_COLORS = ['#00d4ff','#00e676','#ffb300','#b380ff','#ff8a80','#80deea','#a5d6a7','#ffcc80'];
+const fmtNum = (v, d=3) => v == null ? '—' : (Math.round(v * Math.pow(10,d)) / Math.pow(10,d)).toFixed(d);
+const fmtPct = (v, sign=true) => v == null ? '—' : (sign && v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+const fmtAcc = v => v == null ? '—' : (v*100).toFixed(1) + '%';
+
+async function loadJSON(p){
+  const r = await fetch(`./data/${p}?v=${Date.now()}`, {cache:'no-store'});
+  if(!r.ok) throw new Error(`Failed ${p}: ${r.status}`);
+  return r.json();
+}
+
+function renderModeBanner(latest){
+  const banner = document.getElementById('mode-banner');
+  const mode = latest.mode || 'advisory';
+  const cls = mode === 'active' ? 'active' : 'advisory';
+  const desc = mode === 'active'
+    ? 'Calibration recommendation has crossed N thresholds and is treated as authoritative for at least one component.'
+    : 'Below sample-size gates — recommendations are tracked but not applied to predict.py downstream.';
+  banner.innerHTML = `
+    <div class="mode-pill ${cls}">${mode}</div>
+    <div class="mode-text">${desc} · MIN_N pillar=${latest.config?.min_n_pillar} threshold=${latest.config?.min_n_threshold} · EMA α=${latest.config?.ema_alpha}</div>`;
+}
+
+function renderKPIs(latest){
+  const inp = latest.input_summary || {};
+  const thr = latest.confidence_threshold || {};
+  const sl = latest.stop_loss || {};
+  const pillars = latest.pillars || {};
+  const nApplied = Object.values(pillars).filter(p => p.applied).length;
+  const kpis = [
+    {label:'Records (5d)', val: `${inp.n_actionable_5d ?? 0} / ${inp.n_records ?? 0}`, sub:`${inp.snapshot_count ?? 0} snapshots`},
+    {label:'Threshold (EMA)', val: fmtNum(thr.ema, 3), sub:`prev ${fmtNum(thr.previous_ema,3)} → rec ${thr.recommended ?? '—'}`},
+    {label:'Pillars Applied', val:`${nApplied} / ${Object.keys(pillars).length}`, sub:`gate N≥${latest.config?.min_n_pillar}`},
+    {label:'Stop Loss', val: sl.current_stop_loss_pct != null ? sl.current_stop_loss_pct.toFixed(0)+'%' : '−8%', sub: sl.n_completed != null ? `${sl.n_completed} completed trades` : 'no data'},
+  ];
+  document.getElementById('kpi-grid').innerHTML = kpis.map(k => `
+    <div class="kpi">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-val">${k.val}</div>
+      <div class="kpi-sub">${k.sub || ''}</div>
+    </div>`).join('');
+}
+
+function renderThresholdEvolution(runs){
+  const labels = runs.map((r,i) => r.updated?.slice(0,10) || `run ${i+1}`);
+  const ema = runs.map(r => r.confidence_threshold?.ema ?? null);
+  const rec = runs.map(r => r.confidence_threshold?.recommended ?? null);
+  const ctx = document.getElementById('chart-threshold').getContext('2d');
+  new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[
+      {label:'EMA', data:ema, borderColor:'#00d4ff', backgroundColor:'transparent', borderWidth:1.6, pointRadius:3, tension:0.18},
+      {label:'Recommended (raw)', data:rec, borderColor:'#ffb300', backgroundColor:'transparent', borderWidth:1, pointRadius:2, borderDash:[4,4]},
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'#c8d8e8',font:{family:'IBM Plex Mono',size:10}}},
+        tooltip:{backgroundColor:'#0c1220',borderColor:'#1a2840',borderWidth:1,titleColor:'#c8d8e8',bodyColor:'#c8d8e8'},
+      },
+      scales:{
+        x:{ticks:{color:'#6a8aa8',font:{family:'IBM Plex Mono',size:9}},grid:{color:'#1a2840'}},
+        y:{min:0.3, max:0.9, ticks:{color:'#6a8aa8',font:{family:'IBM Plex Mono',size:9}},grid:{color:'#1a2840'}},
+      }
+    }
+  });
+  document.getElementById('thr-meta').textContent = `${runs.length} run${runs.length===1?'':'s'} logged`;
+}
+
+function renderPillarEvolution(runs){
+  const labels = runs.map((r,i) => r.updated?.slice(0,10) || `run ${i+1}`);
+  const pillarNames = Object.keys(runs[runs.length-1].pillars || {});
+  const datasets = pillarNames.map((pn,i) => ({
+    label: pn,
+    data: runs.map(r => r.pillars?.[pn]?.ema_weight ?? null),
+    borderColor: PILLAR_COLORS[i % PILLAR_COLORS.length],
+    backgroundColor:'transparent',
+    borderWidth: 1.4, pointRadius: 2, tension: 0.18,
+  }));
+  const ctx = document.getElementById('chart-pillars').getContext('2d');
+  new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'#c8d8e8',font:{family:'IBM Plex Mono',size:9},boxWidth:10}},
+        tooltip:{backgroundColor:'#0c1220',borderColor:'#1a2840',borderWidth:1,titleColor:'#c8d8e8',bodyColor:'#c8d8e8'},
+      },
+      scales:{
+        x:{ticks:{color:'#6a8aa8',font:{family:'IBM Plex Mono',size:9}},grid:{color:'#1a2840'}},
+        y:{min:0.5, max:1.5, ticks:{color:'#6a8aa8',font:{family:'IBM Plex Mono',size:9}},grid:{color:'#1a2840'}},
+      }
+    }
+  });
+  document.getElementById('pw-meta').textContent = `${pillarNames.length} pillars tracked`;
+}
+
+function renderSweepTable(latest){
+  const sweep = latest.confidence_threshold?.sweep || [];
+  const tbody = document.querySelector('#sweep-table tbody');
+  if(!sweep.length){ tbody.innerHTML = '<tr><td colspan="6" class="empty">No sweep data</td></tr>'; return; }
+  const rec = latest.confidence_threshold?.recommended;
+  const minN = latest.config?.min_n_threshold ?? 20;
+  tbody.innerHTML = sweep.map(s => {
+    const isRec = s.threshold === rec;
+    const eligible = s.n != null && s.n >= minN;
+    const status = isRec ? `<span class="tag tag-applied">RECOMMENDED</span>` :
+                   eligible ? `<span class="tag" style="color:var(--t2);border:1px solid var(--b2);background:transparent">eligible</span>` :
+                   `<span class="tag tag-advisory">n&lt;${minN}</span>`;
+    return `<tr ${isRec ? 'style="background:rgba(0,230,118,.04)"' : ''}>
+      <td>${s.threshold.toFixed(2)}</td>
+      <td class="num">${s.n ?? '—'}</td>
+      <td class="num">${fmtAcc(s.accuracy)}</td>
+      <td class="num">${s.avg_return_pct == null ? '—' : (s.avg_return_pct>=0?'+':'')+s.avg_return_pct.toFixed(2)+'%'}</td>
+      <td class="num">${s.score == null ? '—' : (s.score>=0?'+':'')+s.score.toFixed(2)}</td>
+      <td>${status}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPillarStatus(latest){
+  const pillars = latest.pillars || {};
+  const tbody = document.querySelector('#pillar-status-table tbody');
+  const rows = Object.entries(pillars);
+  if(!rows.length){ tbody.innerHTML = '<tr><td colspan="6" class="empty">No pillars</td></tr>'; return; }
+  tbody.innerHTML = rows.map(([pkey, info]) => `
+    <tr>
+      <td>${pkey}</td>
+      <td class="num">${info.n ?? 0}</td>
+      <td class="num">${info.alpha_pct == null ? '—' : (info.alpha_pct>=0?'+':'')+info.alpha_pct.toFixed(2)}</td>
+      <td class="num">${fmtNum(info.ema_weight, 3)}</td>
+      <td>${info.applied ? '<span class="tag tag-applied">APPLIED</span>' : '<span class="tag tag-advisory">advisory</span>'}</td>
+      <td style="color:var(--t3)">${info.reason ?? ''}</td>
+    </tr>`).join('');
+}
+
+function renderRunsLog(runs){
+  const tbody = document.querySelector('#runs-table tbody');
+  tbody.innerHTML = runs.slice().reverse().map((r,i) => {
+    const idx = runs.length - i;
+    const inp = r.input_summary || {};
+    return `<tr>
+      <td>#${idx}</td>
+      <td>${r.updated?.replace('T',' ').slice(0,16) || '—'}</td>
+      <td>${r.mode === 'active' ? '<span class="tag tag-applied">active</span>' : '<span class="tag tag-advisory">advisory</span>'}</td>
+      <td class="num">${inp.n_records ?? '—'}</td>
+      <td class="num">${inp.n_actionable_5d ?? '—'}</td>
+      <td class="num">${fmtNum(r.confidence_threshold?.ema, 3)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('runs-meta').textContent = `${runs.length} calibration run${runs.length===1?'':'s'}`;
+}
+
+(async () => {
+  try {
+    const log = await loadJSON('calibration_history.json');
+    const runs = log.runs || [];
+    if(!runs.length){
+      document.querySelector('main').innerHTML = '<div class="empty" style="padding:60px">No calibration runs yet.<br><br>Run: <code>python3 scripts/adaptive_calibration.py</code></div>';
+      return;
+    }
+    const latest = runs[runs.length-1];
+    document.getElementById('unified-ts').textContent = latest.updated;
+    renderModeBanner(latest);
+    renderKPIs(latest);
+    if(runs.length === 1){
+      const note = document.getElementById('evolution-note');
+      note.style.display = 'block';
+      note.innerHTML = `Single calibration run logged so far. Evolution charts will show meaningful change once daily recalibration accumulates a few weeks of runs (Phase 5 wires the GitHub Action). The current snapshot reflects mode=<b>${latest.mode}</b>; pillar weights stay at prior 1.0 until each pillar's actionable N crosses ${latest.config?.min_n_pillar}.`;
+    }
+    renderThresholdEvolution(runs);
+    renderPillarEvolution(runs);
+    renderSweepTable(latest);
+    renderPillarStatus(latest);
+    renderRunsLog(runs);
+  } catch (e) {
+    document.querySelector('main').innerHTML = `<div class="empty" style="padding:60px">Error loading calibration_history.json: ${e.message}<br><br>Run: <code>python3 scripts/adaptive_calibration.py</code></div>`;
+  }
+})();
+</script>
+</body>
+</html>
