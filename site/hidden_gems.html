@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · Hidden Gems</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;--bg3:#0a1018;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--purple:#b380ff;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg1)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+
+/* HEADER */
+header{height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:10}
+.brand{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300;margin-left:6px}
+nav{display:flex;gap:2px}
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:6px 12px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+#ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+/* MAIN */
+main{max-width:1400px;margin:0 auto;padding:20px 24px}
+
+/* HERO STRIP */
+.hero{background:linear-gradient(135deg, var(--bg2) 0%, var(--bg1) 100%);
+      border:1px solid var(--b1);padding:18px 24px;margin-bottom:18px;
+      display:grid;grid-template-columns:repeat(5,1fr);gap:24px;align-items:center}
+.hero-block{}
+.hero-label{font-family:var(--fm);font-size:9px;letter-spacing:.16em;
+            text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.hero-value{font-family:var(--fm);font-size:18px;font-weight:600;color:var(--t1)}
+.hero-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:2px}
+
+/* CONTROLS */
+.controls{display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.controls label{font-family:var(--fm);font-size:9px;letter-spacing:.14em;
+                text-transform:uppercase;color:var(--t3)}
+.controls select{font-family:var(--fm);font-size:11px;color:var(--t1);
+                 background:var(--bg2);border:1px solid var(--b1);padding:5px 10px}
+.controls .count{margin-left:auto;font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+/* GRID */
+.gem-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px}
+
+/* CARD */
+.gem-card{background:var(--bg1);border:1px solid var(--b1);border-left:4px solid;
+          padding:14px 16px;display:flex;flex-direction:column;gap:10px;
+          transition:transform .15s,background .15s}
+.gem-card:hover{transform:translateY(-2px);background:var(--bg2)}
+
+/* sector left-border colors */
+.sec-tech{border-left-color:var(--cyan)}
+.sec-mfg{border-left-color:var(--amber)}
+.sec-life{border-left-color:var(--green)}
+.sec-fin{border-left-color:var(--purple)}
+.sec-crypto{border-left-color:#ff8800}
+.sec-energy{border-left-color:var(--red)}
+.sec-other{border-left-color:var(--t2)}
+
+/* CARD HEADER */
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.card-id{display:flex;align-items:baseline;gap:8px}
+.rank{font-family:var(--fm);font-size:10px;font-weight:600;color:var(--cyan);
+      letter-spacing:.06em}
+.ticker{font-family:var(--fm);font-size:18px;font-weight:600;color:var(--t1)}
+.entity{font-family:var(--fs);font-size:10px;color:var(--t2);margin-top:2px}
+.score-block{text-align:right}
+.score-val{font-family:var(--fm);font-size:20px;font-weight:600;color:var(--cyan);
+           line-height:1}
+.score-label{font-family:var(--fm);font-size:8px;color:var(--t3);
+             letter-spacing:.14em;text-transform:uppercase;margin-top:2px}
+
+/* SECTOR + METRICS */
+.card-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;
+           padding-bottom:6px;border-bottom:1px solid var(--b1)}
+.sec-chip{font-family:var(--fm);font-size:9px;font-weight:600;letter-spacing:.06em;
+          padding:3px 8px;border:1px solid;background:transparent}
+.chip-tech{color:var(--cyan);border-color:var(--cyan);background:rgba(0,212,255,.08)}
+.chip-mfg{color:var(--amber);border-color:var(--amber);background:rgba(255,179,0,.08)}
+.chip-life{color:var(--green);border-color:var(--green);background:rgba(0,230,118,.08)}
+.chip-fin{color:var(--purple);border-color:var(--purple);background:rgba(179,128,255,.08)}
+.chip-crypto{color:#ff8800;border-color:#ff8800;background:rgba(255,136,0,.08)}
+.chip-energy{color:var(--red);border-color:var(--red);background:rgba(255,68,68,.08)}
+.chip-other{color:var(--t2);border-color:var(--t2);background:rgba(106,138,168,.08)}
+.metric-row{font-family:var(--fm);font-size:11px;color:var(--t2);text-align:right}
+.metric-row .rev{color:var(--t1)}
+
+/* PILLARS BARS */
+.pillars{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.pillar{display:flex;flex-direction:column;gap:3px}
+.pillar-label{font-family:var(--fm);font-size:8px;color:var(--t3);
+              letter-spacing:.1em;text-transform:uppercase}
+.pillar-bar{height:4px;background:var(--b1);border-radius:2px;overflow:hidden;position:relative}
+.pillar-fill{position:absolute;top:0;left:0;height:100%;border-radius:2px;
+             background:var(--cyan)}
+.pillar-fill.obs{background:var(--amber)}
+.pillar-val{font-family:var(--fm);font-size:9px;color:var(--t2);text-align:right}
+
+/* REASONS / RISKS */
+.notes{display:flex;flex-direction:column;gap:4px;font-family:var(--fs);font-size:11px}
+.note{display:flex;gap:6px;align-items:flex-start;line-height:1.4}
+.note-icon{font-family:var(--fm);font-size:11px;font-weight:600;flex-shrink:0;
+           min-width:10px}
+.note.reason .note-icon{color:var(--green)}
+.note.risk .note-icon{color:var(--amber)}
+.note-txt{color:var(--t1)}
+.note.risk .note-txt{color:var(--t2)}
+
+/* EMPTY / LOADING */
+.status{padding:40px 20px;text-align:center;font-family:var(--fm);font-size:11px;
+        color:var(--t2)}
+
+@media (max-width:780px){
+  .hero{grid-template-columns:repeat(2,1fr);gap:14px}
+  nav{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">NEWSTREND<em>· hidden gems</em></div>
+  <nav>
+    <a href="./index.html">DASHBOARD</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
+    <a href="./hidden_gems.html" class="on">GEMS</a>
+    <a href="./ticker_detail.html">TICKER</a>
+    <a href="./report.html">REPORT</a>
+    <a href="./weekly.html">WEEKLY</a>
+    <a href="./portfolio.html">PORTFOLIO</a>
+    <a href="./rising.html">RISING</a>
+    <a href="./macro.html">MACRO</a>
+    <a href="./backtest.html">BACKTEST</a>
+  </nav>
+  <div class="hdr-right">
+    <span id="ts">—</span>
+  </div>
+</header>
+
+<main>
+  <div class="hero" id="hero">
+    <div class="hero-block">
+      <div class="hero-label">UNIVERSE</div>
+      <div class="hero-value" id="h-universe">—</div>
+      <div class="hero-sub">SEC EDGAR fundamentals</div>
+    </div>
+    <div class="hero-block">
+      <div class="hero-label">PASSING GATES</div>
+      <div class="hero-value" id="h-passing">—</div>
+      <div class="hero-sub">no losses, fund ≥ 0.40, no ETF</div>
+    </div>
+    <div class="hero-block">
+      <div class="hero-label">TOP SHOWN</div>
+      <div class="hero-value" id="h-shown">—</div>
+      <div class="hero-sub">composite × obscurity</div>
+    </div>
+    <div class="hero-block">
+      <div class="hero-label">WEIGHTS</div>
+      <div class="hero-value" id="h-weights" style="font-size:13px">P1 25 / P2 10 / P3 25 / P4 40</div>
+      <div class="hero-sub">sentiment / sector / TA / fundamentals</div>
+    </div>
+    <div class="hero-block">
+      <div class="hero-label">GENERATED</div>
+      <div class="hero-value" id="h-generated" style="font-size:13px">—</div>
+      <div class="hero-sub">UTC · auto-refresh on rebuild</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <label for="f-sector">Sector</label>
+    <select id="f-sector"><option value="">All</option></select>
+    <label for="f-sort">Sort</label>
+    <select id="f-sort">
+      <option value="score">Score (composite)</option>
+      <option value="fund">P4 Fundamentals</option>
+      <option value="obs">Obscurity</option>
+      <option value="rev_asc">Revenue (smallest first)</option>
+      <option value="rev_desc">Revenue (largest first)</option>
+    </select>
+    <span class="count" id="count">—</span>
+  </div>
+
+  <div class="gem-grid" id="grid">
+    <div class="status" id="status">Loading hidden gems…</div>
+  </div>
+</main>
+
+<script>
+const SECTOR_CLASS = {
+  "06 Technology":                                  ["sec-tech",   "chip-tech",   "TECH"],
+  "04 Manufacturing":                               ["sec-mfg",    "chip-mfg",    "MFG"],
+  "03 Life Sciences":                               ["sec-life",   "chip-life",   "LIFE SCI"],
+  "02 Finance":                                     ["sec-fin",    "chip-fin",    "FINANCE"],
+  "09 Crypto Assets":                               ["sec-crypto", "chip-crypto", "CRYPTO"],
+  "01 Energy & Transportation":                     ["sec-energy", "chip-energy", "ENERGY"],
+  "07 Trade & Services":                            ["sec-other",  "chip-other",  "TRADE & SVC"],
+  "08 Industrial Applications and Services":        ["sec-other",  "chip-other",  "INDUSTRIAL"],
+  "05 Real Estate & Construction":                  ["sec-other",  "chip-other",  "REAL ESTATE"],
+};
+function sectorClass(sec){
+  return SECTOR_CLASS[sec] || ["sec-other","chip-other", sec || "UNKNOWN"];
+}
+function pct(x){ return Math.max(0, Math.min(100, x*100)); }
+function fmt2(x){ return (x===null||x===undefined) ? "—" : Number(x).toFixed(2); }
+function fmt3(x){ return (x===null||x===undefined) ? "—" : Number(x).toFixed(3); }
+
+let DATA = null;
+
+function render(){
+  const grid = document.getElementById("grid");
+  const status = document.getElementById("status");
+  if(!DATA){ status.textContent = "No data."; return; }
+
+  // filters
+  const sectorFilter = document.getElementById("f-sector").value;
+  const sortKey      = document.getElementById("f-sort").value;
+
+  let picks = DATA.top_picks.slice();
+  if(sectorFilter){
+    picks = picks.filter(p => (p.metadata && p.metadata.sector) === sectorFilter);
+  }
+  picks.sort((a,b) => {
+    if(sortKey === "score") return b.hidden_gems_score - a.hidden_gems_score;
+    if(sortKey === "fund")  return (b.scores.P4||0) - (a.scores.P4||0);
+    if(sortKey === "obs")   return (b.scores.obscurity||0) - (a.scores.obscurity||0);
+    if(sortKey === "rev_asc")  return (a.metadata.revenue_b||0) - (b.metadata.revenue_b||0);
+    if(sortKey === "rev_desc") return (b.metadata.revenue_b||0) - (a.metadata.revenue_b||0);
+    return 0;
+  });
+
+  document.getElementById("count").textContent = `${picks.length} cards`;
+
+  if(picks.length === 0){
+    grid.innerHTML = `<div class="status">No gems match the current filter.</div>`;
+    return;
+  }
+
+  grid.innerHTML = picks.map(p => {
+    const [secCls, chipCls, secLabel] = sectorClass(p.metadata.sector);
+    const s = p.scores;
+    const reasons = (p.reasons||[]).map(r =>
+      `<div class="note reason"><span class="note-icon">+</span><span class="note-txt">${escapeHtml(r)}</span></div>`
+    ).join("");
+    const risks = (p.risks||[]).map(r =>
+      `<div class="note risk"><span class="note-icon">!</span><span class="note-txt">${escapeHtml(r)}</span></div>`
+    ).join("");
+
+    return `
+    <div class="gem-card ${secCls}" data-ticker="${p.ticker}">
+      <div class="card-top">
+        <div class="card-id">
+          <span class="rank">#${String(p.rank).padStart(2,"0")}</span>
+          <div>
+            <div class="ticker">${p.ticker}</div>
+            <div class="entity">${escapeHtml(p.entity || "")}</div>
+          </div>
+        </div>
+        <div class="score-block">
+          <div class="score-val">${fmt3(p.hidden_gems_score)}</div>
+          <div class="score-label">composite</div>
+        </div>
+      </div>
+      <div class="card-meta">
+        <span class="sec-chip ${chipCls}">${secLabel}</span>
+        <span class="metric-row">revenue <span class="rev">$${(p.metadata.revenue_b||0).toFixed(1)}B</span></span>
+      </div>
+      <div class="pillars">
+        ${pillarBar("P1 sentiment", s.P1)}
+        ${pillarBar("P2 sector",    s.P2)}
+        ${pillarBar("P3 TA",        s.P3)}
+        ${pillarBar("P4 fund",      s.P4)}
+        ${pillarBar("obscurity",    s.obscurity, true)}
+      </div>
+      <div class="notes">
+        ${reasons}
+        ${risks}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function pillarBar(label, val, isObs){
+  const v = (val===null||val===undefined) ? 0.5 : val;
+  return `
+    <div class="pillar">
+      <div class="pillar-label">${label}</div>
+      <div class="pillar-bar"><div class="pillar-fill ${isObs?'obs':''}" style="width:${pct(v)}%"></div></div>
+      <div class="pillar-val">${fmt2(v)}</div>
+    </div>`;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c =>
+    ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+
+function populateSectors(){
+  const sel = document.getElementById("f-sector");
+  const seen = new Set();
+  (DATA.top_picks||[]).forEach(p => {
+    const s = p.metadata && p.metadata.sector;
+    if(s && !seen.has(s)){ seen.add(s); }
+  });
+  Array.from(seen).sort().forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s;
+    opt.textContent = s;
+    sel.appendChild(opt);
+  });
+}
+
+async function load(){
+  try{
+    const r = await fetch("./data/hidden_gems.json", {cache:"no-store"});
+    DATA = await r.json();
+  }catch(e){
+    document.getElementById("status").textContent = "Failed to load hidden_gems.json: " + e;
+    return;
+  }
+  document.getElementById("h-universe").textContent  = DATA.universe_size ?? "—";
+  document.getElementById("h-passing").textContent   = DATA.passing_gate ?? "—";
+  document.getElementById("h-shown").textContent     = (DATA.top_picks||[]).length;
+  if(DATA.weights){
+    const w = DATA.weights;
+    document.getElementById("h-weights").textContent =
+      `P1 ${Math.round(w.P1*100)} / P2 ${Math.round(w.P2*100)} / P3 ${Math.round(w.P3*100)} / P4 ${Math.round(w.P4*100)}`;
+  }
+  if(DATA.generated_at){
+    document.getElementById("h-generated").textContent = DATA.generated_at.replace("T"," ").replace(/Z$|\+00:00$/, " UTC");
+    document.getElementById("ts").textContent = DATA.generated_at.replace("T"," ").slice(0,16) + " UTC";
+  }
+  populateSectors();
+  render();
+}
+
+document.getElementById("f-sector").addEventListener("change", render);
+document.getElementById("f-sort").addEventListener("change", render);
+load();
+</script>
+</body>
+</html>
