@@ -215,6 +215,46 @@ jobs:
             --min-corr 0.25 \
             --min-events 3 || true
 
+      - name: Cache HuggingFace models (FinBERT)
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-prosusai-finbert-v1
+
+      - name: Install FinBERT deps
+        run: |
+          pip install -q "torch>=2.2" "transformers>=4.38" "tokenizers>=0.15"
+
+      - name: FinBERT — score recent daily news (last 30 days)
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/sentiment_per_day
+          PROCESSED=0
+          # Pick last 30 raw daily jsonl files (exclude *_tokens.jsonl)
+          for f in $(ls data/warehouse/daily/*.jsonl 2>/dev/null | grep -v '_tokens\.jsonl' | sort | tail -30); do
+            [ -f "$f" ] || continue
+            name=$(basename "$f")
+            date=$(echo "$name" | sed -E 's/^([0-9]{4}-[0-9]{2}-[0-9]{2}).*/\1/')
+            [ -z "$date" ] && continue
+            python scripts/sentiment_finbert.py \
+              --input "$f" \
+              --output "/tmp/sentiment_per_day/sentiment_${date}.json" \
+              --batch-size 16 || true
+            PROCESSED=$((PROCESSED + 1))
+          done
+          echo "FinBERT processed $PROCESSED days"
+
+      - name: FinBERT — aggregate ticker sentiment
+        run: |
+          set -euo pipefail
+          python scripts/aggregate_ticker_sentiment.py \
+            --inputs '/tmp/sentiment_per_day/sentiment_*.json' \
+            --output site/data/ticker_sentiment.json \
+            --min-articles 5 || true
+          if [ -s site/data/ticker_sentiment.json ]; then
+            python -c "import json; d=json.load(open('site/data/ticker_sentiment.json')); dates=d.get('dates',[]); print(f'ticker_sentiment.json: dates={len(dates)} tickers={len(d.get(\"tickers\",{}))} latest={dates[-1] if dates else None}')"
+          fi
+
       - name: Build fundamentals (SEC EDGAR Pillar 4)
         env:
           SEC_USER_AGENT: "Newstrend-CI ci@newstrend.local"
@@ -343,7 +383,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           # 1) 변경사항 없으면 종료
-          git add site/data/predictions_history/ site/data/reports/ site/data/trends.json 2>/dev/null || true
+          git add site/data/predictions_history/ site/data/reports/ site/data/trends.json site/data/ticker_sentiment.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No history changes to commit"
             exit 0
