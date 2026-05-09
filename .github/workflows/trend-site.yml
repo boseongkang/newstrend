@@ -225,30 +225,47 @@ jobs:
         run: |
           pip install -q "torch>=2.2" "transformers>=4.38" "tokenizers>=0.15"
 
-      - name: FinBERT — score recent daily news (last 30 days)
+      - name: Restore sentiment_per_day from data-cache
+        run: |
+          mkdir -p data/sentiment_per_day
+          git fetch origin data-cache 2>/dev/null || true
+          if git show-ref --verify refs/remotes/origin/data-cache 2>/dev/null; then
+            git restore --worktree --source=origin/data-cache -- data/sentiment_per_day/ 2>/dev/null || true
+            git reset HEAD data/sentiment_per_day/ 2>/dev/null || true
+          fi
+          CACHED=$(ls data/sentiment_per_day/sentiment_*.json 2>/dev/null | wc -l | tr -d ' ')
+          echo "sentiment_per_day cache: $CACHED day(s) restored"
+
+      - name: FinBERT — score recent daily news (incremental, last 30 days)
         run: |
           set -euo pipefail
-          mkdir -p /tmp/sentiment_per_day
+          mkdir -p data/sentiment_per_day
           PROCESSED=0
+          SKIPPED=0
           # Pick last 30 raw daily jsonl files (exclude *_tokens.jsonl)
           for f in $(ls data/warehouse/daily/*.jsonl 2>/dev/null | grep -v '_tokens\.jsonl' | sort | tail -30); do
             [ -f "$f" ] || continue
             name=$(basename "$f")
             date=$(echo "$name" | sed -E 's/^([0-9]{4}-[0-9]{2}-[0-9]{2}).*/\1/')
             [ -z "$date" ] && continue
+            out="data/sentiment_per_day/sentiment_${date}.json"
+            if [ -s "$out" ]; then
+              SKIPPED=$((SKIPPED + 1))
+              continue
+            fi
             python scripts/sentiment_finbert.py \
               --input "$f" \
-              --output "/tmp/sentiment_per_day/sentiment_${date}.json" \
+              --output "$out" \
               --batch-size 16 || true
             PROCESSED=$((PROCESSED + 1))
           done
-          echo "FinBERT processed $PROCESSED days"
+          echo "FinBERT scored $PROCESSED new day(s), skipped $SKIPPED cached day(s)"
 
       - name: FinBERT — aggregate ticker sentiment
         run: |
           set -euo pipefail
           python scripts/aggregate_ticker_sentiment.py \
-            --inputs '/tmp/sentiment_per_day/sentiment_*.json' \
+            --inputs 'data/sentiment_per_day/sentiment_*.json' \
             --output site/data/ticker_sentiment.json \
             --min-articles 5 || true
           if [ -s site/data/ticker_sentiment.json ]; then
@@ -361,15 +378,20 @@ jobs:
           mkdir -p /tmp/cache-worktree/data/prices
           cp -r data/prices/. /tmp/cache-worktree/data/prices/ 2>/dev/null || true
 
+          mkdir -p /tmp/cache-worktree/data/sentiment_per_day
+          if [ -d data/sentiment_per_day ]; then
+            cp -r data/sentiment_per_day/. /tmp/cache-worktree/data/sentiment_per_day/ 2>/dev/null || true
+          fi
+
           cd /tmp/cache-worktree
           rm -f .gitignore
-          git add data/prices/
+          git add data/prices/ data/sentiment_per_day/
           if git diff --cached --quiet; then
-            echo "No price changes to push"
+            echo "No price/sentiment changes to push"
             exit 0
           fi
 
-          git commit -m "prices: $(date -u +%Y-%m-%d)"
+          git commit -m "prices+sentiment_per_day: $(date -u +%Y-%m-%d)"
           git push origin data-cache
 
           # Cleanup
