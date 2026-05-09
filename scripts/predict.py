@@ -175,6 +175,44 @@ def load_insider_signals(insider_index_path: str) -> dict[str, dict]:
         return {}
 
 
+def load_pillar_multipliers(path: str, blend_alpha: float = 0.3,
+                            min_n: int = 30) -> dict:
+    """pillar_weights.json → {pillar_name: multiplier in [0.85, 1.3]}.
+
+    Conservative blend: multiplier = (1 - α)·1.0 + α·ema_weight, applied only
+    when calibrator marked the pillar `applied=True` AND n ≥ min_n. Otherwise
+    multiplier stays 1.0 (no effect on hardcoded weights).
+
+    α=0.3 default keeps blends within ±15% of hardcoded — safe even if learned
+    weights drift early. Output dict is keyed by pillar name as written by
+    adaptive_calibration.py: fundamental_score / sentiment_score /
+    news_best_conf / insider_score / etc.
+
+    Returns empty dict (no-op) if file missing, malformed, or mode != 'active'.
+    """
+    p = Path(path)
+    if not p.exists():
+        return {}
+    try:
+        d = json.loads(p.read_text())
+    except Exception:
+        return {}
+    if d.get("mode") != "active":
+        return {}
+    out: dict[str, dict] = {}
+    for name, pdata in (d.get("pillars") or {}).items():
+        if not pdata.get("applied"):
+            continue
+        if (pdata.get("n") or 0) < min_n:
+            continue
+        ema = pdata.get("ema_weight")
+        if ema is None:
+            continue
+        mult = (1.0 - blend_alpha) * 1.0 + blend_alpha * float(ema)
+        out[name] = {"mult": mult, "ema": ema, "n": pdata.get("n")}
+    return out
+
+
 def load_signals(path: str) -> list:
     try:
         d = json.loads(Path(path).read_text())
@@ -335,7 +373,8 @@ def decide_action(rsi_state: str, macd_bias: str, bb_state: str,
                   fundamental: dict | None = None,
                   fundamental_weight: float = 0.5,
                   insider: dict | None = None,
-                  insider_weight: float = 0.5) -> tuple[str, float, list, list]:
+                  insider_weight: float = 0.5,
+                  news_weight_mult: float = 1.0) -> tuple[str, float, list, list]:
     """
     반환: (action, confidence, reasons, risks)
     action: BUY / HOLD / SELL / WATCH
@@ -447,7 +486,8 @@ def decide_action(rsi_state: str, macd_bias: str, bb_state: str,
     if news.get("available") and news.get("active_terms"):
         ret  = news.get("best_ret_1d", 0) or 0
         conf = news.get("best_conf", 0) or 0
-        boost = min(conf * 1.5, 1.2)
+        # news_weight_mult: pillar_weights.json learned multiplier (default 1.0 = no-op).
+        boost = min(conf * 1.5 * news_weight_mult, 1.2)
         if ret > 0:
             score += boost
             reasons.append(f"News signal: {news['active_terms'][0]} → bullish (conf={conf:.2f})")
@@ -618,6 +658,12 @@ def main():
                     help="0=disable, 0.5=conservative, 1.0=balanced, 2.0=aggressive")
     ap.add_argument("--weights", default="site/data/ticker_weights.json",
                     help="종목별 TA/News 가중치")
+    ap.add_argument("--pillar-weights", default="site/data/pillar_weights.json",
+                    help="adaptive_calibration learned weights (advisory until n≥30)")
+    ap.add_argument("--learned-blend-alpha", type=float, default=0.3,
+                    help="conservative blend factor: w_eff = (1-α)·hardcoded + α·learned")
+    ap.add_argument("--learned-min-n", type=int, default=30,
+                    help="apply learned weights only when pillar n ≥ this")
     ap.add_argument("--min-conf", type=float, default=0.0)
     args = ap.parse_args()
 
@@ -628,6 +674,28 @@ def main():
     print(f"Fundamentals: {len(fundamentals_today)} tickers scored (Phase 3)")
     insider_today = load_insider_signals(args.insider_index)
     print(f"Insider signals: {len(insider_today)} tickers (Phase 5)")
+
+    # Conservative learned-weight blend. Multiplier 1.0 = no-op (current state:
+    # all pillars n=0 or applied=False → blend dict is empty → exact-match output).
+    pillar_mults_raw = load_pillar_multipliers(
+        args.pillar_weights,
+        blend_alpha=args.learned_blend_alpha,
+        min_n=args.learned_min_n,
+    )
+    pillar_mults = {name: info["mult"] for name, info in pillar_mults_raw.items()}
+    if pillar_mults_raw:
+        print(f"Learned blend ACTIVE for {len(pillar_mults_raw)} pillar(s) "
+              f"(α={args.learned_blend_alpha}, min_n={args.learned_min_n}):")
+        for name, info in sorted(pillar_mults_raw.items()):
+            print(f"  {name:<22s} n={info['n']:>3d}  ema={info['ema']:.3f} "
+                  f"→ mult={info['mult']:.3f}")
+    else:
+        print(f"Learned blend INACTIVE (no pillar passed gate; using hardcoded weights)")
+
+    sentiment_w_eff   = args.sentiment_weight   * pillar_mults.get("sentiment_score",   1.0)
+    fundamental_w_eff = args.fundamental_weight * pillar_mults.get("fundamental_score", 1.0)
+    insider_w_eff     = args.insider_weight     * pillar_mults.get("insider_score",     1.0)
+    news_mult_eff     = pillar_mults.get("news_best_conf", 1.0)
     tickers_list = [t.strip().upper() for t in args.tickers.split(",")]\
                    if args.tickers else list(ta_data.keys())
     ta_news  = load_ticker_analysis(args.analysis_dir, tickers_list)
@@ -739,11 +807,12 @@ def main():
             ta_sigs, news, price_days,
             market_regime=market_regime.get("regime", "NEUTRAL"),
             sentiment=sentiment_today.get(ticker),
-            sentiment_weight=args.sentiment_weight,
+            sentiment_weight=sentiment_w_eff,
             fundamental=fundamentals_today.get(ticker),
-            fundamental_weight=args.fundamental_weight,
+            fundamental_weight=fundamental_w_eff,
             insider=insider_today.get(ticker),
-            insider_weight=args.insider_weight,
+            insider_weight=insider_w_eff,
+            news_weight_mult=news_mult_eff,
         )
 
         # 종목별 가중치로 뉴스 영향 조정
@@ -835,6 +904,18 @@ def main():
         "updated":       datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "data_quality":  data_quality,
         "market_regime": market_regime,
+        "learned_blend": {
+            "active":   bool(pillar_mults_raw),
+            "alpha":    args.learned_blend_alpha,
+            "min_n":    args.learned_min_n,
+            "pillars":  pillar_mults_raw,
+            "effective_weights": {
+                "sentiment_weight":   round(sentiment_w_eff, 4),
+                "fundamental_weight": round(fundamental_w_eff, 4),
+                "insider_weight":     round(insider_w_eff, 4),
+                "news_mult":          round(news_mult_eff, 4),
+            },
+        },
         "n_buy":         sum(1 for p in predictions if p["action"] == "BUY"),
         "n_watch":       sum(1 for p in predictions if p["action"] == "WATCH"),
         "n_hold":        sum(1 for p in predictions if p["action"] == "HOLD"),
