@@ -38,6 +38,7 @@ PER_TICKER_DIR = ROOT / "site" / "data" / "fundamentals"
 
 # ── 점수 캡 (정규화 한도) ──────────────────────────────────────────────────
 ROE_CAP             = 0.40   # ROE 40% 이상이면 만점
+ROA_CAP             = 0.15   # ROA fallback: 음의 자기자본 시 ROE 대체 (15%+ 만점)
 OP_MARGIN_CAP       = 0.40
 PROFIT_MARGIN_CAP   = 0.30
 REV_CAGR_CAP        = 0.30   # 연 30% 이상 성장이면 만점
@@ -82,6 +83,26 @@ def _safe_cagr(start: float | None, end: float | None, years: int) -> float | No
     return (end / start) ** (1.0 / years) - 1.0
 
 
+def _is_negative_equity(payload: dict) -> bool:
+    """자기자본 음수 검출. equity 직접 < 0 또는 D/E 음수 (자기자본 음수의 proxy).
+
+    ROE 트랩 두 가지를 모두 잡음:
+      - 음의 NI ÷ 음의 equity = +ROE (LCID: ROE 7.68 — 만점 같지만 무의미)
+      - 양의 NI ÷ 음의 equity = -ROE (SBUX/MAR: buyback 왜곡)
+    이 케이스에서는 ROE 무시 + ROA fallback + D/E neutral.
+    """
+    summary = payload.get("summary") or {}
+    raw     = summary.get("raw") or {}
+    ratios  = summary.get("ratios") or {}
+    equity  = raw.get("equity")
+    d_to_e  = ratios.get("debt_to_equity")
+    if equity is not None and equity < 0:
+        return True
+    if d_to_e is not None and d_to_e < 0:
+        return True
+    return False
+
+
 def _series_endpoints(records: list[dict], n_years: int) -> tuple[float | None, float | None]:
     """annual records list에서 (n년전 값, 최신 값) 튜플 반환.
 
@@ -103,16 +124,27 @@ def calculate_quality_score(payload: dict) -> tuple[float | None, list[dict]]:
     summary = payload.get("summary") or {}
     ratios = summary.get("ratios") or {}
     roe   = ratios.get("roe")
+    roa   = ratios.get("roa")
     op_m  = ratios.get("operating_margin")
     pm    = ratios.get("profit_margin")
-    if all(v is None for v in (roe, op_m, pm)):
+    neg_eq = _is_negative_equity(payload)
+
+    if all(v is None for v in (roe, roa, op_m, pm)):
         return None, []
 
     # None인 metric은 제외 — 미보고를 0점으로 페널티주지 않음.
     # 예: 은행은 OperatingIncomeLoss 안 씀 (NIM 사용) → op_m=None → ROE+PM만으로 평가.
     parts: list[dict] = []
-    if roe is not None:
-        parts.append({"name": "roe",              "score": _norm(roe, ROE_CAP),          "value": roe})
+    if neg_eq:
+        # 자기자본 음수면 ROE 무의미 (sign trap). ROA로 대체 — 자산 기준이라 영향 X.
+        if roa is not None:
+            parts.append({"name": "roa_fallback",
+                          "score": _norm(roa, ROA_CAP),
+                          "value": roa,
+                          "note":  "neg-equity guard: ROE excluded"})
+    else:
+        if roe is not None:
+            parts.append({"name": "roe", "score": _norm(roe, ROE_CAP), "value": roe})
     if op_m is not None:
         parts.append({"name": "operating_margin", "score": _norm(op_m, OP_MARGIN_CAP),   "value": op_m})
     if pm is not None:
@@ -157,10 +189,19 @@ def calculate_health_score(payload: dict) -> tuple[float | None, list[dict]]:
     if d_to_e is None and cr is None:
         return None, []
 
-    # Sector-aware D/E cap — 은행은 deposits=liabilities 구조라 일반 cap이면 항상 0.
-    owner_org = metadata.get("owner_org")
-    de_cap = DE_CAP_BY_SECTOR.get(owner_org, DE_CAP_DEFAULT)
-    de_score = (1.0 - _norm(d_to_e, de_cap)) if d_to_e is not None else NEUTRAL_FILL
+    neg_eq = _is_negative_equity(payload)
+
+    if neg_eq:
+        # 자기자본 음수면 D/E 무의미 (음수 → _norm 0 → de_score 1.0 만점 트랩).
+        # NEUTRAL_FILL 0.5로 페널티도 만점도 아님. 적자 페널티는 별도 적용.
+        de_score = NEUTRAL_FILL
+        de_cap   = None
+        owner_org = metadata.get("owner_org")
+    else:
+        # Sector-aware D/E cap — 은행은 deposits=liabilities 구조라 일반 cap이면 항상 0.
+        owner_org = metadata.get("owner_org")
+        de_cap = DE_CAP_BY_SECTOR.get(owner_org, DE_CAP_DEFAULT)
+        de_score = (1.0 - _norm(d_to_e, de_cap)) if d_to_e is not None else NEUTRAL_FILL
 
     # None인 current_ratio는 NEUTRAL_FILL — 미보고(은행/금융) 시 페널티 X.
     cr_score = (
@@ -182,8 +223,12 @@ def calculate_health_score(payload: dict) -> tuple[float | None, list[dict]]:
         {"name": "current_ratio",  "score": cr_score, "value": cr},
         {"name": "ni_sign",        "score": None,    "value": ni_note},
     ]
+    if neg_eq:
+        parts.append({"name":  "negative_equity_guard",
+                      "score": None,
+                      "value": "D/E neutralized to 0.5"})
     # 투명성: sector-cap이 default와 다를 때 rationale에 노출
-    if owner_org and de_cap != DE_CAP_DEFAULT:
+    elif owner_org and de_cap is not None and de_cap != DE_CAP_DEFAULT:
         parts.append({"name":  "de_cap_sector_override",
                       "score": None,
                       "value": f"{owner_org} → cap={de_cap}"})
@@ -239,16 +284,22 @@ def generate_summary(payload: dict, q, g, h) -> str:
     annual  = payload.get("annual") or {}
     parts: list[str] = []
 
-    roe = ratios.get("roe")
+    roe  = ratios.get("roe")
+    roa  = ratios.get("roa")
     op_m = ratios.get("operating_margin")
-    if q is not None and roe is not None and op_m is not None:
+    neg_eq = _is_negative_equity(payload)
+    if q is not None and op_m is not None:
         if q >= 0.7:
             label = "strong"
         elif q >= 0.4:
             label = "moderate"
         else:
             label = "weak"
-        parts.append(f"{label} quality (ROE {roe*100:.0f}%, op {op_m*100:.0f}%)")
+        # 음의 자기자본이면 ROE 대신 ROA로 표시 (sign trap 방지)
+        if neg_eq and roa is not None:
+            parts.append(f"{label} quality (ROA {roa*100:.0f}%, op {op_m*100:.0f}%, neg eq)")
+        elif roe is not None:
+            parts.append(f"{label} quality (ROE {roe*100:.0f}%, op {op_m*100:.0f}%)")
 
     rev_records = annual.get("revenue") or []
     rs, re = _series_endpoints(rev_records, CAGR_YEARS)
@@ -262,6 +313,9 @@ def generate_summary(payload: dict, q, g, h) -> str:
     de = ratios.get("debt_to_equity")
     if ni is not None and ni < 0:
         parts.append(f"loss ${ni/1e9:.1f}B")
+    elif neg_eq:
+        # 음의 D/E는 leverage 라벨 무의미 — 자기자본 음수만 명시.
+        parts.append("negative equity")
     elif de is not None:
         if de < 1:
             parts.append(f"low leverage (D/E {de:.2f})")
