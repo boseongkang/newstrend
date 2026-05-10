@@ -132,8 +132,20 @@ def commit_and_push(cache_dir: Path) -> None:
         ["git", "commit", "-m", f"sentiment_per_day local backfill: {today}"],
         cwd=cache_dir, check=True,
     )
-    subprocess.run(["git", "push", "origin", "data-cache"], cwd=cache_dir, check=True)
-    print("[commit] pushed to origin/data-cache")
+    # Retry-on-rebase: trend-site CI pushes prices to data-cache during our
+    # ~20min scoring window, which would otherwise reject our push. Sentiment
+    # and prices touch disjoint paths so rebase is conflict-free.
+    for attempt in range(1, 4):
+        push = subprocess.run(["git", "push", "origin", "data-cache"], cwd=cache_dir)
+        if push.returncode == 0:
+            print("[commit] pushed to origin/data-cache")
+            return
+        if attempt == 3:
+            print("[commit] push still failing after 2 rebase attempts; giving up", file=sys.stderr)
+            sys.exit(1)
+        print(f"[commit] push rejected (attempt {attempt}); fetching + rebasing on origin/data-cache")
+        subprocess.run(["git", "fetch", "origin", "data-cache"], cwd=cache_dir, check=True)
+        subprocess.run(["git", "rebase", "origin/data-cache"], cwd=cache_dir, check=True)
 
 
 def main() -> None:
