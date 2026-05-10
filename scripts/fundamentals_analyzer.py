@@ -252,6 +252,7 @@ def score_ticker(payload: dict) -> dict:
             "growth_score":  None,
             "health_score":  None,
             "fundamental_score": None,
+            "negative_equity": False,
             "summary": "no fundamentals available (metadata-only)",
             "rationale": {"quality": [], "growth": [], "health": []},
         }
@@ -261,13 +262,29 @@ def score_ticker(payload: dict) -> dict:
     hf = h if h is not None else NEUTRAL_FILL
     fund = W_QUALITY * qf + W_GROWTH * gf + W_HEALTH * hf
 
+    # Negative-equity guard at composite level. Individual ratios already use
+    # ROA fallback / neutralized D/E (see calculate_quality_score, calculate_health_score),
+    # but growth_score is equity-independent so a strong-revenue buybacker can
+    # still produce a misleadingly high composite. Suppress fundamental_score
+    # entirely; keep q/g/h visible for diagnostics. Affects ~SBUX/MAR/PEP.
+    neg_eq = _is_negative_equity(payload)
+    fund_out: float | None
+    if neg_eq:
+        fund_out = None
+        summary = generate_summary(payload, q, g, h)
+        summary = f"[neg-equity: pillar suppressed] {summary}"
+    else:
+        fund_out = round(fund, 3)
+        summary = generate_summary(payload, q, g, h)
+
     return {
         "ticker": payload.get("ticker"),
         "quality_score":     None if q is None else round(q, 3),
         "growth_score":      None if g is None else round(g, 3),
         "health_score":      None if h is None else round(h, 3),
-        "fundamental_score": round(fund, 3),
-        "summary": generate_summary(payload, q, g, h),
+        "fundamental_score": fund_out,
+        "negative_equity":   neg_eq,
+        "summary": summary,
         "rationale": {
             "quality": q_parts,
             "growth":  g_parts,
