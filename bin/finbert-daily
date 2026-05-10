@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Daily FinBERT sentiment refresh.
+# Scores any missing days in the last ${WINDOW_DAYS:-60} days and pushes
+# data/sentiment_per_day to origin/data-cache.
+#
+# Usage:
+#   bin/finbert-daily                      # default 60-day window
+#   WINDOW_DAYS=90 bin/finbert-daily       # custom window
+#
+# Wired into launchd via ~/Library/LaunchAgents/com.newstrend.finbert.plist.
+set -euo pipefail
+
+REPO="/Users/newstrend-dev/Projects/newstrend"
+WINDOW_DAYS="${WINDOW_DAYS:-60}"
+
+cd "$REPO"
+exec "$REPO/.venv/bin/python" scripts/sentiment_finbert_local.py \
+    --window-days "$WINDOW_DAYS" \
+    --commit

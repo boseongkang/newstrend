@@ -10,17 +10,26 @@ Now also includes **quick view & daily report generation**.
 
 GitHub Actions handles raw-news collection and the trend-site build, but FinBERT
 sentiment scoring runs locally — M3 MPS is ~52x faster than free-tier CPU and
-the 30-day backfill that timed out on CI finishes in ~14 min locally.
+the 60-day backfill that would have timed out on CI finishes in ~25 min locally.
 
 ```bash
-# one-liner: refresh sentiment cache and push to data-cache
-python scripts/sentiment_finbert_local.py --window-days 30 --commit
+# wrapper (auto-runs daily at 09:00 via launchd):
+bin/finbert-daily                          # default 60-day window
+WINDOW_DAYS=90 bin/finbert-daily           # custom window
+
+# direct invocation:
+python scripts/sentiment_finbert_local.py --window-days 60 --commit
 ```
 
 First run only: pass `--setup` to create the `/tmp/newstrend-cache` worktree.
 On subsequent runs the script auto-detects which days are missing (typically
 just today) and only scores those — usually a few seconds. The push lands on
 the `data-cache` branch where `trend-site.yml` restores it on each CI run.
+
+The launchd plist at `~/Library/LaunchAgents/com.newstrend.finbert.plist`
+fires `bin/finbert-daily` at 09:00 daily; logs go to
+`~/Library/Logs/newstrend-finbert.log`. Manual kickstart:
+`launchctl kickstart gui/$(id -u)/com.newstrend.finbert`.
 
 ---
 
