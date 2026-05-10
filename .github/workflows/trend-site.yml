@@ -232,6 +232,20 @@ jobs:
             echo "::warning::no sentiment_per_day cache on data-cache. Run scripts/sentiment_finbert_local.py --commit locally to seed."
           fi
 
+      - name: Restore local FinBERT run metadata from data-cache
+        run: |
+          mkdir -p site/data
+          if git show-ref --verify refs/remotes/origin/data-cache 2>/dev/null; then
+            git restore --worktree --source=origin/data-cache -- data/local_runs.json 2>/dev/null || true
+            git reset HEAD data/local_runs.json 2>/dev/null || true
+          fi
+          if [ -f data/local_runs.json ]; then
+            cp data/local_runs.json site/data/local_runs.json
+            echo "local_runs.json restored: $(cat site/data/local_runs.json)"
+          else
+            echo "no local_runs.json yet on data-cache (local launchd hasn't run with the metadata patch)"
+          fi
+
       - name: Aggregate ticker sentiment
         run: |
           set -euo pipefail
@@ -434,6 +448,54 @@ jobs:
       - name: Weekly — meta-analysis + improvement plan
         run: |
           python scripts/weekly_analyzer.py || true
+
+      - name: Generate site/data/health.json
+        env:
+          GH_RUN_ID: ${{ github.run_id }}
+          GH_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GH_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, datetime
+          from pathlib import Path
+
+          def git(*args):
+              try:
+                  return subprocess.check_output(['git', *args], stderr=subprocess.DEVNULL).decode().strip()
+              except subprocess.CalledProcessError:
+                  return ''
+
+          dc_sha  = git('rev-parse', 'origin/data-cache')
+          dc_iso  = git('log', '-1', '--format=%cI', 'origin/data-cache')
+          dc_subj = git('log', '-1', '--format=%s',  'origin/data-cache')
+
+          sent_dir = Path('data/sentiment_per_day')
+          sent_files = sorted(p.name for p in sent_dir.glob('sentiment_*.json')) if sent_dir.is_dir() else []
+
+          phist_dir = Path('site/data/predictions_history')
+          phist = sorted(phist_dir.glob('*.json')) if phist_dir.is_dir() else []
+          latest_pred = phist[-1].relative_to('site').as_posix() if phist else None
+
+          out = {
+              'ci_run_at':  datetime.datetime.utcnow().isoformat(timespec='seconds') + 'Z',
+              'ci_run_id':  os.environ.get('GH_RUN_ID'),
+              'ci_run_url': os.environ.get('GH_RUN_URL'),
+              'ci_sha':     (os.environ.get('GH_SHA') or '')[:40],
+              'data_cache_head': ({
+                  'sha': dc_sha[:40],
+                  'committed_at': dc_iso,
+                  'subject': dc_subj,
+              } if dc_sha else None),
+              'sentiment_cache': {
+                  'count':    len(sent_files),
+                  'earliest': sent_files[0][len('sentiment_'):-len('.json')] if sent_files else None,
+                  'latest':   sent_files[-1][len('sentiment_'):-len('.json')] if sent_files else None,
+              },
+              'latest_predictions_path': latest_pred,
+          }
+          Path('site/data/health.json').write_text(json.dumps(out, indent=2))
+          print(json.dumps(out, indent=2))
+          PY
 
       - name: Commit self-correcting outputs to main
         run: |

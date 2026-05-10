@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · System Health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--purple:#b380ff;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg1)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+
+.unified-header{height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:100}
+.brand{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300;margin-left:6px}
+nav{display:flex;gap:2px;flex-wrap:wrap}
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:6px 12px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10px;color:var(--green)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+main{max-width:1300px;margin:20px auto;padding:0 24px}
+h1{font-family:var(--fm);font-size:14px;font-weight:600;letter-spacing:.14em;
+   text-transform:uppercase;margin-bottom:6px}
+.subtitle{font-family:var(--fm);font-size:11px;color:var(--t3);margin-bottom:20px}
+
+/* alert banner ---------------------------------------------------- */
+.alert{padding:12px 18px;margin-bottom:20px;font-family:var(--fm);font-size:12px;
+       display:flex;align-items:center;gap:14px;border:1px solid}
+.alert .lvl{font-size:9px;font-weight:600;padding:3px 10px;letter-spacing:.16em;
+            text-transform:uppercase}
+.alert.ok{color:var(--green);border-color:rgba(0,230,118,.35);background:rgba(0,230,118,.05)}
+.alert.ok .lvl{background:var(--green);color:var(--bg0)}
+.alert.warn{color:var(--amber);border-color:rgba(255,179,0,.35);background:rgba(255,179,0,.06)}
+.alert.warn .lvl{background:var(--amber);color:var(--bg0)}
+.alert.crit{color:var(--red);border-color:rgba(255,68,68,.45);background:rgba(255,68,68,.07)}
+.alert.crit .lvl{background:var(--red);color:var(--bg0)}
+.alert ul{list-style:none;display:flex;flex-direction:column;gap:3px;margin-left:6px}
+
+/* sections -------------------------------------------------------- */
+.section{background:var(--bg1);border:1px solid var(--b1);margin-bottom:20px}
+.sec-hdr{padding:14px 20px;border-bottom:1px solid var(--b1);display:flex;
+         align-items:center;justify-content:space-between}
+.sec-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--t1)}
+.sec-meta{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.sec-meta a,a.link{color:var(--cyan);text-decoration:none}
+.sec-meta a:hover,a.link:hover{text-decoration:underline}
+.sec-body{padding:18px 20px}
+
+/* pipeline kpi grid ---------------------------------------------- */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1);
+          border:1px solid var(--b1)}
+.kpi{background:var(--bg1);padding:16px 14px}
+.kpi-label{font-family:var(--fm);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+           color:var(--t3);margin-bottom:6px}
+.kpi-val{font-family:var(--fm);font-size:18px;font-weight:600;color:var(--t1);
+         font-feature-settings:"tnum"}
+.kpi-val.ok{color:var(--green)}
+.kpi-val.warn{color:var(--amber)}
+.kpi-val.crit{color:var(--red)}
+.kpi-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:4px}
+
+/* mode banner ----------------------------------------------------- */
+.mode-banner{padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;
+             gap:12px;background:var(--bg2);border:1px solid var(--b1);flex-wrap:wrap}
+.mode-pill{font-family:var(--fm);font-size:10px;font-weight:600;letter-spacing:.14em;
+           padding:4px 10px;text-transform:uppercase}
+.mode-pill.on{color:var(--green);background:rgba(0,230,118,.08);border:1px solid var(--green)}
+.mode-pill.off{color:var(--t3);background:rgba(50,70,100,.08);border:1px solid var(--b2)}
+.mode-text{font-family:var(--fm);font-size:11px;color:var(--t2)}
+
+/* tables ---------------------------------------------------------- */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:900px){.split{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.sub-title{font-family:var(--fm);font-size:10px;font-weight:600;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--t2);margin-bottom:10px}
+.bartable{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:11px}
+.bartable th{padding:9px 10px;text-align:left;color:var(--t3);font-weight:500;
+             font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+             border-bottom:1px solid var(--b1)}
+.bartable td{padding:6px 10px;border-bottom:1px solid var(--b1);color:var(--t1)}
+.bartable .num{text-align:right;font-feature-settings:"tnum"}
+.bartable .muted{color:var(--t2)}
+.tag{font-family:var(--fm);font-size:9px;padding:2px 8px;letter-spacing:.06em;
+     text-transform:uppercase;display:inline-block}
+.tag-on{color:var(--green);background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3)}
+.tag-off{color:var(--t3);background:rgba(50,70,100,.05);border:1px solid var(--b2)}
+
+/* regime block ---------------------------------------------------- */
+.regime-block{margin-bottom:14px}
+.regime-block:last-child{margin-bottom:0}
+.regime-head{font-family:var(--fm);font-size:10px;font-weight:600;color:var(--cyan);
+             letter-spacing:.1em;margin-bottom:6px}
+.regime-empty{font-family:var(--fm);font-size:10px;color:var(--t3);font-style:italic}
+
+/* strategy grid -------------------------------------------------- */
+.strat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:700px){.strat-grid{grid-template-columns:1fr}}
+.strat-card{background:var(--bg2);border:1px solid var(--b1);padding:14px 16px}
+.strat-name{font-family:var(--fm);font-size:11px;font-weight:600;color:var(--cyan);
+            letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.strat-row{display:flex;justify-content:space-between;font-family:var(--fm);
+           font-size:11px;padding:4px 0;color:var(--t2)}
+.strat-row .v{color:var(--t1);font-feature-settings:"tnum"}
+.strat-row .v.up{color:var(--green)}
+.strat-row .v.down{color:var(--red)}
+
+/* quick links ---------------------------------------------------- */
+.ql{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+@media(max-width:700px){.ql{grid-template-columns:repeat(2,1fr)}}
+.ql a{display:block;padding:18px 14px;background:var(--bg2);border:1px solid var(--b1);
+      font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
+      text-transform:uppercase;color:var(--t1);text-decoration:none;text-align:center;
+      transition:all .12s}
+.ql a:hover{color:var(--cyan);border-color:var(--cyan);background:var(--bg1)}
+.ql a .desc{font-size:9px;font-weight:400;color:var(--t3);margin-top:4px;letter-spacing:.05em;
+            text-transform:none;display:block}
+
+.empty{font-family:var(--fm);font-size:11px;color:var(--t3);font-style:italic;
+       padding:20px;text-align:center}
+.spinner{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cyan);
+         margin-right:8px;animation:blink 1s infinite}
+</style>
+</head>
+<body>
+<header class="unified-header">
+  <div class="brand">NEWSTREND <em>// SYSTEM HEALTH</em></div>
+  <nav>
+    <a href="./index.html">DASHBOARD</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
+    <a href="./hidden_gems.html">GEMS</a>
+    <a href="./domino.html">DOMINO</a>
+    <a href="./insider_activity.html">INSIDER</a>
+    <a href="./backtest.html">BACKTEST</a>
+    <a href="./paper_trading.html">PAPER</a>
+    <a href="./accuracy.html">ACCURACY</a>
+    <a href="./system_evolution.html">EVOLUTION</a>
+    <a href="./gap_minimization.html">GAP</a>
+    <a href="./weekly_report.html">WEEKLY_R</a>
+    <a href="./ml_baseline.html">ML</a>
+    <a href="./system_health.html" class="on">HEALTH</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="live"><span class="dot"></span>HEALTH</div>
+    <div id="ts">—</div>
+  </div>
+</header>
+
+<main>
+  <h1>System Health</h1>
+  <div class="subtitle">Pipeline status • calibration v2 • alerts</div>
+
+  <div id="alert-banner"></div>
+
+  <!-- Section 1: Pipeline Health -->
+  <div class="section">
+    <div class="sec-hdr">
+      <span class="sec-title">Pipeline Health</span>
+      <span class="sec-meta" id="ph-meta">—</span>
+    </div>
+    <div class="sec-body">
+      <div class="kpi-grid" id="pipeline-kpi">
+        <div class="empty"><span class="spinner"></span>Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Calibration v2 -->
+  <div class="section">
+    <div class="sec-hdr">
+      <span class="sec-title">Calibration v2 Status</span>
+      <span class="sec-meta" id="cal-meta">—</span>
+    </div>
+    <div class="sec-body">
+      <div class="mode-banner" id="mode-banner">
+        <div class="empty"><span class="spinner"></span>Loading…</div>
+      </div>
+      <div class="split">
+        <div>
+          <div class="sub-title">Pillars (Global)</div>
+          <table class="bartable" id="pillars-global">
+            <thead><tr><th>PILLAR</th><th class="num">N</th><th>STATE</th><th class="num">EMA</th><th>REASON</th></tr></thead>
+            <tbody><tr><td colspan="5"><div class="empty">Loading…</div></td></tr></tbody>
+          </table>
+        </div>
+        <div>
+          <div class="sub-title">Pillars by Regime</div>
+          <div id="pillars-regime"><div class="empty">Loading…</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Strategy Snapshot -->
+  <div class="section">
+    <div class="sec-hdr">
+      <span class="sec-title">Strategy Snapshot</span>
+      <span class="sec-meta"><a href="./paper_trading.html">Full P&L →</a></span>
+    </div>
+    <div class="sec-body">
+      <div class="strat-grid" id="strat-grid">
+        <div class="empty"><span class="spinner"></span>Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Quick Links -->
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">Quick Links</span></div>
+    <div class="sec-body">
+      <div class="ql">
+        <a href="./index.html">DASHBOARD<span class="desc">today's snapshot</span></a>
+        <a href="./predict.html">PREDICT<span class="desc">full action list</span></a>
+        <a href="./paper_trading.html">PAPER<span class="desc">strategy P&L</span></a>
+        <a href="./accuracy.html">ACCURACY<span class="desc">vs realized</span></a>
+        <a href="./weekly_report.html">WEEKLY<span class="desc">improvement plan</span></a>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const AGE_THRESHOLDS = { sentimentStaleHr: 24, localStaleHr: 36, ciStaleHr: 24 };
+
+function fmtAgo(iso){
+  if(!iso) return '—';
+  const d = new Date(iso);
+  if(isNaN(d)) return '—';
+  const ms = Date.now() - d.getTime();
+  const h = ms/3600e3;
+  if(h < 1) return Math.round(ms/60e3) + 'm ago';
+  if(h < 48) return h.toFixed(1) + 'h ago';
+  return (h/24).toFixed(1) + 'd ago';
+}
+function ageHours(iso){
+  if(!iso) return Infinity;
+  const d = new Date(iso);
+  if(isNaN(d)) return Infinity;
+  return (Date.now() - d.getTime())/3600e3;
+}
+function ageStatus(iso, threshHr){
+  const a = ageHours(iso);
+  if(a === Infinity) return 'crit';
+  if(a > threshHr*1.5) return 'crit';
+  if(a > threshHr) return 'warn';
+  return 'ok';
+}
+async function getJSON(path){
+  try{ const r = await fetch(path, {cache:'no-store'}); if(!r.ok) return null;
+       return await r.json(); }catch(_){ return null; }
+}
+
+function renderAlert(state){
+  const el = document.getElementById('alert-banner');
+  if(state.issues.length === 0){
+    el.innerHTML = `<div class="alert ok"><span class="lvl">OK</span>
+      <span>All systems healthy — pipeline fresh, calibration loaded, strategies tracked.</span></div>`;
+    return;
+  }
+  const cls = state.issues.some(i=>i.lvl==='crit') ? 'crit' : 'warn';
+  const label = cls === 'crit' ? 'CRITICAL' : 'WARNING';
+  el.innerHTML = `<div class="alert ${cls}"><span class="lvl">${label}</span>
+    <ul>${state.issues.map(i=>`<li>${i.msg}</li>`).join('')}</ul></div>`;
+}
+
+function renderPipeline(health, localRuns, sentiment){
+  const ciAt = health?.ci_run_at;
+  const dcAt = health?.data_cache_head?.committed_at;
+  const sentLatest = (sentiment?.dates||[]).slice(-1)[0];
+  // sentiment latest is a date string YYYY-MM-DD; treat as that day 00:00 UTC
+  const sentIso = sentLatest ? sentLatest + 'T00:00:00Z' : null;
+  const lrAt = localRuns?.last_run_at;
+  const lrExit = localRuns?.last_exit;
+  const lrDays = localRuns?.days_scored;
+
+  const cells = [
+    {label:'Local FinBERT', val: lrAt ? fmtAgo(lrAt) : 'never',
+     sub: lrAt ? `exit=${lrExit ?? '?'} · scored ${lrDays ?? '?'}d` : 'launchd has not run yet',
+     state: lrAt ? (lrExit === 0 ? ageStatus(lrAt, AGE_THRESHOLDS.localStaleHr) : 'crit') : 'warn'},
+    {label:'Sentiment Cache', val: sentLatest || '—',
+     sub: `latest day on data-cache`,
+     state: sentIso ? ageStatus(sentIso, AGE_THRESHOLDS.sentimentStaleHr) : 'crit'},
+    {label:'Data-cache Head', val: fmtAgo(dcAt),
+     sub: health?.data_cache_head?.subject ? health.data_cache_head.subject.slice(0,40) : '—',
+     state: dcAt ? ageStatus(dcAt, AGE_THRESHOLDS.sentimentStaleHr) : 'warn'},
+    {label:'CI Build', val: fmtAgo(ciAt),
+     sub: health?.ci_sha ? `sha ${health.ci_sha.slice(0,7)}` : '—',
+     state: ciAt ? ageStatus(ciAt, AGE_THRESHOLDS.ciStaleHr) : 'warn'},
+  ];
+  document.getElementById('pipeline-kpi').innerHTML = cells.map(c => `
+    <div class="kpi">
+      <div class="kpi-label">${c.label}</div>
+      <div class="kpi-val ${c.state}">${c.val}</div>
+      <div class="kpi-sub">${c.sub}</div>
+    </div>`).join('');
+
+  // Build alert state
+  const issues = [];
+  if(!sentLatest || ageHours(sentIso) > AGE_THRESHOLDS.sentimentStaleHr*1.5)
+    issues.push({lvl:'crit', msg:`sentiment cache stale (${fmtAgo(sentIso)}) — run bin/finbert-daily`});
+  else if(ageHours(sentIso) > AGE_THRESHOLDS.sentimentStaleHr)
+    issues.push({lvl:'warn', msg:`sentiment cache aging (${fmtAgo(sentIso)})`});
+  if(localRuns && lrExit !== 0 && lrExit !== undefined)
+    issues.push({lvl:'crit', msg:`launchd last run failed (exit=${lrExit}) — check ~/Library/Logs/newstrend-finbert.log`});
+  if(lrAt && ageHours(lrAt) > AGE_THRESHOLDS.localStaleHr)
+    issues.push({lvl:'warn', msg:`launchd has not run in ${fmtAgo(lrAt)}`});
+  if(!ciAt || ageHours(ciAt) > AGE_THRESHOLDS.ciStaleHr*2)
+    issues.push({lvl:'warn', msg:`CI build is ${fmtAgo(ciAt)} old`});
+  renderAlert({issues});
+  document.getElementById('ph-meta').textContent = ciAt ? `last CI ${fmtAgo(ciAt)}` : '—';
+}
+
+function renderCalibration(weights, latestSnap){
+  const md = weights?.mode_detail || {};
+  const flags = [
+    {key:'pillar_weights', label:'Pillar Weights'},
+    {key:'pillar_weights_regime', label:'Regime Weights'},
+    {key:'confidence_threshold', label:'Threshold'},
+  ];
+  const banner = document.getElementById('mode-banner');
+  const blendRegime = latestSnap?.learned_blend?.regime;
+  const blendActive = latestSnap?.learned_blend?.active;
+  banner.innerHTML = `
+    ${flags.map(f => `<span class="mode-pill ${md[f.key] ? 'on' : 'off'}">${f.label}: ${md[f.key] ? 'ACTIVE' : 'OFF'}</span>`).join('')}
+    <span class="mode-text">mode=${weights?.mode || '—'} · blend=${blendActive ? 'ACTIVE' : 'inactive'} · regime=${blendRegime || '—'}</span>
+  `;
+
+  const pillars = weights?.pillars || {};
+  const rows = Object.keys(pillars).map(k => {
+    const p = pillars[k];
+    const tag = p.applied ? '<span class="tag tag-on">APPLIED</span>' : '<span class="tag tag-off">advisory</span>';
+    const reason = (p.reason || '').replace(/_/g,' ');
+    return `<tr><td>${k}</td><td class="num">${p.n}</td><td>${tag}</td>
+      <td class="num">${(p.ema_weight ?? 1).toFixed(3)}</td>
+      <td class="muted">${reason}</td></tr>`;
+  });
+  document.querySelector('#pillars-global tbody').innerHTML = rows.length
+    ? rows.join('')
+    : '<tr><td colspan="5"><div class="empty">No pillars data</div></td></tr>';
+
+  const byRegime = weights?.pillars_by_regime || {};
+  const regimes = Object.keys(byRegime);
+  const regEl = document.getElementById('pillars-regime');
+  if(regimes.length === 0){
+    regEl.innerHTML = '<div class="regime-empty">No regime-conditional data yet — calibrator activates when n ≥ 12 per regime.</div>';
+  } else {
+    regEl.innerHTML = regimes.map(rg => {
+      const ps = byRegime[rg];
+      const applied = Object.values(ps).filter(p=>p.applied).length;
+      const totN = Object.values(ps).reduce((s,p)=>s+(p.n||0),0);
+      return `<div class="regime-block">
+        <div class="regime-head">${rg}</div>
+        <table class="bartable">
+          <thead><tr><th>PILLAR</th><th class="num">N</th><th>STATE</th><th class="num">EMA</th></tr></thead>
+          <tbody>${Object.keys(ps).map(k=>{
+            const p = ps[k];
+            const tag = p.applied ? '<span class="tag tag-on">on</span>' : '<span class="tag tag-off">·</span>';
+            return `<tr><td>${k}</td><td class="num">${p.n}</td><td>${tag}</td>
+              <td class="num">${(p.ema_weight ?? 1).toFixed(3)}</td></tr>`;
+          }).join('')}</tbody>
+        </table>
+        <div class="kpi-sub" style="margin-top:6px">applied ${applied}/${Object.keys(ps).length} · total n=${totN}</div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('cal-meta').textContent = weights?.updated ? `updated ${fmtAgo(weights.updated)}` : '—';
+}
+
+function renderStrategies(paper){
+  const el = document.getElementById('strat-grid');
+  const strats = paper?.strategies || {};
+  const names = Object.keys(strats).filter(n => typeof strats[n] === 'object');
+  if(names.length === 0){
+    el.innerHTML = '<div class="empty">No paper trading data yet</div>';
+    return;
+  }
+  el.innerHTML = names.slice(0,3).map(name => {
+    const s = strats[name] || {};
+    const m = s.metrics || {};
+    const ret = m.total_return_pct;
+    const winRate = m.win_rate;          // 0..1
+    const nCompleted = m.n_completed ?? '—';
+    const nOpen = m.n_open ?? '—';
+    const cls = ret == null ? '' : (ret >= 0 ? 'up' : 'down');
+    const retDisp = ret == null ? '—' : ((ret >= 0 ? '+' : '') + ret.toFixed(2) + '%');
+    const wrDisp = winRate == null ? '—' : (winRate*100).toFixed(0) + '%';
+    return `<div class="strat-card">
+      <div class="strat-name">${(s.label || name).replace(/_/g,' ')}</div>
+      <div class="strat-row"><span>total return</span><span class="v ${cls}">${retDisp}</span></div>
+      <div class="strat-row"><span>win rate (closed)</span><span class="v">${wrDisp}</span></div>
+      <div class="strat-row"><span>trades closed/open</span><span class="v">${nCompleted}/${nOpen}</span></div>
+    </div>`;
+  }).join('');
+}
+
+(async function init(){
+  document.getElementById('ts').textContent = new Date().toUTCString().replace('GMT','UTC').slice(5,25);
+  const [health, localRuns, sentiment, weights, paper] = await Promise.all([
+    getJSON('./data/health.json'),
+    getJSON('./data/local_runs.json'),
+    getJSON('./data/ticker_sentiment.json'),
+    getJSON('./data/pillar_weights.json'),
+    getJSON('./data/paper_trading_history.json'),
+  ]);
+  let latestSnap = null;
+  const latestPath = health?.latest_predictions_path;
+  if(latestPath) latestSnap = await getJSON('./' + latestPath.replace(/^site\//,''));
+
+  renderPipeline(health, localRuns, sentiment);
+  renderCalibration(weights, latestSnap);
+  renderStrategies(paper);
+})();
+</script>
+</body>
+</html>

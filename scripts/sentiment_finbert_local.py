@@ -19,10 +19,12 @@ Daily use after backfill:
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import subprocess
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -113,16 +115,38 @@ def score_one_day(input_jsonl: Path, output_json: Path, batch_size: int) -> tupl
     return True, elapsed
 
 
+def write_local_runs(cache_dir: Path, *, last_exit: int, days_scored: int,
+                     days_failed: int, days_skipped: int,
+                     elapsed_seconds: float, window_days: int) -> None:
+    """Write data/local_runs.json — the launchd-side metadata the system_health
+    page reads to detect stale/failed runs. Lives on data-cache alongside
+    sentiment_per_day so it ships with the same push."""
+    out = cache_dir / "data" / "local_runs.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "last_run_at":     datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+        "last_exit":       last_exit,
+        "days_scored":     days_scored,
+        "days_failed":     days_failed,
+        "days_skipped":    days_skipped,
+        "elapsed_seconds": round(elapsed_seconds, 1),
+        "window_days":     window_days,
+    }
+    out.write_text(json.dumps(payload, indent=2))
+    print(f"[local_runs] {out.relative_to(cache_dir)}: scored={days_scored} skipped={days_skipped} exit={last_exit}")
+
+
 def commit_and_push(cache_dir: Path) -> None:
-    """Stage data/sentiment_per_day, commit, push origin data-cache."""
+    """Stage data/sentiment_per_day + data/local_runs.json, commit, push origin data-cache."""
     print(f"[commit] staging changes in {cache_dir}")
     # Make sure we're on a branch (worktree may be detached).
     subprocess.run(["git", "checkout", "-B", "data-cache"], cwd=cache_dir, check=False)
-    # data-cache branch removes .gitignore; stage the sentiment dir explicitly.
+    # data-cache branch removes .gitignore; stage tracked files explicitly.
     subprocess.run(["git", "rm", "-f", "--cached", ".gitignore"],
                    cwd=cache_dir, check=False, capture_output=True)
     (cache_dir / ".gitignore").unlink(missing_ok=True)
-    subprocess.run(["git", "add", "data/sentiment_per_day/"], cwd=cache_dir, check=True)
+    subprocess.run(["git", "add", "data/sentiment_per_day/", "data/local_runs.json"],
+                   cwd=cache_dir, check=True)
     diff = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=cache_dir)
     if diff.returncode == 0:
         print("[commit] no changes to push")
@@ -178,9 +202,13 @@ def main() -> None:
     print(f"[plan] window={args.window_days}d  news_archive={len(news)}  "
           f"target={len(target)}  cached={len(cached & {d for d,_ in target})}  "
           f"missing={len(missing)}")
+    days_skipped = len(target) - len(missing)
     if not missing:
         print("[plan] all target days already cached — nothing to do")
         if args.commit:
+            write_local_runs(cache_dir, last_exit=0, days_scored=0, days_failed=0,
+                             days_skipped=days_skipped, elapsed_seconds=0.0,
+                             window_days=args.window_days)
             commit_and_push(cache_dir)
         return
 
@@ -204,8 +232,16 @@ def main() -> None:
     print(f"\n[done] scored {n_ok}/{len(missing)}  failed={n_fail}  "
           f"total={total/60:.1f}min  avg={avg:.1f}s/day")
 
-    if args.commit and n_ok > 0:
+    if args.commit:
+        write_local_runs(cache_dir, last_exit=(0 if n_fail == 0 else 1),
+                         days_scored=n_ok, days_failed=n_fail,
+                         days_skipped=days_skipped, elapsed_seconds=total,
+                         window_days=args.window_days)
+        # Always commit — even if 0 new sentiment files, local_runs.json
+        # timestamp moved and the system_health page reads it.
         commit_and_push(cache_dir)
+        if n_fail > 0:
+            sys.exit(1)
 
 
 if __name__ == "__main__":
