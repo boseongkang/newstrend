@@ -176,12 +176,19 @@ def load_insider_signals(insider_index_path: str) -> dict[str, dict]:
 
 
 def load_pillar_multipliers(path: str, blend_alpha: float = 0.3,
-                            min_n: int = 30) -> dict:
+                            min_n: int = 30, min_n_regime: int = 12,
+                            regime: str | None = None) -> dict:
     """pillar_weights.json → {pillar_name: multiplier in [0.85, 1.3]}.
 
     Conservative blend: multiplier = (1 - α)·1.0 + α·ema_weight, applied only
     when calibrator marked the pillar `applied=True` AND n ≥ min_n. Otherwise
     multiplier stays 1.0 (no effect on hardcoded weights).
+
+    Regime-conditional preference: if `regime` is provided AND
+    pillars_by_regime[regime][pkey] has applied=True with n ≥ min_n_regime,
+    use that. Else fall back to the global pillars[pkey] gate. This way each
+    pillar resolves to the best signal available — regime-specific when we
+    have enough data, global otherwise, hardcoded if neither qualifies.
 
     α=0.3 default keeps blends within ±15% of hardcoded — safe even if learned
     weights drift early. Output dict is keyed by pillar name as written by
@@ -199,17 +206,32 @@ def load_pillar_multipliers(path: str, blend_alpha: float = 0.3,
         return {}
     if d.get("mode") != "active":
         return {}
-    out: dict[str, dict] = {}
-    for name, pdata in (d.get("pillars") or {}).items():
+
+    def _gate(pdata: dict, n_floor: int) -> dict | None:
         if not pdata.get("applied"):
-            continue
-        if (pdata.get("n") or 0) < min_n:
-            continue
+            return None
+        if (pdata.get("n") or 0) < n_floor:
+            return None
         ema = pdata.get("ema_weight")
         if ema is None:
-            continue
+            return None
         mult = (1.0 - blend_alpha) * 1.0 + blend_alpha * float(ema)
-        out[name] = {"mult": mult, "ema": ema, "n": pdata.get("n")}
+        return {"mult": mult, "ema": ema, "n": pdata.get("n")}
+
+    out: dict[str, dict] = {}
+    pillars_global = d.get("pillars") or {}
+    pillars_regime = ((d.get("pillars_by_regime") or {}).get(regime) or {}) if regime else {}
+
+    pkeys = set(pillars_global) | set(pillars_regime)
+    for name in pkeys:
+        # Prefer regime-specific when available, fall back to global.
+        rg_entry = _gate(pillars_regime.get(name) or {}, min_n_regime)
+        if rg_entry is not None:
+            out[name] = {**rg_entry, "source": f"regime:{regime}"}
+            continue
+        gl_entry = _gate(pillars_global.get(name) or {}, min_n)
+        if gl_entry is not None:
+            out[name] = {**gl_entry, "source": "global"}
     return out
 
 
@@ -663,7 +685,9 @@ def main():
     ap.add_argument("--learned-blend-alpha", type=float, default=0.3,
                     help="conservative blend factor: w_eff = (1-α)·hardcoded + α·learned")
     ap.add_argument("--learned-min-n", type=int, default=30,
-                    help="apply learned weights only when pillar n ≥ this")
+                    help="apply global learned weights only when pillar n ≥ this")
+    ap.add_argument("--learned-min-n-regime", type=int, default=12,
+                    help="apply regime-conditional learned weights when n ≥ this (lower bar; records split per regime)")
     ap.add_argument("--min-conf", type=float, default=0.0)
     args = ap.parse_args()
 
@@ -675,20 +699,29 @@ def main():
     insider_today = load_insider_signals(args.insider_index)
     print(f"Insider signals: {len(insider_today)} tickers (Phase 5)")
 
-    # Conservative learned-weight blend. Multiplier 1.0 = no-op (current state:
-    # all pillars n=0 or applied=False → blend dict is empty → exact-match output).
+    # Market regime drives regime-conditional pillar lookup below.
+    market_regime = analyze_market_regime(ta_data)
+    current_regime = market_regime.get("regime", "NEUTRAL")
+    print(f"Market regime: {current_regime} | Fear/Greed: {market_regime['fear_greed']} ({market_regime['fear_greed_label']})")
+
+    # Conservative learned-weight blend. Multiplier 1.0 = no-op when a pillar
+    # has no qualifying signal in either the regime-specific or global path.
+    # Regime preference: pillars_by_regime[current_regime] beats global pillars.
     pillar_mults_raw = load_pillar_multipliers(
         args.pillar_weights,
         blend_alpha=args.learned_blend_alpha,
         min_n=args.learned_min_n,
+        min_n_regime=args.learned_min_n_regime,
+        regime=current_regime,
     )
     pillar_mults = {name: info["mult"] for name, info in pillar_mults_raw.items()}
     if pillar_mults_raw:
         print(f"Learned blend ACTIVE for {len(pillar_mults_raw)} pillar(s) "
-              f"(α={args.learned_blend_alpha}, min_n={args.learned_min_n}):")
+              f"(α={args.learned_blend_alpha}, min_n_global={args.learned_min_n}, "
+              f"min_n_regime={args.learned_min_n_regime}, regime={current_regime}):")
         for name, info in sorted(pillar_mults_raw.items()):
             print(f"  {name:<22s} n={info['n']:>3d}  ema={info['ema']:.3f} "
-                  f"→ mult={info['mult']:.3f}")
+                  f"→ mult={info['mult']:.3f}  ({info['source']})")
     else:
         print(f"Learned blend INACTIVE (no pillar passed gate; using hardcoded weights)")
 
@@ -730,9 +763,6 @@ def main():
         "news_reliable":  news_days >= 60,
         "sma200_available": price_days >= 200,
     }
-
-    market_regime = analyze_market_regime(ta_data)
-    print(f"Market regime: {market_regime['regime']} | Fear/Greed: {market_regime['fear_greed']} ({market_regime['fear_greed_label']})")
 
     tickers = tickers_list
 
@@ -905,10 +935,12 @@ def main():
         "data_quality":  data_quality,
         "market_regime": market_regime,
         "learned_blend": {
-            "active":   bool(pillar_mults_raw),
-            "alpha":    args.learned_blend_alpha,
-            "min_n":    args.learned_min_n,
-            "pillars":  pillar_mults_raw,
+            "active":        bool(pillar_mults_raw),
+            "alpha":         args.learned_blend_alpha,
+            "min_n":         args.learned_min_n,
+            "min_n_regime":  args.learned_min_n_regime,
+            "regime":        current_regime,
+            "pillars":       pillar_mults_raw,
             "effective_weights": {
                 "sentiment_weight":   round(sentiment_w_eff, 4),
                 "fundamental_weight": round(fundamental_w_eff, 4),

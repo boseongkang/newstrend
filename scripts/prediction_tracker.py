@@ -171,11 +171,30 @@ def load_snapshots() -> list[tuple[str, dict]]:
 
 
 # ── aggregation helpers ─────────────────────────────────────────────────
-def _aggregate(records: list[dict], key_fn, *, horizon: int = 5) -> dict:
+# Time-decay parameters for pillar buckets. τ=14 calendar days means a
+# record from 14 days ago contributes 1/e (~37%) of one from today. This
+# keeps pillar weights responsive when market regime shifts. Other
+# aggregations (by_action, by_dow, etc.) intentionally stay unweighted.
+DECAY_TAU_DAYS = 14.0
+
+
+def _decay_weight(snap_date: str, ref_date: datetime, tau_days: float) -> float:
+    """exp(-Δdays / τ). Returns 1.0 if snap_date == ref_date."""
+    import math
+    days_old = max(0, (ref_date.date() - datetime.fromisoformat(snap_date).date()).days)
+    return math.exp(-days_old / tau_days)
+
+
+def _aggregate(records: list[dict], key_fn, *, horizon: int = 5, weight_fn=None) -> dict:
     """Group records by key_fn, compute accuracy + mean return.
 
     Records with non-directional actions or missing returns at this horizon
     are skipped. Keys returning None are also skipped.
+
+    If `weight_fn` is provided, accuracy and avg_return are computed as
+    weighted means (Σ w·x / Σ w). `n` stays as the raw record count so
+    downstream gates (e.g. n ≥ 30) reason about real data volume, not
+    effective sample size.
     """
     ret_key = f"fwd_{horizon}d_return"
     correct_key = f"correct_{horizon}d"
@@ -186,19 +205,35 @@ def _aggregate(records: list[dict], key_fn, *, horizon: int = 5) -> dict:
         k = key_fn(r)
         if k is None:
             continue
-        g = groups.setdefault(k, {"n": 0, "n_correct": 0, "ret_sum": 0.0})
+        w = float(weight_fn(r)) if weight_fn else 1.0
+        g = groups.setdefault(k, {
+            "n": 0, "n_correct": 0, "ret_sum": 0.0,
+            "w_sum": 0.0, "w_correct": 0.0, "w_ret_sum": 0.0,
+        })
         g["n"] += 1
         g["n_correct"] += int(r[correct_key])
         g["ret_sum"] += r[ret_key]
+        g["w_sum"] += w
+        g["w_correct"] += w * int(r[correct_key])
+        g["w_ret_sum"] += w * r[ret_key]
     out = {}
     for k in sorted(groups):
         g = groups[k]
-        out[k] = {
+        if weight_fn and g["w_sum"] > 0:
+            acc = g["w_correct"] / g["w_sum"]
+            avg_ret = g["w_ret_sum"] / g["w_sum"]
+        else:
+            acc = g["n_correct"] / g["n"]
+            avg_ret = g["ret_sum"] / g["n"]
+        entry = {
             "n": g["n"],
             "n_correct": g["n_correct"],
-            "accuracy": round(g["n_correct"] / g["n"], 3),
-            "avg_return_pct": round(g["ret_sum"] / g["n"] * 100, 3),
+            "accuracy": round(acc, 3),
+            "avg_return_pct": round(avg_ret * 100, 3),
         }
+        if weight_fn:
+            entry["n_eff"] = round(g["w_sum"], 2)
+        out[k] = entry
     return out
 
 
@@ -218,7 +253,16 @@ def _tertile_bounds(values: list[float]) -> tuple[float, float] | None:
     return vs[len(vs) // 3], vs[2 * len(vs) // 3]
 
 
-def _bucket_pillar(records: list[dict], pkey: str, horizon: int = 5) -> dict | None:
+def _bucket_pillar(records: list[dict], pkey: str, horizon: int = 5,
+                   ref_date: datetime | None = None,
+                   tau_days: float = DECAY_TAU_DAYS) -> dict | None:
+    """Tertile-bucket records by `pkey`, then aggregate with time-decay.
+
+    Tertile bounds use raw values (geometric binning is regime-independent).
+    Inside each bucket, accuracy and avg_return are exp(-Δt/τ)-weighted so
+    recent records dominate — keeps the calibrator responsive to regime
+    shifts without throwing away historical data.
+    """
     vals = [r["features"].get(pkey) for r in records if r.get(f"correct_{horizon}d") is not None]
     bounds = _tertile_bounds(vals)
     if bounds is None:
@@ -235,11 +279,15 @@ def _bucket_pillar(records: list[dict], pkey: str, horizon: int = 5) -> dict | N
             return "mid"
         return "high"
 
-    agg = _aggregate(records, key_fn, horizon=horizon)
+    if ref_date is None:
+        ref_date = datetime.now(timezone.utc)
+    weight_fn = lambda r: _decay_weight(r["snap_date"], ref_date, tau_days)
+    agg = _aggregate(records, key_fn, horizon=horizon, weight_fn=weight_fn)
     if not agg:
         return None
     return {
         "tertile_bounds": {"t1": round(t1, 4), "t2": round(t2, 4)},
+        "decay_tau_days": tau_days,
         "buckets": agg,
     }
 
@@ -307,6 +355,22 @@ def run() -> None:
         if bucket is not None:
             by_pillar[pkey] = bucket
 
+    # Regime-conditional buckets: {regime_label: {pkey: bucket}}.
+    # Tertile bounds are computed within each regime so high/low are
+    # regime-relative — a "high quality_score" in RISK-OFF can differ
+    # from "high quality_score" in RISK-ON.
+    by_pillar_by_regime: dict[str, dict] = {}
+    regimes = sorted({r.get("regime") for r in records if r.get("regime")})
+    for rg in regimes:
+        rg_records = [r for r in records if r.get("regime") == rg]
+        rg_buckets: dict[str, dict] = {}
+        for pkey in PILLAR_KEYS:
+            bucket = _bucket_pillar(rg_records, pkey, horizon=primary_h)
+            if bucket is not None:
+                rg_buckets[pkey] = bucket
+        if rg_buckets:
+            by_pillar_by_regime[rg] = rg_buckets
+
     # Coverage summary
     actionable = [r for r in records if r.get(f"correct_{primary_h}d") is not None]
     pending = [r for r in records if r.get(f"fwd_{primary_h}d_return") is None]
@@ -324,6 +388,7 @@ def run() -> None:
         "aggregations": aggregations,
         "aggregations_10d": aggregations_10d,
         "by_pillar_tertile": by_pillar,
+        "by_pillar_tertile_by_regime": by_pillar_by_regime,
         "records": records,
     }
 

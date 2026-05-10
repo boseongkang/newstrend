@@ -61,7 +61,8 @@ PRIOR_WEIGHT = 1.0
 DEFAULT_THRESHOLD = 0.70
 
 # Tunables
-MIN_N_PILLAR = 30          # below this n, weight stays advisory
+MIN_N_PILLAR = 30          # below this n, global weight stays advisory
+MIN_N_PILLAR_REGIME = 12   # lower bar for regime-conditional (records split across regimes)
 MIN_N_THRESHOLD = 20       # below this n in best bucket, threshold stays advisory
 ALPHA_SCALE = 5.0          # 1pp tertile spread → +5% weight tilt
 WEIGHT_CLAMP = (0.5, 2.0)
@@ -92,9 +93,9 @@ def _load_prev_calibration() -> dict | None:
 
 
 # ── pillar α estimation ─────────────────────────────────────────────────
-def _pillar_alpha(accuracy: dict, pkey: str) -> dict:
-    """Use the by_pillar_tertile aggregation from prediction_tracker."""
-    bucket = (accuracy.get("by_pillar_tertile") or {}).get(pkey)
+def _alpha_from_bucket(bucket: dict | None) -> dict:
+    """Translate a pillar bucket aggregation into stats. Shared by global
+    and regime-conditional paths."""
     if not bucket:
         return {
             "n": 0,
@@ -127,13 +128,28 @@ def _pillar_alpha(accuracy: dict, pkey: str) -> dict:
     }
 
 
-def _recommend_pillar_weight(stats: dict, prev_weight: float, gap_delta: float = 0.0) -> dict:
+def _pillar_alpha(accuracy: dict, pkey: str) -> dict:
+    """Global by_pillar_tertile → stats."""
+    return _alpha_from_bucket((accuracy.get("by_pillar_tertile") or {}).get(pkey))
+
+
+def _pillar_alpha_regime(accuracy: dict, regime: str, pkey: str) -> dict:
+    """Per-regime by_pillar_tertile_by_regime[regime][pkey] → stats."""
+    by_rg = accuracy.get("by_pillar_tertile_by_regime") or {}
+    return _alpha_from_bucket((by_rg.get(regime) or {}).get(pkey))
+
+
+def _recommend_pillar_weight(stats: dict, prev_weight: float, gap_delta: float = 0.0,
+                             min_n: int = MIN_N_PILLAR) -> dict:
     """Combine accuracy-derived alpha with gap-derived ΔW into a final weight.
 
     The gap delta nudges the raw weight before shrinkage so that pillars
     where high-tertile predictions over-shoot reality (positive gap)
     shrink, and pillars where they under-shoot grow. Both signals then
     pass through the same shrinkage + EMA gate.
+
+    `min_n` controls the n-threshold for `applied=True`. Regime-conditional
+    pillars use a lower bar (MIN_N_PILLAR_REGIME) since records are split.
     """
     n = stats["n"]
     alpha = stats["alpha_pct"]
@@ -157,7 +173,7 @@ def _recommend_pillar_weight(stats: dict, prev_weight: float, gap_delta: float =
     raw = _clamp(raw_acc + gap_delta, *WEIGHT_CLAMP)
     shrunk = raw * (n / (n + SHRINK_K)) + PRIOR_WEIGHT * (SHRINK_K / (n + SHRINK_K))
     ema = EMA_ALPHA * shrunk + (1.0 - EMA_ALPHA) * prev_weight
-    applied = n >= MIN_N_PILLAR
+    applied = n >= min_n
     return {
         "raw_weight_acc": round(raw_acc, 4),
         "gap_delta": round(gap_delta, 4),
@@ -165,7 +181,7 @@ def _recommend_pillar_weight(stats: dict, prev_weight: float, gap_delta: float =
         "shrunk_weight": round(shrunk, 4),
         "ema_weight": round(ema, 4),
         "applied": applied,
-        "reason": f"n={n}≥{MIN_N_PILLAR}" if applied else f"n={n}<{MIN_N_PILLAR}_advisory",
+        "reason": f"n={n}≥{min_n}" if applied else f"n={n}<{min_n}_advisory",
     }
 
 
@@ -269,19 +285,42 @@ def run() -> None:
 
     # Resolve previous weights / threshold for EMA
     prev_weights: dict[str, float] = {}
+    prev_weights_by_regime: dict[str, dict[str, float]] = {}
     prev_threshold: float = DEFAULT_THRESHOLD
     if prev:
         for pkey, info in (prev.get("pillars") or {}).items():
             prev_weights[pkey] = info.get("ema_weight", PRIOR_WEIGHT)
+        for rg, rg_pillars in (prev.get("pillars_by_regime") or {}).items():
+            prev_weights_by_regime[rg] = {
+                pk: info.get("ema_weight", PRIOR_WEIGHT)
+                for pk, info in rg_pillars.items()
+            }
         prev_threshold = (prev.get("confidence_threshold") or {}).get("ema", DEFAULT_THRESHOLD)
 
-    # ── per-pillar recommendations ──────────────────────────────────────
+    # ── per-pillar recommendations (global) ────────────────────────────
     pillars: dict[str, dict] = {}
     for pkey in PILLAR_KEYS:
         stats = _pillar_alpha(accuracy, pkey)
         gap_delta = (gap_gradients.get(pkey) or {}).get("delta", 0.0) or 0.0
         rec = _recommend_pillar_weight(stats, prev_weights.get(pkey, PRIOR_WEIGHT), gap_delta)
         pillars[pkey] = {**stats, **rec}
+
+    # ── per-pillar recommendations (regime-conditional) ────────────────
+    # gap_delta is global only for now — regime-specific gap not tracked.
+    pillars_by_regime: dict[str, dict] = {}
+    by_rg = accuracy.get("by_pillar_tertile_by_regime") or {}
+    for regime in sorted(by_rg.keys()):
+        rg_prev = prev_weights_by_regime.get(regime, {})
+        rg_pillars: dict[str, dict] = {}
+        for pkey in PILLAR_KEYS:
+            stats = _pillar_alpha_regime(accuracy, regime, pkey)
+            gap_delta = (gap_gradients.get(pkey) or {}).get("delta", 0.0) or 0.0
+            rec = _recommend_pillar_weight(
+                stats, rg_prev.get(pkey, PRIOR_WEIGHT), gap_delta,
+                min_n=MIN_N_PILLAR_REGIME,
+            )
+            rg_pillars[pkey] = {**stats, **rec}
+        pillars_by_regime[regime] = rg_pillars
 
     # ── confidence threshold ───────────────────────────────────────────
     sweep = _threshold_sweep(accuracy.get("records") or [], horizon=5)
@@ -290,15 +329,27 @@ def run() -> None:
     # ── stop loss (diagnostic only) ────────────────────────────────────
     stop_diag = _stop_loss_diagnostics()
 
-    # Overall mode flag
-    any_applied = any(p["applied"] for p in pillars.values()) or thr_rec["applied"]
+    # Overall mode flag — granular so callers can distinguish what's actually applied.
+    pillar_applied = any(p["applied"] for p in pillars.values())
+    pillar_regime_applied = any(
+        p["applied"] for rg in pillars_by_regime.values() for p in rg.values()
+    )
+    threshold_applied = thr_rec["applied"]
+    mode_detail = {
+        "pillar_weights":         pillar_applied,
+        "pillar_weights_regime":  pillar_regime_applied,
+        "confidence_threshold":   threshold_applied,
+    }
+    any_applied = pillar_applied or pillar_regime_applied or threshold_applied
     mode = "active" if any_applied else "advisory"
 
     payload = {
         "updated": _now_iso(),
         "mode": mode,
+        "mode_detail": mode_detail,
         "config": {
             "min_n_pillar": MIN_N_PILLAR,
+            "min_n_pillar_regime": MIN_N_PILLAR_REGIME,
             "min_n_threshold": MIN_N_THRESHOLD,
             "alpha_scale": ALPHA_SCALE,
             "weight_clamp": list(WEIGHT_CLAMP),
@@ -316,6 +367,7 @@ def run() -> None:
             "gap_pillars_with_gradient": sum(1 for v in gap_gradients.values() if (v or {}).get("delta") not in (None, 0)),
         },
         "pillars": pillars,
+        "pillars_by_regime": pillars_by_regime,
         "confidence_threshold": {
             "current_default": DEFAULT_THRESHOLD,
             "previous_ema": prev_threshold,
@@ -344,7 +396,7 @@ def run() -> None:
     print(f"Wrote {WEIGHTS_FILE}  (mode={mode})")
     print(f"  history runs: {len(log['runs'])}")
     print()
-    print("pillar weights:")
+    print("pillar weights (global):")
     for pkey, info in pillars.items():
         marker = "✓" if info["applied"] else "·"
         alpha = info["alpha_pct"]
@@ -353,6 +405,19 @@ def run() -> None:
             f"  {marker} {pkey:22s} n={info['n']:3d}  "
             f"α={alpha_str}  ema={info['ema_weight']:.3f}  ({info['reason']})"
         )
+    if pillars_by_regime:
+        print()
+        print(f"pillar weights by regime (min_n={MIN_N_PILLAR_REGIME}):")
+        for regime in sorted(pillars_by_regime.keys()):
+            print(f"  [{regime}]")
+            for pkey, info in pillars_by_regime[regime].items():
+                marker = "✓" if info["applied"] else "·"
+                alpha = info["alpha_pct"]
+                alpha_str = f"{alpha:+.2f}pp" if alpha is not None else "  n/a "
+                print(
+                    f"    {marker} {pkey:22s} n={info['n']:3d}  "
+                    f"α={alpha_str}  ema={info['ema_weight']:.3f}  ({info['reason']})"
+                )
     print()
     print("confidence threshold sweep:")
     for r in sweep:
