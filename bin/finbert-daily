@@ -3,6 +3,10 @@
 # Scores any missing days in the last ${WINDOW_DAYS:-60} days and pushes
 # data/sentiment_per_day to origin/data-cache.
 #
+# On failure, writes [FAIL] to the log and posts a macOS notification so
+# the user notices when the launchd job goes silently wrong (stale cache
+# would otherwise only surface days later via a stale-looking dashboard).
+#
 # Usage:
 #   bin/finbert-daily                      # default 60-day window
 #   WINDOW_DAYS=90 bin/finbert-daily       # custom window
@@ -13,7 +17,20 @@ set -euo pipefail
 REPO="/Users/newstrend-dev/Projects/newstrend"
 WINDOW_DAYS="${WINDOW_DAYS:-60}"
 
+on_exit() {
+    local code=$?
+    if [ "$code" -ne 0 ]; then
+        local ts
+        ts=$(date '+%Y-%m-%d %H:%M:%S')
+        echo "[FAIL] exit=$code at $ts" >&2
+        /usr/bin/osascript \
+            -e "display notification \"FinBERT daily failed (exit $code) — see ~/Library/Logs/newstrend-finbert.log\" with title \"Newstrend\" sound name \"Basso\"" \
+            >/dev/null 2>&1 || true
+    fi
+}
+trap on_exit EXIT
+
 cd "$REPO"
-exec "$REPO/.venv/bin/python" scripts/sentiment_finbert_local.py \
+"$REPO/.venv/bin/python" scripts/sentiment_finbert_local.py \
     --window-days "$WINDOW_DAYS" \
     --commit
