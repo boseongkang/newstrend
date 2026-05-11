@@ -387,7 +387,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           # 1) 변경사항 없으면 종료
-          git add site/data/predictions_history/ site/data/reports/ site/data/trends.json site/data/ticker_sentiment.json 2>/dev/null || true
+          git add site/data/predictions_history/ site/data/reports/ site/data/trends.json site/data/ticker_sentiment.json site/data/hidden_gems.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No history changes to commit"
             exit 0
