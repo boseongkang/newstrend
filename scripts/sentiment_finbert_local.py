@@ -82,6 +82,39 @@ def list_news_days(cache_dir: Path) -> list[tuple[str, Path]]:
     return out
 
 
+def ensure_today_in_news(cache_dir: Path, news: list[tuple[str, Path]],
+                         max_attempts: int = 3, sleep_s: int = 30) -> list[tuple[str, Path]]:
+    """If the latest news file isn't today (UTC), retry fetch.
+
+    trend-site.yml's "Preserve raw news to data-cache" step pushes today's
+    raw JSONL asynchronously from CI; launchd fires us at a fixed hour and
+    can race ahead of that push, leaving today out of `news_archive/`. The
+    script would then declare missing=0 and move on, leaving sentiment one
+    day behind until tomorrow's cycle. Retry the fetch a few times to give
+    trend-site a chance to land today's file before we plan the window.
+    """
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    latest = news[-1][0] if news else None
+    if latest == today:
+        return news
+    for attempt in range(1, max_attempts + 1):
+        print(f"[fetch-retry] latest news = {latest}, expected {today} — "
+              f"trend-site may not have pushed yet (attempt {attempt}/{max_attempts})")
+        time.sleep(sleep_s)
+        subprocess.run(["git", "fetch", "origin", "data-cache"],
+                       cwd=ROOT, check=False, capture_output=True)
+        subprocess.run(["git", "pull", "--ff-only", "origin", "data-cache"],
+                       cwd=cache_dir, check=False, capture_output=True)
+        news = list_news_days(cache_dir)
+        latest = news[-1][0] if news else None
+        if latest == today:
+            print(f"[fetch-retry] picked up {today} after attempt {attempt}")
+            return news
+    print(f"[fetch-retry] warning: today's news ({today}) still missing after "
+          f"{max_attempts} attempts — deferring to next cycle", file=sys.stderr)
+    return news
+
+
 def cached_dates(cache_dir: Path) -> set[str]:
     sent_dir = cache_dir / "data" / "sentiment_per_day"
     if not sent_dir.is_dir():
@@ -194,6 +227,7 @@ def main() -> None:
     if not news:
         print("[error] no news_archive daily files found", file=sys.stderr)
         sys.exit(1)
+    news = ensure_today_in_news(cache_dir, news)
     target = news[-args.window_days:]                         # most recent N days
     cached = cached_dates(cache_dir)
     missing = [(d, p) for d, p in target if d not in cached]
