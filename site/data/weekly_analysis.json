@@ -1,43 +1,43 @@
 {
-  "updated": "2026-05-13T10:54:23Z",
+  "updated": "2026-05-13T13:40:39Z",
   "week": "2026-W19",
   "week_summary": {
     "week": "2026-W19",
-    "n": 58,
-    "avg_abs_gap_pct": 6.354,
-    "avg_signed_gap_pct": -4.714,
-    "directional_acc": 0.293
+    "n": 87,
+    "avg_abs_gap_pct": 5.627,
+    "avg_signed_gap_pct": -3.753,
+    "directional_acc": 0.31
   },
   "trade_summary": {
     "strategies": {
       "main_system": {
-        "total_return_pct": 2.454,
+        "total_return_pct": 2.438,
         "win_rate": 1.0,
         "n_trades_total": 12,
         "n_open": 10,
         "n_completed": 1,
-        "current_value": 10245.41
+        "current_value": 10243.84
       },
       "conservative": {
-        "total_return_pct": 2.015,
+        "total_return_pct": 2.131,
         "win_rate": 1.0,
         "n_trades_total": 12,
         "n_open": 10,
         "n_completed": 1,
-        "current_value": 10201.49
+        "current_value": 10213.13
       },
       "aggressive": {
-        "total_return_pct": 1.643,
+        "total_return_pct": 1.806,
         "win_rate": 0.667,
         "n_trades_total": 16,
         "n_open": 10,
         "n_completed": 3,
-        "current_value": 10164.27
+        "current_value": 10180.58
       }
     }
   },
   "accuracy_summary": {
-    "n_actionable": 62,
+    "n_actionable": 69,
     "by_action": {
       "BUY": {
         "n": 9,
@@ -46,10 +46,10 @@
         "avg_return_pct": 2.582
       },
       "REDUCE": {
-        "n": 24,
-        "n_correct": 12,
+        "n": 28,
+        "n_correct": 14,
         "accuracy": 0.5,
-        "avg_return_pct": 3.264
+        "avg_return_pct": 2.961
       },
       "SELL": {
         "n": 5,
@@ -58,17 +58,17 @@
         "avg_return_pct": 12.023
       },
       "WATCH": {
-        "n": 24,
-        "n_correct": 10,
-        "accuracy": 0.417,
-        "avg_return_pct": 0.472
+        "n": 27,
+        "n_correct": 12,
+        "accuracy": 0.444,
+        "avg_return_pct": 0.459
       }
     }
   },
   "gap_summary": {
-    "avg_abs_gap_pct": 5.646,
-    "avg_signed_gap_pct": -3.666,
-    "directional_acc": 0.331
+    "avg_abs_gap_pct": 5.401,
+    "avg_signed_gap_pct": -3.36,
+    "directional_acc": 0.333
   },
   "top_issues": [
     {
@@ -84,42 +84,42 @@
     {
       "dimension": "by_sector",
       "bucket": "Technology",
-      "n": 50,
-      "avg_abs_gap_pct": 10.856,
-      "avg_signed_gap_pct": -10.142,
-      "directional_acc": 0.28,
-      "severity": 15.256,
-      "reason": "|gap|=10.86% \u00b7 dir_acc=28%"
+      "n": 60,
+      "avg_abs_gap_pct": 10.238,
+      "avg_signed_gap_pct": -9.434,
+      "directional_acc": 0.267,
+      "severity": 14.898,
+      "reason": "|gap|=10.24% \u00b7 dir_acc=27%"
     },
     {
       "dimension": "by_volatility",
       "bucket": "high",
-      "n": 56,
-      "avg_abs_gap_pct": 10.145,
-      "avg_signed_gap_pct": -8.875,
-      "directional_acc": 0.286,
-      "severity": 14.425,
-      "reason": "|gap|=10.14% \u00b7 dir_acc=29%"
-    },
-    {
-      "dimension": "by_action",
-      "bucket": "HOLD",
-      "n": 83,
-      "avg_abs_gap_pct": 6.081,
-      "avg_signed_gap_pct": -4.842,
-      "directional_acc": 0.217,
-      "severity": 11.741,
-      "reason": "|gap|=6.08% \u00b7 dir_acc=22%"
+      "n": 67,
+      "avg_abs_gap_pct": 9.628,
+      "avg_signed_gap_pct": -8.316,
+      "directional_acc": 0.254,
+      "severity": 14.548,
+      "reason": "|gap|=9.63% \u00b7 dir_acc=25%"
     },
     {
       "dimension": "by_sector",
       "bucket": "Consumer Cyclical",
-      "n": 10,
-      "avg_abs_gap_pct": 5.714,
-      "avg_signed_gap_pct": -3.747,
-      "directional_acc": 0.2,
-      "severity": 11.714,
-      "reason": "|gap|=5.71% \u00b7 dir_acc=20%"
+      "n": 12,
+      "avg_abs_gap_pct": 6.034,
+      "avg_signed_gap_pct": -3.763,
+      "directional_acc": 0.167,
+      "severity": 12.694,
+      "reason": "|gap|=6.03% \u00b7 dir_acc=17%"
+    },
+    {
+      "dimension": "by_action",
+      "bucket": "HOLD",
+      "n": 105,
+      "avg_abs_gap_pct": 5.749,
+      "avg_signed_gap_pct": -4.296,
+      "directional_acc": 0.229,
+      "severity": 11.169,
+      "reason": "|gap|=5.75% \u00b7 dir_acc=23%"
     }
   ],
   "improvement_plan": [
@@ -133,47 +133,47 @@
     {
       "id": "sector_Technology",
       "target": "sector Technology",
-      "issue": "|gap|=10.86% across this sector (n=50).",
+      "issue": "|gap|=10.24% across this sector (n=60).",
       "suggestion": "Audit the pillar that's largest contributor to Technology-sector calls; defer untested signals.",
-      "severity": 15.256
+      "severity": 14.898
     },
     {
       "id": "vol_high",
       "target": "volatility tier high",
-      "issue": "|gap|=10.14% at this vol level (n=56).",
+      "issue": "|gap|=9.63% at this vol level (n=67).",
       "suggestion": "Tighten stop-loss / shrink position when HV20 is in 'high' tier.",
-      "severity": 14.425
-    },
-    {
-      "id": "action_HOLD",
-      "target": "HOLD action calibration",
-      "issue": "|gap|=6.08% (n=83); system predicts lower than reality.",
-      "suggestion": "Re-check HOLD action mapping to predicted_return heuristic.",
-      "severity": 11.741
+      "severity": 14.548
     },
     {
       "id": "sector_Consumer Cyclical",
       "target": "sector Consumer Cyclical",
-      "issue": "|gap|=5.71% across this sector (n=10).",
+      "issue": "|gap|=6.03% across this sector (n=12).",
       "suggestion": "Audit the pillar that's largest contributor to Consumer Cyclical-sector calls; defer untested signals.",
-      "severity": 11.714
+      "severity": 12.694
+    },
+    {
+      "id": "action_HOLD",
+      "target": "HOLD action calibration",
+      "issue": "|gap|=5.75% (n=105); system predicts lower than reality.",
+      "suggestion": "Re-check HOLD action mapping to predicted_return heuristic.",
+      "severity": 11.169
     },
     {
       "id": "pillar_grad_news_best_conf",
       "target": "pillar weight: news_best_conf",
-      "issue": "Gap gradient suggests \u0394weight=-0.033.",
+      "issue": "Gap gradient suggests \u0394weight=+0.016.",
       "suggestion": "Calibrator will absorb this signal automatically; verify after next run that news_best_conf EMA weight has moved in the suggested direction.",
-      "severity": 0.1635
+      "severity": 0.0795
     }
   ],
   "last_week_validation": {
     "available": true,
     "this_week": {
       "week": "2026-W19",
-      "n": 58,
-      "avg_abs_gap_pct": 6.354,
-      "avg_signed_gap_pct": -4.714,
-      "directional_acc": 0.293
+      "n": 87,
+      "avg_abs_gap_pct": 5.627,
+      "avg_signed_gap_pct": -3.753,
+      "directional_acc": 0.31
     },
     "last_week": {
       "week": "2026-W18",
@@ -182,10 +182,10 @@
       "avg_signed_gap_pct": -3.379,
       "directional_acc": 0.328
     },
-    "delta_abs_gap_pct": 1.013,
-    "delta_signed_gap_pct": -1.335,
+    "delta_abs_gap_pct": 0.286,
+    "delta_signed_gap_pct": -0.374,
     "direction": "worsened",
-    "improvement_pct": -18.97
+    "improvement_pct": -5.35
   },
-  "calibration_runs_total": 62
+  "calibration_runs_total": 63
 }
