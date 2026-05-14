@@ -286,18 +286,24 @@ function renderPipeline(health, localRuns, sentiment){
   const ciAt = health?.ci_run_at;
   const dcAt = health?.data_cache_head?.committed_at;
   const sentLatest = (sentiment?.dates||[]).slice(-1)[0];
-  // sentiment latest is a date string YYYY-MM-DD; treat as that day 00:00 UTC
-  const sentIso = sentLatest ? sentLatest + 'T00:00:00Z' : null;
+  // sentiment date is YYYY-MM-DD (no time). Treating it as 00:00 UTC created
+  // a daily 24h artifact where age climbed to 32-40h between launchd cycles
+  // before resetting. The launchd runner pushes sentiment_per_day and
+  // local_runs.json to data-cache atomically, so local_runs.last_run_at
+  // (when last_exit===0) is the real "sentiment freshness" timestamp.
+  const sentDateIso = sentLatest ? sentLatest + 'T00:00:00Z' : null;
   const lrAt = localRuns?.last_run_at;
   const lrExit = localRuns?.last_exit;
   const lrDays = localRuns?.days_scored;
+  const sentIso = (lrAt && lrExit === 0) ? lrAt : sentDateIso;
+  const sentSrc = (lrAt && lrExit === 0) ? 'via launchd push' : 'date-derived';
 
   const cells = [
     {label:'Local FinBERT', val: lrAt ? fmtAgo(lrAt) : 'never',
      sub: lrAt ? `exit=${lrExit ?? '?'} · scored ${lrDays ?? '?'}d` : 'launchd has not run yet',
      state: lrAt ? (lrExit === 0 ? ageStatus(lrAt, AGE_THRESHOLDS.localStaleHr) : 'crit') : 'warn'},
     {label:'Sentiment Cache', val: sentLatest || '—',
-     sub: `latest day on data-cache`,
+     sub: `latest day · ${sentSrc}`,
      state: sentIso ? ageStatus(sentIso, AGE_THRESHOLDS.sentimentStaleHr) : 'crit'},
     {label:'Data-cache Head', val: fmtAgo(dcAt),
      sub: health?.data_cache_head?.subject ? health.data_cache_head.subject.slice(0,40) : '—',
