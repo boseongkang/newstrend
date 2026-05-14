@@ -387,7 +387,12 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           # 1) 변경사항 없으면 종료
-          git add site/data/predictions_history/ site/data/reports/ site/data/trends.json site/data/ticker_sentiment.json site/data/hidden_gems.json 2>/dev/null || true
+          git add site/data/predictions_history/ site/data/reports/ \
+                  site/data/trends.json site/data/ticker_sentiment.json \
+                  site/data/hidden_gems.json site/data/predictions.json \
+                  site/data/signal_corr.json site/data/backtest.json \
+                  site/data/backtest_v2.json site/data/verification/ \
+                  site/data/ticker_weights.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No history changes to commit"
             exit 0
@@ -510,7 +515,9 @@ jobs:
                   site/data/gap_history.json \
                   site/data/ml_baseline.json \
                   site/data/weekly_analysis.json \
-                  site/data/weekly_history.json 2>/dev/null || true
+                  site/data/weekly_history.json \
+                  site/data/macro_themes.json \
+                  site/data/tickers.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No self-correcting changes to commit"
             exit 0
