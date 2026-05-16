@@ -175,6 +175,16 @@ jobs:
             --min-len 4
           test -s site/data/trends.json
 
+      - name: Build DOW / weekly / monthly aggregations
+        run: |
+          python scripts/make_trend_aggregations.py \
+            --trends site/data/trends.json \
+            --outdir site/data \
+            --topk 200
+          test -s site/data/trends_dow.json
+          test -s site/data/trends_weekly.json
+          test -s site/data/trends_monthly.json
+
       - name: Overwrite index with custom dashboard
         run: cp site/index_custom.html site/index.html
 
@@ -389,6 +399,8 @@ jobs:
           # 1) 변경사항 없으면 종료
           git add site/data/predictions_history/ site/data/reports/ \
                   site/data/trends.json site/data/ticker_sentiment.json \
+                  site/data/trends_dow.json site/data/trends_weekly.json \
+                  site/data/trends_monthly.json \
                   site/data/hidden_gems.json site/data/predictions.json \
                   site/data/signal_corr.json site/data/backtest.json \
                   site/data/backtest_v2.json site/data/verification/ \
