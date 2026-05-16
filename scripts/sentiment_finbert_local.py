@@ -7,7 +7,7 @@ runs locally on M3 MPS (~10x faster than CI CPU); CI just restores + aggregates.
 Workflow:
     # one-time worktree setup (or pass --setup)
     git fetch origin data-cache
-    git worktree add /tmp/newstrend-cache origin/data-cache
+    git worktree add ~/.cache/newstrend/cache origin/data-cache
 
     # backfill last 30 days, then push to data-cache
     python scripts/sentiment_finbert_local.py --window-days 30 --commit
@@ -29,7 +29,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCORE_SCRIPT = ROOT / "scripts" / "sentiment_finbert.py"
-DEFAULT_CACHE_DIR = Path("/tmp/newstrend-cache")
+DEFAULT_CACHE_DIR = Path.home() / ".cache" / "newstrend" / "cache"
 DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
 # Prefer repo-local .venv (has torch/transformers installed); fall back to current python.
 VENV_PYTHON = ROOT / ".venv" / "bin" / "python"
@@ -171,6 +171,13 @@ def write_local_runs(cache_dir: Path, *, last_exit: int, days_scored: int,
 
 def commit_and_push(cache_dir: Path) -> None:
     """Stage data/sentiment_per_day + data/local_runs.json, commit, push origin data-cache."""
+    # Guard A: worktree health. macOS periodically cleans /tmp, which is why
+    # we moved the worktree under ~/.cache — but be defensive anyway.
+    if not (cache_dir / ".git").exists():
+        raise RuntimeError(
+            f"worktree broken at {cache_dir}: .git is missing. "
+            f"Recreate with: git worktree add {cache_dir} origin/data-cache"
+        )
     print(f"[commit] staging changes in {cache_dir}")
     # Make sure we're on a branch (worktree may be detached).
     subprocess.run(["git", "checkout", "-B", "data-cache"], cwd=cache_dir, check=False)
@@ -182,7 +189,7 @@ def commit_and_push(cache_dir: Path) -> None:
                    cwd=cache_dir, check=True)
     diff = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=cache_dir)
     if diff.returncode == 0:
-        print("[commit] no changes to push")
+        print("[commit] no changes, skipping push")
         return
     today = time.strftime("%Y-%m-%d")
     subprocess.run(
@@ -208,7 +215,7 @@ def commit_and_push(cache_dir: Path) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR,
-                    help="git worktree of data-cache branch (default: /tmp/newstrend-cache)")
+                    help="git worktree of data-cache branch (default: ~/.cache/newstrend/cache)")
     ap.add_argument("--window-days", type=int, default=30,
                     help="how many most-recent days to keep filled (default 30)")
     ap.add_argument("--batch-size", type=int, default=32,
@@ -228,6 +235,8 @@ def main() -> None:
         print("[error] no news_archive daily files found", file=sys.stderr)
         sys.exit(1)
     news = ensure_today_in_news(cache_dir, news)
+    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    fetch_ok = bool(news) and news[-1][0] == today_str
     target = news[-args.window_days:]                         # most recent N days
     cached = cached_dates(cache_dir)
     missing = [(d, p) for d, p in target if d not in cached]
@@ -240,6 +249,22 @@ def main() -> None:
     if not missing:
         print("[plan] all target days already cached — nothing to do")
         if args.commit:
+            # Guard C: fetch failure — if today's news never landed, don't push
+            # a misleading "everything caught up" local_runs timestamp.
+            if not fetch_ok:
+                print(f"[skip-commit] news_archive missing today ({today_str}) — "
+                      "fetch incomplete, deferring to next cycle")
+                return
+            # Guard B: worktree clean — avoid pushing a commit that only bumps
+            # local_runs.json timestamp when nothing substantive changed.
+            if (cache_dir / ".git").exists():
+                status = subprocess.run(
+                    ["git", "-C", str(cache_dir), "status", "--porcelain"],
+                    capture_output=True, text=True, check=False,
+                )
+                if status.returncode == 0 and not status.stdout.strip():
+                    print("[commit] no changes, skipping push")
+                    return
             write_local_runs(cache_dir, last_exit=0, days_scored=0, days_failed=0,
                              days_skipped=days_skipped, elapsed_seconds=0.0,
                              window_days=args.window_days)
