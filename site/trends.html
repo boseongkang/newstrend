@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · Word Trends</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="./vendor/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--magenta:#ff00aa;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
+
+header{height:42px;display:flex;align-items:center;gap:20px;padding:0 16px;
+  background:var(--bg1);border-bottom:1px solid var(--b1)}
+.brand{font-family:var(--fm);font-size:13px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300}
+nav{display:flex;gap:2px;flex-wrap:wrap}
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:5px 11px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+.live{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10px;color:var(--green)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+#ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+main{max-width:1280px;margin:20px auto;padding:0 20px}
+.section{background:var(--bg1);border:1px solid var(--b1);padding:16px 20px;margin-bottom:16px}
+.stitle{font-family:var(--fm);font-size:10px;font-weight:600;letter-spacing:.14em;
+        text-transform:uppercase;color:var(--t3);margin-bottom:12px;
+        padding-bottom:6px;border-bottom:1px solid var(--b1);
+        display:flex;justify-content:space-between;align-items:baseline}
+.stitle .meta{color:var(--t2);font-weight:400;letter-spacing:.08em;text-transform:none}
+
+/* KPI 스트립 */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1)}
+.kpi{background:var(--bg2);padding:14px;text-align:center}
+.kpi-label{font-family:var(--fm);font-size:9px;letter-spacing:.12em;
+           text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.kpi-val{font-family:var(--fm);font-size:24px;font-weight:600;color:var(--cyan)}
+.kpi-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:3px}
+
+/* DOW bar chart 컨테이너 */
+.dow-row{display:grid;grid-template-columns:1fr 1.6fr;gap:16px;margin-top:8px}
+.chart-box{background:var(--bg2);padding:12px;border:1px solid var(--b1);min-height:240px}
+.chart-box.tall{min-height:320px}
+.chart-title{font-family:var(--fm);font-size:9px;letter-spacing:.12em;
+             text-transform:uppercase;color:var(--t2);margin-bottom:8px}
+
+/* DOW heatmap */
+.hm-wrap{overflow-x:auto;background:var(--bg2);padding:8px;border:1px solid var(--b1)}
+.hm{border-collapse:separate;border-spacing:2px;width:100%}
+.hm th{font-family:var(--fm);font-size:9px;letter-spacing:.08em;color:var(--t3);
+       text-transform:uppercase;padding:4px 6px;text-align:center;font-weight:500}
+.hm th:first-child{text-align:left;width:100px;min-width:100px}
+.hm td.term{font-family:var(--fm);font-size:10px;color:var(--t1);padding:3px 6px;
+            background:var(--bg1);white-space:nowrap}
+.hm td.cell{font-family:var(--fm);font-size:9px;text-align:center;padding:3px 0;
+            color:#000;font-weight:600;cursor:default;position:relative}
+.hm td.cell.lo{color:var(--t3);font-weight:400}
+.hm-legend{display:flex;gap:6px;align-items:center;font-family:var(--fm);
+           font-size:9px;color:var(--t3);letter-spacing:.08em;margin-top:8px}
+.hm-legend .bar{flex:1;height:8px;background:linear-gradient(90deg,#102030,#00d4ff,#ffb300,#ff4444)}
+
+/* Term picker */
+.picker-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.picker-row label{font-family:var(--fm);font-size:9px;letter-spacing:.12em;
+                  text-transform:uppercase;color:var(--t3)}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-family:var(--fm);font-size:10px;padding:3px 8px;
+      background:var(--bg2);border:1px solid var(--b1);color:var(--t1);
+      cursor:pointer;transition:all .1s;user-select:none}
+.chip:hover{border-color:var(--b2)}
+.chip.on{background:rgba(0,212,255,.15);border-color:var(--cyan);color:var(--cyan)}
+.chip.muted{color:var(--t3)}
+.term-input{font-family:var(--fm);font-size:11px;background:var(--bg2);
+            border:1px solid var(--b1);color:var(--t1);padding:4px 8px;width:160px;outline:none}
+.term-input:focus{border-color:var(--cyan)}
+.btn{font-family:var(--fm);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+     background:var(--bg2);border:1px solid var(--b1);color:var(--t2);padding:4px 10px;
+     cursor:pointer;transition:all .1s}
+.btn:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* Movers tables */
+.mover-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+table.mv{width:100%;border-collapse:collapse}
+table.mv th{font-family:var(--fm);font-size:8px;letter-spacing:.1em;
+            text-transform:uppercase;color:var(--t3);padding:6px 10px;
+            border-bottom:1px solid var(--b1);text-align:right}
+table.mv th:first-child{text-align:left}
+table.mv td{font-family:var(--fm);font-size:11px;padding:6px 10px;
+            border-bottom:1px solid rgba(255,255,255,.03);text-align:right}
+table.mv td:first-child{text-align:left;color:var(--t1)}
+table.mv td.pos{color:var(--green)}
+table.mv td.neg{color:var(--red)}
+table.mv tr:hover{background:rgba(255,255,255,.02)}
+
+.empty{color:var(--t3);font-family:var(--fm);font-size:11px;padding:20px;text-align:center}
+.note{font-family:var(--fm);font-size:9px;color:var(--t3);letter-spacing:.06em;margin-top:6px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">NEWSTREND <em>// WORD TRENDS</em></div>
+  <nav>
+    <a href="./index.html">DASHBOARD</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
+    <a href="./hidden_gems.html">GEMS</a>
+    <a href="./domino.html">DOMINO</a>
+    <a href="./insider_activity.html">INSIDER</a>
+    <a href="./report.html">REPORT</a>
+    <a href="./weekly.html">WEEKLY</a>
+    <a href="./rising.html">RISING</a>
+    <a href="./macro.html">MACRO</a>
+    <a href="./trends.html" class="on">TRENDS</a>
+    <a href="./system_health.html">HEALTH</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="live"><div class="dot"></div>LIVE</div>
+    <div id="ts">—</div>
+  </div>
+</header>
+
+<main>
+  <section class="section">
+    <div class="stitle">
+      <span>Overview · 180-day rolling window</span>
+      <span class="meta" id="date-range">—</span>
+    </div>
+    <div class="kpi-grid" id="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Total Days</div><div class="kpi-val" id="kpi-days">—</div><div class="kpi-sub">non-empty</div></div>
+      <div class="kpi"><div class="kpi-label">Tracked Terms</div><div class="kpi-val" id="kpi-terms">—</div><div class="kpi-sub">by volume</div></div>
+      <div class="kpi"><div class="kpi-label">Weekend Dip</div><div class="kpi-val" id="kpi-dip">—</div><div class="kpi-sub">Sat+Sun vs Tue-Fri</div></div>
+      <div class="kpi"><div class="kpi-label">Top DOW Skew</div><div class="kpi-val" id="kpi-skew">—</div><div class="kpi-sub" id="kpi-skew-sub">—</div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="stitle">
+      <span>Day-of-Week</span>
+      <span class="meta">avg news volume per weekday</span>
+    </div>
+    <div class="dow-row">
+      <div class="chart-box">
+        <div class="chart-title">Overall volume by weekday</div>
+        <canvas id="dow-volume" height="220"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Top 8 terms — DOW signature (row-normalized)</div>
+        <div class="hm-wrap" id="hm-mini-wrap"></div>
+        <div class="hm-legend"><span>cold</span><div class="bar"></div><span>hot</span></div>
+      </div>
+    </div>
+    <div class="hm-wrap" id="hm-wrap" style="margin-top:12px"></div>
+    <div class="note">Color = term's avg on that weekday ÷ term's overall avg. Bright = day where this term over-indexes. Zero-volume ingestion days excluded from averages.</div>
+  </section>
+
+  <section class="section">
+    <div class="stitle">
+      <span>Weekly &amp; Monthly Trends</span>
+      <span class="meta" id="series-meta">—</span>
+    </div>
+    <div class="picker-row">
+      <label>Terms:</label>
+      <div class="chips" id="term-chips"></div>
+      <input class="term-input" id="term-input" placeholder="add term…" list="all-terms-list">
+      <datalist id="all-terms-list"></datalist>
+      <button class="btn" id="clear-btn">CLEAR</button>
+      <button class="btn" id="reset-btn">RESET TOP 5</button>
+    </div>
+    <div class="chart-box tall">
+      <div class="chart-title">Weekly totals (ISO weeks)</div>
+      <canvas id="weekly-chart" height="200"></canvas>
+    </div>
+    <div class="chart-box tall" style="margin-top:12px">
+      <div class="chart-title">Monthly totals</div>
+      <canvas id="monthly-chart" height="200"></canvas>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="stitle">
+      <span>Top Movers</span>
+      <span class="meta">last bucket vs previous</span>
+    </div>
+    <div class="mover-row">
+      <div>
+        <div class="chart-title">Week-over-week</div>
+        <table class="mv" id="wow-table"><thead><tr><th>Term</th><th>Prev</th><th>Last</th><th>Δ%</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div>
+        <div class="chart-title">Month-over-month</div>
+        <table class="mv" id="mom-table"><thead><tr><th>Term</th><th>Prev</th><th>Last</th><th>Δ%</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+    <div class="note">Showing terms with prev-bucket count ≥ 50 to suppress noise. Top 10 gainers + 10 losers per bucket.</div>
+  </section>
+</main>
+
+<script>
+const DAY_ORDER = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const SERIES_COLORS = ["#00d4ff","#ffb300","#00e676","#ff4444","#ff00aa","#6a8aa8","#c8d8e8","#9f7aea"];
+
+async function loadJSON(path){
+  const r = await fetch(path,{cache:"no-store"});
+  if(!r.ok) throw new Error(path+" "+r.status);
+  return r.json();
+}
+
+function pct(v){ return (v*100).toFixed(0)+"%"; }
+function fmt(n){ return n>=1000?(n/1000).toFixed(1)+"k":String(n); }
+
+function chartTheme(){
+  Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+  Chart.defaults.font.size = 10;
+  Chart.defaults.color = "#6a8aa8";
+  Chart.defaults.borderColor = "#1a2840";
+}
+
+function renderKPI(dow, weekly){
+  document.getElementById("date-range").textContent =
+    `${dow.date_range[0]} → ${dow.date_range[1]}`;
+  const totalDays = Object.values(dow.day_counts).reduce((a,b)=>a+b,0);
+  document.getElementById("kpi-days").textContent = totalDays;
+  document.getElementById("kpi-terms").textContent = dow.terms ? Object.keys(dow.terms).length : "—";
+
+  // Weekend dip: (Sat+Sun)/2 vs (Tue+Wed+Thu+Fri)/4
+  const a = dow.avg_volume_by_day;
+  const wknd = (a.Sat + a.Sun)/2;
+  const wkdy = (a.Tue + a.Wed + a.Thu + a.Fri)/4;
+  const dip = wkdy > 0 ? (1 - wknd/wkdy) : 0;
+  document.getElementById("kpi-dip").textContent = pct(dip);
+
+  // Top DOW skew: term with highest peak_ratio
+  let topTerm=null, topRatio=0, topDay="";
+  for(const [t, info] of Object.entries(dow.terms||{})){
+    if(info.peak_ratio > topRatio){ topRatio = info.peak_ratio; topTerm = t; topDay = info.peak_day; }
+  }
+  document.getElementById("kpi-skew").textContent = topRatio ? topRatio.toFixed(2)+"x" : "—";
+  document.getElementById("kpi-skew-sub").textContent = topTerm ? `${topTerm} · ${topDay}` : "—";
+}
+
+function renderDOWVolume(dow){
+  const ctx = document.getElementById("dow-volume");
+  new Chart(ctx, {
+    type:"bar",
+    data:{
+      labels: DAY_ORDER,
+      datasets:[{
+        data: DAY_ORDER.map(d => dow.avg_volume_by_day[d]),
+        backgroundColor: DAY_ORDER.map(d => (d==="Sat"||d==="Sun") ? "#344a60" : "#00d4ff"),
+        borderWidth: 0,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{
+        callbacks:{ label: c => "avg "+Math.round(c.parsed.y).toLocaleString()+" / day" }
+      }},
+      scales:{
+        x:{grid:{display:false},ticks:{color:"#6a8aa8"}},
+        y:{grid:{color:"#1a2840"},ticks:{color:"#6a8aa8",callback:v=>fmt(v)}}
+      }
+    }
+  });
+}
+
+function colorForRatio(r){
+  // r in [0, ~2]. Map 0→bg, 1→cyan, 1.3→amber, 1.6→red
+  if(r <= 0.1) return "#0c1220";
+  if(r < 0.7) return `rgba(106,138,168,${0.15+r*0.4})`;       // cool: bluegray
+  if(r < 1.0) return `rgba(0,212,255,${0.25+(r-0.7)*0.8})`;   // cyan
+  if(r < 1.3) return `rgba(255,179,0,${0.5+(r-1.0)*0.9})`;    // amber
+  return `rgba(255,68,68,${Math.min(1, 0.6+(r-1.3)*0.6)})`;   // red
+}
+
+function buildHeatmap(dow, terms, target){
+  const rows = terms.map(t => {
+    const info = dow.terms[t];
+    if(!info) return null;
+    const avgs = DAY_ORDER.map(d => info.avg_by_day[d]);
+    const mean = avgs.reduce((a,b)=>a+b,0)/7;
+    const ratios = mean>0 ? avgs.map(v=>v/mean) : avgs.map(()=>0);
+    return {term:t, avgs, ratios};
+  }).filter(Boolean);
+
+  let html = "<table class='hm'><thead><tr><th></th>";
+  for(const d of DAY_ORDER) html += `<th>${d}</th>`;
+  html += "</tr></thead><tbody>";
+  for(const r of rows){
+    html += `<tr><td class='term'>${r.term}</td>`;
+    for(let i=0;i<7;i++){
+      const ratio = r.ratios[i];
+      const v = Math.round(r.avgs[i]);
+      const cls = ratio < 0.5 ? "cell lo" : "cell";
+      html += `<td class='${cls}' style='background:${colorForRatio(ratio)}' title='${r.term} ${DAY_ORDER[i]}: avg ${v} (${ratio.toFixed(2)}× term mean)'>${v}</td>`;
+    }
+    html += "</tr>";
+  }
+  html += "</tbody></table>";
+  target.innerHTML = html;
+}
+
+let weeklyChart, monthlyChart;
+function renderSeries(weekly, monthly, terms){
+  const wkLabels = weekly.weeks;
+  const moLabels = monthly.months;
+  const wkData = terms.map((t,i) => ({
+    label: t, data: weekly.series[t] || [],
+    borderColor: SERIES_COLORS[i % SERIES_COLORS.length],
+    backgroundColor: SERIES_COLORS[i % SERIES_COLORS.length],
+    borderWidth: 1.5, pointRadius: 1.5, tension: 0.25, fill: false
+  }));
+  const moData = terms.map((t,i) => ({
+    label: t, data: monthly.series[t] || [],
+    borderColor: SERIES_COLORS[i % SERIES_COLORS.length],
+    backgroundColor: SERIES_COLORS[i % SERIES_COLORS.length],
+    borderWidth: 1.8, pointRadius: 3, tension: 0.25, fill: false
+  }));
+  const baseOpts = {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{position:"top", labels:{color:"#c8d8e8", boxWidth:10, font:{size:10}} }},
+    scales:{
+      x:{grid:{color:"#1a2840"},ticks:{color:"#6a8aa8",maxRotation:60,minRotation:30}},
+      y:{grid:{color:"#1a2840"},ticks:{color:"#6a8aa8",callback:v=>fmt(v)},beginAtZero:true}
+    }
+  };
+  if(weeklyChart) weeklyChart.destroy();
+  if(monthlyChart) monthlyChart.destroy();
+  weeklyChart = new Chart(document.getElementById("weekly-chart"),
+    {type:"line", data:{labels:wkLabels, datasets:wkData}, options:baseOpts});
+  monthlyChart = new Chart(document.getElementById("monthly-chart"),
+    {type:"line", data:{labels:moLabels, datasets:moData}, options:baseOpts});
+}
+
+function computeMovers(buckets, series, label, prevMin=50){
+  // Compute last-vs-prev delta % for each term, filter prev>=prevMin
+  if(buckets.length < 2) return [];
+  const last = buckets.length-1, prev = buckets.length-2;
+  const out = [];
+  for(const [t, s] of Object.entries(series)){
+    const p = s[prev]||0, l = s[last]||0;
+    if(p < prevMin) continue;
+    const d = (l - p) / p;
+    out.push({term:t, prev:p, last:l, delta:d});
+  }
+  return out;
+}
+
+function renderMovers(buckets, series, tableId){
+  const arr = computeMovers(buckets, series);
+  const gainers = [...arr].sort((a,b)=>b.delta-a.delta).slice(0,10);
+  const losers  = [...arr].sort((a,b)=>a.delta-b.delta).slice(0,10);
+  const tbody = document.querySelector("#"+tableId+" tbody");
+  tbody.innerHTML = "";
+  const all = [...gainers, ...losers];
+  if(!all.length){ tbody.innerHTML = "<tr><td colspan='4' class='empty'>not enough data yet</td></tr>"; return; }
+  for(const r of all){
+    const sign = r.delta >= 0 ? "+" : "";
+    const cls = r.delta >= 0 ? "pos" : "neg";
+    tbody.innerHTML += `<tr><td>${r.term}</td><td>${r.prev}</td><td>${r.last}</td><td class='${cls}'>${sign}${(r.delta*100).toFixed(0)}%</td></tr>`;
+  }
+  // separator after top 10
+  const rows = tbody.querySelectorAll("tr");
+  if(rows[10]) rows[10].style.borderTop = "1px solid #1a2840";
+}
+
+const state = { selected:[], dow:null, weekly:null, monthly:null };
+
+function refreshChips(){
+  const wrap = document.getElementById("term-chips");
+  wrap.innerHTML = "";
+  state.selected.forEach((t,i) => {
+    const chip = document.createElement("div");
+    chip.className = "chip on";
+    chip.style.borderColor = SERIES_COLORS[i % SERIES_COLORS.length];
+    chip.style.color = SERIES_COLORS[i % SERIES_COLORS.length];
+    chip.textContent = t + " ×";
+    chip.title = "click to remove";
+    chip.onclick = () => { state.selected = state.selected.filter(x=>x!==t); refresh(); };
+    wrap.appendChild(chip);
+  });
+}
+
+function refresh(){
+  refreshChips();
+  renderSeries(state.weekly, state.monthly, state.selected);
+}
+
+function addTerm(t){
+  t = (t||"").trim().toLowerCase();
+  if(!t) return false;
+  if(state.selected.includes(t)) return false;
+  if(!(t in state.weekly.series)){ return false; }
+  if(state.selected.length >= 8){ state.selected.shift(); }
+  state.selected.push(t);
+  refresh();
+  return true;
+}
+
+async function main(){
+  chartTheme();
+  const [dow, weekly, monthly] = await Promise.all([
+    loadJSON("./data/trends_dow.json"),
+    loadJSON("./data/trends_weekly.json"),
+    loadJSON("./data/trends_monthly.json"),
+  ]);
+  state.dow = dow; state.weekly = weekly; state.monthly = monthly;
+
+  renderKPI(dow, weekly);
+  renderDOWVolume(dow);
+
+  // Top-8 mini heatmap = first 8 terms by volume
+  buildHeatmap(dow, dow.terms ? Object.keys(dow.terms).slice(0,8) : [], document.getElementById("hm-mini-wrap"));
+  // Full heatmap = top 30 terms
+  buildHeatmap(dow, dow.terms ? Object.keys(dow.terms).slice(0,30) : [], document.getElementById("hm-wrap"));
+
+  // Wire term picker
+  const dl = document.getElementById("all-terms-list");
+  for(const t of Object.keys(weekly.series)){
+    const opt = document.createElement("option"); opt.value = t; dl.appendChild(opt);
+  }
+  const input = document.getElementById("term-input");
+  input.addEventListener("change", () => { if(addTerm(input.value)) input.value = ""; });
+  input.addEventListener("keydown", e => { if(e.key==="Enter"){ e.preventDefault(); if(addTerm(input.value)) input.value=""; }});
+  document.getElementById("clear-btn").onclick = () => { state.selected = []; refresh(); };
+  document.getElementById("reset-btn").onclick = () => {
+    state.selected = Object.keys(weekly.series).slice(0,5);
+    refresh();
+  };
+
+  // Default selection: top 5
+  state.selected = Object.keys(weekly.series).slice(0,5);
+  refresh();
+  document.getElementById("series-meta").textContent =
+    `${weekly.weeks.length} weeks · ${monthly.months.length} months · ${Object.keys(weekly.series).length} terms`;
+
+  renderMovers(weekly.weeks, weekly.series, "wow-table");
+  renderMovers(monthly.months, monthly.series, "mom-table");
+
+  // Footer timestamp
+  document.getElementById("ts").textContent = new Date().toISOString().replace("T"," ").slice(0,16) + " UTC";
+}
+
+main().catch(e => {
+  document.querySelector("main").innerHTML =
+    `<div class='section'><div class='empty'>failed to load trend data — ${e.message}</div></div>`;
+});
+</script>
+</body>
+</html>
