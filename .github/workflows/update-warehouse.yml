@@ -1,6 +1,11 @@
 name: update-warehouse
 on:
   workflow_dispatch:
+    inputs:
+      backfill:
+        description: "Regenerate every daily CSV from master.jsonl (--multi-day)"
+        type: boolean
+        default: false
   schedule:
     - cron: "23 * * * *"
 
@@ -143,7 +148,8 @@ jobs:
                   print(f"Merged raw data: {fname} -> {dest}")
           PY
 
-      - name: Extract terms to daily CSV
+      - name: Extract terms to daily CSV (incremental)
+        if: ${{ github.event.inputs.backfill != 'true' }}
         run: |
           set -euo pipefail
           DT="$(date -u +%F)"
@@ -151,9 +157,27 @@ jobs:
             --inputs "data/live_newsapi/*.jsonl" "data/warehouse/daily/${DT}.jsonl" "data/warehouse/master.jsonl" \
             --outcsv "data/warehouse/daily/${DT}.csv" \
             --date "$DT" \
+            --date-filter "$DT" \
             --topk 800 --minlen 2 --mincount 2 \
             --max-ngram 1 \
             --stop config/stopwords_en.txt
+
+      - name: Extract terms to daily CSVs (backfill — multi-day from master)
+        if: ${{ github.event.inputs.backfill == 'true' }}
+        run: |
+          set -euo pipefail
+          # Drop stale per-day token derivatives so they don't shadow the new CSV.
+          rm -f data/warehouse/daily/*_tokens.csv data/warehouse/daily/*_tokens.jsonl
+          python scripts/extract_terms.py \
+            --inputs "data/warehouse/master.jsonl" \
+            --multi-day \
+            --outdir "data/warehouse/daily" \
+            --topk 800 --minlen 2 --mincount 2 \
+            --max-ngram 1 \
+            --stop config/stopwords_en.txt
+          echo "=== Daily CSVs after backfill ==="
+          ls data/warehouse/daily/*.csv | wc -l
+          ls -lt data/warehouse/daily/*.csv | head -10
 
 
       - name: Upload warehouse artifact

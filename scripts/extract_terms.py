@@ -18,13 +18,45 @@ _NUMERIC_ONLY_RE = re.compile(r"^[0-9]+$")
 _PUNCT_RE = re.compile(r"^[\W_]+$")
 _TOKEN_RE = re.compile(r"[A-Za-z]+")
 
-def read_docs(patterns):
+def parse_date_from_doc(obj):
+    pu = obj.get("published_at") or obj.get("publishedAt") or obj.get("published")
+    if not pu or not isinstance(pu, str):
+        return None
+    pu = pu.strip()
+    if not pu:
+        return None
+    if pu.endswith("Z"):
+        pu = pu[:-1] + "+00:00"
+    try:
+        dt = datetime.fromisoformat(pu)
+    except Exception:
+        if len(pu) >= 10 and pu[4] == "-" and pu[7] == "-":
+            return pu[:10]
+        return None
+    return dt.astimezone(timezone.utc).date().isoformat()
+
+
+def doc_text(obj):
+    parts = []
+    for k in ("title", "description", "content", "text"):
+        v = obj.get(k)
+        if isinstance(v, str) and v.strip():
+            parts.append(v.strip())
+    return " ".join(parts)
+
+
+def read_docs_with_date(patterns):
+    """Yield (text, date_str_or_None) tuples from jsonl files."""
     files = []
     for p in patterns:
         files.extend(glob.glob(p, recursive=True))
-    docs = []
+    seen_files = set()
     for fp in files:
         p = Path(fp)
+        rp = str(p.resolve())
+        if rp in seen_files:
+            continue
+        seen_files.add(rp)
         if not p.exists() or p.stat().st_size == 0:
             continue
         if p.suffix.lower() == ".jsonl":
@@ -35,19 +67,24 @@ def read_docs(patterns):
                         continue
                     try:
                         obj = json.loads(line)
-                        t = obj.get("text") or obj.get("content") or ""
                     except Exception:
-                        t = ""
-                    if t:
-                        docs.append(t)
+                        continue
+                    t = doc_text(obj)
+                    if not t:
+                        continue
+                    yield t, parse_date_from_doc(obj)
         else:
             try:
                 txt = p.read_text(encoding="utf-8", errors="ignore")
             except Exception:
                 txt = ""
             if txt:
-                docs.append(txt)
-    return docs
+                yield txt, None
+
+
+def read_docs(patterns):
+    """Legacy: list of text only. Kept for backwards compat."""
+    return [t for t, _d in read_docs_with_date(patterns)]
 
 def normalize_text(s):
     s = unicodedata.normalize("NFKC", s)
@@ -166,23 +203,60 @@ def combine_scores(freq_uni, freq_bi, freq_tri, kbs):
         res[w] = score
     return res
 
-def to_daily_csv(date_str, outcsv, terms, topk):
+def to_daily_csv(date_str, outcsv, terms, topk, raw_counts=None):
+    """Write CSV with date, entity, count, score columns.
+
+    `terms` is {term: normalized_score in [0,1]}.
+    `raw_counts` is {term: int} — actual occurrence count for that day.
+    For back-compat, if raw_counts is None we fall back to score*1000 in the count column.
+    """
     date = date_str
-    rows = []
     rank = sorted(terms.items(), key=lambda x: x[1], reverse=True)[:topk]
+    rows = []
     for w, sc in rank:
-        rows.append((date, w, int(sc*1000)))
-    df = pd.DataFrame(rows, columns=["date","entity","count"])
+        if raw_counts is not None:
+            c = int(raw_counts.get(w, 0))
+        else:
+            c = int(sc * 1000)
+        rows.append((date, w, c, round(float(sc), 6)))
+    df = pd.DataFrame(rows, columns=["date", "entity", "count", "score"])
     p = Path(outcsv)
     p.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(p, index=False)
     return p
 
+def _build_one_day_csv(date_str, docs, args, alias, stop, outcsv):
+    uni, bi, tri = counts_ngrams(docs, stop, args.minlen, args.max_ngram)
+    filtered_uni = filter_and_alias(uni, stop, args.mincount, alias)
+    filtered_bi = filter_and_alias(bi, stop, args.mincount, alias)
+    filtered_tri = filter_and_alias(tri, stop, args.mincount, alias)
+    kbs = keybert_scores(docs, topk=50) if args.use_keybert and _HAS_KEYBERT else {}
+    scores = combine_scores(filtered_uni, filtered_bi, filtered_tri, kbs)
+    # raw_counts spans all three n-gram tiers so the count column reflects what got scored.
+    raw_counts = Counter()
+    raw_counts.update(filtered_uni)
+    raw_counts.update(filtered_bi)
+    raw_counts.update(filtered_tri)
+    return to_daily_csv(date_str, outcsv, scores, args.topk, raw_counts=raw_counts)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--inputs", nargs="+", required=True)
-    ap.add_argument("--outcsv", required=True)
+    ap.add_argument("--outcsv", default=None,
+                    help="Single-day mode output path. Required unless --multi-day is set.")
     ap.add_argument("--date", default=datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+    ap.add_argument("--date-filter", default=None,
+                    help="If set, only include docs whose published_at matches this YYYY-MM-DD. "
+                         "Docs with no parseable date are skipped.")
+    ap.add_argument("--multi-day", action="store_true",
+                    help="Emit one CSV per published_at date present in the inputs.")
+    ap.add_argument("--outdir", default=None,
+                    help="Output directory for --multi-day mode. CSVs named <date>.csv.")
+    ap.add_argument("--csv-template", default="{date}.csv",
+                    help="Filename template within --outdir for --multi-day mode.")
+    ap.add_argument("--include-undated", action="store_true",
+                    help="In --multi-day mode, include docs with no published_at under --date.")
     ap.add_argument("--topk", type=int, default=500)
     ap.add_argument("--minlen", type=int, default=2)
     ap.add_argument("--mincount", type=int, default=2)
@@ -192,17 +266,48 @@ def main():
     ap.add_argument("--use-keybert", action="store_true")
     args = ap.parse_args()
 
-    docs = read_docs(args.inputs)
+    if args.multi_day and not args.outdir:
+        ap.error("--multi-day requires --outdir")
+    if not args.multi_day and not args.outcsv:
+        ap.error("--outcsv is required (or use --multi-day with --outdir)")
+
     stop = load_stopwords(args.stop)
     alias = load_alias(args.alias)
 
-    uni, bi, tri = counts_ngrams(docs, stop, args.minlen, args.max_ngram)
-    filtered_uni = filter_and_alias(uni, stop, args.mincount, alias)
-    filtered_bi = filter_and_alias(bi, stop, args.mincount, alias)
-    filtered_tri = filter_and_alias(tri, stop, args.mincount, alias)
-    kbs = keybert_scores(docs, topk=50) if args.use_keybert and _HAS_KEYBERT else {}
-    scores = combine_scores(filtered_uni, filtered_bi, filtered_tri, kbs)
-    outp = to_daily_csv(args.date, args.outcsv, scores, args.topk)
+    if args.multi_day:
+        by_date: dict[str, list[str]] = defaultdict(list)
+        n_skipped = 0
+        for text, d in read_docs_with_date(args.inputs):
+            if d is None:
+                if args.include_undated:
+                    by_date[args.date].append(text)
+                else:
+                    n_skipped += 1
+                continue
+            by_date[d].append(text)
+        outdir = Path(args.outdir)
+        outdir.mkdir(parents=True, exist_ok=True)
+        for d in sorted(by_date.keys()):
+            docs = by_date[d]
+            outcsv = outdir / args.csv_template.format(date=d)
+            _build_one_day_csv(d, docs, args, alias, stop, outcsv)
+            print(f"saved {d} -> {outcsv}  (n_docs={len(docs)})")
+        print(f"[multi-day] dates={len(by_date)}  skipped_undated={n_skipped}")
+        return
+
+    # Single-day mode
+    docs: list[str] = []
+    n_skipped = 0
+    for text, d in read_docs_with_date(args.inputs):
+        if args.date_filter is None:
+            docs.append(text)
+        elif d == args.date_filter:
+            docs.append(text)
+        else:
+            n_skipped += 1
+    outp = _build_one_day_csv(args.date, docs, args, alias, stop, args.outcsv)
+    if args.date_filter is not None:
+        print(f"[date-filter={args.date_filter}] kept={len(docs)} skipped={n_skipped}")
     print(f"saved -> {outp}")
 
 if __name__ == "__main__":
