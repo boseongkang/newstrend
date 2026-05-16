@@ -58,8 +58,9 @@ main{max-width:1280px;margin:20px auto;padding:0 20px}
              text-transform:uppercase;color:var(--t2);margin-bottom:8px;flex-shrink:0}
 /* Chart.js requires the canvas parent to have an explicit height when
    maintainAspectRatio is false — min-height collapses to 0. */
-.canvas-wrap{position:relative;height:240px;flex:1 0 240px}
-.canvas-wrap.tall{height:320px;flex:1 0 320px}
+.canvas-wrap{position:relative;height:360px;min-height:360px;flex:1 0 360px}
+.canvas-wrap.tall{height:360px;min-height:360px;flex:1 0 360px}
+.canvas-wrap > canvas{position:absolute;left:0;top:0;width:100% !important;height:100% !important}
 
 /* DOW heatmap */
 .hm-wrap{overflow-x:auto;background:var(--bg2);padding:8px;border:1px solid var(--b1)}
@@ -257,14 +258,32 @@ function renderKPI(dow, weekly){
 
 function renderDOWVolume(dow){
   const ctx = document.getElementById("dow-volume");
+  const vals = DAY_ORDER.map(d => dow.avg_volume_by_day[d]);
+  if(vals.length !== 7){
+    console.error("[trends] expected 7 DOW values, got", vals.length, vals);
+  }
+  if(vals.some(v => v == null || isNaN(v))){
+    console.error("[trends] DOW values contain null/NaN:", vals);
+  }
+  const wrap = ctx.parentElement;
+  const r = wrap.getBoundingClientRect();
+  console.log("[trends] dow-volume canvas-wrap rect", r.width.toFixed(0)+"x"+r.height.toFixed(0));
+  if(r.height < 50){
+    console.error("[trends] canvas-wrap height too small ("+r.height.toFixed(0)+"px) — chart will be invisible");
+  }
   new Chart(ctx, {
     type:"bar",
     data:{
       labels: DAY_ORDER,
       datasets:[{
-        data: DAY_ORDER.map(d => dow.avg_volume_by_day[d]),
+        label: "avg / day",
+        data: vals,
         backgroundColor: DAY_ORDER.map(d => (d==="Sat"||d==="Sun") ? "#344a60" : "#00d4ff"),
-        borderWidth: 0,
+        borderColor: DAY_ORDER.map(d => (d==="Sat"||d==="Sun") ? "#344a60" : "#00d4ff"),
+        borderWidth: 1,
+        borderSkipped: false,
+        categoryPercentage: 0.85,
+        barPercentage: 0.9,
       }]
     },
     options:{
@@ -274,7 +293,7 @@ function renderDOWVolume(dow){
       }},
       scales:{
         x:{grid:{display:false},ticks:{color:"#6a8aa8"}},
-        y:{grid:{color:"#1a2840"},ticks:{color:"#6a8aa8",callback:v=>fmt(v)}}
+        y:{grid:{color:"#1a2840"},ticks:{color:"#6a8aa8",callback:v=>fmt(v)},beginAtZero:true}
       }
     }
   });
