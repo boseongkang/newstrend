@@ -51,11 +51,15 @@ main{max-width:1280px;margin:20px auto;padding:0 20px}
 .kpi-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:3px}
 
 /* DOW bar chart 컨테이너 */
-.dow-row{display:grid;grid-template-columns:1fr 1.6fr;gap:16px;margin-top:8px}
-.chart-box{background:var(--bg2);padding:12px;border:1px solid var(--b1);min-height:240px}
-.chart-box.tall{min-height:320px}
+.dow-row{display:grid;grid-template-columns:1fr 1.6fr;gap:16px;margin-top:8px;align-items:stretch}
+.chart-box{background:var(--bg2);padding:12px;border:1px solid var(--b1);
+           display:flex;flex-direction:column}
 .chart-title{font-family:var(--fm);font-size:9px;letter-spacing:.12em;
-             text-transform:uppercase;color:var(--t2);margin-bottom:8px}
+             text-transform:uppercase;color:var(--t2);margin-bottom:8px;flex-shrink:0}
+/* Chart.js requires the canvas parent to have an explicit height when
+   maintainAspectRatio is false — min-height collapses to 0. */
+.canvas-wrap{position:relative;height:240px;flex:1 0 240px}
+.canvas-wrap.tall{height:320px;flex:1 0 320px}
 
 /* DOW heatmap */
 .hm-wrap{overflow-x:auto;background:var(--bg2);padding:8px;border:1px solid var(--b1)}
@@ -154,7 +158,7 @@ table.mv tr:hover{background:rgba(255,255,255,.02)}
     <div class="dow-row">
       <div class="chart-box">
         <div class="chart-title">Overall volume by weekday</div>
-        <canvas id="dow-volume" height="220"></canvas>
+        <div class="canvas-wrap"><canvas id="dow-volume"></canvas></div>
       </div>
       <div class="chart-box">
         <div class="chart-title">Top 8 terms — DOW signature (row-normalized)</div>
@@ -179,13 +183,13 @@ table.mv tr:hover{background:rgba(255,255,255,.02)}
       <button class="btn" id="clear-btn">CLEAR</button>
       <button class="btn" id="reset-btn">RESET TOP 5</button>
     </div>
-    <div class="chart-box tall">
+    <div class="chart-box">
       <div class="chart-title">Weekly totals (ISO weeks)</div>
-      <canvas id="weekly-chart" height="200"></canvas>
+      <div class="canvas-wrap tall"><canvas id="weekly-chart"></canvas></div>
     </div>
-    <div class="chart-box tall" style="margin-top:12px">
+    <div class="chart-box" style="margin-top:12px">
       <div class="chart-title">Monthly totals</div>
-      <canvas id="monthly-chart" height="200"></canvas>
+      <div class="canvas-wrap tall"><canvas id="monthly-chart"></canvas></div>
     </div>
   </section>
 
