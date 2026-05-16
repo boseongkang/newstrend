@@ -177,7 +177,7 @@ jobs:
             --stop config/stopwords_en.txt
           echo "=== Daily CSVs after backfill ==="
           ls data/warehouse/daily/*.csv | wc -l
-          ls -lt data/warehouse/daily/*.csv | head -10
+          ls -lt data/warehouse/daily/*.csv | head -10 || true
 
 
       - name: Upload warehouse artifact
