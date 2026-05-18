@@ -381,7 +381,198 @@
         "improvement_pct": 4.08
       },
       "calibration_runs_total": 129
+    },
+    {
+      "updated": "2026-05-18T16:43:11Z",
+      "week": "2026-W20",
+      "week_summary": {
+        "week": "2026-W20",
+        "n": 90,
+        "avg_abs_gap_pct": 5.443,
+        "avg_signed_gap_pct": 0.436,
+        "directional_acc": 0.256
+      },
+      "trade_summary": {
+        "strategies": {
+          "main_system": {
+            "total_return_pct": 1.675,
+            "win_rate": 0.5,
+            "n_trades_total": 13,
+            "n_open": 9,
+            "n_completed": 2,
+            "current_value": 10167.49
+          },
+          "conservative": {
+            "total_return_pct": 1.46,
+            "win_rate": 0.5,
+            "n_trades_total": 13,
+            "n_open": 9,
+            "n_completed": 2,
+            "current_value": 10146.02
+          },
+          "aggressive": {
+            "total_return_pct": 2.652,
+            "win_rate": 0.667,
+            "n_trades_total": 16,
+            "n_open": 10,
+            "n_completed": 3,
+            "current_value": 10265.23
+          }
+        }
+      },
+      "accuracy_summary": {
+        "n_actionable": 200,
+        "by_action": {
+          "BUY": {
+            "n": 19,
+            "n_correct": 8,
+            "accuracy": 0.421,
+            "avg_return_pct": -0.139
+          },
+          "REDUCE": {
+            "n": 67,
+            "n_correct": 27,
+            "accuracy": 0.403,
+            "avg_return_pct": 2.66
+          },
+          "SELL": {
+            "n": 30,
+            "n_correct": 19,
+            "accuracy": 0.633,
+            "avg_return_pct": 1.587
+          },
+          "WATCH": {
+            "n": 84,
+            "n_correct": 27,
+            "accuracy": 0.321,
+            "avg_return_pct": -0.832
+          }
+        }
+      },
+      "gap_summary": {
+        "avg_abs_gap_pct": 5.182,
+        "avg_signed_gap_pct": -1.693,
+        "directional_acc": 0.277
+      },
+      "top_issues": [
+        {
+          "dimension": "by_sector",
+          "bucket": "Technology",
+          "n": 214,
+          "avg_abs_gap_pct": 7.528,
+          "avg_signed_gap_pct": -4.996,
+          "directional_acc": 0.243,
+          "severity": 12.668,
+          "reason": "|gap|=7.53% \u00b7 dir_acc=24%"
+        },
+        {
+          "dimension": "by_volatility",
+          "bucket": "high",
+          "n": 301,
+          "avg_abs_gap_pct": 6.987,
+          "avg_signed_gap_pct": -3.115,
+          "directional_acc": 0.229,
+          "severity": 12.407,
+          "reason": "|gap|=6.99% \u00b7 dir_acc=23%"
+        },
+        {
+          "dimension": "by_action",
+          "bucket": "HOLD",
+          "n": 363,
+          "avg_abs_gap_pct": 5.398,
+          "avg_signed_gap_pct": -2.514,
+          "directional_acc": 0.207,
+          "severity": 11.258,
+          "reason": "|gap|=5.40% \u00b7 dir_acc=21%"
+        },
+        {
+          "dimension": "by_confidence",
+          "bucket": "[0.5, 0.7)",
+          "n": 84,
+          "avg_abs_gap_pct": 6.869,
+          "avg_signed_gap_pct": -3.515,
+          "directional_acc": 0.321,
+          "severity": 10.449,
+          "reason": "|gap|=6.87% \u00b7 dir_acc=32%"
+        },
+        {
+          "dimension": "by_dow",
+          "bucket": "Mon",
+          "n": 148,
+          "avg_abs_gap_pct": 5.895,
+          "avg_signed_gap_pct": -1.564,
+          "directional_acc": 0.277,
+          "severity": 10.355,
+          "reason": "|gap|=5.89% \u00b7 dir_acc=28%"
+        }
+      ],
+      "improvement_plan": [
+        {
+          "id": "sector_Technology",
+          "target": "sector Technology",
+          "issue": "|gap|=7.53% across this sector (n=214).",
+          "suggestion": "Audit the pillar that's largest contributor to Technology-sector calls; defer untested signals.",
+          "severity": 12.668
+        },
+        {
+          "id": "vol_high",
+          "target": "volatility tier high",
+          "issue": "|gap|=6.99% at this vol level (n=301).",
+          "suggestion": "Tighten stop-loss / shrink position when HV20 is in 'high' tier.",
+          "severity": 12.407
+        },
+        {
+          "id": "action_HOLD",
+          "target": "HOLD action calibration",
+          "issue": "|gap|=5.40% (n=363); system predicts lower than reality.",
+          "suggestion": "Re-check HOLD action mapping to predicted_return heuristic.",
+          "severity": 11.258
+        },
+        {
+          "id": "conf_[0.5, 0.7)",
+          "target": "confidence band [0.5, 0.7)",
+          "issue": "|gap|=6.87% in this band (n=84).",
+          "suggestion": "Add confidence-conditional position sizing \u2014 smaller bets in this band.",
+          "severity": 10.449
+        },
+        {
+          "id": "by_dow_Mon",
+          "target": "by_dow \u2192 Mon",
+          "issue": "|gap|=5.89% \u00b7 dir_acc=28%",
+          "suggestion": "Investigate this bucket; review recent predictions for systematic miss.",
+          "severity": 10.355
+        },
+        {
+          "id": "pillar_grad_fundamental_score",
+          "target": "pillar weight: fundamental_score",
+          "issue": "Gap gradient suggests \u0394weight=-0.100.",
+          "suggestion": "Calibrator will absorb this signal automatically; verify after next run that fundamental_score EMA weight has moved in the suggested direction.",
+          "severity": 0.5
+        }
+      ],
+      "last_week_validation": {
+        "available": true,
+        "this_week": {
+          "week": "2026-W20",
+          "n": 90,
+          "avg_abs_gap_pct": 5.443,
+          "avg_signed_gap_pct": 0.436,
+          "directional_acc": 0.256
+        },
+        "last_week": {
+          "week": "2026-W19",
+          "n": 386,
+          "avg_abs_gap_pct": 5.123,
+          "avg_signed_gap_pct": -1.902,
+          "directional_acc": 0.264
+        },
+        "delta_abs_gap_pct": 0.32,
+        "delta_signed_gap_pct": 2.338,
+        "direction": "worsened",
+        "improvement_pct": -6.25
+      },
+      "calibration_runs_total": 130
     }
   ],
-  "updated": "2026-05-18T12:57:19Z"
+  "updated": "2026-05-18T16:43:11Z"
 }
