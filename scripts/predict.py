@@ -504,6 +504,12 @@ def decide_action(rsi_state: str, macd_bias: str, bb_state: str,
         score *= 0.85
         risks.append("High volatility")
 
+    # Snapshot the TA-only score before any pillar boosts. The 5d-horizon
+    # confidence gate below (line ~570) uses this to prevent news / sentiment
+    # / fundamentals / insider from inflating confidence on technically weak
+    # setups — empirically the worst cohort (W_mid_BAD).
+    ta_only_score = score
+
     # ── 뉴스 신호 보너스 ──────────────────────────────────────────────────────
     if news.get("available") and news.get("active_terms"):
         ret  = news.get("best_ret_1d", 0) or 0
@@ -563,7 +569,17 @@ def decide_action(rsi_state: str, macd_bias: str, bb_state: str,
         data_conf = 1.0
 
     # ── score → confidence ────────────────────────────────────────────────────
-    raw_conf   = 1 / (1 + math.exp(-score * 0.45))
+    raw_conf = 1 / (1 + math.exp(-score * 0.45))
+
+    # TA-conviction gate (Bug 2 fix, 2026-05-21). Diagnosis of the 0.7-0.8
+    # confidence band (W_mid_BAD cohort, n=90, 27.8% acc, -1.48% 5d return)
+    # found that records with weak TA score (<1.5) had a 0% hit rate when
+    # pillar boosts pushed them into the high-conf band. Cap raw_conf at
+    # 0.65 when the underlying technical setup lacks conviction so pillar
+    # boosts can't manufacture phantom confidence.
+    if ta_only_score < 1.5:
+        raw_conf = min(raw_conf, 0.65)
+
     confidence = round(raw_conf * data_conf, 3)
 
     # ── 액션 결정 ─────────────────────────────────────────────────────────────
