@@ -126,11 +126,12 @@ def extract_features(p: dict) -> dict:
         out["quality_score"] = fund.get("quality_score")
         out["growth_score"] = fund.get("growth_score")
         out["health_score"] = fund.get("health_score")
+    # predict.py writes the full insider dict from insider_analyzer.py
+    # (keys: score/status/n_purchases/n_distinct_buyers_30d_max/weighted_buy_value/summary).
+    # No "available" key — presence of "score" is the right guard.
     ins = p.get("insider") or {}
-    if ins.get("available"):
-        for k in ("p_score", "score", "p", "cluster_size", "net_buy_value", "n_buyers"):
-            if k in ins:
-                out[f"insider_{k}"] = ins[k]
+    if ins.get("score") is not None:
+        out["insider_score"] = ins["score"]
     return out
 
 
@@ -273,6 +274,11 @@ def _bucket_pillar(records: list[dict], pkey: str, horizon: int = 5,
         v = r["features"].get(pkey)
         if v is None:
             return None
+        if t1 == t2:
+            # Degenerate tertile (signal clusters at a floor — e.g. insider_score
+            # where ~85% of tickers sit at the 0.5 RSU-churn floor). Fall back to
+            # a binary split so calibrator gets both high and low buckets.
+            return "high" if v > t1 else "low"
         if v < t1:
             return "low"
         if v < t2:
