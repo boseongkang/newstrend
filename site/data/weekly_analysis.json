@@ -1,43 +1,43 @@
 {
-  "updated": "2026-05-21T10:58:15Z",
+  "updated": "2026-05-21T14:26:32Z",
   "week": "2026-W20",
   "week_summary": {
     "week": "2026-W20",
-    "n": 270,
-    "avg_abs_gap_pct": 5.07,
-    "avg_signed_gap_pct": -0.847,
-    "directional_acc": 0.311
+    "n": 360,
+    "avg_abs_gap_pct": 4.981,
+    "avg_signed_gap_pct": -0.606,
+    "directional_acc": 0.286
   },
   "trade_summary": {
     "strategies": {
       "main_system": {
-        "total_return_pct": 1.903,
+        "total_return_pct": 1.738,
         "win_rate": 0.625,
-        "n_trades_total": 21,
-        "n_open": 5,
+        "n_trades_total": 24,
+        "n_open": 8,
         "n_completed": 8,
-        "current_value": 10190.29
+        "current_value": 10173.84
       },
       "conservative": {
-        "total_return_pct": 2.008,
+        "total_return_pct": 1.9,
         "win_rate": 0.571,
         "n_trades_total": 19,
         "n_open": 5,
         "n_completed": 7,
-        "current_value": 10200.82
+        "current_value": 10189.96
       },
       "aggressive": {
-        "total_return_pct": 2.999,
+        "total_return_pct": 2.692,
         "win_rate": 0.727,
-        "n_trades_total": 26,
-        "n_open": 4,
+        "n_trades_total": 32,
+        "n_open": 10,
         "n_completed": 11,
-        "current_value": 10299.86
+        "current_value": 10269.15
       }
     }
   },
   "accuracy_summary": {
-    "n_actionable": 266,
+    "n_actionable": 297,
     "by_action": {
       "BUY": {
         "n": 20,
@@ -46,60 +46,60 @@
         "avg_return_pct": -0.453
       },
       "REDUCE": {
-        "n": 87,
-        "n_correct": 37,
-        "accuracy": 0.425,
-        "avg_return_pct": 2.515
+        "n": 100,
+        "n_correct": 42,
+        "accuracy": 0.42,
+        "avg_return_pct": 2.363
       },
       "SELL": {
-        "n": 41,
-        "n_correct": 24,
-        "accuracy": 0.585,
-        "avg_return_pct": 2.308
+        "n": 45,
+        "n_correct": 26,
+        "accuracy": 0.578,
+        "avg_return_pct": 2.277
       },
       "WATCH": {
-        "n": 118,
-        "n_correct": 43,
+        "n": 132,
+        "n_correct": 48,
         "accuracy": 0.364,
-        "avg_return_pct": -0.629
+        "avg_return_pct": -0.664
       }
     }
   },
   "gap_summary": {
-    "avg_abs_gap_pct": 5.109,
-    "avg_signed_gap_pct": -1.643,
-    "directional_acc": 0.292
+    "avg_abs_gap_pct": 5.067,
+    "avg_signed_gap_pct": -1.453,
+    "directional_acc": 0.283
   },
   "top_issues": [
     {
       "dimension": "by_sector",
       "bucket": "Technology",
-      "n": 286,
-      "avg_abs_gap_pct": 7.326,
-      "avg_signed_gap_pct": -4.74,
-      "directional_acc": 0.245,
-      "severity": 12.426,
-      "reason": "|gap|=7.33% \u00b7 dir_acc=24%"
+      "n": 322,
+      "avg_abs_gap_pct": 7.198,
+      "avg_signed_gap_pct": -4.383,
+      "directional_acc": 0.227,
+      "severity": 12.658,
+      "reason": "|gap|=7.20% \u00b7 dir_acc=23%"
     },
     {
       "dimension": "by_volatility",
       "bucket": "high",
-      "n": 415,
-      "avg_abs_gap_pct": 6.684,
-      "avg_signed_gap_pct": -2.889,
-      "directional_acc": 0.255,
-      "severity": 11.584,
-      "reason": "|gap|=6.68% \u00b7 dir_acc=26%"
+      "n": 474,
+      "avg_abs_gap_pct": 6.588,
+      "avg_signed_gap_pct": -2.572,
+      "directional_acc": 0.243,
+      "severity": 11.728,
+      "reason": "|gap|=6.59% \u00b7 dir_acc=24%"
     },
     {
       "dimension": "by_action",
       "bucket": "HOLD",
-      "n": 477,
-      "avg_abs_gap_pct": 5.248,
-      "avg_signed_gap_pct": -2.364,
-      "directional_acc": 0.22,
-      "severity": 10.848,
-      "reason": "|gap|=5.25% \u00b7 dir_acc=22%"
+      "n": 536,
+      "avg_abs_gap_pct": 5.2,
+      "avg_signed_gap_pct": -2.078,
+      "directional_acc": 0.209,
+      "severity": 11.02,
+      "reason": "|gap|=5.20% \u00b7 dir_acc=21%"
     },
     {
       "dimension": "by_dow",
@@ -126,23 +126,23 @@
     {
       "id": "sector_Technology",
       "target": "sector Technology",
-      "issue": "|gap|=7.33% across this sector (n=286).",
+      "issue": "|gap|=7.20% across this sector (n=322).",
       "suggestion": "Audit the pillar that's largest contributor to Technology-sector calls; defer untested signals.",
-      "severity": 12.426
+      "severity": 12.658
     },
     {
       "id": "vol_high",
       "target": "volatility tier high",
-      "issue": "|gap|=6.68% at this vol level (n=415).",
+      "issue": "|gap|=6.59% at this vol level (n=474).",
       "suggestion": "Tighten stop-loss / shrink position when HV20 is in 'high' tier.",
-      "severity": 11.584
+      "severity": 11.728
     },
     {
       "id": "action_HOLD",
       "target": "HOLD action calibration",
-      "issue": "|gap|=5.25% (n=477); system predicts lower than reality.",
+      "issue": "|gap|=5.20% (n=536); system predicts lower than reality.",
       "suggestion": "Re-check HOLD action mapping to predicted_return heuristic.",
-      "severity": 10.848
+      "severity": 11.02
     },
     {
       "id": "by_dow_Mon",
@@ -170,10 +170,10 @@
     "available": true,
     "this_week": {
       "week": "2026-W20",
-      "n": 270,
-      "avg_abs_gap_pct": 5.07,
-      "avg_signed_gap_pct": -0.847,
-      "directional_acc": 0.311
+      "n": 360,
+      "avg_abs_gap_pct": 4.981,
+      "avg_signed_gap_pct": -0.606,
+      "directional_acc": 0.286
     },
     "last_week": {
       "week": "2026-W19",
@@ -182,10 +182,10 @@
       "avg_signed_gap_pct": -1.902,
       "directional_acc": 0.264
     },
-    "delta_abs_gap_pct": -0.053,
-    "delta_signed_gap_pct": 1.055,
-    "direction": "flat",
-    "improvement_pct": 1.03
+    "delta_abs_gap_pct": -0.142,
+    "delta_signed_gap_pct": 1.296,
+    "direction": "improved",
+    "improvement_pct": 2.77
   },
-  "calibration_runs_total": 159
+  "calibration_runs_total": 160
 }
