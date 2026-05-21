@@ -1,0 +1,98 @@
+name: insider-refresh
+
+# Weekly Form 4 ingest → Pillar 5 (insider) index regeneration.
+# Form 4 filings have a 2-business-day reporting lag so daily refresh
+# adds little value; Monday 06:00 UTC catches the prior week's filings
+# before trend-site's 07:25 UTC build picks up the new insider.json.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # Mondays 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: insider-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SEC_USER_AGENT: "Newstrend-CI ci@newstrend.local"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: |
+          python -m pip install -U pip
+          pip install -r requirements.txt
+
+      - name: Restore Form 4 cache from data-cache branch
+        run: |
+          set -e
+          git fetch origin data-cache:refs/remotes/origin/data-cache 2>/dev/null || true
+          mkdir -p data/sec_form4_cache
+          if git show-ref --verify --quiet refs/remotes/origin/data-cache; then
+            git restore --worktree --source=origin/data-cache -- data/sec_form4_cache/ 2>/dev/null || true
+            git reset HEAD data/sec_form4_cache/ 2>/dev/null || true
+          fi
+          ls data/sec_form4_cache/parsed/ 2>/dev/null | wc -l | xargs -I{} echo "parsed cache entries: {}"
+
+      - name: Fetch Form 4 filings (90d window)
+        run: |
+          python scripts/sec_form4_fetcher.py --all --days 90 || true
+
+      - name: Rebuild insider index
+        run: |
+          python scripts/insider_analyzer.py
+          ls site/data/insider/ | wc -l | xargs -I{} echo "per-ticker insider files: {}"
+          python -c "import json; d=json.load(open('site/data/insider.json')); print(f'insider.json: n_tickers={d[\"n_tickers\"]} generated_at={d[\"generated_at\"]}')"
+
+      - name: Commit insider.json to main
+        run: |
+          set -e
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add site/data/insider.json site/data/insider/
+          if git diff --cached --quiet; then
+            echo "no insider changes to commit"
+          else
+            git commit -m "insider: weekly refresh $(date -u +%Y-%m-%d)"
+            git pull --rebase origin main
+            git push origin main
+          fi
+
+      - name: Preserve Form 4 cache to data-cache branch
+        run: |
+          set -e
+          rm -rf /tmp/form4-cache
+          git worktree prune || true
+          if git show-ref --verify --quiet refs/remotes/origin/data-cache; then
+            git worktree add /tmp/form4-cache origin/data-cache
+            (cd /tmp/form4-cache && git checkout -B data-cache)
+          else
+            git worktree add /tmp/form4-cache -b data-cache
+          fi
+          mkdir -p /tmp/form4-cache/data/sec_form4_cache
+          cp -r data/sec_form4_cache/. /tmp/form4-cache/data/sec_form4_cache/
+          cd /tmp/form4-cache
+          rm -f .gitignore
+          git add data/sec_form4_cache/
+          if git diff --cached --quiet; then
+            echo "no Form 4 cache changes to preserve"
+          else
+            git commit -m "form4: cache refresh $(date -u +%Y-%m-%d)"
+            git push origin data-cache
+          fi
+          cd "$GITHUB_WORKSPACE"
+          git worktree remove --force /tmp/form4-cache 2>/dev/null || true
