@@ -604,3 +604,9 @@ jobs:
 
       - id: deploy
         uses: actions/deploy-pages@v4
+
+      # Fail the workflow if sentiment is stale, so GitHub mobile notifies
+      # us regardless of laptop launchd state. Runs after deploy so the site
+      # still ships with whatever data we have.
+      - name: Sentiment freshness health check
+        run: python scripts/health_check.py
