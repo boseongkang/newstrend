@@ -30,7 +30,7 @@ jobs:
           pip install pandas numpy pyyaml || true
 
       - name: Download previous warehouse artifact
-        uses: dawidd6/action-download-artifact@v9
+        uses: dawidd6/action-download-artifact@v17
         with:
           workflow: update-warehouse.yml
           name: warehouse
@@ -46,7 +46,7 @@ jobs:
           if [ -d "$SRC" ]; then rsync -a "$SRC"/ data/warehouse/; fi
 
       - name: Download latest live jsonl
-        uses: dawidd6/action-download-artifact@v9
+        uses: dawidd6/action-download-artifact@v17
         with:
           workflow: collect_continuous.yml
           name: live-jsonl
@@ -54,7 +54,7 @@ jobs:
           if_no_artifact_found: ignore
 
       - name: Download RSS jsonl
-        uses: dawidd6/action-download-artifact@v9
+        uses: dawidd6/action-download-artifact@v17
         with:
           workflow: collect_rss.yml
           name: rss-jsonl

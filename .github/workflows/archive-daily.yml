@@ -37,7 +37,7 @@ jobs:
 
       - name: Download latest warehouse artifact
         id: dlwh
-        uses: dawidd6/action-download-artifact@v9
+        uses: dawidd6/action-download-artifact@v17
         with:
           workflow: update-warehouse.yml
           workflow_conclusion: success
@@ -63,7 +63,7 @@ jobs:
 
       - name: Download latest live artifact (fallback)
         if: ${{ steps.find.outputs.from != 'warehouse' }}
-        uses: dawidd6/action-download-artifact@v9
+        uses: dawidd6/action-download-artifact@v17
         with:
           workflow: collect_continuous.yml
           workflow_conclusion: success
