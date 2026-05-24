@@ -18,11 +18,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -37,7 +37,7 @@ jobs:
 
       - name: Download latest warehouse artifact
         id: dlwh
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v9
         with:
           workflow: update-warehouse.yml
           workflow_conclusion: success
@@ -63,7 +63,7 @@ jobs:
 
       - name: Download latest live artifact (fallback)
         if: ${{ steps.find.outputs.from != 'warehouse' }}
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v9
         with:
           workflow: collect_continuous.yml
           workflow_conclusion: success
@@ -109,7 +109,7 @@ jobs:
           ls -lh out
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

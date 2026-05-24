@@ -23,10 +23,10 @@ jobs:
         OR (nvidia OR apple OR microsoft OR tesla OR amazon OR google)
         OR (oil OR energy OR dollar OR treasury OR bond OR crypto OR bitcoin)
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Ensure dirs
@@ -70,7 +70,7 @@ jobs:
           fi
       - name: Upload artifact
         if: ${{ steps.collect.outputs.outfile != '' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: live-jsonl
           path: ${{ steps.collect.outputs.outfile }}

@@ -17,9 +17,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -30,7 +30,7 @@ jobs:
           pip install pandas numpy pyyaml || true
 
       - name: Download previous warehouse artifact
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v9
         with:
           workflow: update-warehouse.yml
           name: warehouse
@@ -46,7 +46,7 @@ jobs:
           if [ -d "$SRC" ]; then rsync -a "$SRC"/ data/warehouse/; fi
 
       - name: Download latest live jsonl
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v9
         with:
           workflow: collect_continuous.yml
           name: live-jsonl
@@ -54,7 +54,7 @@ jobs:
           if_no_artifact_found: ignore
 
       - name: Download RSS jsonl
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v9
         with:
           workflow: collect_rss.yml
           name: rss-jsonl
@@ -181,7 +181,7 @@ jobs:
 
 
       - name: Upload warehouse artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: warehouse
           path: |
