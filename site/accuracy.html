@@ -186,12 +186,14 @@ function renderKPI(d){
   const overallRet = nDir ? retSum/nDir : null;
 
   const buy = all.BUY || {};
-  const watch = all.WATCH || {};
+
+  const rawN = d.n_actionable_5d_raw || d.n_actionable_5d;
+  const dedupN = d.n_deduped || d.n_records;
 
   const kpis = [
-    {label:'Total Predictions', val: d.n_records, sub:`${d.coverage?.snapshot_count || 0} snapshots`},
-    {label:'Actionable (5d)', val: d.n_actionable_5d, sub:`${d.n_pending_5d || 0} pending`},
-    {label:'Overall Accuracy', val: fmtAcc(overallAcc), cls: overallAcc != null && overallAcc > 0.5 ? 'up' : '', sub: nDir + ' calls'},
+    {label:'Raw / Deduped', val: d.n_records + ' → ' + dedupN, sub:`${d.coverage?.snapshot_count || 0} snapshots`},
+    {label:'Actionable (5d)', val: d.n_actionable_5d, sub:`raw ${rawN} · ${d.n_pending_5d || 0} pending`},
+    {label:'Overall Accuracy', val: fmtAcc(overallAcc), cls: overallAcc != null && overallAcc > 0.5 ? 'up' : '', sub: nDir + ' deduped calls'},
     {label:'Avg Return (5d)', val: fmtPct(overallRet), cls: dirCls(overallRet), sub:'directional only'},
     {label:'BUY Accuracy', val: fmtAcc(buy.accuracy), cls: buy.accuracy != null && buy.accuracy > 0.5 ? 'up' : '', sub: `n=${buy.n||0} avg ${fmtPct(buy.avg_return_pct)}`},
   ];
@@ -203,7 +205,7 @@ function renderKPI(d){
       <div class="kpi-sub">${k.sub || ''}</div>
     </div>`).join('');
   document.getElementById('subtitle').textContent =
-    `${d.coverage?.snapshot_count || 0} archived snapshots · 5-day forward horizon · ${d.n_actionable_5d}/${d.n_records} actionable`;
+    `${d.coverage?.snapshot_count || 0} snapshots · 5d horizon · ${d.n_actionable_5d} actionable (deduped from ${rawN})`;
 
   if (d.n_actionable_5d < 60) {
     const note = document.getElementById('low-n-note');

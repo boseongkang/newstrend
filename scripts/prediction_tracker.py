@@ -339,36 +339,61 @@ def run() -> None:
                 rec[f"correct_{h}d"] = is_correct(action, ret)
             records.append(rec)
 
-    # ── aggregations (5-day horizon is primary; 10d secondary) ──────────
+    # ── dedup: keep latest snap_date per (ticker, anchor_date) ──────────
+    # A ticker predicted on consecutive days often shares the same forward
+    # anchor date (= same realized outcome).  Counting both inflates n and
+    # distorts accuracy.  Dedup keeps the latest snap_date per pair so each
+    # outcome is measured once.
     primary_h = 5
-    aggregations = {
+
+    def _dedup(recs: list[dict], horizon: int) -> list[dict]:
+        anchor_key = f"fwd_{horizon}d_anchor_date"
+        best: dict[str, dict] = {}
+        for r in recs:
+            a = r.get(anchor_key)
+            if not a:
+                continue
+            k = f"{r['ticker']}|{a}"
+            if k not in best or r["snap_date"] > best[k]["snap_date"]:
+                best[k] = r
+        return list(best.values())
+
+    deduped = _dedup(records, primary_h)
+    deduped_10d = _dedup(records, 10)
+
+    # ── aggregations (5-day horizon is primary; 10d secondary) ──────────
+    # Raw aggregations (kept for comparison)
+    raw_aggregations = {
         "by_action":        _aggregate(records, lambda r: r["action"], horizon=primary_h),
         "by_confidence":    _aggregate(records, lambda r: _confidence_band(r["confidence"]), horizon=primary_h),
-        "by_sector":        _aggregate(records, lambda r: r["sector"], horizon=primary_h),
         "by_regime":        _aggregate(records, lambda r: r["regime"], horizon=primary_h),
-        "by_dow":           _aggregate(records, lambda r: _dow_label(r["snap_date"]), horizon=primary_h),
-        "by_month":         _aggregate(records, lambda r: _month_label(r["snap_date"]), horizon=primary_h),
-        "by_snapshot":      _aggregate(records, lambda r: r["snap_date"], horizon=primary_h),
+    }
+    # Deduped aggregations (primary)
+    aggregations = {
+        "by_action":        _aggregate(deduped, lambda r: r["action"], horizon=primary_h),
+        "by_confidence":    _aggregate(deduped, lambda r: _confidence_band(r["confidence"]), horizon=primary_h),
+        "by_sector":        _aggregate(deduped, lambda r: r["sector"], horizon=primary_h),
+        "by_regime":        _aggregate(deduped, lambda r: r["regime"], horizon=primary_h),
+        "by_dow":           _aggregate(deduped, lambda r: _dow_label(r["snap_date"]), horizon=primary_h),
+        "by_month":         _aggregate(deduped, lambda r: _month_label(r["snap_date"]), horizon=primary_h),
+        "by_snapshot":      _aggregate(deduped, lambda r: r["snap_date"], horizon=primary_h),
     }
     aggregations_10d = {
-        "by_action":     _aggregate(records, lambda r: r["action"], horizon=10),
-        "by_confidence": _aggregate(records, lambda r: _confidence_band(r["confidence"]), horizon=10),
+        "by_action":     _aggregate(deduped_10d, lambda r: r["action"], horizon=10),
+        "by_confidence": _aggregate(deduped_10d, lambda r: _confidence_band(r["confidence"]), horizon=10),
     }
 
     by_pillar: dict[str, dict] = {}
     for pkey in PILLAR_KEYS:
-        bucket = _bucket_pillar(records, pkey, horizon=primary_h)
+        bucket = _bucket_pillar(deduped, pkey, horizon=primary_h)
         if bucket is not None:
             by_pillar[pkey] = bucket
 
     # Regime-conditional buckets: {regime_label: {pkey: bucket}}.
-    # Tertile bounds are computed within each regime so high/low are
-    # regime-relative — a "high quality_score" in RISK-OFF can differ
-    # from "high quality_score" in RISK-ON.
     by_pillar_by_regime: dict[str, dict] = {}
-    regimes = sorted({r.get("regime") for r in records if r.get("regime")})
+    regimes = sorted({r.get("regime") for r in deduped if r.get("regime")})
     for rg in regimes:
-        rg_records = [r for r in records if r.get("regime") == rg]
+        rg_records = [r for r in deduped if r.get("regime") == rg]
         rg_buckets: dict[str, dict] = {}
         for pkey in PILLAR_KEYS:
             bucket = _bucket_pillar(rg_records, pkey, horizon=primary_h)
@@ -378,20 +403,24 @@ def run() -> None:
             by_pillar_by_regime[rg] = rg_buckets
 
     # Coverage summary
-    actionable = [r for r in records if r.get(f"correct_{primary_h}d") is not None]
-    pending = [r for r in records if r.get(f"fwd_{primary_h}d_return") is None]
+    actionable = [r for r in deduped if r.get(f"correct_{primary_h}d") is not None]
+    pending = [r for r in deduped if r.get(f"fwd_{primary_h}d_return") is None]
+    raw_actionable = [r for r in records if r.get(f"correct_{primary_h}d") is not None]
 
     out = {
         "updated": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
         "horizon_days": list(HORIZONS_DAYS),
         "n_records": len(records),
+        "n_deduped": len(deduped),
         "n_actionable_5d": len(actionable),
+        "n_actionable_5d_raw": len(raw_actionable),
         "n_pending_5d": len(pending),
         "coverage": {
             "snapshots": [d for d, _ in snapshots],
             "snapshot_count": len(snapshots),
         },
         "aggregations": aggregations,
+        "raw_aggregations": raw_aggregations,
         "aggregations_10d": aggregations_10d,
         "by_pillar_tertile": by_pillar,
         "by_pillar_tertile_by_regime": by_pillar_by_regime,
@@ -400,16 +429,18 @@ def run() -> None:
 
     OUT_FILE.write_text(json.dumps(out, indent=2, default=str))
     print(f"Wrote {OUT_FILE}")
-    print(f"  records={len(records)}  actionable_5d={len(actionable)}  pending_5d={len(pending)}")
+    print(f"  records={len(records)}  deduped={len(deduped)}  actionable_5d={len(actionable)} (raw={len(raw_actionable)})  pending_5d={len(pending)}")
     print()
-    print("by_action (5d):")
+    print("by_action (5d, deduped):")
     for k, v in aggregations["by_action"].items():
-        print(f"  {k:8s} n={v['n']:3d}  acc={v['accuracy']*100:5.1f}%  avg_ret={v['avg_return_pct']:+.2f}%")
-    print("by_confidence (5d):")
+        raw = raw_aggregations["by_action"].get(k, {})
+        print(f"  {k:8s} n={v['n']:3d} (raw={raw.get('n',0):3d})  acc={v['accuracy']*100:5.1f}% (raw={raw.get('accuracy',0)*100:5.1f}%)  avg_ret={v['avg_return_pct']:+.2f}%")
+    print("by_confidence (5d, deduped):")
     for k, v in aggregations["by_confidence"].items():
-        print(f"  {k:14s} n={v['n']:3d}  acc={v['accuracy']*100:5.1f}%  avg_ret={v['avg_return_pct']:+.2f}%")
+        raw = raw_aggregations["by_confidence"].get(k, {})
+        print(f"  {k:14s} n={v['n']:3d} (raw={raw.get('n',0):3d})  acc={v['accuracy']*100:5.1f}% (raw={raw.get('accuracy',0)*100:5.1f}%)  avg_ret={v['avg_return_pct']:+.2f}%")
     if by_pillar:
-        print("by_pillar_tertile (5d):")
+        print("by_pillar_tertile (5d, deduped):")
         for pk, bucket in by_pillar.items():
             print(f"  {pk}:")
             for tier, v in bucket["buckets"].items():
