@@ -357,6 +357,7 @@ def run() -> None:
             "ema_alpha": EMA_ALPHA,
             "candidates": list(CONF_CANDIDATES),
         },
+        "market_drift": (gap.get("market_drift") or {}) if gap else {},
         "input_summary": {
             "n_records": accuracy.get("n_records"),
             "n_actionable_5d": accuracy.get("n_actionable_5d"),

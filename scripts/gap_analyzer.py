@@ -80,6 +80,9 @@ CONF_BANDS = [
 GRADIENT_LR = 0.05  # 1pp gap differential → 5% weight nudge
 GRADIENT_CLAMP = 0.10  # max ±10 % per run
 
+# EMA smoothing for market-drift offset
+DRIFT_EMA_ALPHA = 0.3
+
 
 # ── price calendar ──────────────────────────────────────────────────────
 class PriceCache:
@@ -180,6 +183,62 @@ def _isoweek(d: str) -> str:
     dt = datetime.fromisoformat(d).date()
     yr, wk, _ = dt.isocalendar()
     return f"{yr}-W{wk:02d}"
+
+
+def _compute_drift_ema(convergence_weeks: list[dict]) -> float:
+    """EMA of weekly signed_gap — estimates persistent market drift.
+
+    Warm-starts on first week, then rolls forward at DRIFT_EMA_ALPHA.
+    Recent weeks receive higher weight so the offset adapts when
+    the market regime shifts.
+    """
+    if not convergence_weeks:
+        return 0.0
+    drift = convergence_weeks[0]["avg_signed_gap_pct"]
+    for w in convergence_weeks[1:]:
+        drift = DRIFT_EMA_ALPHA * w["avg_signed_gap_pct"] + (1 - DRIFT_EMA_ALPHA) * drift
+    return round(drift, 4)
+
+
+def _drift_adjusted_metrics(actionable: list[dict], drift_pct: float) -> tuple[dict, dict]:
+    """Counterfactual metrics if predicted_return were drift-corrected."""
+    drift_dec = drift_pct / 100.0
+    agg: dict[str, dict] = {}
+    totals = {"n": 0, "abs_sum": 0.0, "signed_sum": 0.0, "dir": 0}
+    for r in actionable:
+        pred_adj = r["predicted_return"] - drift_dec
+        actual = r["actual_return"]
+        sgap = (pred_adj - actual) * 100
+        dc = int(
+            (pred_adj > 0 and actual > 0)
+            or (pred_adj < 0 and actual < 0)
+            or (pred_adj == 0 and abs(actual) < 0.01)
+        )
+        totals["n"] += 1
+        totals["abs_sum"] += abs(sgap)
+        totals["signed_sum"] += sgap
+        totals["dir"] += dc
+        g = agg.setdefault(r["action"], {"n": 0, "abs_sum": 0.0, "signed_sum": 0.0, "dir": 0})
+        g["n"] += 1
+        g["abs_sum"] += abs(sgap)
+        g["signed_sum"] += sgap
+        g["dir"] += dc
+    n = totals["n"]
+    summary = {
+        "avg_abs_gap_pct": round(totals["abs_sum"] / n, 3),
+        "avg_signed_gap_pct": round(totals["signed_sum"] / n, 3),
+        "directional_acc": round(totals["dir"] / n, 3),
+    }
+    by_action = {}
+    for act in sorted(agg):
+        g = agg[act]
+        by_action[act] = {
+            "n": g["n"],
+            "avg_abs_gap_pct": round(g["abs_sum"] / g["n"], 3),
+            "avg_signed_gap_pct": round(g["signed_sum"] / g["n"], 3),
+            "directional_acc": round(g["dir"] / g["n"], 3),
+        }
+    return summary, by_action
 
 
 def _aggregate(records: list[dict], key_fn) -> dict:
@@ -370,6 +429,10 @@ def run() -> None:
     grads = _gradients(by_pillar)
     convergence = _convergence(actionable)
 
+    # Market-drift offset (EMA of weekly signed gaps)
+    drift_ema_pct = _compute_drift_ema(convergence["weeks"])
+    summary_adj, by_action_adj = _drift_adjusted_metrics(actionable, drift_ema_pct)
+
     summary_n = len(actionable)
     avg_abs = round(sum(r["abs_gap_pct"] for r in actionable) / summary_n, 3) if summary_n else None
     avg_signed = round(sum(r["signed_gap_pct"] for r in actionable) / summary_n, 3) if summary_n else None
@@ -386,6 +449,12 @@ def run() -> None:
             "directional_acc": dir_acc,
         },
         "predicted_return_heuristic": ACTION_PR,
+        "market_drift": {
+            "ema_offset_pct": drift_ema_pct,
+            "ema_alpha": DRIFT_EMA_ALPHA,
+        },
+        "summary_drift_adjusted": summary_adj,
+        "by_action_drift_adjusted": by_action_adj,
         "aggregations": aggregations,
         "by_pillar_tertile": by_pillar,
         "gradients": grads,
@@ -405,6 +474,7 @@ def run() -> None:
         "updated": payload["updated"],
         "n_actionable": summary_n,
         "summary": payload["summary"],
+        "market_drift_ema_pct": drift_ema_pct,
         "convergence": convergence,
     })
     history["updated"] = payload["updated"]
@@ -434,6 +504,25 @@ def run() -> None:
         for w in convergence["weeks"]:
             print(f"  {w['week']} n={w['n']:3d} avg_abs={w['avg_abs_gap_pct']:.2f}%")
         print(f"  trend: {convergence['trend']}  improvement: {convergence['improvement_pct']}%")
+
+    print()
+    print(f"market drift (EMA of weekly signed gaps): {drift_ema_pct:+.3f}%")
+    print()
+    print("drift-adjusted vs raw:")
+    print(f"  {'':18s} {'raw':>10s} {'adjusted':>10s} {'delta':>8s}")
+    print(f"  {'avg_abs_gap':18s} {avg_abs:10.3f}% {summary_adj['avg_abs_gap_pct']:10.3f}% {summary_adj['avg_abs_gap_pct'] - avg_abs:+7.3f}%")
+    print(f"  {'avg_signed_gap':18s} {avg_signed:+10.3f}% {summary_adj['avg_signed_gap_pct']:+10.3f}% {summary_adj['avg_signed_gap_pct'] - avg_signed:+7.3f}%")
+    print(f"  {'directional_acc':18s} {dir_acc*100:9.1f}% {summary_adj['directional_acc']*100:9.1f}% {(summary_adj['directional_acc'] - dir_acc)*100:+6.1f}%p")
+    print()
+    print("by_action drift-adjusted:")
+    for act in ["BUY", "WATCH", "HOLD", "REDUCE", "SELL"]:
+        raw = aggregations["by_action"].get(act, {})
+        adj = by_action_adj.get(act, {})
+        if not raw or not adj:
+            continue
+        print(f"  {act:8s} signed: {raw['avg_signed_gap_pct']:+.2f}→{adj['avg_signed_gap_pct']:+.2f}%  "
+              f"abs: {raw['avg_abs_gap_pct']:.2f}→{adj['avg_abs_gap_pct']:.2f}%  "
+              f"dir: {raw['directional_acc']*100:.0f}→{adj['directional_acc']*100:.0f}%")
 
 
 if __name__ == "__main__":

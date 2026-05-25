@@ -466,6 +466,14 @@ jobs:
         run: |
           python scripts/weekly_analyzer.py || true
 
+      - name: Phase 0 — validation (measurement only)
+        run: |
+          python scripts/validate.py --ci || true
+
+      - name: ML monitor — forward alpha tracker
+        run: |
+          python scripts/ml_monitor.py --status || true
+
       - name: Generate site/data/health.json
         env:
           GH_RUN_ID: ${{ github.run_id }}
