@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-03",
+  "updated": "2026-06-04",
   "rules": {
     "stop_pct": -3,
     "take_pct": 5,
@@ -8,26 +8,38 @@
       "CHTR",
       "CVX",
       "NFLX",
+      "PEP",
       "PYPL",
-      "SBUX",
       "SOFI",
-      "USO",
-      "XOM"
+      "USO"
     ],
     "min_score": 1.5,
     "max_market_rsi": 60
   },
   "summary": {
-    "total_trades": 14,
-    "win_rate": 57.1,
-    "avg_ret": 1.77,
-    "cum_ret": 25.71,
-    "mdd": 14.23,
+    "total_trades": 15,
+    "win_rate": 53.3,
+    "avg_ret": 1.73,
+    "cum_ret": 27.47,
+    "mdd": 7.27,
     "stop_count": 3,
     "take_count": 1,
-    "timeout_count": 10
+    "timeout_count": 11
   },
   "by_ticker": {
+    "ABNB": {
+      "ticker": "ABNB",
+      "trades": 1,
+      "win_rate": 0.0,
+      "avg_ret": -1.64,
+      "avg_win": 0,
+      "avg_loss": -1.64,
+      "total_ret": -1.64,
+      "mdd": 1.64,
+      "sharpe": 0,
+      "stop_count": 0,
+      "take_count": 0
+    },
     "ADBE": {
       "ticker": "ADBE",
       "trades": 1,
@@ -54,19 +66,6 @@
       "stop_count": 0,
       "take_count": 0
     },
-    "AMZN": {
-      "ticker": "AMZN",
-      "trades": 1,
-      "win_rate": 0.0,
-      "avg_ret": -1.77,
-      "avg_win": 0,
-      "avg_loss": -1.77,
-      "total_ret": -1.77,
-      "mdd": 1.77,
-      "sharpe": 0,
-      "stop_count": 0,
-      "take_count": 0
-    },
     "BKNG": {
       "ticker": "BKNG",
       "trades": 1,
@@ -78,6 +77,19 @@
       "mdd": 0,
       "sharpe": 0,
       "stop_count": 0,
+      "take_count": 0
+    },
+    "COST": {
+      "ticker": "COST",
+      "trades": 1,
+      "win_rate": 0.0,
+      "avg_ret": -3.87,
+      "avg_win": 0,
+      "avg_loss": -3.87,
+      "total_ret": -3.87,
+      "mdd": 3.87,
+      "sharpe": 0,
+      "stop_count": 1,
       "take_count": 0
     },
     "ETSY": {
@@ -102,6 +114,19 @@
       "avg_loss": -0.65,
       "total_ret": -0.65,
       "mdd": 0.65,
+      "sharpe": 0,
+      "stop_count": 0,
+      "take_count": 0
+    },
+    "GOOGL": {
+      "ticker": "GOOGL",
+      "trades": 1,
+      "win_rate": 0.0,
+      "avg_ret": -2.57,
+      "avg_win": 0,
+      "avg_loss": -2.57,
+      "total_ret": -2.57,
+      "mdd": 2.57,
       "sharpe": 0,
       "stop_count": 0,
       "take_count": 0
@@ -171,19 +196,6 @@
       "stop_count": 1,
       "take_count": 0
     },
-    "PEP": {
-      "ticker": "PEP",
-      "trades": 1,
-      "win_rate": 0.0,
-      "avg_ret": -3.19,
-      "avg_win": 0,
-      "avg_loss": -3.19,
-      "total_ret": -3.19,
-      "mdd": 3.19,
-      "sharpe": 0,
-      "stop_count": 1,
-      "take_count": 0
-    },
     "ROKU": {
       "ticker": "ROKU",
       "trades": 1,
@@ -197,21 +209,38 @@
       "stop_count": 0,
       "take_count": 0
     },
-    "SNPS": {
-      "ticker": "SNPS",
+    "SBUX": {
+      "ticker": "SBUX",
       "trades": 1,
       "win_rate": 0.0,
-      "avg_ret": -8.79,
+      "avg_ret": -4.53,
       "avg_win": 0,
-      "avg_loss": -8.79,
-      "total_ret": -8.79,
-      "mdd": 8.79,
+      "avg_loss": -4.53,
+      "total_ret": -4.53,
+      "mdd": 4.53,
       "sharpe": 0,
       "stop_count": 1,
       "take_count": 0
     }
   },
   "all_trades": [
+    {
+      "date": "2026-05-21",
+      "entry": 134.86,
+      "exit": 132.65,
+      "ret": -1.64,
+      "exit_reason": "TIME_OUT",
+      "hold_days": 5,
+      "action": "STRONG_NEWS",
+      "rsi": 36.4,
+      "score": 2.99,
+      "words": [
+        "investors",
+        "department",
+        "attack"
+      ],
+      "ticker": "ABNB"
+    },
     {
       "date": "2026-05-21",
       "entry": 248.5,
@@ -221,7 +250,7 @@
       "hold_days": 5,
       "action": "MEDIUM_NEWS",
       "rsi": 46.1,
-      "score": 1.75,
+      "score": 1.64,
       "words": [
         "attack",
         "term"
@@ -237,28 +266,13 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 58.0,
-      "score": 2.68,
+      "score": 3.4,
       "words": [
         "trade",
-        "minister"
+        "minister",
+        "google"
       ],
       "ticker": "AMAT"
-    },
-    {
-      "date": "2026-05-21",
-      "entry": 269.24,
-      "exit": 264.46,
-      "ret": -1.77,
-      "exit_reason": "TIME_OUT",
-      "hold_days": 5,
-      "action": "MEDIUM_NEWS",
-      "rsi": 45.0,
-      "score": 2.0,
-      "words": [
-        "military",
-        "attack"
-      ],
-      "ticker": "AMZN"
     },
     {
       "date": "2026-05-21",
@@ -275,6 +289,23 @@
     },
     {
       "date": "2026-05-21",
+      "entry": 1040.08,
+      "exit": 999.78,
+      "ret": -3.87,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 1,
+      "action": "STRONG_NEWS",
+      "rsi": 58.2,
+      "score": 3.67,
+      "words": [
+        "trump",
+        "financial",
+        "money"
+      ],
+      "ticker": "COST"
+    },
+    {
+      "date": "2026-05-21",
       "entry": 61.15,
       "exit": 68.19,
       "ret": 9.44,
@@ -282,11 +313,11 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 44.0,
-      "score": 3.98,
+      "score": 5.36,
       "words": [
+        "intelligence",
         "money",
-        "states",
-        "country"
+        "states"
       ],
       "ticker": "ETSY"
     },
@@ -299,13 +330,30 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 47.1,
-      "score": 3.01,
+      "score": 3.21,
       "words": [
-        "financial",
         "money",
-        "trade"
+        "trade",
+        "traders"
       ],
       "ticker": "GILD"
+    },
+    {
+      "date": "2026-05-21",
+      "entry": 385.7,
+      "exit": 375.79,
+      "ret": -2.57,
+      "exit_reason": "TIME_OUT",
+      "hold_days": 5,
+      "action": "MEDIUM_NEWS",
+      "rsi": 49.7,
+      "score": 2.11,
+      "words": [
+        "leader",
+        "traders",
+        "future"
+      ],
+      "ticker": "GOOGL"
     },
     {
       "date": "2026-05-21",
@@ -314,12 +362,11 @@
       "ret": 8.55,
       "exit_reason": "TIME_OUT",
       "hold_days": 5,
-      "action": "STRONG_NEWS",
+      "action": "MEDIUM_NEWS",
       "rsi": 28.0,
-      "score": 2.94,
+      "score": 1.93,
       "words": [
-        "attack",
-        "term"
+        "attack"
       ],
       "ticker": "INTU"
     },
@@ -332,7 +379,7 @@
       "hold_days": 4,
       "action": "STRONG_NEWS",
       "rsi": 56.8,
-      "score": 4.37,
+      "score": 4.35,
       "words": [
         "energy",
         "trade",
@@ -349,7 +396,7 @@
       "hold_days": 5,
       "action": "OVERSOLD",
       "rsi": 28.0,
-      "score": 0.42,
+      "score": 0.36,
       "words": [],
       "ticker": "LYFT"
     },
@@ -360,13 +407,13 @@
       "ret": -0.3,
       "exit_reason": "TIME_OUT",
       "hold_days": 5,
-      "action": "STRONG_NEWS",
+      "action": "MEDIUM_NEWS",
       "rsi": 44.0,
-      "score": 3.32,
+      "score": 2.43,
       "words": [
-        "term",
         "biggest",
-        "called"
+        "called",
+        "general"
       ],
       "ticker": "META"
     },
@@ -379,29 +426,13 @@
       "hold_days": 3,
       "action": "STRONG_NEWS",
       "rsi": 54.4,
-      "score": 4.55,
+      "score": 7.31,
       "words": [
         "military",
-        "country"
+        "country",
+        "party"
       ],
       "ticker": "MRNA"
-    },
-    {
-      "date": "2026-05-21",
-      "entry": 149.64,
-      "exit": 144.87,
-      "ret": -3.19,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 4,
-      "action": "STRONG_NEWS",
-      "rsi": 27.7,
-      "score": 2.91,
-      "words": [
-        "deal",
-        "trade",
-        "traders"
-      ],
-      "ticker": "PEP"
     },
     {
       "date": "2026-05-21",
@@ -412,7 +443,7 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 51.6,
-      "score": 3.53,
+      "score": 3.67,
       "words": [
         "released",
         "term",
@@ -422,20 +453,20 @@
     },
     {
       "date": "2026-05-21",
-      "entry": 524.83,
-      "exit": 478.68,
-      "ret": -8.79,
+      "entry": 103.31,
+      "exit": 98.63,
+      "ret": -4.53,
       "exit_reason": "STOP_LOSS",
-      "hold_days": 3,
+      "hold_days": 4,
       "action": "STRONG_NEWS",
-      "rsi": 55.9,
-      "score": 2.6,
+      "rsi": 47.0,
+      "score": 3.02,
       "words": [
-        "military",
-        "released",
-        "called"
+        "financial",
+        "leader",
+        "agency"
       ],
-      "ticker": "SNPS"
+      "ticker": "SBUX"
     }
   ]
 }
