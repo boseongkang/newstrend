@@ -404,7 +404,9 @@ jobs:
                   site/data/hidden_gems.json site/data/predictions.json \
                   site/data/signal_corr.json site/data/backtest.json \
                   site/data/backtest_v2.json site/data/verification/ \
-                  site/data/ticker_weights.json 2>/dev/null || true
+                  site/data/ticker_weights.json \
+                  site/data/domino.json site/data/domino_history.json \
+                  site/data/fundamentals.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No history changes to commit"
             exit 0
