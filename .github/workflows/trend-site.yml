@@ -541,7 +541,13 @@ jobs:
                   site/data/weekly_analysis.json \
                   site/data/weekly_history.json \
                   site/data/macro_themes.json \
-                  site/data/tickers.json 2>/dev/null || true
+                  site/data/tickers.json \
+                  site/data/validation.json \
+                  site/data/ml_monitor.json \
+                  site/data/ml_prediction_log.json \
+                  site/data/ml_frozen_train.json \
+                  site/data/health.json \
+                  experiments/results.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No self-correcting changes to commit"
             exit 0
@@ -559,6 +565,69 @@ jobs:
 
           git stash pop 2>/dev/null || true
           echo "Done"
+
+      - name: Validation freshness gate (fail loud on silent staleness)
+        # Recurrence guard for the 2026-05-25→06-05 silent-staleness bug: the
+        # validation/ML/experiment scripts run under `|| true` (so a transient
+        # crash never blocks the day's data commit), but their outputs used to
+        # be omitted from the `git add` list and were silently thrown away every
+        # run. This gate makes that impossible: it fails the job RED if any
+        # validation output is missing, untracked, NOT committed this run, or
+        # staler than MAX_AGE_DAYS. A green job now guarantees these are live.
+        run: |
+          python3 - <<'PY'
+          import json, subprocess, sys, datetime
+          from pathlib import Path
+
+          MAX_AGE_DAYS = 2
+          now = datetime.datetime.now(datetime.timezone.utc)
+          # file -> timestamp field that records when the script last wrote it
+          TARGETS = {
+              "site/data/validation.json": "updated",
+              "site/data/ml_monitor.json": "updated",
+              "site/data/ml_prediction_log.json": None,   # presence/commit only
+              "experiments/results.json": "updated",
+          }
+
+          def git(*a):
+              return subprocess.run(["git", *a], capture_output=True, text=True).stdout.strip()
+
+          failures = []
+          for path, field in TARGETS.items():
+              p = Path(path)
+              if not p.exists():
+                  failures.append(f"{path}: MISSING — script did not write it (silent crash?)")
+                  continue
+              if not git("ls-files", path):
+                  failures.append(f"{path}: NOT tracked by git — add it to the commit `git add` list")
+                  continue
+              # Empty diff vs HEAD == the just-regenerated file was committed this run.
+              if git("diff", "HEAD", "--", path):
+                  failures.append(f"{path}: regenerated but UNCOMMITTED — missing from `git add` list")
+                  continue
+              if field:
+                  try:
+                      ts = json.loads(p.read_text()).get(field, "")
+                      dt = datetime.datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                      age = (now - dt).total_seconds() / 86400
+                  except Exception as e:
+                      failures.append(f"{path}: unreadable '{field}' timestamp ({e})")
+                      continue
+                  if age > MAX_AGE_DAYS:
+                      failures.append(f"{path}: STALE — {field}={ts} ({age:.1f}d old > {MAX_AGE_DAYS}d). "
+                                      f"Validation layer not updating.")
+                      continue
+                  print(f"OK  {path}  ({age:.1f}d old, committed)")
+              else:
+                  print(f"OK  {path}  (committed)")
+
+          if failures:
+              print("\n=== VALIDATION FRESHNESS GATE FAILED ===", file=sys.stderr)
+              for f in failures:
+                  print("  ✗ " + f, file=sys.stderr)
+              sys.exit(1)
+          print("\nAll validation outputs are committed and fresh.")
+          PY
 
       - name: Copy daily files into site
         run: |
