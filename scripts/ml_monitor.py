@@ -53,6 +53,7 @@ PRICES_FILE = DATA / "prices.json"
 TICKERS_FILE = DATA / "tickers.json"
 OUT_FILE = DATA / "ml_monitor.json"
 PREDICTION_LOG = DATA / "ml_prediction_log.json"
+FROZEN_TRAIN = DATA / "ml_frozen_train.json"
 
 BASELINE_DATE = "2026-05-25"
 
@@ -196,6 +197,36 @@ def _compute_model_hash(X_train: np.ndarray, y_train: np.ndarray, model_name: st
     h.update(y_train.tobytes())
     h.update(model_name.encode())
     return h.hexdigest()[:16]
+
+
+def _load_or_freeze_train_rows(rows: list[dict]) -> list[dict]:
+    """Return the FROZEN pre-baseline training set.
+
+    The whole point of the forward test is to freeze the model on data
+    <= BASELINE_DATE and only ever score NEW data. But upstream re-aggregation
+    (FinBERT re-runs, fundamental/insider refresh, dedup) silently mutates the
+    feature values of pre-baseline rows run-to-run, so re-deriving train_rows
+    every run produced a different X_train → a different model → a perpetually
+    failing hash check (the "training data changed" alert).
+
+    Fix: snapshot the training rows ONCE to a committed file and always train
+    from that snapshot. The frozen model is then byte-stable and the hash check
+    means what it says. Forward leakage is impossible — only snap_date <=
+    BASELINE_DATE rows are ever frozen."""
+    if FROZEN_TRAIN.exists():
+        try:
+            snap = json.loads(FROZEN_TRAIN.read_text())
+            frozen = snap.get("train_rows")
+            if frozen:
+                return frozen
+        except (json.JSONDecodeError, OSError):
+            pass
+    candidate = [r for r in rows if r["snap_date"] <= BASELINE_DATE]
+    FROZEN_TRAIN.write_text(json.dumps(
+        {"baseline_date": BASELINE_DATE, "frozen_at": _now_iso(),
+         "n_train": len(candidate), "train_rows": candidate},
+        indent=2, default=str))
+    return candidate
 
 
 # ── Immutable prediction log ──────────────────────────────────────────────
@@ -374,7 +405,7 @@ def run_monitor() -> dict:
     rows = [_extract_row_from_accuracy(r) for r in all_records if r.get("fwd_5d_return") is not None]
     rows = [r for r in rows if r is not None]
 
-    train_rows = [r for r in rows if r["snap_date"] <= BASELINE_DATE]
+    train_rows = _load_or_freeze_train_rows(rows)
     forward_rows = [r for r in rows if r["snap_date"] > BASELINE_DATE]
 
     if len(train_rows) < 30:
@@ -476,12 +507,19 @@ def run_monitor() -> dict:
             ci_lo = round(m - 1.96 * se, 3)
             ci_hi = round(m + 1.96 * se, 3)
 
-        t_stat = p_val = 0.0
-        if len(fold_alphas) >= 2:
-            fm = np.mean(fold_alphas)
-            fse = np.std(fold_alphas, ddof=1) / np.sqrt(len(fold_alphas))
-            t_stat = fm / fse if fse > 0 else 0
-            p_val = 2 * (1 - _norm_cdf(abs(t_stat)))
+        # Significance is computed at the FOLD (per-date) level — same-day
+        # predictions are correlated, so the n=90 per-trade CI overstates
+        # confidence (pseudo-replication). With <2 independent folds there is
+        # no t-test: leave t/p as None so it can never read as "significant"
+        # (the old 0.0 default looked like p<0.05 and was a unfreeze hazard).
+        n_folds_eval = len(fold_alphas)
+        t_stat = p_val = None
+        if n_folds_eval >= 2:
+            fm = float(np.mean(fold_alphas))
+            fse = float(np.std(fold_alphas, ddof=1)) / math.sqrt(n_folds_eval)
+            if fse > 0:
+                t_stat = fm / fse
+                p_val = 2 * (1 - _norm_cdf(abs(t_stat)))
 
         regime_summary = {}
         for rg, g in by_regime.items():
@@ -498,8 +536,10 @@ def run_monitor() -> dict:
             "n_folds": len(fold_alphas),
             "cumulative_alpha_pct": round(m, 3),
             "alpha_ci_95": [ci_lo, ci_hi],
-            "alpha_t": round(t_stat, 3),
-            "alpha_p": round(p_val, 4),
+            "alpha_t": round(t_stat, 3) if t_stat is not None else None,
+            "alpha_p": round(p_val, 4) if p_val is not None else None,
+            "sig_status": "ok" if p_val is not None
+                          else f"insufficient_folds (have {n_folds_eval}, need >=2)",
             "cumulative_accuracy": round(sum(fold_accs) / len(fold_accs), 4) if fold_accs else 0,
             "by_regime": regime_summary,
         }
@@ -514,7 +554,7 @@ def run_monitor() -> dict:
     has_fwd_alpha = any(
         isinstance(s, dict) and s.get("status") == "tracking"
         and (s.get("cumulative_alpha_pct") or 0) > 0
-        and (s.get("alpha_p") or 1) < 0.05
+        and s.get("alpha_p") is not None and s["alpha_p"] < 0.05
         for s in model_forward.values()
     )
     has_risk_off = any(
@@ -609,7 +649,9 @@ def run() -> int:
               f"{pl.get('evaluated',0)} evaluated, {pl.get('new_today',0)} new today")
         for name, s in result.get("forward", {}).items():
             if isinstance(s, dict) and s.get("status") == "tracking":
-                print(f"  {name}: n={s['n']} alpha={s['cumulative_alpha_pct']}% p={s['alpha_p']:.4f}")
+                p = s.get("alpha_p")
+                pstr = f"p={p:.4f}" if p is not None else f"p=n/a ({s.get('sig_status')})"
+                print(f"  {name}: n={s['n']} alpha={s['cumulative_alpha_pct']}% {pstr}")
             else:
                 print(f"  {name}: awaiting data")
         uf = result.get("unfreeze_check", {})
@@ -641,9 +683,11 @@ def run() -> int:
             continue
         ci = s.get("alpha_ci_95", [None, None])
         ci_str = f" CI=[{ci[0]:+.2f},{ci[1]:+.2f}]" if ci[0] is not None else ""
-        print(f"\n  {name} (forward, n={s['n']}):")
-        print(f"    Alpha: {s['cumulative_alpha_pct']:+.3f}%{ci_str}  "
-              f"t={s['alpha_t']:.2f}  p={s['alpha_p']:.4f}")
+        t, p = s.get("alpha_t"), s.get("alpha_p")
+        sig_str = (f"t={t:.2f}  p={p:.4f}" if p is not None
+                   else f"sig=n/a ({s.get('sig_status')})")
+        print(f"\n  {name} (forward, n={s['n']}, folds={s.get('n_folds')}):")
+        print(f"    Alpha: {s['cumulative_alpha_pct']:+.3f}%{ci_str}  {sig_str}")
         print(f"    Accuracy: {s['cumulative_accuracy']*100:.1f}%")
         for rg, ri in s.get("by_regime", {}).items():
             prov = " [PROVISIONAL]" if ri.get("provisional") else ""
