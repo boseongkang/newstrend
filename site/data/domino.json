@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-07T16:54:21+00:00",
+  "generated_at": "2026-06-07T18:49:43+00:00",
   "source": {
-    "signal_corr_updated": "2026-06-07T16:53:15Z",
-    "n_pairs_total": 3243,
+    "signal_corr_updated": "2026-06-07T18:48:37Z",
+    "n_pairs_total": 3248,
     "n_dates": 180,
     "prices_tickers": 90,
     "trends_terms": 600
@@ -21,10 +21,73 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "host": 3.938,
-    "shooting": 2.32
+    "israel": 1.885,
+    "iranian": 2.041,
+    "israeli": 1.996,
+    "attack": 1.795,
+    "sports": 1.506,
+    "points": 2.902,
+    "host": 4.861,
+    "travel": 1.662,
+    "everything": 2.066,
+    "shooting": 2.929,
+    "clear": 1.629,
+    "deadline": 1.896,
+    "corporation": 2.15,
+    "grow": 1.521
   },
   "stock_chains": [
+    {
+      "term": "sports",
+      "is_active_today": true,
+      "today_z": 1.506,
+      "hop1": {
+        "ticker": "PDD",
+        "sector": "07 Trade & Services",
+        "entity": "PDD Holdings Inc.",
+        "corr": 0.3318,
+        "lag": -2,
+        "hit_rate": 0.5,
+        "direction": "bull",
+        "avg_ret_1d": 0.017,
+        "confidence": 0.303
+      },
+      "hop2": []
+    },
+    {
+      "term": "sports",
+      "is_active_today": true,
+      "today_z": 1.506,
+      "hop1": {
+        "ticker": "ORCL",
+        "sector": "06 Technology",
+        "entity": "ORACLE CORP",
+        "corr": 0.3051,
+        "lag": -2,
+        "hit_rate": 0.5,
+        "direction": "bull",
+        "avg_ret_1d": 0.606,
+        "confidence": 0.293
+      },
+      "hop2": []
+    },
+    {
+      "term": "israel",
+      "is_active_today": true,
+      "today_z": 1.885,
+      "hop1": {
+        "ticker": "KDP",
+        "sector": "04 Manufacturing",
+        "entity": "Keurig Dr Pepper Inc.",
+        "corr": -0.302,
+        "lag": -3,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": -0.059,
+        "confidence": 0.292
+      },
+      "hop2": []
+    },
     {
       "term": "investors",
       "is_active_today": false,
@@ -6122,23 +6185,6 @@
       ]
     },
     {
-      "term": "sports",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PDD",
-        "sector": "07 Trade & Services",
-        "entity": "PDD Holdings Inc.",
-        "corr": 0.3318,
-        "lag": -2,
-        "hit_rate": 0.5,
-        "direction": "bull",
-        "avg_ret_1d": 0.017,
-        "confidence": 0.303
-      },
-      "hop2": []
-    },
-    {
       "term": "next",
       "is_active_today": false,
       "today_z": null,
@@ -6324,40 +6370,6 @@
           "entity": "JPMORGAN CHASE & CO"
         }
       ]
-    },
-    {
-      "term": "sports",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "ORCL",
-        "sector": "06 Technology",
-        "entity": "ORACLE CORP",
-        "corr": 0.3051,
-        "lag": -2,
-        "hit_rate": 0.5,
-        "direction": "bull",
-        "avg_ret_1d": 0.606,
-        "confidence": 0.293
-      },
-      "hop2": []
-    },
-    {
-      "term": "israel",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "KDP",
-        "sector": "04 Manufacturing",
-        "entity": "Keurig Dr Pepper Inc.",
-        "corr": -0.302,
-        "lag": -3,
-        "hit_rate": 0.5,
-        "direction": "bear",
-        "avg_ret_1d": -0.059,
-        "confidence": 0.292
-      },
-      "hop2": []
     }
   ],
   "macro_chains": [
@@ -6596,7 +6608,50 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "PDD",
+      "sector": "07 Trade & Services",
+      "entity": "PDD Holdings Inc.",
+      "fund_score": 0.844,
+      "inbound": [
+        {
+          "term": "sports",
+          "direction": "bull",
+          "today_z": 1.506,
+          "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "ORCL",
+      "sector": "06 Technology",
+      "entity": "ORACLE CORP",
+      "fund_score": 0.623,
+      "inbound": [
+        {
+          "term": "sports",
+          "direction": "bull",
+          "today_z": 1.506,
+          "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "KDP",
+      "sector": "04 Manufacturing",
+      "entity": "Keurig Dr Pepper Inc.",
+      "fund_score": 0.467,
+      "inbound": [
+        {
+          "term": "israel",
+          "direction": "bear",
+          "today_z": 1.885,
+          "hit_rate": 0.5
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 183,
