@@ -1,48 +1,48 @@
 {
-  "updated": "2026-06-08T12:18:44Z",
+  "updated": "2026-06-08T16:39:18Z",
   "gate": {
     "pass": false,
     "criterion": "walk-forward OOS alpha vs SPY > always-buy alpha, p<0.05",
-    "system_alpha_pct": -2.6648,
-    "always_buy_alpha_pct": 1.4357,
+    "system_alpha_pct": -2.3915,
+    "always_buy_alpha_pct": 1.2917,
     "system_alpha_p": 0.0,
-    "reason": "FAIL: system alpha (-2.66%) vs always-buy alpha (+1.44%), p=0.0000"
+    "reason": "FAIL: system alpha (-2.39%) vs always-buy alpha (+1.29%), p=0.0000"
   },
   "walk_forward": {
-    "n_folds": 28,
-    "total_test_n": 777,
-    "pooled_accuracy": 0.4234,
+    "n_folds": 29,
+    "total_test_n": 803,
+    "pooled_accuracy": 0.4309,
     "pooled_ci_95": [
-      0.3891,
-      0.4585
+      0.397,
+      0.4654
     ],
-    "pooled_market_up_rate": 0.5663,
-    "pooled_edge_vs_buy_pp": -14.29,
-    "pooled_edge_vs_coin_pp": -7.66,
-    "z_vs_coin": -4.2691,
-    "p_vs_coin": 0.0,
+    "pooled_market_up_rate": 0.5567,
+    "pooled_edge_vs_buy_pp": -12.58,
+    "pooled_edge_vs_coin_pp": -6.91,
+    "z_vs_coin": -3.9171,
+    "p_vs_coin": 0.0001,
     "alpha": {
-      "per_trade_mean_pct": -2.6648,
-      "per_trade_t": -6.1497,
+      "per_trade_mean_pct": -2.3915,
+      "per_trade_t": -4.7881,
       "per_trade_p": 0.0,
-      "portfolio_mean_pct": -2.6648,
-      "portfolio_t": -6.1497,
+      "portfolio_mean_pct": -2.3915,
+      "portfolio_t": -4.7881,
       "portfolio_p": 0.0,
-      "n_folds_with_alpha": 28
+      "n_folds_with_alpha": 29
     },
     "by_regime": {
       "RISK-ON": {
-        "n": 777,
-        "n_folds": 28,
-        "accuracy": 0.4234,
+        "n": 803,
+        "n_folds": 29,
+        "accuracy": 0.4309,
         "ci_95": [
-          0.3891,
-          0.4585
+          0.397,
+          0.4654
         ],
-        "z_vs_coin": -4.2691,
-        "p_vs_coin": 0.0,
-        "alpha_per_trade_mean_pct": -2.6648,
-        "alpha_t_stat": -6.1497,
+        "z_vs_coin": -3.9171,
+        "p_vs_coin": 0.0001,
+        "alpha_per_trade_mean_pct": -2.3915,
+        "alpha_t_stat": -4.7881,
         "alpha_p_value": 0.0,
         "provisional": false
       }
@@ -691,6 +691,29 @@
         "alpha_portfolio_pct": 0.245,
         "test_date": "2026-05-31",
         "train_dates": 30
+      },
+      {
+        "n": 26,
+        "n_correct": 17,
+        "accuracy": 0.6538,
+        "ci_95": [
+          0.4622,
+          0.8059
+        ],
+        "avg_return_pct": -4.569,
+        "market_up_rate": 0.2692,
+        "edge_vs_buy_pp": 38.46,
+        "edge_vs_coin_pp": 15.38,
+        "edge_vs_best_pp": -7.69,
+        "best_naive": 0.7308,
+        "z_vs_coin": 1.5689,
+        "p_vs_coin": 0.1167,
+        "regime": "RISK-ON",
+        "spy_5d_pct": -1.829,
+        "alpha_per_trade_pct": 5.259,
+        "alpha_portfolio_pct": 5.259,
+        "test_date": "2026-06-01",
+        "train_dates": 31
       }
     ]
   },
@@ -699,63 +722,63 @@
       "main_system": {
         "period": {
           "start": "2026-04-17",
-          "end": "2026-06-05"
+          "end": "2026-06-08"
         },
-        "return_pct": -1.38,
+        "return_pct": -2.56,
         "initial": 10000.0,
-        "final": 9861.92,
-        "avg_invested_pct": 78.4,
+        "final": 9744.46,
+        "avg_invested_pct": 78.8,
         "regime": "RISK-ON",
         "benchmarks": {
           "SPY": {
-            "return_pct": 5.76,
-            "alpha_pct": -7.14
+            "return_pct": 4.74,
+            "alpha_pct": -7.3
           },
           "QQQ": {
-            "return_pct": 12.11,
-            "alpha_pct": -13.49
+            "return_pct": 11.23,
+            "alpha_pct": -13.79
           }
         }
       },
       "conservative": {
         "period": {
           "start": "2026-04-17",
-          "end": "2026-06-05"
+          "end": "2026-06-08"
         },
-        "return_pct": 0.99,
+        "return_pct": -0.42,
         "initial": 10000.0,
-        "final": 10099.41,
-        "avg_invested_pct": 70.8,
+        "final": 9958.15,
+        "avg_invested_pct": 71.1,
         "regime": "RISK-ON",
         "benchmarks": {
           "SPY": {
-            "return_pct": 5.76,
-            "alpha_pct": -4.76
+            "return_pct": 4.74,
+            "alpha_pct": -5.16
           },
           "QQQ": {
-            "return_pct": 12.11,
-            "alpha_pct": -11.11
+            "return_pct": 11.23,
+            "alpha_pct": -11.65
           }
         }
       },
       "aggressive": {
         "period": {
           "start": "2026-04-17",
-          "end": "2026-06-05"
+          "end": "2026-06-08"
         },
-        "return_pct": 2.97,
+        "return_pct": 1.18,
         "initial": 10000.0,
-        "final": 10296.6,
-        "avg_invested_pct": 93.7,
+        "final": 10118.17,
+        "avg_invested_pct": 93.9,
         "regime": "RISK-ON",
         "benchmarks": {
           "SPY": {
-            "return_pct": 5.76,
-            "alpha_pct": -2.79
+            "return_pct": 4.74,
+            "alpha_pct": -3.56
           },
           "QQQ": {
-            "return_pct": 12.11,
-            "alpha_pct": -9.14
+            "return_pct": 11.23,
+            "alpha_pct": -10.05
           }
         }
       }
@@ -763,67 +786,67 @@
   },
   "baselines": {
     "system": {
-      "pooled_accuracy": 0.4234,
+      "pooled_accuracy": 0.4309,
       "pooled_ci_95": [
-        0.3891,
-        0.4585
+        0.397,
+        0.4654
       ],
-      "alpha_per_trade_pct": -2.6648,
-      "total_test_n": 777,
-      "n_folds": 28
+      "alpha_per_trade_pct": -2.3915,
+      "total_test_n": 803,
+      "n_folds": 29
     },
     "baselines": {
       "always_buy": {
-        "pooled_accuracy": 0.5663,
-        "alpha_per_trade_pct": 1.4357
+        "pooled_accuracy": 0.5567,
+        "alpha_per_trade_pct": 1.2917
       },
       "always_sell": {
-        "pooled_accuracy": 0.4337,
-        "alpha_per_trade_pct": -2.976
+        "pooled_accuracy": 0.4433,
+        "alpha_per_trade_pct": -2.6528
       },
       "random_42": {
-        "pooled_accuracy": 0.4865,
-        "alpha_per_trade_pct": -0.6463
+        "pooled_accuracy": 0.4907,
+        "alpha_per_trade_pct": -0.5087
       },
       "random_99": {
-        "pooled_accuracy": 0.5122,
-        "alpha_per_trade_pct": -0.9341
+        "pooled_accuracy": 0.5093,
+        "alpha_per_trade_pct": -0.8736
       }
     },
     "edge": {
       "vs_best_baseline": "always_buy",
-      "best_baseline_accuracy": 0.5663,
-      "edge_pp": -14.29,
-      "z": -8.0376,
+      "best_baseline_accuracy": 0.5567,
+      "edge_pp": -12.58,
+      "z": -7.1759,
       "p_value": 0.0
     },
     "by_regime": {
       "RISK-ON": {
-        "system_accuracy": 0.4234,
+        "system_accuracy": 0.4309,
         "best_baseline": "always_buy",
-        "best_baseline_accuracy": 0.5663,
-        "edge_pp": -14.29,
+        "best_baseline_accuracy": 0.5567,
+        "edge_pp": -12.58,
         "provisional": false,
-        "n": 777
+        "n": 803
       }
     }
   },
   "verdict": [
-    "Accuracy 42.3% significantly below 50% (p=0.0000)",
-    "Alpha -2.66% significantly negative (p=0.0000)",
-    "Edge vs always_buy: -14.3pp (p=0.0000)",
-    "Gate: FAIL: system alpha (-2.66%) vs always-buy alpha (+1.44%), p=0.0000"
+    "Accuracy 43.1% significantly below 50% (p=0.0001)",
+    "Alpha -2.39% significantly negative (p=0.0000)",
+    "Edge vs always_buy: -12.6pp (p=0.0000)",
+    "Gate: FAIL: system alpha (-2.39%) vs always-buy alpha (+1.29%), p=0.0000"
   ],
   "alerts": [],
   "regime_warnings": [
     "RISK-OFF: no test data \u2014 regime robustness unverifiable"
   ],
   "data_sufficiency": {
-    "total_test_n": 777,
+    "total_test_n": 803,
     "target_n": 1785,
-    "progress_pct": 43.5,
-    "delta_n_since_last": 0,
-    "n_folds": 28,
+    "progress_pct": 45.0,
+    "delta_n_since_last": 26,
+    "n_folds": 29,
     "regimes_tested": [
       "RISK-ON"
     ],
