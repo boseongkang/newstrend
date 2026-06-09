@@ -409,10 +409,20 @@
         "after_fdr": 40,
         "after_holdout": 0
       }
+    },
+    {
+      "updated": "2026-06-09T15:40:05Z",
+      "n_experiments": 60,
+      "n_candidates": 0,
+      "funnel": {
+        "raw_significant": 41,
+        "after_fdr": 40,
+        "after_holdout": 0
+      }
     }
   ],
   "latest": {
-    "updated": "2026-06-09T12:27:57Z",
+    "updated": "2026-06-09T15:40:05Z",
     "n_experiments": 60,
     "n_valid": 60,
     "n_errors": 0,
@@ -442,34 +452,35 @@
       "2026-05-23",
       "2026-05-24",
       "2026-05-25",
-      "2026-05-26"
+      "2026-05-26",
+      "2026-05-27"
     ],
     "holdout_dates": [
-      "2026-05-27",
       "2026-05-28",
       "2026-05-29",
       "2026-05-30",
       "2026-05-31",
-      "2026-06-01"
+      "2026-06-01",
+      "2026-06-02"
     ],
     "data_quality": {
-      "n_rows": 2453,
+      "n_rows": 2543,
       "missing_rates": {
         "ta_rsi14": 0.0,
         "ta_hv20": 0.0,
         "confidence": 0.0,
-        "news_best_conf": 0.204,
-        "news_z": 0.221,
-        "sentiment_score": 0.135,
-        "sentiment_total": 0.135,
-        "fundamental_score": 0.221,
-        "quality_score": 0.221,
-        "growth_score": 0.221,
-        "health_score": 0.221,
-        "insider_score": 0.154
+        "news_best_conf": 0.197,
+        "news_z": 0.213,
+        "sentiment_score": 0.132,
+        "sentiment_total": 0.132,
+        "fundamental_score": 0.219,
+        "quality_score": 0.219,
+        "growth_score": 0.219,
+        "health_score": 0.219,
+        "insider_score": 0.151
       },
       "outlier_counts": {
-        "sentiment_score": 43,
+        "sentiment_score": 44,
         "sentiment_total": 9
       },
       "look_ahead_suspects": [],
@@ -477,7 +488,7 @@
       "pass": true
     },
     "defense_funnel": {
-      "raw_significant": 40,
+      "raw_significant": 41,
       "after_fdr": 40,
       "after_holdout": 0
     },
@@ -486,484 +497,484 @@
       {
         "id": "Ridge_ta_only_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 1.7128,
+        "alpha": 1.8205,
         "p": 0.0,
-        "acc": 0.5942,
-        "n_folds": 16
+        "acc": 0.5978,
+        "n_folds": 17
       },
       {
         "id": "Ridge_ta_only_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 3.4831,
+        "alpha": 3.6613,
         "p": 0.0,
-        "acc": 0.6232,
-        "n_folds": 16
+        "acc": 0.6287,
+        "n_folds": 17
       },
       {
         "id": "Ridge_ta_only_low_vol_5d",
         "status": "rejected",
-        "alpha": -0.2748,
-        "p": 0.30831,
-        "acc": 0.5852,
-        "n_folds": 16
+        "alpha": -0.2467,
+        "p": 0.333106,
+        "acc": 0.5857,
+        "n_folds": 17
       },
       {
         "id": "Lasso_ta_only_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 2.0181,
+        "alpha": 2.1019,
         "p": 0.0,
-        "acc": 0.611,
-        "n_folds": 16
+        "acc": 0.6136,
+        "n_folds": 17
       },
       {
         "id": "Lasso_ta_only_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 3.4707,
+        "alpha": 3.6322,
         "p": 0.0,
-        "acc": 0.6392,
-        "n_folds": 16
+        "acc": 0.6427,
+        "n_folds": 17
       },
       {
         "id": "Lasso_ta_only_low_vol_5d",
         "status": "rejected",
-        "alpha": -0.3886,
-        "p": 0.216316,
-        "acc": 0.5973,
-        "n_folds": 16
+        "alpha": -0.4114,
+        "p": 0.164772,
+        "acc": 0.5892,
+        "n_folds": 17
       },
       {
         "id": "RandomForest_ta_only_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 2.3268,
+        "alpha": 2.4297,
         "p": 0.0,
-        "acc": 0.6654,
-        "n_folds": 16
+        "acc": 0.6661,
+        "n_folds": 17
       },
       {
         "id": "RandomForest_ta_only_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 4.4125,
+        "alpha": 4.522,
         "p": 0.0,
-        "acc": 0.6721,
-        "n_folds": 16
+        "acc": 0.6747,
+        "n_folds": 17
       },
       {
         "id": "RandomForest_ta_only_low_vol_5d",
         "status": "rejected",
-        "alpha": -0.0789,
-        "p": 0.802108,
-        "acc": 0.6175,
-        "n_folds": 16
+        "alpha": -0.0033,
+        "p": 0.991295,
+        "acc": 0.6193,
+        "n_folds": 17
       },
       {
         "id": "GradientBoosting_ta_only_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 2.1179,
+        "alpha": 2.2323,
         "p": 0.0,
-        "acc": 0.6406,
-        "n_folds": 16
+        "acc": 0.6435,
+        "n_folds": 17
       },
       {
         "id": "GradientBoosting_ta_only_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 4.162,
+        "alpha": 4.2762,
         "p": 0.0,
-        "acc": 0.6686,
-        "n_folds": 16
+        "acc": 0.6704,
+        "n_folds": 17
       },
       {
         "id": "GradientBoosting_ta_only_low_vol_5d",
         "status": "rejected",
-        "alpha": -0.2498,
-        "p": 0.443583,
-        "acc": 0.5978,
-        "n_folds": 16
+        "alpha": -0.1926,
+        "p": 0.536522,
+        "acc": 0.6024,
+        "n_folds": 17
       },
       {
         "id": "Ridge_ta_news_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 1.6082,
-        "p": 9e-06,
-        "acc": 0.5866,
-        "n_folds": 16
+        "alpha": 1.7155,
+        "p": 1e-06,
+        "acc": 0.5887,
+        "n_folds": 17
       },
       {
         "id": "Ridge_ta_news_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 2.8963,
-        "p": 2e-06,
-        "acc": 0.6081,
-        "n_folds": 16
+        "alpha": 3.085,
+        "p": 0.0,
+        "acc": 0.6123,
+        "n_folds": 17
       },
       {
         "id": "Ridge_ta_news_low_vol_5d",
         "status": "rejected",
-        "alpha": -0.264,
-        "p": 0.388276,
-        "acc": 0.5784,
-        "n_folds": 16
+        "alpha": -0.2018,
+        "p": 0.49257,
+        "acc": 0.5841,
+        "n_folds": 17
       },
       {
         "id": "Lasso_ta_news_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 1.8931,
+        "alpha": 1.978,
         "p": 0.0,
-        "acc": 0.6032,
-        "n_folds": 16
+        "acc": 0.6049,
+        "n_folds": 17
       },
       {
         "id": "Lasso_ta_news_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 3.289,
+        "alpha": 3.4611,
         "p": 0.0,
-        "acc": 0.6215,
-        "n_folds": 16
+        "acc": 0.626,
+        "n_folds": 17
       },
       {
         "id": "Lasso_ta_news_low_vol_5d",
         "status": "rejected",
-        "alpha": -0.3184,
-        "p": 0.338802,
-        "acc": 0.6083,
-        "n_folds": 16
+        "alpha": -0.3677,
+        "p": 0.245404,
+        "acc": 0.5996,
+        "n_folds": 17
       },
       {
         "id": "RandomForest_ta_news_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 2.3526,
+        "alpha": 2.455,
         "p": 0.0,
-        "acc": 0.6675,
-        "n_folds": 16
+        "acc": 0.6688,
+        "n_folds": 17
       },
       {
         "id": "RandomForest_ta_news_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 4.471,
+        "alpha": 4.5736,
         "p": 0.0,
-        "acc": 0.6733,
-        "n_folds": 16
+        "acc": 0.6747,
+        "n_folds": 17
       },
       {
         "id": "RandomForest_ta_news_low_vol_5d",
         "status": "rejected",
-        "alpha": 0.1041,
-        "p": 0.764095,
-        "acc": 0.6411,
-        "n_folds": 16
+        "alpha": 0.1684,
+        "p": 0.612234,
+        "acc": 0.6415,
+        "n_folds": 17
       },
       {
         "id": "GradientBoosting_ta_news_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 2.1232,
+        "alpha": 2.1887,
         "p": 0.0,
-        "acc": 0.6453,
-        "n_folds": 16
+        "acc": 0.6427,
+        "n_folds": 17
       },
       {
         "id": "GradientBoosting_ta_news_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 4.0173,
+        "alpha": 4.1084,
         "p": 0.0,
-        "acc": 0.6573,
-        "n_folds": 16
+        "acc": 0.6597,
+        "n_folds": 17
       },
       {
         "id": "GradientBoosting_ta_news_low_vol_5d",
         "status": "rejected",
-        "alpha": -0.3147,
-        "p": 0.459285,
-        "acc": 0.5855,
-        "n_folds": 16
+        "alpha": -0.271,
+        "p": 0.500103,
+        "acc": 0.5893,
+        "n_folds": 17
       },
       {
         "id": "Ridge_ta_fundamental_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 1.7611,
+        "alpha": 1.8656,
         "p": 0.0,
-        "acc": 0.5963,
-        "n_folds": 16
+        "acc": 0.5991,
+        "n_folds": 17
       },
       {
         "id": "Ridge_ta_fundamental_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 3.4447,
+        "alpha": 3.6251,
         "p": 0.0,
-        "acc": 0.6343,
-        "n_folds": 16
+        "acc": 0.6392,
+        "n_folds": 17
       },
       {
         "id": "Ridge_ta_fundamental_low_vol_5d",
         "status": "rejected",
-        "alpha": -0.0528,
-        "p": 0.867126,
-        "acc": 0.5939,
-        "n_folds": 16
+        "alpha": -0.0494,
+        "p": 0.867774,
+        "acc": 0.5908,
+        "n_folds": 17
       },
       {
         "id": "Lasso_ta_fundamental_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 1.9357,
+        "alpha": 2.0244,
         "p": 0.0,
-        "acc": 0.6006,
-        "n_folds": 16
+        "acc": 0.6038,
+        "n_folds": 17
       },
       {
         "id": "Lasso_ta_fundamental_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 3.4728,
+        "alpha": 3.6342,
         "p": 0.0,
-        "acc": 0.6391,
-        "n_folds": 16
+        "acc": 0.6426,
+        "n_folds": 17
       },
       {
         "id": "Lasso_ta_fundamental_low_vol_5d",
         "status": "rejected",
-        "alpha": -0.0479,
-        "p": 0.891549,
-        "acc": 0.6061,
-        "n_folds": 16
+        "alpha": -0.022,
+        "p": 0.947013,
+        "acc": 0.6023,
+        "n_folds": 17
       },
       {
         "id": "RandomForest_ta_fundamental_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 2.6438,
+        "alpha": 2.7359,
         "p": 0.0,
-        "acc": 0.689,
-        "n_folds": 16
+        "acc": 0.6897,
+        "n_folds": 17
       },
       {
         "id": "RandomForest_ta_fundamental_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 4.7798,
+        "alpha": 4.882,
         "p": 0.0,
-        "acc": 0.6875,
-        "n_folds": 16
+        "acc": 0.6903,
+        "n_folds": 17
       },
       {
         "id": "RandomForest_ta_fundamental_low_vol_5d",
         "status": "rejected",
-        "alpha": 0.4425,
-        "p": 0.181631,
-        "acc": 0.6815,
-        "n_folds": 16
+        "alpha": 0.5377,
+        "p": 0.098457,
+        "acc": 0.6891,
+        "n_folds": 17
       },
       {
         "id": "GradientBoosting_ta_fundamental_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 2.4603,
+        "alpha": 2.5678,
         "p": 0.0,
-        "acc": 0.6601,
-        "n_folds": 16
+        "acc": 0.6631,
+        "n_folds": 17
       },
       {
         "id": "GradientBoosting_ta_fundamental_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 4.8381,
+        "alpha": 4.9566,
         "p": 0.0,
-        "acc": 0.7124,
-        "n_folds": 16
+        "acc": 0.7149,
+        "n_folds": 17
       },
       {
         "id": "GradientBoosting_ta_fundamental_low_vol_5d",
         "status": "rejected",
-        "alpha": 0.3376,
-        "p": 0.272762,
-        "acc": 0.6489,
-        "n_folds": 16
+        "alpha": 0.4512,
+        "p": 0.146413,
+        "acc": 0.66,
+        "n_folds": 17
       },
       {
         "id": "Ridge_ta_sentiment_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 1.7217,
+        "alpha": 1.8289,
         "p": 0.0,
-        "acc": 0.5928,
-        "n_folds": 16
+        "acc": 0.5965,
+        "n_folds": 17
       },
       {
         "id": "Ridge_ta_sentiment_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 3.4646,
+        "alpha": 3.6439,
         "p": 0.0,
-        "acc": 0.6231,
-        "n_folds": 16
+        "acc": 0.6286,
+        "n_folds": 17
       },
       {
         "id": "Ridge_ta_sentiment_low_vol_5d",
         "status": "rejected",
-        "alpha": -0.2762,
-        "p": 0.308155,
-        "acc": 0.5817,
-        "n_folds": 16
+        "alpha": -0.248,
+        "p": 0.332827,
+        "acc": 0.5824,
+        "n_folds": 17
       },
       {
         "id": "Lasso_ta_sentiment_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 2.0354,
+        "alpha": 2.1182,
         "p": 0.0,
-        "acc": 0.6124,
-        "n_folds": 16
+        "acc": 0.6149,
+        "n_folds": 17
       },
       {
         "id": "Lasso_ta_sentiment_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 3.4707,
+        "alpha": 3.6322,
         "p": 0.0,
-        "acc": 0.6392,
-        "n_folds": 16
+        "acc": 0.6427,
+        "n_folds": 17
       },
       {
         "id": "Lasso_ta_sentiment_low_vol_5d",
         "status": "rejected",
-        "alpha": -0.313,
-        "p": 0.317923,
-        "acc": 0.6047,
-        "n_folds": 16
+        "alpha": -0.3402,
+        "p": 0.249827,
+        "acc": 0.5962,
+        "n_folds": 17
       },
       {
         "id": "RandomForest_ta_sentiment_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 2.3359,
+        "alpha": 2.4382,
         "p": 0.0,
-        "acc": 0.6647,
-        "n_folds": 16
+        "acc": 0.6655,
+        "n_folds": 17
       },
       {
         "id": "RandomForest_ta_sentiment_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 4.4125,
+        "alpha": 4.522,
         "p": 0.0,
-        "acc": 0.6721,
-        "n_folds": 16
+        "acc": 0.6747,
+        "n_folds": 17
       },
       {
         "id": "RandomForest_ta_sentiment_low_vol_5d",
         "status": "rejected",
-        "alpha": -0.0265,
-        "p": 0.934222,
-        "acc": 0.6246,
-        "n_folds": 16
+        "alpha": 0.03,
+        "p": 0.921899,
+        "acc": 0.6244,
+        "n_folds": 17
       },
       {
         "id": "GradientBoosting_ta_sentiment_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 2.0396,
+        "alpha": 2.1376,
         "p": 0.0,
-        "acc": 0.6302,
-        "n_folds": 16
+        "acc": 0.6317,
+        "n_folds": 17
       },
       {
         "id": "GradientBoosting_ta_sentiment_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 4.223,
+        "alpha": 4.3109,
         "p": 0.0,
-        "acc": 0.6754,
-        "n_folds": 16
+        "acc": 0.6768,
+        "n_folds": 17
       },
       {
         "id": "GradientBoosting_ta_sentiment_low_vol_5d",
         "status": "rejected",
-        "alpha": -0.1302,
-        "p": 0.683808,
-        "acc": 0.6083,
-        "n_folds": 16
+        "alpha": -0.0775,
+        "p": 0.799287,
+        "acc": 0.6139,
+        "n_folds": 17
       },
       {
         "id": "Ridge_all_features_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 1.4746,
-        "p": 1.7e-05,
-        "acc": 0.581,
-        "n_folds": 16
+        "alpha": 1.5898,
+        "p": 3e-06,
+        "acc": 0.5834,
+        "n_folds": 17
       },
       {
         "id": "Ridge_all_features_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 2.6174,
-        "p": 3.3e-05,
-        "acc": 0.6022,
-        "n_folds": 16
+        "alpha": 2.8291,
+        "p": 7e-06,
+        "acc": 0.6079,
+        "n_folds": 17
       },
       {
         "id": "Ridge_all_features_low_vol_5d",
         "status": "rejected",
-        "alpha": -0.0176,
-        "p": 0.960983,
-        "acc": 0.5979,
-        "n_folds": 16
+        "alpha": 0.0125,
+        "p": 0.970555,
+        "acc": 0.6009,
+        "n_folds": 17
       },
       {
         "id": "Lasso_all_features_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 1.8306,
+        "alpha": 1.9192,
         "p": 0.0,
-        "acc": 0.5941,
-        "n_folds": 16
+        "acc": 0.5964,
+        "n_folds": 17
       },
       {
         "id": "Lasso_all_features_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 3.1044,
+        "alpha": 3.2874,
         "p": 0.0,
-        "acc": 0.6158,
-        "n_folds": 16
+        "acc": 0.6206,
+        "n_folds": 17
       },
       {
         "id": "Lasso_all_features_low_vol_5d",
         "status": "rejected",
-        "alpha": 0.0867,
-        "p": 0.812346,
-        "acc": 0.6155,
-        "n_folds": 16
+        "alpha": 0.0809,
+        "p": 0.813656,
+        "acc": 0.6095,
+        "n_folds": 17
       },
       {
         "id": "RandomForest_all_features_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 2.6855,
+        "alpha": 2.773,
         "p": 0.0,
-        "acc": 0.6856,
-        "n_folds": 16
+        "acc": 0.6858,
+        "n_folds": 17
       },
       {
         "id": "RandomForest_all_features_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 4.8538,
+        "alpha": 4.9517,
         "p": 0.0,
-        "acc": 0.6955,
-        "n_folds": 16
+        "acc": 0.6978,
+        "n_folds": 17
       },
       {
         "id": "RandomForest_all_features_low_vol_5d",
-        "status": "rejected",
-        "alpha": 0.54,
-        "p": 0.075692,
-        "acc": 0.6863,
-        "n_folds": 16
+        "status": "raw_sig_fdr_fail",
+        "alpha": 0.6078,
+        "p": 0.038364,
+        "acc": 0.6905,
+        "n_folds": 17
       },
       {
         "id": "GradientBoosting_all_features_all_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 2.5737,
+        "alpha": 2.6473,
         "p": 0.0,
-        "acc": 0.678,
-        "n_folds": 16
+        "acc": 0.6773,
+        "n_folds": 17
       },
       {
         "id": "GradientBoosting_all_features_high_vol_5d",
         "status": "fdr_pass_holdout_fail",
-        "alpha": 4.8504,
+        "alpha": 4.9385,
         "p": 0.0,
-        "acc": 0.6997,
-        "n_folds": 16
+        "acc": 0.7018,
+        "n_folds": 17
       },
       {
         "id": "GradientBoosting_all_features_low_vol_5d",
         "status": "rejected",
-        "alpha": 0.3838,
-        "p": 0.332264,
-        "acc": 0.6711,
-        "n_folds": 16
+        "alpha": 0.4729,
+        "p": 0.216179,
+        "acc": 0.6793,
+        "n_folds": 17
       }
     ]
   },
-  "updated": "2026-06-09T12:27:57Z"
+  "updated": "2026-06-09T15:40:05Z"
 }
