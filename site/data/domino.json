@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-09T10:47:28+00:00",
+  "generated_at": "2026-06-09T12:25:35+00:00",
   "source": {
-    "signal_corr_updated": "2026-06-09T10:46:24Z",
-    "n_pairs_total": 3336,
+    "signal_corr_updated": "2026-06-09T12:24:35Z",
+    "n_pairs_total": 3335,
     "n_dates": 180,
     "prices_tickers": 90,
     "trends_terms": 600
@@ -21,9 +21,36 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "list": 1.859
+    "follow": 2.083,
+    "california": 1.727,
+    "agents": 2.474,
+    "list": 3.21,
+    "agent": 2.537,
+    "election": 1.868,
+    "travel": 2.042,
+    "investigating": 2.068,
+    "fourth": 1.537,
+    "fraud": 2.286,
+    "alleged": 1.64
   },
   "stock_chains": [
+    {
+      "term": "california",
+      "is_active_today": true,
+      "today_z": 1.727,
+      "hop1": {
+        "ticker": "PDD",
+        "sector": "07 Trade & Services",
+        "entity": "PDD Holdings Inc.",
+        "corr": 0.3982,
+        "lag": -2,
+        "hit_rate": 0.6,
+        "direction": "bull",
+        "avg_ret_1d": 0.221,
+        "confidence": 0.39
+      },
+      "hop2": []
+    },
     {
       "term": "investors",
       "is_active_today": false,
@@ -3047,23 +3074,6 @@
         "direction": "bull",
         "avg_ret_1d": -0.557,
         "confidence": 0.391
-      },
-      "hop2": []
-    },
-    {
-      "term": "california",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PDD",
-        "sector": "07 Trade & Services",
-        "entity": "PDD Holdings Inc.",
-        "corr": 0.3982,
-        "lag": -2,
-        "hit_rate": 0.6,
-        "direction": "bull",
-        "avg_ret_1d": 0.221,
-        "confidence": 0.39
       },
       "hop2": []
     },
@@ -6354,7 +6364,22 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "PDD",
+      "sector": "07 Trade & Services",
+      "entity": "PDD Holdings Inc.",
+      "fund_score": 0.844,
+      "inbound": [
+        {
+          "term": "california",
+          "direction": "bull",
+          "today_z": 1.727,
+          "hit_rate": 0.6
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 182,
