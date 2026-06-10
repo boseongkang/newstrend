@@ -1059,10 +1059,30 @@
       "hash_ok": true,
       "ood": true,
       "unfreeze_ready": false
+    },
+    {
+      "updated": "2026-06-10T14:39:01Z",
+      "n_pred_total": 1260,
+      "n_evaluated": 180,
+      "models": {
+        "RandomForest": {
+          "alpha": 2.183,
+          "p": null,
+          "n": 90
+        },
+        "GradientBoosting": {
+          "alpha": 1.788,
+          "p": null,
+          "n": 90
+        }
+      },
+      "hash_ok": true,
+      "ood": false,
+      "unfreeze_ready": false
     }
   ],
   "latest": {
-    "updated": "2026-06-10T11:13:36Z",
+    "updated": "2026-06-10T14:39:01Z",
     "baseline_date": "2026-05-25",
     "model_hashes": {
       "RandomForest": "a2947618dfbb05bd",
@@ -1129,10 +1149,10 @@
       }
     },
     "ood_check": {
-      "current_regime": "NEUTRAL",
-      "training_pct": 0,
-      "out_of_distribution": true,
-      "confidence_note": "UNTESTED REGIME: NEUTRAL was 0.0% of training data. Predictions unreliable."
+      "current_regime": "RISK-ON",
+      "training_pct": 98.3,
+      "out_of_distribution": false,
+      "confidence_note": "In-distribution: RISK-ON was 98.3% of training data."
     },
     "bias_monitor": {
       "n_total_predictions": 1260,
@@ -1150,7 +1170,6 @@
       }
     },
     "alerts": [
-      "OOD: UNTESTED REGIME: NEUTRAL was 0.0% of training data. Predictions unreliable.",
       "BIAS: long_ratio=85.2% \u2014 model may be systematically long"
     ],
     "unfreeze_check": {
@@ -1160,5 +1179,5 @@
     },
     "label": "ADVISORY ONLY \u00b7 paper trading \u00b7 unverified \u00b7 single-regime baseline"
   },
-  "updated": "2026-06-10T11:13:36Z"
+  "updated": "2026-06-10T14:39:01Z"
 }
