@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-06-12T11:14:47+00:00",
+  "generated_at": "2026-06-12T12:43:32+00:00",
   "source": {
-    "signal_corr_updated": "2026-06-12T11:13:36Z",
-    "n_pairs_total": 3288,
+    "signal_corr_updated": "2026-06-12T12:42:23Z",
+    "n_pairs_total": 3294,
     "n_dates": 180,
     "prices_tickers": 90,
     "trends_terms": 600
@@ -21,12 +21,89 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "provides": 4.283,
-    "date": 3.953,
-    "injury": 10.585,
-    "name": 2.016
+    "provides": 3.371,
+    "breaks": 2.785,
+    "indian": 1.664,
+    "sports": 2.98,
+    "managers": 5.686,
+    "design": 4.445,
+    "date": 3.124,
+    "injury": 8.429,
+    "name": 1.556,
+    "opening": 1.964,
+    "break": 1.613
   },
   "stock_chains": [
+    {
+      "term": "breaks",
+      "is_active_today": true,
+      "today_z": 2.785,
+      "hop1": {
+        "ticker": "KDP",
+        "sector": "04 Manufacturing",
+        "entity": "Keurig Dr Pepper Inc.",
+        "corr": 0.3779,
+        "lag": -5,
+        "hit_rate": 0.75,
+        "direction": "bull",
+        "avg_ret_1d": 0.622,
+        "confidence": 0.455
+      },
+      "hop2": []
+    },
+    {
+      "term": "breaks",
+      "is_active_today": true,
+      "today_z": 2.785,
+      "hop1": {
+        "ticker": "ADI",
+        "sector": "04 Manufacturing",
+        "entity": "ANALOG DEVICES INC",
+        "corr": 0.3193,
+        "lag": -1,
+        "hit_rate": 0.75,
+        "direction": "bull",
+        "avg_ret_1d": 2.537,
+        "confidence": 0.435
+      },
+      "hop2": [
+        {
+          "ticker": "TXN",
+          "ticker_corr": 0.734,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "TEXAS INSTRUMENTS INC"
+        },
+        {
+          "ticker": "MCHP",
+          "ticker_corr": 0.728,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "MICROCHIP TECHNOLOGY INC"
+        },
+        {
+          "ticker": "ON",
+          "ticker_corr": 0.678,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "ON SEMICONDUCTOR CORP"
+        },
+        {
+          "ticker": "NXPI",
+          "ticker_corr": 0.607,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "NXP Semiconductors N.V."
+        },
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.551,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": null
+        }
+      ]
+    },
     {
       "term": "first",
       "is_active_today": false,
@@ -1087,23 +1164,6 @@
       "hop2": []
     },
     {
-      "term": "breaks",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "KDP",
-        "sector": "04 Manufacturing",
-        "entity": "Keurig Dr Pepper Inc.",
-        "corr": 0.3779,
-        "lag": -5,
-        "hit_rate": 0.75,
-        "direction": "bull",
-        "avg_ret_1d": 0.622,
-        "confidence": 0.455
-      },
-      "hop2": []
-    },
-    {
       "term": "action",
       "is_active_today": false,
       "today_z": null,
@@ -1425,55 +1485,108 @@
       ]
     },
     {
-      "term": "breaks",
+      "term": "line",
       "is_active_today": false,
       "today_z": null,
       "hop1": {
-        "ticker": "ADI",
-        "sector": "04 Manufacturing",
-        "entity": "ANALOG DEVICES INC",
-        "corr": 0.3193,
+        "ticker": "JPM",
+        "sector": "02 Finance",
+        "entity": "JPMORGAN CHASE & CO",
+        "corr": -0.3225,
         "lag": -1,
         "hit_rate": 0.75,
-        "direction": "bull",
-        "avg_ret_1d": 2.537,
-        "confidence": 0.435
+        "direction": "bear",
+        "avg_ret_1d": 0.594,
+        "confidence": 0.436
       },
       "hop2": [
         {
-          "ticker": "TXN",
-          "ticker_corr": 0.734,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "TEXAS INSTRUMENTS INC"
+          "ticker": "BAC",
+          "ticker_corr": 0.797,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "BANK OF AMERICA CORP /DE/"
         },
         {
-          "ticker": "MCHP",
-          "ticker_corr": 0.728,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "MICROCHIP TECHNOLOGY INC"
+          "ticker": "DIA",
+          "ticker_corr": 0.768,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
         },
         {
-          "ticker": "ON",
-          "ticker_corr": 0.678,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "ON SEMICONDUCTOR CORP"
+          "ticker": "GS",
+          "ticker_corr": 0.768,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "GOLDMAN SACHS GROUP INC"
         },
         {
-          "ticker": "NXPI",
-          "ticker_corr": 0.607,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "NXP Semiconductors N.V."
+          "ticker": "MS",
+          "ticker_corr": 0.763,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "MORGAN STANLEY"
         },
         {
           "ticker": "SPY",
-          "ticker_corr": 0.551,
-          "implied_dir": "bull",
+          "ticker_corr": 0.706,
+          "implied_dir": "bear",
           "sector": null,
           "entity": null
+        }
+      ]
+    },
+    {
+      "term": "line",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "NVDA",
+        "sector": "04 Manufacturing",
+        "entity": "NVIDIA CORP",
+        "corr": -0.3217,
+        "lag": -5,
+        "hit_rate": 0.75,
+        "direction": "bear",
+        "avg_ret_1d": 2.355,
+        "confidence": 0.436
+      },
+      "hop2": [
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.801,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.762,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "AVGO",
+          "ticker_corr": 0.646,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "Broadcom Inc."
+        },
+        {
+          "ticker": "ASML",
+          "ticker_corr": 0.602,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "ASML HOLDING NV"
+        },
+        {
+          "ticker": "TSM",
+          "ticker_corr": 0.594,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
         }
       ]
     },
@@ -1696,6 +1809,59 @@
           "implied_dir": "bear",
           "sector": "02 Finance",
           "entity": "JPMORGAN CHASE & CO"
+        }
+      ]
+    },
+    {
+      "term": "line",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "TSLA",
+        "sector": "04 Manufacturing",
+        "entity": "Tesla, Inc.",
+        "corr": -0.3056,
+        "lag": -5,
+        "hit_rate": 0.75,
+        "direction": "bear",
+        "avg_ret_1d": 0.943,
+        "confidence": 0.43
+      },
+      "hop2": [
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.69,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.673,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "HYG",
+          "ticker_corr": 0.577,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "IWM",
+          "ticker_corr": 0.576,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.55,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
         }
       ]
     },
@@ -5356,6 +5522,38 @@
       "hop2": []
     },
     {
+      "term": "line",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "CDNS",
+        "sector": "06 Technology",
+        "entity": "CADENCE DESIGN SYSTEMS INC",
+        "corr": -0.3093,
+        "lag": -5,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": -0.519,
+        "confidence": 0.295
+      },
+      "hop2": [
+        {
+          "ticker": "SNPS",
+          "ticker_corr": 0.691,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "SYNOPSYS INC"
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.506,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        }
+      ]
+    },
+    {
       "term": "professional",
       "is_active_today": false,
       "today_z": null,
@@ -5472,6 +5670,15 @@
       "is_active_today": false
     },
     {
+      "term": "line",
+      "ticker": "SPY",
+      "corr": -0.3174,
+      "lag": -5,
+      "hit_rate": 0.75,
+      "direction": "bear",
+      "is_active_today": false
+    },
+    {
       "term": "march",
       "ticker": "SPY",
       "corr": -0.3264,
@@ -5571,11 +5778,115 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "KDP",
+      "sector": "04 Manufacturing",
+      "entity": "Keurig Dr Pepper Inc.",
+      "fund_score": 0.467,
+      "inbound": [
+        {
+          "term": "breaks",
+          "direction": "bull",
+          "today_z": 2.785,
+          "hit_rate": 0.75
+        }
+      ]
+    },
+    {
+      "ticker": "ADI",
+      "sector": "04 Manufacturing",
+      "entity": "ANALOG DEVICES INC",
+      "fund_score": 0.377,
+      "inbound": [
+        {
+          "term": "breaks",
+          "direction": "bull",
+          "today_z": 2.785,
+          "hit_rate": 0.75
+        }
+      ]
+    },
+    {
+      "ticker": "TXN",
+      "sector": "04 Manufacturing",
+      "entity": "TEXAS INSTRUMENTS INC",
+      "fund_score": 0.544,
+      "inbound": [
+        {
+          "term": "breaks",
+          "via": "ADI",
+          "direction": "bull",
+          "today_z": 2.785,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MCHP",
+      "sector": "04 Manufacturing",
+      "entity": "MICROCHIP TECHNOLOGY INC",
+      "fund_score": 0.285,
+      "inbound": [
+        {
+          "term": "breaks",
+          "via": "ADI",
+          "direction": "bull",
+          "today_z": 2.785,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ON",
+      "sector": "04 Manufacturing",
+      "entity": "ON SEMICONDUCTOR CORP",
+      "fund_score": 0.285,
+      "inbound": [
+        {
+          "term": "breaks",
+          "via": "ADI",
+          "direction": "bull",
+          "today_z": 2.785,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "NXPI",
+      "sector": "04 Manufacturing",
+      "entity": "NXP Semiconductors N.V.",
+      "fund_score": 0.418,
+      "inbound": [
+        {
+          "term": "breaks",
+          "via": "ADI",
+          "direction": "bull",
+          "today_z": 2.785,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "SPY",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "breaks",
+          "via": "ADI",
+          "direction": "bull",
+          "today_z": 2.785,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
-    "stock_signals": 151,
-    "macro_signals": 14,
+    "stock_signals": 155,
+    "macro_signals": 15,
     "sector_diversity": 8,
     "grade": "A",
     "next_grade": null,
