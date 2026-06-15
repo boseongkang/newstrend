@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-15T14:46:02+00:00",
+  "generated_at": "2026-06-15T19:17:07+00:00",
   "source": {
-    "signal_corr_updated": "2026-06-15T14:44:56Z",
+    "signal_corr_updated": "2026-06-15T19:15:57Z",
     "n_pairs_total": 3628,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,24 +21,26 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "deal": 1.683,
-    "hormuz": 2.113,
-    "strait": 1.671,
-    "february": 1.831,
-    "announces": 3.396,
-    "framework": 2.892,
-    "review": 1.824,
-    "agreement": 2.614,
+    "deal": 2.205,
+    "hormuz": 2.644,
+    "strait": 2.152,
+    "february": 2.038,
+    "services": 1.552,
+    "announces": 4.207,
+    "content": 1.524,
+    "framework": 3.557,
+    "review": 2.322,
+    "agreement": 3.228,
     "special": 1.709,
-    "details": 2.274,
-    "helps": 3.58,
-    "means": 1.73
+    "details": 2.818,
+    "helps": 4.118,
+    "means": 2.261
   },
   "stock_chains": [
     {
       "term": "february",
       "is_active_today": true,
-      "today_z": 1.831,
+      "today_z": 2.038,
       "hop1": {
         "ticker": "ENPH",
         "sector": "04 Manufacturing",
@@ -63,7 +65,7 @@
     {
       "term": "hormuz",
       "is_active_today": true,
-      "today_z": 2.113,
+      "today_z": 2.644,
       "hop1": {
         "ticker": "ADI",
         "sector": "04 Manufacturing",
@@ -114,9 +116,62 @@
       ]
     },
     {
+      "term": "services",
+      "is_active_today": true,
+      "today_z": 1.552,
+      "hop1": {
+        "ticker": "QCOM",
+        "sector": "04 Manufacturing",
+        "entity": "QUALCOMM INC/DE",
+        "corr": -0.3079,
+        "lag": -4,
+        "hit_rate": 0.667,
+        "direction": "bear",
+        "avg_ret_1d": 0.98,
+        "confidence": 0.374
+      },
+      "hop2": [
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.609,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "NXPI",
+          "ticker_corr": 0.591,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "NXP Semiconductors N.V."
+        },
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.584,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "IWM",
+          "ticker_corr": 0.565,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "AMD",
+          "ticker_corr": 0.53,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "ADVANCED MICRO DEVICES INC"
+        }
+      ]
+    },
+    {
       "term": "strait",
       "is_active_today": true,
-      "today_z": 1.671,
+      "today_z": 2.152,
       "hop1": {
         "ticker": "MDB",
         "sector": "06 Technology",
@@ -5160,59 +5215,6 @@
       ]
     },
     {
-      "term": "services",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "QCOM",
-        "sector": "04 Manufacturing",
-        "entity": "QUALCOMM INC/DE",
-        "corr": -0.3079,
-        "lag": -4,
-        "hit_rate": 0.667,
-        "direction": "bear",
-        "avg_ret_1d": 0.98,
-        "confidence": 0.374
-      },
-      "hop2": [
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.609,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "NXPI",
-          "ticker_corr": 0.591,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "NXP Semiconductors N.V."
-        },
-        {
-          "ticker": "SPY",
-          "ticker_corr": 0.584,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "IWM",
-          "ticker_corr": 0.565,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "AMD",
-          "ticker_corr": 0.53,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "ADVANCED MICRO DEVICES INC"
-        }
-      ]
-    },
-    {
       "term": "sales",
       "is_active_today": false,
       "today_z": null,
@@ -8187,108 +8189,6 @@
   ],
   "ticker_pressure": [
     {
-      "ticker": "ENPH",
-      "sector": "04 Manufacturing",
-      "entity": "Enphase Energy, Inc.",
-      "fund_score": 0.349,
-      "inbound": [
-        {
-          "term": "february",
-          "direction": "bull",
-          "today_z": 1.831,
-          "hit_rate": 0.6
-        }
-      ]
-    },
-    {
-      "ticker": "ADI",
-      "sector": "04 Manufacturing",
-      "entity": "ANALOG DEVICES INC",
-      "fund_score": 0.377,
-      "inbound": [
-        {
-          "term": "hormuz",
-          "direction": "bear",
-          "today_z": 2.113,
-          "hit_rate": 0.538
-        }
-      ]
-    },
-    {
-      "ticker": "MDB",
-      "sector": "06 Technology",
-      "entity": "MongoDB, Inc.",
-      "fund_score": 0.285,
-      "inbound": [
-        {
-          "term": "strait",
-          "direction": "bear",
-          "today_z": 1.671,
-          "hit_rate": 0.545
-        }
-      ]
-    },
-    {
-      "ticker": "SEDG",
-      "sector": "04 Manufacturing",
-      "entity": "SOLAREDGE TECHNOLOGIES, INC.",
-      "fund_score": 0.168,
-      "inbound": [
-        {
-          "term": "february",
-          "via": "ENPH",
-          "direction": "bull",
-          "today_z": 1.831,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "TXN",
-      "sector": "04 Manufacturing",
-      "entity": "TEXAS INSTRUMENTS INC",
-      "fund_score": 0.544,
-      "inbound": [
-        {
-          "term": "hormuz",
-          "via": "ADI",
-          "direction": "bear",
-          "today_z": 2.113,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "MCHP",
-      "sector": "04 Manufacturing",
-      "entity": "MICROCHIP TECHNOLOGY INC",
-      "fund_score": 0.285,
-      "inbound": [
-        {
-          "term": "hormuz",
-          "via": "ADI",
-          "direction": "bear",
-          "today_z": 2.113,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "ON",
-      "sector": "04 Manufacturing",
-      "entity": "ON SEMICONDUCTOR CORP",
-      "fund_score": 0.285,
-      "inbound": [
-        {
-          "term": "hormuz",
-          "via": "ADI",
-          "direction": "bear",
-          "today_z": 2.113,
-          "indirect": true
-        }
-      ]
-    },
-    {
       "ticker": "NXPI",
       "sector": "04 Manufacturing",
       "entity": "NXP Semiconductors N.V.",
@@ -8298,7 +8198,14 @@
           "term": "hormuz",
           "via": "ADI",
           "direction": "bear",
-          "today_z": 2.113,
+          "today_z": 2.644,
+          "indirect": true
+        },
+        {
+          "term": "services",
+          "via": "QCOM",
+          "direction": "bear",
+          "today_z": 1.552,
           "indirect": true
         }
       ]
@@ -8313,7 +8220,175 @@
           "term": "hormuz",
           "via": "ADI",
           "direction": "bear",
-          "today_z": 2.113,
+          "today_z": 2.644,
+          "indirect": true
+        },
+        {
+          "term": "services",
+          "via": "QCOM",
+          "direction": "bear",
+          "today_z": 1.552,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ENPH",
+      "sector": "04 Manufacturing",
+      "entity": "Enphase Energy, Inc.",
+      "fund_score": 0.349,
+      "inbound": [
+        {
+          "term": "february",
+          "direction": "bull",
+          "today_z": 2.038,
+          "hit_rate": 0.6
+        }
+      ]
+    },
+    {
+      "ticker": "ADI",
+      "sector": "04 Manufacturing",
+      "entity": "ANALOG DEVICES INC",
+      "fund_score": 0.377,
+      "inbound": [
+        {
+          "term": "hormuz",
+          "direction": "bear",
+          "today_z": 2.644,
+          "hit_rate": 0.538
+        }
+      ]
+    },
+    {
+      "ticker": "QCOM",
+      "sector": "04 Manufacturing",
+      "entity": "QUALCOMM INC/DE",
+      "fund_score": 0.435,
+      "inbound": [
+        {
+          "term": "services",
+          "direction": "bear",
+          "today_z": 1.552,
+          "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "MDB",
+      "sector": "06 Technology",
+      "entity": "MongoDB, Inc.",
+      "fund_score": 0.285,
+      "inbound": [
+        {
+          "term": "strait",
+          "direction": "bear",
+          "today_z": 2.152,
+          "hit_rate": 0.545
+        }
+      ]
+    },
+    {
+      "ticker": "SEDG",
+      "sector": "04 Manufacturing",
+      "entity": "SOLAREDGE TECHNOLOGIES, INC.",
+      "fund_score": 0.168,
+      "inbound": [
+        {
+          "term": "february",
+          "via": "ENPH",
+          "direction": "bull",
+          "today_z": 2.038,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "TXN",
+      "sector": "04 Manufacturing",
+      "entity": "TEXAS INSTRUMENTS INC",
+      "fund_score": 0.544,
+      "inbound": [
+        {
+          "term": "hormuz",
+          "via": "ADI",
+          "direction": "bear",
+          "today_z": 2.644,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MCHP",
+      "sector": "04 Manufacturing",
+      "entity": "MICROCHIP TECHNOLOGY INC",
+      "fund_score": 0.285,
+      "inbound": [
+        {
+          "term": "hormuz",
+          "via": "ADI",
+          "direction": "bear",
+          "today_z": 2.644,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ON",
+      "sector": "04 Manufacturing",
+      "entity": "ON SEMICONDUCTOR CORP",
+      "fund_score": 0.285,
+      "inbound": [
+        {
+          "term": "hormuz",
+          "via": "ADI",
+          "direction": "bear",
+          "today_z": 2.644,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "services",
+          "via": "QCOM",
+          "direction": "bear",
+          "today_z": 1.552,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "IWM",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "services",
+          "via": "QCOM",
+          "direction": "bear",
+          "today_z": 1.552,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "AMD",
+      "sector": "04 Manufacturing",
+      "entity": "ADVANCED MICRO DEVICES INC",
+      "fund_score": 0.579,
+      "inbound": [
+        {
+          "term": "services",
+          "via": "QCOM",
+          "direction": "bear",
+          "today_z": 1.552,
           "indirect": true
         }
       ]
