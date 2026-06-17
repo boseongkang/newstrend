@@ -2199,10 +2199,30 @@
       "hash_ok": true,
       "ood": false,
       "unfreeze_ready": false
+    },
+    {
+      "updated": "2026-06-17T16:52:53Z",
+      "n_pred_total": 2520,
+      "n_evaluated": 1260,
+      "models": {
+        "RandomForest": {
+          "alpha": -0.705,
+          "p": 0.1595,
+          "n": 630
+        },
+        "GradientBoosting": {
+          "alpha": -0.72,
+          "p": 0.1191,
+          "n": 630
+        }
+      },
+      "hash_ok": true,
+      "ood": false,
+      "unfreeze_ready": false
     }
   ],
   "latest": {
-    "updated": "2026-06-17T12:39:33Z",
+    "updated": "2026-06-17T16:52:53Z",
     "baseline_date": "2026-05-25",
     "model_hashes": {
       "RandomForest": "a2947618dfbb05bd",
@@ -2215,25 +2235,25 @@
     },
     "prediction_log": {
       "total": 2520,
-      "evaluated": 1080,
-      "pending": 1440,
+      "evaluated": 1260,
+      "pending": 1260,
       "new_today": 0,
-      "newly_evaluated": 0
+      "newly_evaluated": 180
     },
     "forward": {
       "RandomForest": {
         "status": "tracking",
-        "n": 540,
-        "n_folds": 6,
-        "cumulative_alpha_pct": -0.73,
+        "n": 630,
+        "n_folds": 7,
+        "cumulative_alpha_pct": -0.705,
         "alpha_ci_95": [
-          -1.667,
-          0.206
+          -1.581,
+          0.171
         ],
-        "alpha_t": -1.234,
-        "alpha_p": 0.2173,
+        "alpha_t": -1.407,
+        "alpha_p": 0.1595,
         "sig_status": "ok",
-        "cumulative_accuracy": 0.4981,
+        "cumulative_accuracy": 0.5254,
         "by_regime": {
           "RISK-ON": {
             "n": 540,
@@ -2241,28 +2261,42 @@
             "accuracy": 0.4981,
             "alpha_mean_pct": -0.73,
             "provisional": false
+          },
+          "NEUTRAL": {
+            "n": 90,
+            "n_folds": 1,
+            "accuracy": 0.6889,
+            "alpha_mean_pct": -0.551,
+            "provisional": false
           }
         }
       },
       "GradientBoosting": {
         "status": "tracking",
-        "n": 540,
-        "n_folds": 6,
-        "cumulative_alpha_pct": -0.829,
+        "n": 630,
+        "n_folds": 7,
+        "cumulative_alpha_pct": -0.72,
         "alpha_ci_95": [
-          -1.768,
-          0.111
+          -1.598,
+          0.158
         ],
-        "alpha_t": -1.559,
+        "alpha_t": -1.558,
         "alpha_p": 0.1191,
         "sig_status": "ok",
-        "cumulative_accuracy": 0.4741,
+        "cumulative_accuracy": 0.4984,
         "by_regime": {
           "RISK-ON": {
             "n": 540,
             "n_folds": 6,
             "accuracy": 0.4741,
             "alpha_mean_pct": -0.829,
+            "provisional": false
+          },
+          "NEUTRAL": {
+            "n": 90,
+            "n_folds": 1,
+            "accuracy": 0.6444,
+            "alpha_mean_pct": -0.07,
             "provisional": false
           }
         }
@@ -2276,28 +2310,29 @@
     },
     "bias_monitor": {
       "n_total_predictions": 2520,
-      "n_evaluated": 1080,
+      "n_evaluated": 1260,
       "long_ratio": 0.843,
       "long_bias_warning": true,
       "top_sector": "Technology",
       "top_sector_pct": 40.0,
       "sector_concentration_warning": false,
       "calibration": {
-        "accuracy": 0.4861,
-        "mean_abs_predicted": 3.023,
-        "mean_abs_realized": 0.041,
-        "overconfidence_ratio": 74.392
+        "accuracy": 0.5119,
+        "mean_abs_predicted": 3.179,
+        "mean_abs_realized": 0.303,
+        "overconfidence_ratio": 10.494
       }
     },
     "alerts": [
+      "REGIME CHANGE: non-RISK-ON data detected in forward predictions",
       "BIAS: long_ratio=84.3% \u2014 model may be systematically long"
     ],
     "unfreeze_check": {
       "forward_alpha_significant": false,
-      "risk_off_observed": false,
+      "risk_off_observed": true,
       "ready_to_unfreeze": false
     },
     "label": "ADVISORY ONLY \u00b7 paper trading \u00b7 unverified \u00b7 single-regime baseline"
   },
-  "updated": "2026-06-17T12:39:33Z"
+  "updated": "2026-06-17T16:52:53Z"
 }
