@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-17T12:01:56+00:00",
+  "generated_at": "2026-06-17T12:38:48+00:00",
   "source": {
-    "signal_corr_updated": "2026-06-17T12:00:57Z",
+    "signal_corr_updated": "2026-06-17T12:37:40Z",
     "n_pairs_total": 3608,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,9 +21,119 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "grow": 1.604
+    "full": 1.624,
+    "leading": 1.524,
+    "college": 5.213,
+    "manchester": 4.041,
+    "range": 2.007
   },
   "stock_chains": [
+    {
+      "term": "leading",
+      "is_active_today": true,
+      "today_z": 1.524,
+      "hop1": {
+        "ticker": "AAPL",
+        "sector": "06 Technology",
+        "entity": "Apple Inc.",
+        "corr": 0.3127,
+        "lag": -3,
+        "hit_rate": 0.8,
+        "direction": "bull",
+        "avg_ret_1d": 0.639,
+        "confidence": 0.47
+      },
+      "hop2": [
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.727,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.696,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.667,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "HYG",
+          "ticker_corr": 0.579,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "MS",
+          "ticker_corr": 0.579,
+          "implied_dir": "bull",
+          "sector": "02 Finance",
+          "entity": "MORGAN STANLEY"
+        }
+      ]
+    },
+    {
+      "term": "full",
+      "is_active_today": true,
+      "today_z": 1.624,
+      "hop1": {
+        "ticker": "NVDA",
+        "sector": "04 Manufacturing",
+        "entity": "NVIDIA CORP",
+        "corr": -0.3111,
+        "lag": -5,
+        "hit_rate": 0.8,
+        "direction": "bear",
+        "avg_ret_1d": 0.242,
+        "confidence": 0.469
+      },
+      "hop2": [
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.799,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.762,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "AVGO",
+          "ticker_corr": 0.645,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "Broadcom Inc."
+        },
+        {
+          "ticker": "ASML",
+          "ticker_corr": 0.602,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "ASML HOLDING NV"
+        },
+        {
+          "ticker": "TSM",
+          "ticker_corr": 0.596,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
+        }
+      ]
+    },
     {
       "term": "intelligence",
       "is_active_today": false,
@@ -1652,59 +1762,6 @@
       ]
     },
     {
-      "term": "leading",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "AAPL",
-        "sector": "06 Technology",
-        "entity": "Apple Inc.",
-        "corr": 0.3127,
-        "lag": -3,
-        "hit_rate": 0.8,
-        "direction": "bull",
-        "avg_ret_1d": 0.639,
-        "confidence": 0.47
-      },
-      "hop2": [
-        {
-          "ticker": "SPY",
-          "ticker_corr": 0.727,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.696,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "DIA",
-          "ticker_corr": 0.667,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "HYG",
-          "ticker_corr": 0.579,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "MS",
-          "ticker_corr": 0.579,
-          "implied_dir": "bull",
-          "sector": "02 Finance",
-          "entity": "MORGAN STANLEY"
-        }
-      ]
-    },
-    {
       "term": "financial",
       "is_active_today": false,
       "today_z": null,
@@ -1720,59 +1777,6 @@
         "confidence": 0.47
       },
       "hop2": []
-    },
-    {
-      "term": "full",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "NVDA",
-        "sector": "04 Manufacturing",
-        "entity": "NVIDIA CORP",
-        "corr": -0.3111,
-        "lag": -5,
-        "hit_rate": 0.8,
-        "direction": "bear",
-        "avg_ret_1d": 0.242,
-        "confidence": 0.469
-      },
-      "hop2": [
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.799,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "SPY",
-          "ticker_corr": 0.762,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "AVGO",
-          "ticker_corr": 0.645,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "Broadcom Inc."
-        },
-        {
-          "ticker": "ASML",
-          "ticker_corr": 0.602,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "ASML HOLDING NV"
-        },
-        {
-          "ticker": "TSM",
-          "ticker_corr": 0.596,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
-        }
-      ]
     },
     {
       "term": "india",
@@ -7965,7 +7969,7 @@
       "lag": -5,
       "hit_rate": 0.8,
       "direction": "bull",
-      "is_active_today": false
+      "is_active_today": true
     },
     {
       "term": "streaming",
@@ -8157,7 +8161,170 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "SPY",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "leading",
+          "via": "AAPL",
+          "direction": "bull",
+          "today_z": 1.524,
+          "indirect": true
+        },
+        {
+          "term": "full",
+          "via": "NVDA",
+          "direction": "bear",
+          "today_z": 1.624,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "leading",
+          "via": "AAPL",
+          "direction": "bull",
+          "today_z": 1.524,
+          "indirect": true
+        },
+        {
+          "term": "full",
+          "via": "NVDA",
+          "direction": "bear",
+          "today_z": 1.624,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "sector": "06 Technology",
+      "entity": "Apple Inc.",
+      "fund_score": 0.431,
+      "inbound": [
+        {
+          "term": "leading",
+          "direction": "bull",
+          "today_z": 1.524,
+          "hit_rate": 0.8
+        }
+      ]
+    },
+    {
+      "ticker": "NVDA",
+      "sector": "04 Manufacturing",
+      "entity": "NVIDIA CORP",
+      "fund_score": 0.984,
+      "inbound": [
+        {
+          "term": "full",
+          "direction": "bear",
+          "today_z": 1.624,
+          "hit_rate": 0.8
+        }
+      ]
+    },
+    {
+      "ticker": "DIA",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "leading",
+          "via": "AAPL",
+          "direction": "bull",
+          "today_z": 1.524,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "HYG",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "leading",
+          "via": "AAPL",
+          "direction": "bull",
+          "today_z": 1.524,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MS",
+      "sector": "02 Finance",
+      "entity": "MORGAN STANLEY",
+      "fund_score": 0.423,
+      "inbound": [
+        {
+          "term": "leading",
+          "via": "AAPL",
+          "direction": "bull",
+          "today_z": 1.524,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "AVGO",
+      "sector": "04 Manufacturing",
+      "entity": "Broadcom Inc.",
+      "fund_score": 0.853,
+      "inbound": [
+        {
+          "term": "full",
+          "via": "NVDA",
+          "direction": "bear",
+          "today_z": 1.624,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ASML",
+      "sector": "06 Technology",
+      "entity": "ASML HOLDING NV",
+      "fund_score": 0.684,
+      "inbound": [
+        {
+          "term": "full",
+          "via": "NVDA",
+          "direction": "bear",
+          "today_z": 1.624,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "TSM",
+      "sector": "04 Manufacturing",
+      "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "full",
+          "via": "NVDA",
+          "direction": "bear",
+          "today_z": 1.624,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 209,
