@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-18T11:38:11Z",
+  "updated": "2026-06-18T13:52:04Z",
   "mode": "active",
   "config": {
     "min_data": 100,
@@ -7,16 +7,16 @@
     "target": "fwd_5d_return"
   },
   "data_summary": {
-    "n_total_with_target": 3263,
-    "n_train": 2284,
-    "n_test": 979,
+    "n_total_with_target": 3353,
+    "n_train": 2347,
+    "n_test": 1006,
     "train_date_range": [
       "2026-04-17",
       "2026-05-31"
     ],
     "test_date_range": [
       "2026-05-31",
-      "2026-06-10"
+      "2026-06-11"
     ],
     "n_features_categorical": 8,
     "n_features_numeric": 18
@@ -24,83 +24,83 @@
   "models": {
     "LinearRegression": {
       "train": {
-        "mae_pct": 5.4189,
-        "rmse_pct": 8.1812,
-        "r2": 0.1564,
-        "directional_accuracy": 0.6432
+        "mae_pct": 5.3942,
+        "rmse_pct": 8.1489,
+        "r2": 0.1528,
+        "directional_accuracy": 0.6383
       },
       "test": {
-        "mae_pct": 7.6113,
-        "rmse_pct": 12.1054,
-        "r2": -0.5016,
-        "directional_accuracy": 0.4443
+        "mae_pct": 7.7148,
+        "rmse_pct": 12.395,
+        "r2": -0.409,
+        "directional_accuracy": 0.4602
       }
     },
     "Ridge": {
       "train": {
-        "mae_pct": 5.4171,
-        "rmse_pct": 8.1813,
-        "r2": 0.1564,
-        "directional_accuracy": 0.6454
+        "mae_pct": 5.392,
+        "rmse_pct": 8.1491,
+        "r2": 0.1528,
+        "directional_accuracy": 0.6395
       },
       "test": {
-        "mae_pct": 7.6094,
-        "rmse_pct": 12.1062,
-        "r2": -0.5018,
-        "directional_accuracy": 0.4413
+        "mae_pct": 7.7128,
+        "rmse_pct": 12.397,
+        "r2": -0.4095,
+        "directional_accuracy": 0.4622
       }
     },
     "RandomForest": {
       "train": {
-        "mae_pct": 1.4666,
-        "rmse_pct": 2.4683,
-        "r2": 0.9232,
-        "directional_accuracy": 0.9208
+        "mae_pct": 1.431,
+        "rmse_pct": 2.4271,
+        "r2": 0.9248,
+        "directional_accuracy": 0.9288
       },
       "test": {
-        "mae_pct": 7.0165,
-        "rmse_pct": 11.6727,
-        "r2": -0.3962,
-        "directional_accuracy": 0.4872
+        "mae_pct": 7.308,
+        "rmse_pct": 12.0883,
+        "r2": -0.3401,
+        "directional_accuracy": 0.4722
       },
       "top_feature_importance": {
-        "ta_hv20": 0.2103,
-        "ta_atr14": 0.1278,
-        "ta_rsi14": 0.1044,
-        "fund_health": 0.0852,
-        "confidence": 0.0657,
-        "news_best_conf": 0.0528,
-        "fund_score": 0.0518,
-        "sector_Communication Services": 0.0479,
-        "fund_growth": 0.0395,
-        "fund_quality": 0.0363,
-        "news_z": 0.0345,
-        "action_HOLD": 0.0226,
-        "action_WATCH": 0.0142,
-        "ins_cluster_size": 0.0115,
-        "ta_bb_position_above_upper": 0.0113
+        "ta_hv20": 0.2076,
+        "ta_atr14": 0.1326,
+        "ta_rsi14": 0.1028,
+        "fund_health": 0.0873,
+        "confidence": 0.0631,
+        "news_best_conf": 0.0539,
+        "fund_score": 0.0476,
+        "sector_Communication Services": 0.0451,
+        "fund_growth": 0.0431,
+        "fund_quality": 0.0416,
+        "news_z": 0.0341,
+        "action_HOLD": 0.0258,
+        "ta_bb_position_above_upper": 0.012,
+        "ins_cluster_size": 0.0105,
+        "ta_trend_bull": 0.0094
       }
     },
     "GradientBoosting": {
       "train": {
-        "mae_pct": 3.7361,
-        "rmse_pct": 5.2977,
-        "r2": 0.6463,
-        "directional_accuracy": 0.7224
+        "mae_pct": 3.7644,
+        "rmse_pct": 5.3134,
+        "r2": 0.6398,
+        "directional_accuracy": 0.7239
       },
       "test": {
-        "mae_pct": 7.7135,
-        "rmse_pct": 12.5403,
-        "r2": -0.6115,
-        "directional_accuracy": 0.4454
+        "mae_pct": 7.9718,
+        "rmse_pct": 12.9633,
+        "r2": -0.5412,
+        "directional_accuracy": 0.4324
       }
     }
   },
   "winner": {
     "model": "RandomForest",
-    "mae_pct": 7.0165,
-    "rmse_pct": 11.6727,
-    "r2": -0.3962,
-    "directional_accuracy": 0.4872
+    "mae_pct": 7.308,
+    "rmse_pct": 12.0883,
+    "r2": -0.3401,
+    "directional_accuracy": 0.4722
   }
 }
