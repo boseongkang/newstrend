@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-19T16:22:26+00:00",
+  "generated_at": "2026-06-19T18:18:05+00:00",
   "source": {
-    "signal_corr_updated": "2026-06-19T16:21:09Z",
+    "signal_corr_updated": "2026-06-19T18:16:50Z",
     "n_pairs_total": 3629,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,21 +21,160 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "india": 2.843,
-    "prime": 1.678,
-    "indian": 3.608,
+    "india": 2.536,
+    "prime": 2.781,
+    "talks": 2.402,
+    "gold": 1.845,
+    "indian": 3.09,
+    "claims": 1.661,
     "december": 1.657,
-    "black": 2.545,
-    "college": 1.948,
-    "transparency": 3.4,
-    "winter": 2.502,
-    "manchester": 4.041
+    "looking": 1.661,
+    "lebanon": 2.994,
+    "black": 1.945,
+    "value": 1.559,
+    "additional": 1.547,
+    "minute": 4.298,
+    "manchester": 3.657
   },
   "stock_chains": [
     {
+      "term": "talks",
+      "is_active_today": true,
+      "today_z": 2.402,
+      "hop1": {
+        "ticker": "XOM",
+        "sector": "01 Energy & Transportation",
+        "entity": "EXXON MOBIL CORP",
+        "corr": -0.3081,
+        "lag": -5,
+        "hit_rate": 0.75,
+        "direction": "bear",
+        "avg_ret_1d": 0.764,
+        "confidence": 0.493
+      },
+      "hop2": [
+        {
+          "ticker": "CVX",
+          "ticker_corr": 0.869,
+          "implied_dir": "bear",
+          "sector": "01 Energy & Transportation",
+          "entity": "CHEVRON CORP"
+        },
+        {
+          "ticker": "USO",
+          "ticker_corr": 0.641,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        }
+      ]
+    },
+    {
+      "term": "claims",
+      "is_active_today": true,
+      "today_z": 1.661,
+      "hop1": {
+        "ticker": "DOCU",
+        "sector": "06 Technology",
+        "entity": "DOCUSIGN, INC.",
+        "corr": 0.3094,
+        "lag": -4,
+        "hit_rate": 0.667,
+        "direction": "bull",
+        "avg_ret_1d": 0.799,
+        "confidence": 0.428
+      },
+      "hop2": [
+        {
+          "ticker": "CRM",
+          "ticker_corr": 0.581,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "Salesforce, Inc."
+        },
+        {
+          "ticker": "ADBE",
+          "ticker_corr": 0.537,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "ADOBE INC."
+        }
+      ]
+    },
+    {
+      "term": "gold",
+      "is_active_today": true,
+      "today_z": 1.845,
+      "hop1": {
+        "ticker": "PEP",
+        "sector": "04 Manufacturing",
+        "entity": "PEPSICO INC",
+        "corr": 0.3658,
+        "lag": -4,
+        "hit_rate": 0.6,
+        "direction": "bull",
+        "avg_ret_1d": 1.307,
+        "confidence": 0.379
+      },
+      "hop2": []
+    },
+    {
+      "term": "claims",
+      "is_active_today": true,
+      "today_z": 1.661,
+      "hop1": {
+        "ticker": "TSM",
+        "sector": "04 Manufacturing",
+        "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+        "corr": -0.3251,
+        "lag": -2,
+        "hit_rate": 0.556,
+        "direction": "bear",
+        "avg_ret_1d": 0.082,
+        "confidence": 0.373
+      },
+      "hop2": [
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.706,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "LRCX",
+          "ticker_corr": 0.689,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "LAM RESEARCH CORP"
+        },
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.663,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "ASML",
+          "ticker_corr": 0.654,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "ASML HOLDING NV"
+        },
+        {
+          "ticker": "AMAT",
+          "ticker_corr": 0.643,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "APPLIED MATERIALS INC /DE"
+        }
+      ]
+    },
+    {
       "term": "indian",
       "is_active_today": true,
-      "today_z": 3.608,
+      "today_z": 3.09,
       "hop1": {
         "ticker": "BAC",
         "sector": "02 Finance",
@@ -1605,38 +1744,6 @@
       ]
     },
     {
-      "term": "talks",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "XOM",
-        "sector": "01 Energy & Transportation",
-        "entity": "EXXON MOBIL CORP",
-        "corr": -0.3081,
-        "lag": -5,
-        "hit_rate": 0.75,
-        "direction": "bear",
-        "avg_ret_1d": 0.764,
-        "confidence": 0.493
-      },
-      "hop2": [
-        {
-          "ticker": "CVX",
-          "ticker_corr": 0.869,
-          "implied_dir": "bear",
-          "sector": "01 Energy & Transportation",
-          "entity": "CHEVRON CORP"
-        },
-        {
-          "ticker": "USO",
-          "ticker_corr": 0.641,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        }
-      ]
-    },
-    {
       "term": "driven",
       "is_active_today": false,
       "today_z": null,
@@ -3084,38 +3191,6 @@
       ]
     },
     {
-      "term": "claims",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "DOCU",
-        "sector": "06 Technology",
-        "entity": "DOCUSIGN, INC.",
-        "corr": 0.3094,
-        "lag": -4,
-        "hit_rate": 0.667,
-        "direction": "bull",
-        "avg_ret_1d": 0.799,
-        "confidence": 0.428
-      },
-      "hop2": [
-        {
-          "ticker": "CRM",
-          "ticker_corr": 0.581,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "Salesforce, Inc."
-        },
-        {
-          "ticker": "ADBE",
-          "ticker_corr": 0.537,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "ADOBE INC."
-        }
-      ]
-    },
-    {
       "term": "rise",
       "is_active_today": false,
       "today_z": null,
@@ -4330,23 +4405,6 @@
       ]
     },
     {
-      "term": "gold",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PEP",
-        "sector": "04 Manufacturing",
-        "entity": "PEPSICO INC",
-        "corr": 0.3658,
-        "lag": -4,
-        "hit_rate": 0.6,
-        "direction": "bull",
-        "avg_ret_1d": 1.307,
-        "confidence": 0.379
-      },
-      "hop2": []
-    },
-    {
       "term": "platform",
       "is_active_today": false,
       "today_z": null,
@@ -5048,59 +5106,6 @@
         "confidence": 0.373
       },
       "hop2": []
-    },
-    {
-      "term": "claims",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "TSM",
-        "sector": "04 Manufacturing",
-        "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
-        "corr": -0.3251,
-        "lag": -2,
-        "hit_rate": 0.556,
-        "direction": "bear",
-        "avg_ret_1d": 0.082,
-        "confidence": 0.373
-      },
-      "hop2": [
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.706,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "LRCX",
-          "ticker_corr": 0.689,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "LAM RESEARCH CORP"
-        },
-        {
-          "ticker": "SPY",
-          "ticker_corr": 0.663,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "ASML",
-          "ticker_corr": 0.654,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "ASML HOLDING NV"
-        },
-        {
-          "ticker": "AMAT",
-          "ticker_corr": 0.643,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "APPLIED MATERIALS INC /DE"
-        }
-      ]
     },
     {
       "term": "agency",
@@ -8187,6 +8192,62 @@
   ],
   "ticker_pressure": [
     {
+      "ticker": "XOM",
+      "sector": "01 Energy & Transportation",
+      "entity": "EXXON MOBIL CORP",
+      "fund_score": 0.264,
+      "inbound": [
+        {
+          "term": "talks",
+          "direction": "bear",
+          "today_z": 2.402,
+          "hit_rate": 0.75
+        }
+      ]
+    },
+    {
+      "ticker": "DOCU",
+      "sector": "06 Technology",
+      "entity": "DOCUSIGN, INC.",
+      "fund_score": 0.271,
+      "inbound": [
+        {
+          "term": "claims",
+          "direction": "bull",
+          "today_z": 1.661,
+          "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "PEP",
+      "sector": "04 Manufacturing",
+      "entity": "PEPSICO INC",
+      "fund_score": 0.238,
+      "inbound": [
+        {
+          "term": "gold",
+          "direction": "bull",
+          "today_z": 1.845,
+          "hit_rate": 0.6
+        }
+      ]
+    },
+    {
+      "ticker": "TSM",
+      "sector": "04 Manufacturing",
+      "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "claims",
+          "direction": "bear",
+          "today_z": 1.661,
+          "hit_rate": 0.556
+        }
+      ]
+    },
+    {
       "ticker": "BAC",
       "sector": "02 Finance",
       "entity": "BANK OF AMERICA CORP /DE/",
@@ -8195,8 +8256,143 @@
         {
           "term": "indian",
           "direction": "bear",
-          "today_z": 3.608,
+          "today_z": 3.09,
           "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "CVX",
+      "sector": "01 Energy & Transportation",
+      "entity": "CHEVRON CORP",
+      "fund_score": 0.239,
+      "inbound": [
+        {
+          "term": "talks",
+          "via": "XOM",
+          "direction": "bear",
+          "today_z": 2.402,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "USO",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "talks",
+          "via": "XOM",
+          "direction": "bear",
+          "today_z": 2.402,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "CRM",
+      "sector": "06 Technology",
+      "entity": "Salesforce, Inc.",
+      "fund_score": 0.497,
+      "inbound": [
+        {
+          "term": "claims",
+          "via": "DOCU",
+          "direction": "bull",
+          "today_z": 1.661,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ADBE",
+      "sector": "06 Technology",
+      "entity": "ADOBE INC.",
+      "fund_score": 0.581,
+      "inbound": [
+        {
+          "term": "claims",
+          "via": "DOCU",
+          "direction": "bull",
+          "today_z": 1.661,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "claims",
+          "via": "TSM",
+          "direction": "bear",
+          "today_z": 1.661,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "LRCX",
+      "sector": "06 Technology",
+      "entity": "LAM RESEARCH CORP",
+      "fund_score": 0.618,
+      "inbound": [
+        {
+          "term": "claims",
+          "via": "TSM",
+          "direction": "bear",
+          "today_z": 1.661,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "SPY",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "claims",
+          "via": "TSM",
+          "direction": "bear",
+          "today_z": 1.661,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ASML",
+      "sector": "06 Technology",
+      "entity": "ASML HOLDING NV",
+      "fund_score": 0.684,
+      "inbound": [
+        {
+          "term": "claims",
+          "via": "TSM",
+          "direction": "bear",
+          "today_z": 1.661,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "AMAT",
+      "sector": "04 Manufacturing",
+      "entity": "APPLIED MATERIALS INC /DE",
+      "fund_score": 0.565,
+      "inbound": [
+        {
+          "term": "claims",
+          "via": "TSM",
+          "direction": "bear",
+          "today_z": 1.661,
+          "indirect": true
         }
       ]
     },
@@ -8210,7 +8406,7 @@
           "term": "indian",
           "via": "BAC",
           "direction": "bear",
-          "today_z": 3.608,
+          "today_z": 3.09,
           "indirect": true
         }
       ]
@@ -8225,7 +8421,7 @@
           "term": "indian",
           "via": "BAC",
           "direction": "bear",
-          "today_z": 3.608,
+          "today_z": 3.09,
           "indirect": true
         }
       ]
@@ -8240,7 +8436,7 @@
           "term": "indian",
           "via": "BAC",
           "direction": "bear",
-          "today_z": 3.608,
+          "today_z": 3.09,
           "indirect": true
         }
       ]
@@ -8255,7 +8451,7 @@
           "term": "indian",
           "via": "BAC",
           "direction": "bear",
-          "today_z": 3.608,
+          "today_z": 3.09,
           "indirect": true
         }
       ]
@@ -8270,7 +8466,7 @@
           "term": "indian",
           "via": "BAC",
           "direction": "bear",
-          "today_z": 3.608,
+          "today_z": 3.09,
           "indirect": true
         }
       ]
