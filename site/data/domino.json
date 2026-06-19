@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-19T18:18:05+00:00",
+  "generated_at": "2026-06-19T20:15:42+00:00",
   "source": {
-    "signal_corr_updated": "2026-06-19T18:16:50Z",
+    "signal_corr_updated": "2026-06-19T20:14:37Z",
     "n_pairs_total": 3629,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,26 +21,53 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "india": 2.536,
-    "prime": 2.781,
-    "talks": 2.402,
-    "gold": 1.845,
-    "indian": 3.09,
-    "claims": 1.661,
-    "december": 1.657,
-    "looking": 1.661,
-    "lebanon": 2.994,
+    "post": 1.553,
+    "india": 2.69,
+    "power": 2.001,
+    "minister": 1.858,
+    "prime": 3.296,
+    "talks": 2.843,
+    "gold": 2.125,
+    "shipping": 1.633,
+    "russia": 1.612,
+    "indian": 3.177,
+    "claims": 1.94,
+    "infrastructure": 1.628,
+    "ceasefire": 1.624,
+    "auto": 1.757,
+    "december": 1.858,
+    "looking": 1.908,
+    "lebanon": 3.65,
     "black": 1.945,
-    "value": 1.559,
-    "additional": 1.547,
-    "minute": 4.298,
-    "manchester": 3.657
+    "focus": 1.522,
+    "value": 1.942,
+    "questions": 1.633,
+    "additional": 1.813,
+    "started": 1.528,
+    "minute": 5.196
   },
   "stock_chains": [
     {
+      "term": "shipping",
+      "is_active_today": true,
+      "today_z": 1.633,
+      "hop1": {
+        "ticker": "RIVN",
+        "sector": "04 Manufacturing",
+        "entity": "Rivian Automotive, Inc. / DE",
+        "corr": 0.323,
+        "lag": -4,
+        "hit_rate": 0.733,
+        "direction": "bull",
+        "avg_ret_1d": 1.017,
+        "confidence": 0.506
+      },
+      "hop2": []
+    },
+    {
       "term": "talks",
       "is_active_today": true,
-      "today_z": 2.402,
+      "today_z": 2.843,
       "hop1": {
         "ticker": "XOM",
         "sector": "01 Energy & Transportation",
@@ -70,9 +97,26 @@
       ]
     },
     {
+      "term": "shipping",
+      "is_active_today": true,
+      "today_z": 1.633,
+      "hop1": {
+        "ticker": "CSCO",
+        "sector": "06 Technology",
+        "entity": "CISCO SYSTEMS, INC.",
+        "corr": -0.3174,
+        "lag": -3,
+        "hit_rate": 0.6,
+        "direction": "bear",
+        "avg_ret_1d": 0.325,
+        "confidence": 0.431
+      },
+      "hop2": []
+    },
+    {
       "term": "claims",
       "is_active_today": true,
-      "today_z": 1.661,
+      "today_z": 1.94,
       "hop1": {
         "ticker": "DOCU",
         "sector": "06 Technology",
@@ -102,9 +146,59 @@
       ]
     },
     {
+      "term": "ceasefire",
+      "is_active_today": true,
+      "today_z": 1.624,
+      "hop1": {
+        "ticker": "MRVL",
+        "sector": "04 Manufacturing",
+        "entity": "Marvell Technology, Inc.",
+        "corr": 0.3079,
+        "lag": -4,
+        "hit_rate": 0.636,
+        "direction": "bull",
+        "avg_ret_1d": 3.51,
+        "confidence": 0.424
+      },
+      "hop2": [
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.508,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        }
+      ]
+    },
+    {
+      "term": "infrastructure",
+      "is_active_today": true,
+      "today_z": 1.628,
+      "hop1": {
+        "ticker": "CDNS",
+        "sector": "06 Technology",
+        "entity": "CADENCE DESIGN SYSTEMS INC",
+        "corr": -0.3321,
+        "lag": -3,
+        "hit_rate": 0.625,
+        "direction": "bear",
+        "avg_ret_1d": 0.819,
+        "confidence": 0.406
+      },
+      "hop2": [
+        {
+          "ticker": "SNPS",
+          "ticker_corr": 0.695,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "SYNOPSYS INC"
+        }
+      ]
+    },
+    {
       "term": "gold",
       "is_active_today": true,
-      "today_z": 1.845,
+      "today_z": 2.125,
       "hop1": {
         "ticker": "PEP",
         "sector": "04 Manufacturing",
@@ -119,9 +213,62 @@
       "hop2": []
     },
     {
+      "term": "ceasefire",
+      "is_active_today": true,
+      "today_z": 1.624,
+      "hop1": {
+        "ticker": "MS",
+        "sector": "02 Finance",
+        "entity": "MORGAN STANLEY",
+        "corr": 0.3052,
+        "lag": -4,
+        "hit_rate": 0.545,
+        "direction": "bull",
+        "avg_ret_1d": 0.229,
+        "confidence": 0.373
+      },
+      "hop2": [
+        {
+          "ticker": "GS",
+          "ticker_corr": 0.894,
+          "implied_dir": "bull",
+          "sector": "02 Finance",
+          "entity": "GOLDMAN SACHS GROUP INC"
+        },
+        {
+          "ticker": "BAC",
+          "ticker_corr": 0.78,
+          "implied_dir": "bull",
+          "sector": "02 Finance",
+          "entity": "BANK OF AMERICA CORP /DE/"
+        },
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.776,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.772,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "JPM",
+          "ticker_corr": 0.765,
+          "implied_dir": "bull",
+          "sector": "02 Finance",
+          "entity": "JPMORGAN CHASE & CO"
+        }
+      ]
+    },
+    {
       "term": "claims",
       "is_active_today": true,
-      "today_z": 1.661,
+      "today_z": 1.94,
       "hop1": {
         "ticker": "TSM",
         "sector": "04 Manufacturing",
@@ -172,9 +319,68 @@
       ]
     },
     {
+      "term": "infrastructure",
+      "is_active_today": true,
+      "today_z": 1.628,
+      "hop1": {
+        "ticker": "SNPS",
+        "sector": "06 Technology",
+        "entity": "SYNOPSYS INC",
+        "corr": -0.3464,
+        "lag": -3,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": -0.212,
+        "confidence": 0.343
+      },
+      "hop2": [
+        {
+          "ticker": "CDNS",
+          "ticker_corr": 0.695,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "CADENCE DESIGN SYSTEMS INC"
+        }
+      ]
+    },
+    {
+      "term": "infrastructure",
+      "is_active_today": true,
+      "today_z": 1.628,
+      "hop1": {
+        "ticker": "RIVN",
+        "sector": "04 Manufacturing",
+        "entity": "Rivian Automotive, Inc. / DE",
+        "corr": -0.3061,
+        "lag": -1,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": -0.261,
+        "confidence": 0.329
+      },
+      "hop2": []
+    },
+    {
+      "term": "minister",
+      "is_active_today": true,
+      "today_z": 1.858,
+      "hop1": {
+        "ticker": "COST",
+        "sector": "07 Trade & Services",
+        "entity": "COSTCO WHOLESALE CORP /NEW",
+        "corr": 0.3116,
+        "lag": -4,
+        "hit_rate": 0.5,
+        "direction": "bull",
+        "avg_ret_1d": 0.403,
+        "confidence": 0.315
+      },
+      "hop2": []
+    },
+    {
       "term": "indian",
       "is_active_today": true,
-      "today_z": 3.09,
+      "today_z": 3.177,
       "hop1": {
         "ticker": "BAC",
         "sector": "02 Finance",
@@ -1265,23 +1471,6 @@
           "entity": "Palo Alto Networks Inc"
         }
       ]
-    },
-    {
-      "term": "shipping",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "RIVN",
-        "sector": "04 Manufacturing",
-        "entity": "Rivian Automotive, Inc. / DE",
-        "corr": 0.323,
-        "lag": -4,
-        "hit_rate": 0.733,
-        "direction": "bull",
-        "avg_ret_1d": 1.017,
-        "confidence": 0.506
-      },
-      "hop2": []
     },
     {
       "term": "digital",
@@ -3085,23 +3274,6 @@
       ]
     },
     {
-      "term": "shipping",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CSCO",
-        "sector": "06 Technology",
-        "entity": "CISCO SYSTEMS, INC.",
-        "corr": -0.3174,
-        "lag": -3,
-        "hit_rate": 0.6,
-        "direction": "bear",
-        "avg_ret_1d": 0.325,
-        "confidence": 0.431
-      },
-      "hop2": []
-    },
-    {
       "term": "next",
       "is_active_today": false,
       "today_z": null,
@@ -3223,31 +3395,6 @@
         "confidence": 0.425
       },
       "hop2": []
-    },
-    {
-      "term": "ceasefire",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "MRVL",
-        "sector": "04 Manufacturing",
-        "entity": "Marvell Technology, Inc.",
-        "corr": 0.3079,
-        "lag": -4,
-        "hit_rate": 0.636,
-        "direction": "bull",
-        "avg_ret_1d": 3.51,
-        "confidence": 0.424
-      },
-      "hop2": [
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.508,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        }
-      ]
     },
     {
       "term": "provides",
@@ -3711,31 +3858,6 @@
         "confidence": 0.407
       },
       "hop2": []
-    },
-    {
-      "term": "infrastructure",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CDNS",
-        "sector": "06 Technology",
-        "entity": "CADENCE DESIGN SYSTEMS INC",
-        "corr": -0.3321,
-        "lag": -3,
-        "hit_rate": 0.625,
-        "direction": "bear",
-        "avg_ret_1d": 0.819,
-        "confidence": 0.406
-      },
-      "hop2": [
-        {
-          "ticker": "SNPS",
-          "ticker_corr": 0.695,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "SYNOPSYS INC"
-        }
-      ]
     },
     {
       "term": "expected",
@@ -4935,59 +5057,6 @@
           "implied_dir": "bear",
           "sector": "02 Finance",
           "entity": "GOLDMAN SACHS GROUP INC"
-        }
-      ]
-    },
-    {
-      "term": "ceasefire",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "MS",
-        "sector": "02 Finance",
-        "entity": "MORGAN STANLEY",
-        "corr": 0.3052,
-        "lag": -4,
-        "hit_rate": 0.545,
-        "direction": "bull",
-        "avg_ret_1d": 0.229,
-        "confidence": 0.373
-      },
-      "hop2": [
-        {
-          "ticker": "GS",
-          "ticker_corr": 0.894,
-          "implied_dir": "bull",
-          "sector": "02 Finance",
-          "entity": "GOLDMAN SACHS GROUP INC"
-        },
-        {
-          "ticker": "BAC",
-          "ticker_corr": 0.78,
-          "implied_dir": "bull",
-          "sector": "02 Finance",
-          "entity": "BANK OF AMERICA CORP /DE/"
-        },
-        {
-          "ticker": "SPY",
-          "ticker_corr": 0.776,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "DIA",
-          "ticker_corr": 0.772,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "JPM",
-          "ticker_corr": 0.765,
-          "implied_dir": "bull",
-          "sector": "02 Finance",
-          "entity": "JPMORGAN CHASE & CO"
         }
       ]
     },
@@ -6546,31 +6615,6 @@
       ]
     },
     {
-      "term": "infrastructure",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "SNPS",
-        "sector": "06 Technology",
-        "entity": "SYNOPSYS INC",
-        "corr": -0.3464,
-        "lag": -3,
-        "hit_rate": 0.5,
-        "direction": "bear",
-        "avg_ret_1d": -0.212,
-        "confidence": 0.343
-      },
-      "hop2": [
-        {
-          "ticker": "CDNS",
-          "ticker_corr": 0.695,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "CADENCE DESIGN SYSTEMS INC"
-        }
-      ]
-    },
-    {
       "term": "added",
       "is_active_today": false,
       "today_z": null,
@@ -6958,23 +7002,6 @@
       ]
     },
     {
-      "term": "infrastructure",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "RIVN",
-        "sector": "04 Manufacturing",
-        "entity": "Rivian Automotive, Inc. / DE",
-        "corr": -0.3061,
-        "lag": -1,
-        "hit_rate": 0.5,
-        "direction": "bear",
-        "avg_ret_1d": -0.261,
-        "confidence": 0.329
-      },
-      "hop2": []
-    },
-    {
       "term": "space",
       "is_active_today": false,
       "today_z": null,
@@ -7128,23 +7155,6 @@
         "direction": "bull",
         "avg_ret_1d": 0.652,
         "confidence": 0.317
-      },
-      "hop2": []
-    },
-    {
-      "term": "minister",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "COST",
-        "sector": "07 Trade & Services",
-        "entity": "COSTCO WHOLESALE CORP /NEW",
-        "corr": 0.3116,
-        "lag": -4,
-        "hit_rate": 0.5,
-        "direction": "bull",
-        "avg_ret_1d": 0.403,
-        "confidence": 0.315
       },
       "hop2": []
     },
@@ -8034,7 +8044,7 @@
       "lag": -4,
       "hit_rate": 0.636,
       "direction": "bull",
-      "is_active_today": false
+      "is_active_today": true
     },
     {
       "term": "central",
@@ -8097,7 +8107,7 @@
       "lag": -4,
       "hit_rate": 0.545,
       "direction": "bull",
-      "is_active_today": false
+      "is_active_today": true
     },
     {
       "term": "march",
@@ -8160,7 +8170,7 @@
       "lag": -1,
       "hit_rate": 0.5,
       "direction": "bear",
-      "is_active_today": false
+      "is_active_today": true
     },
     {
       "term": "largest",
@@ -8192,6 +8202,220 @@
   ],
   "ticker_pressure": [
     {
+      "ticker": "RIVN",
+      "sector": "04 Manufacturing",
+      "entity": "Rivian Automotive, Inc. / DE",
+      "fund_score": 0.27,
+      "inbound": [
+        {
+          "term": "shipping",
+          "direction": "bull",
+          "today_z": 1.633,
+          "hit_rate": 0.733
+        },
+        {
+          "term": "infrastructure",
+          "direction": "bear",
+          "today_z": 1.628,
+          "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "CDNS",
+      "sector": "06 Technology",
+      "entity": "CADENCE DESIGN SYSTEMS INC",
+      "fund_score": 0.522,
+      "inbound": [
+        {
+          "term": "infrastructure",
+          "direction": "bear",
+          "today_z": 1.628,
+          "hit_rate": 0.625
+        },
+        {
+          "term": "infrastructure",
+          "via": "SNPS",
+          "direction": "bear",
+          "today_z": 1.628,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MS",
+      "sector": "02 Finance",
+      "entity": "MORGAN STANLEY",
+      "fund_score": 0.423,
+      "inbound": [
+        {
+          "term": "ceasefire",
+          "direction": "bull",
+          "today_z": 1.624,
+          "hit_rate": 0.545
+        },
+        {
+          "term": "indian",
+          "via": "BAC",
+          "direction": "bear",
+          "today_z": 3.177,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "SNPS",
+      "sector": "06 Technology",
+      "entity": "SYNOPSYS INC",
+      "fund_score": 0.491,
+      "inbound": [
+        {
+          "term": "infrastructure",
+          "direction": "bear",
+          "today_z": 1.628,
+          "hit_rate": 0.5
+        },
+        {
+          "term": "infrastructure",
+          "via": "CDNS",
+          "direction": "bear",
+          "today_z": 1.628,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "BAC",
+      "sector": "02 Finance",
+      "entity": "BANK OF AMERICA CORP /DE/",
+      "fund_score": 0.349,
+      "inbound": [
+        {
+          "term": "indian",
+          "direction": "bear",
+          "today_z": 3.177,
+          "hit_rate": 0.5
+        },
+        {
+          "term": "ceasefire",
+          "via": "MS",
+          "direction": "bull",
+          "today_z": 1.624,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "ceasefire",
+          "via": "MRVL",
+          "direction": "bull",
+          "today_z": 1.624,
+          "indirect": true
+        },
+        {
+          "term": "claims",
+          "via": "TSM",
+          "direction": "bear",
+          "today_z": 1.94,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "GS",
+      "sector": "02 Finance",
+      "entity": "GOLDMAN SACHS GROUP INC",
+      "fund_score": 0.438,
+      "inbound": [
+        {
+          "term": "ceasefire",
+          "via": "MS",
+          "direction": "bull",
+          "today_z": 1.624,
+          "indirect": true
+        },
+        {
+          "term": "indian",
+          "via": "BAC",
+          "direction": "bear",
+          "today_z": 3.177,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "SPY",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "ceasefire",
+          "via": "MS",
+          "direction": "bull",
+          "today_z": 1.624,
+          "indirect": true
+        },
+        {
+          "term": "claims",
+          "via": "TSM",
+          "direction": "bear",
+          "today_z": 1.94,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "DIA",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "ceasefire",
+          "via": "MS",
+          "direction": "bull",
+          "today_z": 1.624,
+          "indirect": true
+        },
+        {
+          "term": "indian",
+          "via": "BAC",
+          "direction": "bear",
+          "today_z": 3.177,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "sector": "02 Finance",
+      "entity": "JPMORGAN CHASE & CO",
+      "fund_score": 0.477,
+      "inbound": [
+        {
+          "term": "ceasefire",
+          "via": "MS",
+          "direction": "bull",
+          "today_z": 1.624,
+          "indirect": true
+        },
+        {
+          "term": "indian",
+          "via": "BAC",
+          "direction": "bear",
+          "today_z": 3.177,
+          "indirect": true
+        }
+      ]
+    },
+    {
       "ticker": "XOM",
       "sector": "01 Energy & Transportation",
       "entity": "EXXON MOBIL CORP",
@@ -8200,8 +8424,22 @@
         {
           "term": "talks",
           "direction": "bear",
-          "today_z": 2.402,
+          "today_z": 2.843,
           "hit_rate": 0.75
+        }
+      ]
+    },
+    {
+      "ticker": "CSCO",
+      "sector": "06 Technology",
+      "entity": "CISCO SYSTEMS, INC.",
+      "fund_score": 0.324,
+      "inbound": [
+        {
+          "term": "shipping",
+          "direction": "bear",
+          "today_z": 1.633,
+          "hit_rate": 0.6
         }
       ]
     },
@@ -8214,8 +8452,22 @@
         {
           "term": "claims",
           "direction": "bull",
-          "today_z": 1.661,
+          "today_z": 1.94,
           "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "MRVL",
+      "sector": "04 Manufacturing",
+      "entity": "Marvell Technology, Inc.",
+      "fund_score": 0.549,
+      "inbound": [
+        {
+          "term": "ceasefire",
+          "direction": "bull",
+          "today_z": 1.624,
+          "hit_rate": 0.636
         }
       ]
     },
@@ -8228,7 +8480,7 @@
         {
           "term": "gold",
           "direction": "bull",
-          "today_z": 1.845,
+          "today_z": 2.125,
           "hit_rate": 0.6
         }
       ]
@@ -8242,21 +8494,21 @@
         {
           "term": "claims",
           "direction": "bear",
-          "today_z": 1.661,
+          "today_z": 1.94,
           "hit_rate": 0.556
         }
       ]
     },
     {
-      "ticker": "BAC",
-      "sector": "02 Finance",
-      "entity": "BANK OF AMERICA CORP /DE/",
-      "fund_score": 0.349,
+      "ticker": "COST",
+      "sector": "07 Trade & Services",
+      "entity": "COSTCO WHOLESALE CORP /NEW",
+      "fund_score": 0.327,
       "inbound": [
         {
-          "term": "indian",
-          "direction": "bear",
-          "today_z": 3.09,
+          "term": "minister",
+          "direction": "bull",
+          "today_z": 1.858,
           "hit_rate": 0.5
         }
       ]
@@ -8271,7 +8523,7 @@
           "term": "talks",
           "via": "XOM",
           "direction": "bear",
-          "today_z": 2.402,
+          "today_z": 2.843,
           "indirect": true
         }
       ]
@@ -8286,7 +8538,7 @@
           "term": "talks",
           "via": "XOM",
           "direction": "bear",
-          "today_z": 2.402,
+          "today_z": 2.843,
           "indirect": true
         }
       ]
@@ -8301,7 +8553,7 @@
           "term": "claims",
           "via": "DOCU",
           "direction": "bull",
-          "today_z": 1.661,
+          "today_z": 1.94,
           "indirect": true
         }
       ]
@@ -8316,22 +8568,7 @@
           "term": "claims",
           "via": "DOCU",
           "direction": "bull",
-          "today_z": 1.661,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "QQQ",
-      "sector": null,
-      "entity": "INVESCO QQQ TRUST, SERIES 1",
-      "fund_score": null,
-      "inbound": [
-        {
-          "term": "claims",
-          "via": "TSM",
-          "direction": "bear",
-          "today_z": 1.661,
+          "today_z": 1.94,
           "indirect": true
         }
       ]
@@ -8346,22 +8583,7 @@
           "term": "claims",
           "via": "TSM",
           "direction": "bear",
-          "today_z": 1.661,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "SPY",
-      "sector": null,
-      "entity": null,
-      "fund_score": null,
-      "inbound": [
-        {
-          "term": "claims",
-          "via": "TSM",
-          "direction": "bear",
-          "today_z": 1.661,
+          "today_z": 1.94,
           "indirect": true
         }
       ]
@@ -8376,7 +8598,7 @@
           "term": "claims",
           "via": "TSM",
           "direction": "bear",
-          "today_z": 1.661,
+          "today_z": 1.94,
           "indirect": true
         }
       ]
@@ -8391,67 +8613,7 @@
           "term": "claims",
           "via": "TSM",
           "direction": "bear",
-          "today_z": 1.661,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "JPM",
-      "sector": "02 Finance",
-      "entity": "JPMORGAN CHASE & CO",
-      "fund_score": 0.477,
-      "inbound": [
-        {
-          "term": "indian",
-          "via": "BAC",
-          "direction": "bear",
-          "today_z": 3.09,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "MS",
-      "sector": "02 Finance",
-      "entity": "MORGAN STANLEY",
-      "fund_score": 0.423,
-      "inbound": [
-        {
-          "term": "indian",
-          "via": "BAC",
-          "direction": "bear",
-          "today_z": 3.09,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "GS",
-      "sector": "02 Finance",
-      "entity": "GOLDMAN SACHS GROUP INC",
-      "fund_score": 0.438,
-      "inbound": [
-        {
-          "term": "indian",
-          "via": "BAC",
-          "direction": "bear",
-          "today_z": 3.09,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "DIA",
-      "sector": null,
-      "entity": null,
-      "fund_score": null,
-      "inbound": [
-        {
-          "term": "indian",
-          "via": "BAC",
-          "direction": "bear",
-          "today_z": 3.09,
+          "today_z": 1.94,
           "indirect": true
         }
       ]
@@ -8466,7 +8628,7 @@
           "term": "indian",
           "via": "BAC",
           "direction": "bear",
-          "today_z": 3.09,
+          "today_z": 3.177,
           "indirect": true
         }
       ]
