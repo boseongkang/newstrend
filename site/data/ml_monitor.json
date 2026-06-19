@@ -2439,10 +2439,30 @@
       "hash_ok": true,
       "ood": false,
       "unfreeze_ready": false
+    },
+    {
+      "updated": "2026-06-19T02:17:48Z",
+      "n_pred_total": 2880,
+      "n_evaluated": 1440,
+      "models": {
+        "RandomForest": {
+          "alpha": -0.765,
+          "p": 0.0806,
+          "n": 720
+        },
+        "GradientBoosting": {
+          "alpha": -0.806,
+          "p": 0.0489,
+          "n": 720
+        }
+      },
+      "hash_ok": true,
+      "ood": false,
+      "unfreeze_ready": false
     }
   ],
   "latest": {
-    "updated": "2026-06-18T23:21:55Z",
+    "updated": "2026-06-19T02:17:48Z",
     "baseline_date": "2026-05-25",
     "model_hashes": {
       "RandomForest": "a2947618dfbb05bd",
@@ -2454,10 +2474,10 @@
       "n_dates": 25
     },
     "prediction_log": {
-      "total": 2700,
+      "total": 2880,
       "evaluated": 1440,
-      "pending": 1260,
-      "new_today": 0,
+      "pending": 1440,
+      "new_today": 180,
       "newly_evaluated": 0
     },
     "forward": {
@@ -2529,9 +2549,9 @@
       "confidence_note": "In-distribution: RISK-ON was 98.3% of training data."
     },
     "bias_monitor": {
-      "n_total_predictions": 2700,
+      "n_total_predictions": 2880,
       "n_evaluated": 1440,
-      "long_ratio": 0.841,
+      "long_ratio": 0.84,
       "long_bias_warning": true,
       "top_sector": "Technology",
       "top_sector_pct": 40.0,
@@ -2545,7 +2565,7 @@
     },
     "alerts": [
       "REGIME CHANGE: non-RISK-ON data detected in forward predictions",
-      "BIAS: long_ratio=84.1% \u2014 model may be systematically long"
+      "BIAS: long_ratio=84.0% \u2014 model may be systematically long"
     ],
     "unfreeze_check": {
       "forward_alpha_significant": false,
@@ -2554,5 +2574,5 @@
     },
     "label": "ADVISORY ONLY \u00b7 paper trading \u00b7 unverified \u00b7 single-regime baseline"
   },
-  "updated": "2026-06-18T23:21:55Z"
+  "updated": "2026-06-19T02:17:48Z"
 }
