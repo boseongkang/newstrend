@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-21T13:26:10+00:00",
+  "generated_at": "2026-06-21T15:25:45+00:00",
   "source": {
-    "signal_corr_updated": "2026-06-21T13:24:59Z",
+    "signal_corr_updated": "2026-06-21T15:24:41Z",
     "n_pairs_total": 3646,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,10 +21,44 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "provides": 1.547,
-    "helps": 1.963
+    "talks": 1.568,
+    "wall": 2.981,
+    "managers": 3.727,
+    "speed": 1.864
   },
   "stock_chains": [
+    {
+      "term": "talks",
+      "is_active_today": true,
+      "today_z": 1.568,
+      "hop1": {
+        "ticker": "XOM",
+        "sector": "01 Energy & Transportation",
+        "entity": "EXXON MOBIL CORP",
+        "corr": -0.3053,
+        "lag": -5,
+        "hit_rate": 0.75,
+        "direction": "bear",
+        "avg_ret_1d": 0.764,
+        "confidence": 0.492
+      },
+      "hop2": [
+        {
+          "ticker": "CVX",
+          "ticker_corr": 0.869,
+          "implied_dir": "bear",
+          "sector": "01 Energy & Transportation",
+          "entity": "CHEVRON CORP"
+        },
+        {
+          "ticker": "USO",
+          "ticker_corr": 0.641,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        }
+      ]
+    },
     {
       "term": "intelligence",
       "is_active_today": false,
@@ -1237,38 +1271,6 @@
           "ticker": "USO",
           "ticker_corr": 0.641,
           "implied_dir": "bull",
-          "sector": null,
-          "entity": null
-        }
-      ]
-    },
-    {
-      "term": "talks",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "XOM",
-        "sector": "01 Energy & Transportation",
-        "entity": "EXXON MOBIL CORP",
-        "corr": -0.3053,
-        "lag": -5,
-        "hit_rate": 0.75,
-        "direction": "bear",
-        "avg_ret_1d": 0.764,
-        "confidence": 0.492
-      },
-      "hop2": [
-        {
-          "ticker": "CVX",
-          "ticker_corr": 0.869,
-          "implied_dir": "bear",
-          "sector": "01 Energy & Transportation",
-          "entity": "CHEVRON CORP"
-        },
-        {
-          "ticker": "USO",
-          "ticker_corr": 0.641,
-          "implied_dir": "bear",
           "sector": null,
           "entity": null
         }
@@ -8014,7 +8016,52 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "XOM",
+      "sector": "01 Energy & Transportation",
+      "entity": "EXXON MOBIL CORP",
+      "fund_score": 0.264,
+      "inbound": [
+        {
+          "term": "talks",
+          "direction": "bear",
+          "today_z": 1.568,
+          "hit_rate": 0.75
+        }
+      ]
+    },
+    {
+      "ticker": "CVX",
+      "sector": "01 Energy & Transportation",
+      "entity": "CHEVRON CORP",
+      "fund_score": 0.239,
+      "inbound": [
+        {
+          "term": "talks",
+          "via": "XOM",
+          "direction": "bear",
+          "today_z": 1.568,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "USO",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "talks",
+          "via": "XOM",
+          "direction": "bear",
+          "today_z": 1.568,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 203,
