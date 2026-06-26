@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-26T13:33:22Z",
+  "updated": "2026-06-26T16:37:29Z",
   "mode": "active",
   "config": {
     "min_data": 100,
@@ -7,9 +7,9 @@
     "target": "fwd_5d_return"
   },
   "data_summary": {
-    "n_total_with_target": 4173,
-    "n_train": 2921,
-    "n_test": 1252,
+    "n_total_with_target": 4253,
+    "n_train": 2977,
+    "n_test": 1276,
     "train_date_range": [
       "2026-04-17",
       "2026-06-07"
@@ -24,83 +24,83 @@
   "models": {
     "LinearRegression": {
       "train": {
-        "mae_pct": 5.6909,
-        "rmse_pct": 8.8011,
-        "r2": 0.0719,
-        "directional_accuracy": 0.5902
+        "mae_pct": 5.6613,
+        "rmse_pct": 8.761,
+        "r2": 0.0695,
+        "directional_accuracy": 0.5895
       },
       "test": {
-        "mae_pct": 5.8537,
-        "rmse_pct": 9.3452,
-        "r2": -0.1544,
-        "directional_accuracy": 0.5172
+        "mae_pct": 5.7887,
+        "rmse_pct": 9.2069,
+        "r2": -0.1325,
+        "directional_accuracy": 0.5153
       }
     },
     "Ridge": {
       "train": {
-        "mae_pct": 5.6912,
-        "rmse_pct": 8.8022,
-        "r2": 0.0716,
-        "directional_accuracy": 0.5912
+        "mae_pct": 5.6612,
+        "rmse_pct": 8.7622,
+        "r2": 0.0692,
+        "directional_accuracy": 0.5922
       },
       "test": {
-        "mae_pct": 5.857,
-        "rmse_pct": 9.3411,
-        "r2": -0.1534,
-        "directional_accuracy": 0.5188
+        "mae_pct": 5.7911,
+        "rmse_pct": 9.2053,
+        "r2": -0.1321,
+        "directional_accuracy": 0.513
       }
     },
     "RandomForest": {
       "train": {
-        "mae_pct": 1.6168,
-        "rmse_pct": 3.0774,
-        "r2": 0.8865,
-        "directional_accuracy": 0.9367
+        "mae_pct": 1.5908,
+        "rmse_pct": 3.1013,
+        "r2": 0.8834,
+        "directional_accuracy": 0.9405
       },
       "test": {
-        "mae_pct": 5.2231,
-        "rmse_pct": 8.3003,
-        "r2": 0.0893,
-        "directional_accuracy": 0.5909
+        "mae_pct": 5.3231,
+        "rmse_pct": 8.5128,
+        "r2": 0.0318,
+        "directional_accuracy": 0.5546
       },
       "top_feature_importance": {
-        "ta_atr14": 0.1798,
-        "ta_hv20": 0.168,
-        "ta_rsi14": 0.0974,
-        "fund_health": 0.0794,
-        "confidence": 0.0725,
-        "news_best_conf": 0.0633,
-        "news_z": 0.0487,
-        "fund_quality": 0.0407,
-        "fund_score": 0.0399,
-        "fund_growth": 0.0398,
-        "sector_Communication Services": 0.0315,
-        "action_HOLD": 0.0189,
-        "ta_bb_position_above_upper": 0.0106,
-        "ta_trend_bull": 0.0089,
-        "ins_cluster_size": 0.0085
+        "ta_atr14": 0.1727,
+        "ta_hv20": 0.1704,
+        "ta_rsi14": 0.1009,
+        "fund_health": 0.0789,
+        "confidence": 0.0709,
+        "news_best_conf": 0.0693,
+        "news_z": 0.0449,
+        "fund_quality": 0.0396,
+        "fund_growth": 0.039,
+        "fund_score": 0.0387,
+        "sector_Communication Services": 0.0313,
+        "action_HOLD": 0.0176,
+        "ta_bb_position_above_upper": 0.0108,
+        "ins_cluster_size": 0.0103,
+        "ins_score": 0.0093
       }
     },
     "GradientBoosting": {
       "train": {
-        "mae_pct": 4.2742,
-        "rmse_pct": 6.2218,
-        "r2": 0.5362,
-        "directional_accuracy": 0.7138
+        "mae_pct": 4.2724,
+        "rmse_pct": 6.1883,
+        "r2": 0.5357,
+        "directional_accuracy": 0.7121
       },
       "test": {
-        "mae_pct": 5.8888,
-        "rmse_pct": 9.4127,
-        "r2": -0.1711,
-        "directional_accuracy": 0.5661
+        "mae_pct": 5.8121,
+        "rmse_pct": 9.3179,
+        "r2": -0.16,
+        "directional_accuracy": 0.5436
       }
     }
   },
   "winner": {
     "model": "RandomForest",
-    "mae_pct": 5.2231,
-    "rmse_pct": 8.3003,
-    "r2": 0.0893,
-    "directional_accuracy": 0.5909
+    "mae_pct": 5.3231,
+    "rmse_pct": 8.5128,
+    "r2": 0.0318,
+    "directional_accuracy": 0.5546
   }
 }
