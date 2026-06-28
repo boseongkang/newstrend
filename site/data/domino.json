@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-28T19:56:39+00:00",
+  "generated_at": "2026-06-28T21:39:22+00:00",
   "source": {
-    "signal_corr_updated": "2026-06-28T19:55:31Z",
+    "signal_corr_updated": "2026-06-28T21:38:14Z",
     "n_pairs_total": 3575,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,38 +21,43 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "court": 2.236,
-    "saturday": 4.895,
-    "israeli": 1.818,
-    "calls": 2.097,
-    "attacks": 2.145,
-    "provides": 3.827,
-    "round": 1.58,
-    "supreme": 2.494,
-    "updates": 1.975,
-    "single": 1.85,
-    "ongoing": 2.603,
-    "young": 1.553,
-    "clear": 1.991,
-    "analysts": 1.907,
-    "drone": 1.727,
-    "changes": 1.798,
-    "fourth": 4.786,
-    "shared": 1.824,
+    "court": 2.473,
+    "saturday": 4.719,
+    "israeli": 1.733,
+    "calls": 1.599,
+    "strikes": 1.527,
+    "attacks": 2.34,
+    "provides": 4.283,
+    "powered": 1.93,
+    "round": 1.645,
+    "supreme": 2.607,
+    "senior": 1.91,
+    "updates": 2.094,
+    "search": 2.362,
+    "product": 2.919,
+    "single": 1.62,
+    "ongoing": 2.459,
+    "clear": 1.545,
+    "analysts": 1.984,
+    "drone": 1.618,
+    "changes": 1.541,
+    "fourth": 5.069,
+    "shared": 1.527,
     "longer": 2.084,
-    "phone": 8.275,
-    "negotiations": 2.737,
-    "started": 1.59,
-    "republicans": 4.438,
-    "knowledge": 2.67,
-    "images": 5.146,
-    "stage": 1.789
+    "phone": 7.506,
+    "negotiations": 2.421,
+    "launches": 1.92,
+    "started": 1.808,
+    "republicans": 3.663,
+    "knowledge": 3.592,
+    "images": 4.63,
+    "stage": 1.881
   },
   "stock_chains": [
     {
       "term": "calls",
       "is_active_today": true,
-      "today_z": 2.097,
+      "today_z": 1.599,
       "hop1": {
         "ticker": "DDOG",
         "sector": "06 Technology",
@@ -82,9 +87,26 @@
       ]
     },
     {
+      "term": "strikes",
+      "is_active_today": true,
+      "today_z": 1.527,
+      "hop1": {
+        "ticker": "NFLX",
+        "sector": "07 Trade & Services",
+        "entity": "NETFLIX INC",
+        "corr": 0.372,
+        "lag": -5,
+        "hit_rate": 0.6,
+        "direction": "bull",
+        "avg_ret_1d": 0.145,
+        "confidence": 0.42
+      },
+      "hop2": []
+    },
+    {
       "term": "court",
       "is_active_today": true,
-      "today_z": 2.236,
+      "today_z": 2.473,
       "hop1": {
         "ticker": "GS",
         "sector": "02 Finance",
@@ -133,6 +155,23 @@
           "entity": "JPMORGAN CHASE & CO"
         }
       ]
+    },
+    {
+      "term": "strikes",
+      "is_active_today": true,
+      "today_z": 1.527,
+      "hop1": {
+        "ticker": "FSLR",
+        "sector": "04 Manufacturing",
+        "entity": "FIRST SOLAR, INC.",
+        "corr": -0.3114,
+        "lag": -4,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": -0.009,
+        "confidence": 0.345
+      },
+      "hop2": []
     },
     {
       "term": "russia",
@@ -2690,23 +2729,6 @@
           "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
         }
       ]
-    },
-    {
-      "term": "strikes",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "NFLX",
-        "sector": "07 Trade & Services",
-        "entity": "NETFLIX INC",
-        "corr": 0.372,
-        "lag": -5,
-        "hit_rate": 0.6,
-        "direction": "bull",
-        "avg_ret_1d": 0.145,
-        "confidence": 0.42
-      },
-      "hop2": []
     },
     {
       "term": "energy",
@@ -5805,23 +5827,6 @@
       ]
     },
     {
-      "term": "strikes",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "FSLR",
-        "sector": "04 Manufacturing",
-        "entity": "FIRST SOLAR, INC.",
-        "corr": -0.3114,
-        "lag": -4,
-        "hit_rate": 0.5,
-        "direction": "bear",
-        "avg_ret_1d": -0.009,
-        "confidence": 0.345
-      },
-      "hop2": []
-    },
-    {
       "term": "infrastructure",
       "is_active_today": false,
       "today_z": null,
@@ -7583,8 +7588,22 @@
         {
           "term": "calls",
           "direction": "bear",
-          "today_z": 2.097,
+          "today_z": 1.599,
           "hit_rate": 1.0
+        }
+      ]
+    },
+    {
+      "ticker": "NFLX",
+      "sector": "07 Trade & Services",
+      "entity": "NETFLIX INC",
+      "fund_score": 0.725,
+      "inbound": [
+        {
+          "term": "strikes",
+          "direction": "bull",
+          "today_z": 1.527,
+          "hit_rate": 0.6
         }
       ]
     },
@@ -7597,8 +7616,22 @@
         {
           "term": "court",
           "direction": "bear",
-          "today_z": 2.236,
+          "today_z": 2.473,
           "hit_rate": 0.556
+        }
+      ]
+    },
+    {
+      "ticker": "FSLR",
+      "sector": "04 Manufacturing",
+      "entity": "FIRST SOLAR, INC.",
+      "fund_score": 0.681,
+      "inbound": [
+        {
+          "term": "strikes",
+          "direction": "bear",
+          "today_z": 1.527,
+          "hit_rate": 0.5
         }
       ]
     },
@@ -7612,7 +7645,7 @@
           "term": "calls",
           "via": "DDOG",
           "direction": "bear",
-          "today_z": 2.097,
+          "today_z": 1.599,
           "indirect": true
         }
       ]
@@ -7627,7 +7660,7 @@
           "term": "calls",
           "via": "DDOG",
           "direction": "bear",
-          "today_z": 2.097,
+          "today_z": 1.599,
           "indirect": true
         }
       ]
@@ -7642,7 +7675,7 @@
           "term": "court",
           "via": "GS",
           "direction": "bear",
-          "today_z": 2.236,
+          "today_z": 2.473,
           "indirect": true
         }
       ]
@@ -7657,7 +7690,7 @@
           "term": "court",
           "via": "GS",
           "direction": "bear",
-          "today_z": 2.236,
+          "today_z": 2.473,
           "indirect": true
         }
       ]
@@ -7672,7 +7705,7 @@
           "term": "court",
           "via": "GS",
           "direction": "bear",
-          "today_z": 2.236,
+          "today_z": 2.473,
           "indirect": true
         }
       ]
@@ -7687,7 +7720,7 @@
           "term": "court",
           "via": "GS",
           "direction": "bear",
-          "today_z": 2.236,
+          "today_z": 2.473,
           "indirect": true
         }
       ]
@@ -7702,7 +7735,7 @@
           "term": "court",
           "via": "GS",
           "direction": "bear",
-          "today_z": 2.236,
+          "today_z": 2.473,
           "indirect": true
         }
       ]
