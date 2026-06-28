@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-28T12:07:03+00:00",
+  "generated_at": "2026-06-28T14:26:22+00:00",
   "source": {
-    "signal_corr_updated": "2026-06-28T12:05:57Z",
+    "signal_corr_updated": "2026-06-28T14:25:12Z",
     "n_pairs_total": 3575,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,10 +21,69 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "fourth": 3.082,
-    "phone": 2.887
+    "court": 2.0,
+    "saturday": 2.836,
+    "supreme": 1.701,
+    "product": 1.854,
+    "fourth": 3.934,
+    "phone": 5.966,
+    "republicans": 2.113,
+    "images": 3.597
   },
   "stock_chains": [
+    {
+      "term": "court",
+      "is_active_today": true,
+      "today_z": 2.0,
+      "hop1": {
+        "ticker": "GS",
+        "sector": "02 Finance",
+        "entity": "GOLDMAN SACHS GROUP INC",
+        "corr": -0.3139,
+        "lag": -5,
+        "hit_rate": 0.556,
+        "direction": "bear",
+        "avg_ret_1d": -0.4,
+        "confidence": 0.369
+      },
+      "hop2": [
+        {
+          "ticker": "MS",
+          "ticker_corr": 0.894,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "MORGAN STANLEY"
+        },
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.809,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.773,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "IWM",
+          "ticker_corr": 0.765,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "JPM",
+          "ticker_corr": 0.765,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "JPMORGAN CHASE & CO"
+        }
+      ]
+    },
     {
       "term": "russia",
       "is_active_today": false,
@@ -4620,59 +4679,6 @@
       ]
     },
     {
-      "term": "court",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "GS",
-        "sector": "02 Finance",
-        "entity": "GOLDMAN SACHS GROUP INC",
-        "corr": -0.3139,
-        "lag": -5,
-        "hit_rate": 0.556,
-        "direction": "bear",
-        "avg_ret_1d": -0.4,
-        "confidence": 0.369
-      },
-      "hop2": [
-        {
-          "ticker": "MS",
-          "ticker_corr": 0.894,
-          "implied_dir": "bear",
-          "sector": "02 Finance",
-          "entity": "MORGAN STANLEY"
-        },
-        {
-          "ticker": "DIA",
-          "ticker_corr": 0.809,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "SPY",
-          "ticker_corr": 0.773,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "IWM",
-          "ticker_corr": 0.765,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "JPM",
-          "ticker_corr": 0.765,
-          "implied_dir": "bear",
-          "sector": "02 Finance",
-          "entity": "JPMORGAN CHASE & CO"
-        }
-      ]
-    },
-    {
       "term": "users",
       "is_active_today": false,
       "today_z": null,
@@ -7549,7 +7555,97 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "GS",
+      "sector": "02 Finance",
+      "entity": "GOLDMAN SACHS GROUP INC",
+      "fund_score": 0.438,
+      "inbound": [
+        {
+          "term": "court",
+          "direction": "bear",
+          "today_z": 2.0,
+          "hit_rate": 0.556
+        }
+      ]
+    },
+    {
+      "ticker": "MS",
+      "sector": "02 Finance",
+      "entity": "MORGAN STANLEY",
+      "fund_score": 0.423,
+      "inbound": [
+        {
+          "term": "court",
+          "via": "GS",
+          "direction": "bear",
+          "today_z": 2.0,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "DIA",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "court",
+          "via": "GS",
+          "direction": "bear",
+          "today_z": 2.0,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "SPY",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "court",
+          "via": "GS",
+          "direction": "bear",
+          "today_z": 2.0,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "IWM",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "court",
+          "via": "GS",
+          "direction": "bear",
+          "today_z": 2.0,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "sector": "02 Finance",
+      "entity": "JPMORGAN CHASE & CO",
+      "fund_score": 0.477,
+      "inbound": [
+        {
+          "term": "court",
+          "via": "GS",
+          "direction": "bear",
+          "today_z": 2.0,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 195,
