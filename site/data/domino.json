@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-29T14:36:54+00:00",
+  "generated_at": "2026-06-29T18:02:19+00:00",
   "source": {
-    "signal_corr_updated": "2026-06-29T14:35:46Z",
+    "signal_corr_updated": "2026-06-29T18:01:01Z",
     "n_pairs_total": 3499,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,19 +21,66 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "plan": 2.473,
-    "attacks": 2.093,
-    "party": 3.182,
-    "brand": 2.259,
-    "review": 1.836,
-    "professional": 3.849,
-    "democratic": 2.8,
-    "plus": 6.714,
-    "fresh": 2.074,
-    "changes": 2.741,
-    "options": 1.559
+    "reports": 1.907,
+    "plan": 3.388,
+    "attacks": 2.712,
+    "party": 4.311,
+    "target": 1.513,
+    "history": 1.582,
+    "brand": 2.909,
+    "review": 2.311,
+    "professional": 4.859,
+    "ground": 1.527,
+    "democratic": 3.767,
+    "plus": 8.476,
+    "fresh": 2.563,
+    "pakistan": 1.54,
+    "changes": 3.367,
+    "options": 2.134
   },
   "stock_chains": [
+    {
+      "term": "reports",
+      "is_active_today": true,
+      "today_z": 1.907,
+      "hop1": {
+        "ticker": "AMGN",
+        "sector": "03 Life Sciences",
+        "entity": "AMGEN INC",
+        "corr": 0.3157,
+        "lag": -5,
+        "hit_rate": 1.0,
+        "direction": "bull",
+        "avg_ret_1d": 0.903,
+        "confidence": 0.58
+      },
+      "hop2": [
+        {
+          "ticker": "BIIB",
+          "ticker_corr": 0.551,
+          "implied_dir": "bull",
+          "sector": "03 Life Sciences",
+          "entity": "BIOGEN INC."
+        }
+      ]
+    },
+    {
+      "term": "reports",
+      "is_active_today": true,
+      "today_z": 1.907,
+      "hop1": {
+        "ticker": "GILD",
+        "sector": "03 Life Sciences",
+        "entity": "GILEAD SCIENCES, INC.",
+        "corr": 0.3097,
+        "lag": -5,
+        "hit_rate": 0.6,
+        "direction": "bull",
+        "avg_ret_1d": 1.039,
+        "confidence": 0.359
+      },
+      "hop2": []
+    },
     {
       "term": "known",
       "is_active_today": false,
@@ -344,31 +391,6 @@
         "confidence": 0.584
       },
       "hop2": []
-    },
-    {
-      "term": "reports",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "AMGN",
-        "sector": "03 Life Sciences",
-        "entity": "AMGEN INC",
-        "corr": 0.3157,
-        "lag": -5,
-        "hit_rate": 1.0,
-        "direction": "bull",
-        "avg_ret_1d": 0.903,
-        "confidence": 0.58
-      },
-      "hop2": [
-        {
-          "ticker": "BIIB",
-          "ticker_corr": 0.551,
-          "implied_dir": "bull",
-          "sector": "03 Life Sciences",
-          "entity": "BIOGEN INC."
-        }
-      ]
     },
     {
       "term": "calls",
@@ -5848,23 +5870,6 @@
       ]
     },
     {
-      "term": "reports",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "GILD",
-        "sector": "03 Life Sciences",
-        "entity": "GILEAD SCIENCES, INC.",
-        "corr": 0.3097,
-        "lag": -5,
-        "hit_rate": 0.6,
-        "direction": "bull",
-        "avg_ret_1d": 1.039,
-        "confidence": 0.359
-      },
-      "hop2": []
-    },
-    {
       "term": "line",
       "is_active_today": false,
       "today_z": null,
@@ -7639,7 +7644,51 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "AMGN",
+      "sector": "03 Life Sciences",
+      "entity": "AMGEN INC",
+      "fund_score": 0.523,
+      "inbound": [
+        {
+          "term": "reports",
+          "direction": "bull",
+          "today_z": 1.907,
+          "hit_rate": 1.0
+        }
+      ]
+    },
+    {
+      "ticker": "GILD",
+      "sector": "03 Life Sciences",
+      "entity": "GILEAD SCIENCES, INC.",
+      "fund_score": 0.687,
+      "inbound": [
+        {
+          "term": "reports",
+          "direction": "bull",
+          "today_z": 1.907,
+          "hit_rate": 0.6
+        }
+      ]
+    },
+    {
+      "ticker": "BIIB",
+      "sector": "03 Life Sciences",
+      "entity": "BIOGEN INC.",
+      "fund_score": 0.426,
+      "inbound": [
+        {
+          "term": "reports",
+          "via": "AMGN",
+          "direction": "bull",
+          "today_z": 1.907,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 202,
