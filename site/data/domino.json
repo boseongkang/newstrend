@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-01T13:49:40+00:00",
+  "generated_at": "2026-07-01T16:48:09+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-01T13:48:30Z",
+    "signal_corr_updated": "2026-07-01T16:46:58Z",
     "n_pairs_total": 3399,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,20 +21,85 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "crypto": 3.015,
-    "office": 2.228,
-    "order": 1.86,
-    "commission": 2.039,
-    "finally": 2.066,
-    "reveals": 1.895,
-    "transfer": 2.12,
-    "james": 2.937
+    "crypto": 4.579,
+    "gold": 1.768,
+    "called": 1.593,
+    "office": 3.449,
+    "platform": 1.571,
+    "site": 1.91,
+    "anthropic": 1.639,
+    "food": 1.984,
+    "order": 2.667,
+    "dollar": 1.975,
+    "loss": 1.586,
+    "commission": 1.843,
+    "half": 1.636,
+    "finally": 1.665,
+    "reveals": 3.249,
+    "james": 2.512,
+    "fourth": 2.111,
+    "gains": 2.324,
+    "bring": 2.075,
+    "rose": 1.648
   },
   "stock_chains": [
     {
+      "term": "called",
+      "is_active_today": true,
+      "today_z": 1.593,
+      "hop1": {
+        "ticker": "PANW",
+        "sector": "06 Technology",
+        "entity": "Palo Alto Networks Inc",
+        "corr": -0.3439,
+        "lag": -5,
+        "hit_rate": 0.8,
+        "direction": "bear",
+        "avg_ret_1d": 0.799,
+        "confidence": 0.481
+      },
+      "hop2": [
+        {
+          "ticker": "CRWD",
+          "ticker_corr": 0.742,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "CrowdStrike Holdings, Inc."
+        },
+        {
+          "ticker": "FTNT",
+          "ticker_corr": 0.619,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Fortinet, Inc."
+        },
+        {
+          "ticker": "ZS",
+          "ticker_corr": 0.591,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Zscaler, Inc."
+        },
+        {
+          "ticker": "DDOG",
+          "ticker_corr": 0.552,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Datadog, Inc."
+        },
+        {
+          "ticker": "OKTA",
+          "ticker_corr": 0.547,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Okta, Inc."
+        }
+      ]
+    },
+    {
       "term": "crypto",
       "is_active_today": true,
-      "today_z": 3.015,
+      "today_z": 4.579,
       "hop1": {
         "ticker": "KDP",
         "sector": "04 Manufacturing",
@@ -51,7 +116,7 @@
     {
       "term": "office",
       "is_active_today": true,
-      "today_z": 2.228,
+      "today_z": 3.449,
       "hop1": {
         "ticker": "QCOM",
         "sector": "04 Manufacturing",
@@ -1534,59 +1599,6 @@
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "ADVANCED MICRO DEVICES INC"
-        }
-      ]
-    },
-    {
-      "term": "called",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PANW",
-        "sector": "06 Technology",
-        "entity": "Palo Alto Networks Inc",
-        "corr": -0.3439,
-        "lag": -5,
-        "hit_rate": 0.8,
-        "direction": "bear",
-        "avg_ret_1d": 0.799,
-        "confidence": 0.481
-      },
-      "hop2": [
-        {
-          "ticker": "CRWD",
-          "ticker_corr": 0.742,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "CrowdStrike Holdings, Inc."
-        },
-        {
-          "ticker": "FTNT",
-          "ticker_corr": 0.619,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Fortinet, Inc."
-        },
-        {
-          "ticker": "ZS",
-          "ticker_corr": 0.591,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Zscaler, Inc."
-        },
-        {
-          "ticker": "DDOG",
-          "ticker_corr": 0.552,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Datadog, Inc."
-        },
-        {
-          "ticker": "OKTA",
-          "ticker_corr": 0.547,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Okta, Inc."
         }
       ]
     },
@@ -6974,6 +6986,20 @@
   ],
   "ticker_pressure": [
     {
+      "ticker": "PANW",
+      "sector": "06 Technology",
+      "entity": "Palo Alto Networks Inc",
+      "fund_score": 0.361,
+      "inbound": [
+        {
+          "term": "called",
+          "direction": "bear",
+          "today_z": 1.593,
+          "hit_rate": 0.8
+        }
+      ]
+    },
+    {
       "ticker": "KDP",
       "sector": "04 Manufacturing",
       "entity": "Keurig Dr Pepper Inc.",
@@ -6982,7 +7008,7 @@
         {
           "term": "crypto",
           "direction": "bull",
-          "today_z": 3.015,
+          "today_z": 4.579,
           "hit_rate": 0.667
         }
       ]
@@ -6996,8 +7022,83 @@
         {
           "term": "office",
           "direction": "bear",
-          "today_z": 2.228,
+          "today_z": 3.449,
           "hit_rate": 0.6
+        }
+      ]
+    },
+    {
+      "ticker": "CRWD",
+      "sector": "06 Technology",
+      "entity": "CrowdStrike Holdings, Inc.",
+      "fund_score": 0.26,
+      "inbound": [
+        {
+          "term": "called",
+          "via": "PANW",
+          "direction": "bear",
+          "today_z": 1.593,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "FTNT",
+      "sector": "06 Technology",
+      "entity": "Fortinet, Inc.",
+      "fund_score": 0.639,
+      "inbound": [
+        {
+          "term": "called",
+          "via": "PANW",
+          "direction": "bear",
+          "today_z": 1.593,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ZS",
+      "sector": "06 Technology",
+      "entity": "Zscaler, Inc.",
+      "fund_score": 0.268,
+      "inbound": [
+        {
+          "term": "called",
+          "via": "PANW",
+          "direction": "bear",
+          "today_z": 1.593,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "DDOG",
+      "sector": "06 Technology",
+      "entity": "Datadog, Inc.",
+      "fund_score": 0.44,
+      "inbound": [
+        {
+          "term": "called",
+          "via": "PANW",
+          "direction": "bear",
+          "today_z": 1.593,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "OKTA",
+      "sector": "06 Technology",
+      "entity": "Okta, Inc.",
+      "fund_score": 0.376,
+      "inbound": [
+        {
+          "term": "called",
+          "via": "PANW",
+          "direction": "bear",
+          "today_z": 1.593,
+          "indirect": true
         }
       ]
     },
@@ -7011,7 +7112,7 @@
           "term": "office",
           "via": "QCOM",
           "direction": "bear",
-          "today_z": 2.228,
+          "today_z": 3.449,
           "indirect": true
         }
       ]
@@ -7026,7 +7127,7 @@
           "term": "office",
           "via": "QCOM",
           "direction": "bear",
-          "today_z": 2.228,
+          "today_z": 3.449,
           "indirect": true
         }
       ]
@@ -7041,7 +7142,7 @@
           "term": "office",
           "via": "QCOM",
           "direction": "bear",
-          "today_z": 2.228,
+          "today_z": 3.449,
           "indirect": true
         }
       ]
@@ -7056,7 +7157,7 @@
           "term": "office",
           "via": "QCOM",
           "direction": "bear",
-          "today_z": 2.228,
+          "today_z": 3.449,
           "indirect": true
         }
       ]
@@ -7071,7 +7172,7 @@
           "term": "office",
           "via": "QCOM",
           "direction": "bear",
-          "today_z": 2.228,
+          "today_z": 3.449,
           "indirect": true
         }
       ]
