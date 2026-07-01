@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-01T01:42:16+00:00",
+  "generated_at": "2026-07-01T06:55:30+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-01T01:41:12Z",
+    "signal_corr_updated": "2026-07-01T06:54:24Z",
     "n_pairs_total": 3321,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -20,8 +20,28 @@
     },
     "active_z_threshold": 1.5
   },
-  "active_terms": {},
+  "active_terms": {
+    "crypto": 1.607,
+    "transfer": 2.12
+  },
   "stock_chains": [
+    {
+      "term": "crypto",
+      "is_active_today": true,
+      "today_z": 1.607,
+      "hop1": {
+        "ticker": "KDP",
+        "sector": "04 Manufacturing",
+        "entity": "Keurig Dr Pepper Inc.",
+        "corr": 0.3845,
+        "lag": -5,
+        "hit_rate": 0.6,
+        "direction": "bull",
+        "avg_ret_1d": 0.736,
+        "confidence": 0.386
+      },
+      "hop2": []
+    },
     {
       "term": "india",
       "is_active_today": false,
@@ -4164,23 +4184,6 @@
       ]
     },
     {
-      "term": "crypto",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "KDP",
-        "sector": "04 Manufacturing",
-        "entity": "Keurig Dr Pepper Inc.",
-        "corr": 0.3845,
-        "lag": -5,
-        "hit_rate": 0.6,
-        "direction": "bull",
-        "avg_ret_1d": 0.736,
-        "confidence": 0.386
-      },
-      "hop2": []
-    },
-    {
       "term": "space",
       "is_active_today": false,
       "today_z": null,
@@ -6850,7 +6853,22 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "KDP",
+      "sector": "04 Manufacturing",
+      "entity": "Keurig Dr Pepper Inc.",
+      "fund_score": 0.467,
+      "inbound": [
+        {
+          "term": "crypto",
+          "direction": "bull",
+          "today_z": 1.607,
+          "hit_rate": 0.6
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 175,
