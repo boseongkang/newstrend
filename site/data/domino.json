@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-03T11:49:43+00:00",
+  "generated_at": "2026-07-03T14:41:40+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-03T11:48:33Z",
+    "signal_corr_updated": "2026-07-03T14:40:34Z",
     "n_pairs_total": 3338,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,16 +21,22 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "store": 2.165,
-    "brand": 2.543,
-    "generation": 4.356,
-    "episode": 1.774
+    "gold": 1.917,
+    "store": 1.51,
+    "brand": 2.321,
+    "managers": 4.747,
+    "finance": 1.783,
+    "exclusive": 1.565,
+    "fourth": 1.528,
+    "generation": 3.777,
+    "episode": 2.281,
+    "banks": 1.706
   },
   "stock_chains": [
     {
       "term": "store",
       "is_active_today": true,
-      "today_z": 2.165,
+      "today_z": 1.51,
       "hop1": {
         "ticker": "ROKU",
         "sector": "06 Technology",
@@ -76,7 +82,7 @@
     {
       "term": "store",
       "is_active_today": true,
-      "today_z": 2.165,
+      "today_z": 1.51,
       "hop1": {
         "ticker": "TSLA",
         "sector": "04 Manufacturing",
@@ -127,9 +133,34 @@
       ]
     },
     {
+      "term": "gold",
+      "is_active_today": true,
+      "today_z": 1.917,
+      "hop1": {
+        "ticker": "BIIB",
+        "sector": "03 Life Sciences",
+        "entity": "BIOGEN INC.",
+        "corr": 0.3414,
+        "lag": -3,
+        "hit_rate": 0.714,
+        "direction": "bull",
+        "avg_ret_1d": 0.145,
+        "confidence": 0.45
+      },
+      "hop2": [
+        {
+          "ticker": "AMGN",
+          "ticker_corr": 0.553,
+          "implied_dir": "bull",
+          "sector": "03 Life Sciences",
+          "entity": "AMGEN INC"
+        }
+      ]
+    },
+    {
       "term": "store",
       "is_active_today": true,
-      "today_z": 2.165,
+      "today_z": 1.51,
       "hop1": {
         "ticker": "PYPL",
         "sector": "07 Trade & Services",
@@ -146,7 +177,7 @@
     {
       "term": "store",
       "is_active_today": true,
-      "today_z": 2.165,
+      "today_z": 1.51,
       "hop1": {
         "ticker": "COIN",
         "sector": "09 Crypto Assets",
@@ -192,7 +223,7 @@
     {
       "term": "store",
       "is_active_today": true,
-      "today_z": 2.165,
+      "today_z": 1.51,
       "hop1": {
         "ticker": "ADBE",
         "sector": "06 Technology",
@@ -236,9 +267,26 @@
       ]
     },
     {
+      "term": "gold",
+      "is_active_today": true,
+      "today_z": 1.917,
+      "hop1": {
+        "ticker": "PEP",
+        "sector": "04 Manufacturing",
+        "entity": "PEPSICO INC",
+        "corr": 0.3485,
+        "lag": -4,
+        "hit_rate": 0.571,
+        "direction": "bull",
+        "avg_ret_1d": 1.113,
+        "confidence": 0.375
+      },
+      "hop2": []
+    },
+    {
       "term": "store",
       "is_active_today": true,
-      "today_z": 2.165,
+      "today_z": 1.51,
       "hop1": {
         "ticker": "SNPS",
         "sector": "06 Technology",
@@ -257,6 +305,59 @@
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "CADENCE DESIGN SYSTEMS INC"
+        }
+      ]
+    },
+    {
+      "term": "gold",
+      "is_active_today": true,
+      "today_z": 1.917,
+      "hop1": {
+        "ticker": "AMD",
+        "sector": "04 Manufacturing",
+        "entity": "ADVANCED MICRO DEVICES INC",
+        "corr": -0.3007,
+        "lag": -3,
+        "hit_rate": 0.571,
+        "direction": "bear",
+        "avg_ret_1d": -1.313,
+        "confidence": 0.358
+      },
+      "hop2": [
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.687,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.602,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "NVDA",
+          "ticker_corr": 0.578,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "NVIDIA CORP"
+        },
+        {
+          "ticker": "ASML",
+          "ticker_corr": 0.571,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "ASML HOLDING NV"
+        },
+        {
+          "ticker": "TSM",
+          "ticker_corr": 0.555,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
         }
       ]
     },
@@ -2002,31 +2103,6 @@
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "APPLIED MATERIALS INC /DE"
-        }
-      ]
-    },
-    {
-      "term": "gold",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "BIIB",
-        "sector": "03 Life Sciences",
-        "entity": "BIOGEN INC.",
-        "corr": 0.3414,
-        "lag": -3,
-        "hit_rate": 0.714,
-        "direction": "bull",
-        "avg_ret_1d": 0.145,
-        "confidence": 0.45
-      },
-      "hop2": [
-        {
-          "ticker": "AMGN",
-          "ticker_corr": 0.553,
-          "implied_dir": "bull",
-          "sector": "03 Life Sciences",
-          "entity": "AMGEN INC"
         }
       ]
     },
@@ -3949,23 +4025,6 @@
       "hop2": []
     },
     {
-      "term": "gold",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PEP",
-        "sector": "04 Manufacturing",
-        "entity": "PEPSICO INC",
-        "corr": 0.3485,
-        "lag": -4,
-        "hit_rate": 0.571,
-        "direction": "bull",
-        "avg_ret_1d": 1.113,
-        "confidence": 0.375
-      },
-      "hop2": []
-    },
-    {
       "term": "policy",
       "is_active_today": false,
       "today_z": null,
@@ -5077,59 +5136,6 @@
           "implied_dir": "bear",
           "sector": null,
           "entity": "INVESCO QQQ TRUST, SERIES 1"
-        }
-      ]
-    },
-    {
-      "term": "gold",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "AMD",
-        "sector": "04 Manufacturing",
-        "entity": "ADVANCED MICRO DEVICES INC",
-        "corr": -0.3007,
-        "lag": -3,
-        "hit_rate": 0.571,
-        "direction": "bear",
-        "avg_ret_1d": -1.313,
-        "confidence": 0.358
-      },
-      "hop2": [
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.687,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "SPY",
-          "ticker_corr": 0.602,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "NVDA",
-          "ticker_corr": 0.578,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "NVIDIA CORP"
-        },
-        {
-          "ticker": "ASML",
-          "ticker_corr": 0.571,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "ASML HOLDING NV"
-        },
-        {
-          "ticker": "TSM",
-          "ticker_corr": 0.555,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
         }
       ]
     },
@@ -7102,21 +7108,28 @@
           "term": "store",
           "via": "ROKU",
           "direction": "bear",
-          "today_z": 2.165,
+          "today_z": 1.51,
           "indirect": true
         },
         {
           "term": "store",
           "via": "TSLA",
           "direction": "bear",
-          "today_z": 2.165,
+          "today_z": 1.51,
           "indirect": true
         },
         {
           "term": "store",
           "via": "COIN",
           "direction": "bear",
-          "today_z": 2.165,
+          "today_z": 1.51,
+          "indirect": true
+        },
+        {
+          "term": "gold",
+          "via": "AMD",
+          "direction": "bear",
+          "today_z": 1.917,
           "indirect": true
         }
       ]
@@ -7131,165 +7144,28 @@
           "term": "store",
           "via": "ROKU",
           "direction": "bear",
-          "today_z": 2.165,
+          "today_z": 1.51,
           "indirect": true
         },
         {
           "term": "store",
           "via": "TSLA",
           "direction": "bear",
-          "today_z": 2.165,
+          "today_z": 1.51,
           "indirect": true
         },
         {
           "term": "store",
           "via": "COIN",
           "direction": "bear",
-          "today_z": 2.165,
+          "today_z": 1.51,
           "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "ROKU",
-      "sector": "06 Technology",
-      "entity": "ROKU, INC",
-      "fund_score": 0.372,
-      "inbound": [
+        },
         {
-          "term": "store",
+          "term": "gold",
+          "via": "AMD",
           "direction": "bear",
-          "today_z": 2.165,
-          "hit_rate": 1.0
-        }
-      ]
-    },
-    {
-      "ticker": "TSLA",
-      "sector": "04 Manufacturing",
-      "entity": "Tesla, Inc.",
-      "fund_score": 0.337,
-      "inbound": [
-        {
-          "term": "store",
-          "direction": "bear",
-          "today_z": 2.165,
-          "hit_rate": 1.0
-        }
-      ]
-    },
-    {
-      "ticker": "PYPL",
-      "sector": "07 Trade & Services",
-      "entity": "PayPal Holdings, Inc.",
-      "fund_score": 0.475,
-      "inbound": [
-        {
-          "term": "store",
-          "direction": "bear",
-          "today_z": 2.165,
-          "hit_rate": 0.667
-        }
-      ]
-    },
-    {
-      "ticker": "COIN",
-      "sector": "09 Crypto Assets",
-      "entity": "Coinbase Global, Inc.",
-      "fund_score": 0.572,
-      "inbound": [
-        {
-          "term": "store",
-          "direction": "bear",
-          "today_z": 2.165,
-          "hit_rate": 0.667
-        }
-      ]
-    },
-    {
-      "ticker": "ADBE",
-      "sector": "06 Technology",
-      "entity": "ADOBE INC.",
-      "fund_score": 0.581,
-      "inbound": [
-        {
-          "term": "store",
-          "direction": "bear",
-          "today_z": 2.165,
-          "hit_rate": 0.667
-        }
-      ]
-    },
-    {
-      "ticker": "SNPS",
-      "sector": "06 Technology",
-      "entity": "SYNOPSYS INC",
-      "fund_score": 0.491,
-      "inbound": [
-        {
-          "term": "store",
-          "direction": "bear",
-          "today_z": 2.165,
-          "hit_rate": 0.667
-        }
-      ]
-    },
-    {
-      "ticker": "ABNB",
-      "sector": "07 Trade & Services",
-      "entity": "Airbnb, Inc.",
-      "fund_score": 0.491,
-      "inbound": [
-        {
-          "term": "store",
-          "via": "ROKU",
-          "direction": "bear",
-          "today_z": 2.165,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "AMZN",
-      "sector": "07 Trade & Services",
-      "entity": "AMAZON COM INC",
-      "fund_score": 0.337,
-      "inbound": [
-        {
-          "term": "store",
-          "via": "ROKU",
-          "direction": "bear",
-          "today_z": 2.165,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "IWM",
-      "sector": null,
-      "entity": null,
-      "fund_score": null,
-      "inbound": [
-        {
-          "term": "store",
-          "via": "TSLA",
-          "direction": "bear",
-          "today_z": 2.165,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "HYG",
-      "sector": null,
-      "entity": null,
-      "fund_score": null,
-      "inbound": [
-        {
-          "term": "store",
-          "via": "TSLA",
-          "direction": "bear",
-          "today_z": 2.165,
+          "today_z": 1.917,
           "indirect": true
         }
       ]
@@ -7304,7 +7180,215 @@
           "term": "store",
           "via": "TSLA",
           "direction": "bear",
-          "today_z": 2.165,
+          "today_z": 1.51,
+          "indirect": true
+        },
+        {
+          "term": "gold",
+          "via": "AMD",
+          "direction": "bear",
+          "today_z": 1.917,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ROKU",
+      "sector": "06 Technology",
+      "entity": "ROKU, INC",
+      "fund_score": 0.372,
+      "inbound": [
+        {
+          "term": "store",
+          "direction": "bear",
+          "today_z": 1.51,
+          "hit_rate": 1.0
+        }
+      ]
+    },
+    {
+      "ticker": "TSLA",
+      "sector": "04 Manufacturing",
+      "entity": "Tesla, Inc.",
+      "fund_score": 0.337,
+      "inbound": [
+        {
+          "term": "store",
+          "direction": "bear",
+          "today_z": 1.51,
+          "hit_rate": 1.0
+        }
+      ]
+    },
+    {
+      "ticker": "BIIB",
+      "sector": "03 Life Sciences",
+      "entity": "BIOGEN INC.",
+      "fund_score": 0.426,
+      "inbound": [
+        {
+          "term": "gold",
+          "direction": "bull",
+          "today_z": 1.917,
+          "hit_rate": 0.714
+        }
+      ]
+    },
+    {
+      "ticker": "PYPL",
+      "sector": "07 Trade & Services",
+      "entity": "PayPal Holdings, Inc.",
+      "fund_score": 0.475,
+      "inbound": [
+        {
+          "term": "store",
+          "direction": "bear",
+          "today_z": 1.51,
+          "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "COIN",
+      "sector": "09 Crypto Assets",
+      "entity": "Coinbase Global, Inc.",
+      "fund_score": 0.572,
+      "inbound": [
+        {
+          "term": "store",
+          "direction": "bear",
+          "today_z": 1.51,
+          "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "ADBE",
+      "sector": "06 Technology",
+      "entity": "ADOBE INC.",
+      "fund_score": 0.581,
+      "inbound": [
+        {
+          "term": "store",
+          "direction": "bear",
+          "today_z": 1.51,
+          "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "PEP",
+      "sector": "04 Manufacturing",
+      "entity": "PEPSICO INC",
+      "fund_score": 0.238,
+      "inbound": [
+        {
+          "term": "gold",
+          "direction": "bull",
+          "today_z": 1.917,
+          "hit_rate": 0.571
+        }
+      ]
+    },
+    {
+      "ticker": "SNPS",
+      "sector": "06 Technology",
+      "entity": "SYNOPSYS INC",
+      "fund_score": 0.491,
+      "inbound": [
+        {
+          "term": "store",
+          "direction": "bear",
+          "today_z": 1.51,
+          "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "AMD",
+      "sector": "04 Manufacturing",
+      "entity": "ADVANCED MICRO DEVICES INC",
+      "fund_score": 0.579,
+      "inbound": [
+        {
+          "term": "gold",
+          "direction": "bear",
+          "today_z": 1.917,
+          "hit_rate": 0.571
+        }
+      ]
+    },
+    {
+      "ticker": "ABNB",
+      "sector": "07 Trade & Services",
+      "entity": "Airbnb, Inc.",
+      "fund_score": 0.491,
+      "inbound": [
+        {
+          "term": "store",
+          "via": "ROKU",
+          "direction": "bear",
+          "today_z": 1.51,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "AMZN",
+      "sector": "07 Trade & Services",
+      "entity": "AMAZON COM INC",
+      "fund_score": 0.337,
+      "inbound": [
+        {
+          "term": "store",
+          "via": "ROKU",
+          "direction": "bear",
+          "today_z": 1.51,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "IWM",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "store",
+          "via": "TSLA",
+          "direction": "bear",
+          "today_z": 1.51,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "HYG",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "store",
+          "via": "TSLA",
+          "direction": "bear",
+          "today_z": 1.51,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "AMGN",
+      "sector": "03 Life Sciences",
+      "entity": "AMGEN INC",
+      "fund_score": 0.523,
+      "inbound": [
+        {
+          "term": "gold",
+          "via": "BIIB",
+          "direction": "bull",
+          "today_z": 1.917,
           "indirect": true
         }
       ]
@@ -7319,7 +7403,7 @@
           "term": "store",
           "via": "COIN",
           "direction": "bear",
-          "today_z": 2.165,
+          "today_z": 1.51,
           "indirect": true
         }
       ]
@@ -7334,7 +7418,7 @@
           "term": "store",
           "via": "COIN",
           "direction": "bear",
-          "today_z": 2.165,
+          "today_z": 1.51,
           "indirect": true
         }
       ]
@@ -7349,7 +7433,7 @@
           "term": "store",
           "via": "ADBE",
           "direction": "bear",
-          "today_z": 2.165,
+          "today_z": 1.51,
           "indirect": true
         }
       ]
@@ -7364,7 +7448,7 @@
           "term": "store",
           "via": "ADBE",
           "direction": "bear",
-          "today_z": 2.165,
+          "today_z": 1.51,
           "indirect": true
         }
       ]
@@ -7379,7 +7463,7 @@
           "term": "store",
           "via": "ADBE",
           "direction": "bear",
-          "today_z": 2.165,
+          "today_z": 1.51,
           "indirect": true
         }
       ]
@@ -7394,7 +7478,7 @@
           "term": "store",
           "via": "ADBE",
           "direction": "bear",
-          "today_z": 2.165,
+          "today_z": 1.51,
           "indirect": true
         }
       ]
@@ -7409,7 +7493,37 @@
           "term": "store",
           "via": "SNPS",
           "direction": "bear",
-          "today_z": 2.165,
+          "today_z": 1.51,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ASML",
+      "sector": "06 Technology",
+      "entity": "ASML HOLDING NV",
+      "fund_score": 0.684,
+      "inbound": [
+        {
+          "term": "gold",
+          "via": "AMD",
+          "direction": "bear",
+          "today_z": 1.917,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "TSM",
+      "sector": "04 Manufacturing",
+      "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "gold",
+          "via": "AMD",
+          "direction": "bear",
+          "today_z": 1.917,
           "indirect": true
         }
       ]
