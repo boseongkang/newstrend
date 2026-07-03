@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-03T16:54:50+00:00",
+  "generated_at": "2026-07-03T18:49:27+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-03T16:53:45Z",
+    "signal_corr_updated": "2026-07-03T18:48:15Z",
     "n_pairs_total": 3363,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,26 +21,32 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
+    "india": 1.625,
     "gold": 2.239,
-    "russia": 1.908,
+    "russia": 2.234,
+    "ukraine": 1.775,
     "store": 1.51,
+    "japan": 1.804,
+    "content": 1.529,
     "brand": 2.321,
-    "managers": 5.645,
-    "finance": 2.111,
-    "investigating": 1.526,
-    "exclusive": 2.02,
-    "fourth": 1.789,
-    "changes": 2.044,
-    "generation": 3.874,
-    "episode": 2.534,
-    "staff": 1.987,
-    "banks": 1.966
+    "strategic": 2.337,
+    "managers": 6.543,
+    "finance": 2.439,
+    "offers": 3.068,
+    "exclusive": 1.565,
+    "fourth": 2.313,
+    "changes": 2.156,
+    "woman": 2.958,
+    "generation": 3.777,
+    "episode": 2.281,
+    "staff": 2.28,
+    "banks": 2.096
   },
   "stock_chains": [
     {
       "term": "russia",
       "is_active_today": true,
-      "today_z": 1.908,
+      "today_z": 2.234,
       "hop1": {
         "ticker": "BIIB",
         "sector": "03 Life Sciences",
@@ -183,6 +189,38 @@
           "implied_dir": "bull",
           "sector": "03 Life Sciences",
           "entity": "AMGEN INC"
+        }
+      ]
+    },
+    {
+      "term": "india",
+      "is_active_today": true,
+      "today_z": 1.625,
+      "hop1": {
+        "ticker": "DOCU",
+        "sector": "06 Technology",
+        "entity": "DOCUSIGN, INC.",
+        "corr": -0.3593,
+        "lag": -5,
+        "hit_rate": 0.75,
+        "direction": "bear",
+        "avg_ret_1d": 1.015,
+        "confidence": 0.449
+      },
+      "hop2": [
+        {
+          "ticker": "CRM",
+          "ticker_corr": 0.595,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Salesforce, Inc."
+        },
+        {
+          "ticker": "ADBE",
+          "ticker_corr": 0.547,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "ADOBE INC."
         }
       ]
     },
@@ -389,6 +427,23 @@
           "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
         }
       ]
+    },
+    {
+      "term": "india",
+      "is_active_today": true,
+      "today_z": 1.625,
+      "hop1": {
+        "ticker": "PEP",
+        "sector": "04 Manufacturing",
+        "entity": "PEPSICO INC",
+        "corr": 0.3275,
+        "lag": -5,
+        "hit_rate": 0.5,
+        "direction": "bull",
+        "avg_ret_1d": 0.685,
+        "confidence": 0.301
+      },
+      "hop2": []
     },
     {
       "term": "investors",
@@ -2160,38 +2215,6 @@
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "ASML HOLDING NV"
-        }
-      ]
-    },
-    {
-      "term": "india",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "DOCU",
-        "sector": "06 Technology",
-        "entity": "DOCUSIGN, INC.",
-        "corr": -0.3593,
-        "lag": -5,
-        "hit_rate": 0.75,
-        "direction": "bear",
-        "avg_ret_1d": 1.015,
-        "confidence": 0.449
-      },
-      "hop2": [
-        {
-          "ticker": "CRM",
-          "ticker_corr": 0.595,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Salesforce, Inc."
-        },
-        {
-          "ticker": "ADBE",
-          "ticker_corr": 0.547,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "ADOBE INC."
         }
       ]
     },
@@ -6369,23 +6392,6 @@
       ]
     },
     {
-      "term": "india",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PEP",
-        "sector": "04 Manufacturing",
-        "entity": "PEPSICO INC",
-        "corr": 0.3275,
-        "lag": -5,
-        "hit_rate": 0.5,
-        "direction": "bull",
-        "avg_ret_1d": 0.685,
-        "confidence": 0.301
-      },
-      "hop2": []
-    },
-    {
       "term": "iranian",
       "is_active_today": false,
       "today_z": null,
@@ -7208,7 +7214,7 @@
         {
           "term": "russia",
           "direction": "bear",
-          "today_z": 1.908,
+          "today_z": 2.234,
           "hit_rate": 1.0
         },
         {
@@ -7216,6 +7222,68 @@
           "direction": "bull",
           "today_z": 2.239,
           "hit_rate": 0.714
+        }
+      ]
+    },
+    {
+      "ticker": "DOCU",
+      "sector": "06 Technology",
+      "entity": "DOCUSIGN, INC.",
+      "fund_score": 0.271,
+      "inbound": [
+        {
+          "term": "india",
+          "direction": "bear",
+          "today_z": 1.625,
+          "hit_rate": 0.75
+        },
+        {
+          "term": "store",
+          "via": "ADBE",
+          "direction": "bear",
+          "today_z": 1.51,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ADBE",
+      "sector": "06 Technology",
+      "entity": "ADOBE INC.",
+      "fund_score": 0.581,
+      "inbound": [
+        {
+          "term": "store",
+          "direction": "bear",
+          "today_z": 1.51,
+          "hit_rate": 0.667
+        },
+        {
+          "term": "india",
+          "via": "DOCU",
+          "direction": "bear",
+          "today_z": 1.625,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "PEP",
+      "sector": "04 Manufacturing",
+      "entity": "PEPSICO INC",
+      "fund_score": 0.238,
+      "inbound": [
+        {
+          "term": "gold",
+          "direction": "bull",
+          "today_z": 2.239,
+          "hit_rate": 0.571
+        },
+        {
+          "term": "india",
+          "direction": "bull",
+          "today_z": 1.625,
+          "hit_rate": 0.5
         }
       ]
     },
@@ -7229,7 +7297,7 @@
           "term": "russia",
           "via": "BIIB",
           "direction": "bear",
-          "today_z": 1.908,
+          "today_z": 2.234,
           "indirect": true
         },
         {
@@ -7259,6 +7327,28 @@
           "via": "AMD",
           "direction": "bear",
           "today_z": 2.239,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "CRM",
+      "sector": "06 Technology",
+      "entity": "Salesforce, Inc.",
+      "fund_score": 0.497,
+      "inbound": [
+        {
+          "term": "india",
+          "via": "DOCU",
+          "direction": "bear",
+          "today_z": 1.625,
+          "indirect": true
+        },
+        {
+          "term": "store",
+          "via": "ADBE",
+          "direction": "bear",
+          "today_z": 1.51,
           "indirect": true
         }
       ]
@@ -7316,34 +7406,6 @@
           "direction": "bear",
           "today_z": 1.51,
           "hit_rate": 0.667
-        }
-      ]
-    },
-    {
-      "ticker": "ADBE",
-      "sector": "06 Technology",
-      "entity": "ADOBE INC.",
-      "fund_score": 0.581,
-      "inbound": [
-        {
-          "term": "store",
-          "direction": "bear",
-          "today_z": 1.51,
-          "hit_rate": 0.667
-        }
-      ]
-    },
-    {
-      "ticker": "PEP",
-      "sector": "04 Manufacturing",
-      "entity": "PEPSICO INC",
-      "fund_score": 0.238,
-      "inbound": [
-        {
-          "term": "gold",
-          "direction": "bull",
-          "today_z": 2.239,
-          "hit_rate": 0.571
         }
       ]
     },
@@ -7466,40 +7528,10 @@
       ]
     },
     {
-      "ticker": "CRM",
-      "sector": "06 Technology",
-      "entity": "Salesforce, Inc.",
-      "fund_score": 0.497,
-      "inbound": [
-        {
-          "term": "store",
-          "via": "ADBE",
-          "direction": "bear",
-          "today_z": 1.51,
-          "indirect": true
-        }
-      ]
-    },
-    {
       "ticker": "INTU",
       "sector": "06 Technology",
       "entity": "INTUIT INC.",
       "fund_score": 0.628,
-      "inbound": [
-        {
-          "term": "store",
-          "via": "ADBE",
-          "direction": "bear",
-          "today_z": 1.51,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "DOCU",
-      "sector": "06 Technology",
-      "entity": "DOCUSIGN, INC.",
-      "fund_score": 0.271,
       "inbound": [
         {
           "term": "store",
