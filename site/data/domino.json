@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-03T14:41:40+00:00",
+  "generated_at": "2026-07-03T16:54:50+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-03T14:40:34Z",
-    "n_pairs_total": 3338,
+    "signal_corr_updated": "2026-07-03T16:53:45Z",
+    "n_pairs_total": 3363,
     "n_dates": 180,
     "prices_tickers": 90,
     "trends_terms": 600
@@ -21,18 +21,47 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "gold": 1.917,
+    "gold": 2.239,
+    "russia": 1.908,
     "store": 1.51,
     "brand": 2.321,
-    "managers": 4.747,
-    "finance": 1.783,
-    "exclusive": 1.565,
-    "fourth": 1.528,
-    "generation": 3.777,
-    "episode": 2.281,
-    "banks": 1.706
+    "managers": 5.645,
+    "finance": 2.111,
+    "investigating": 1.526,
+    "exclusive": 2.02,
+    "fourth": 1.789,
+    "changes": 2.044,
+    "generation": 3.874,
+    "episode": 2.534,
+    "staff": 1.987,
+    "banks": 1.966
   },
   "stock_chains": [
+    {
+      "term": "russia",
+      "is_active_today": true,
+      "today_z": 1.908,
+      "hop1": {
+        "ticker": "BIIB",
+        "sector": "03 Life Sciences",
+        "entity": "BIOGEN INC.",
+        "corr": -0.3376,
+        "lag": -5,
+        "hit_rate": 1.0,
+        "direction": "bear",
+        "avg_ret_1d": 2.523,
+        "confidence": 0.577
+      },
+      "hop2": [
+        {
+          "ticker": "AMGN",
+          "ticker_corr": 0.553,
+          "implied_dir": "bear",
+          "sector": "03 Life Sciences",
+          "entity": "AMGEN INC"
+        }
+      ]
+    },
     {
       "term": "store",
       "is_active_today": true,
@@ -135,7 +164,7 @@
     {
       "term": "gold",
       "is_active_today": true,
-      "today_z": 1.917,
+      "today_z": 2.239,
       "hop1": {
         "ticker": "BIIB",
         "sector": "03 Life Sciences",
@@ -269,7 +298,7 @@
     {
       "term": "gold",
       "is_active_today": true,
-      "today_z": 1.917,
+      "today_z": 2.239,
       "hop1": {
         "ticker": "PEP",
         "sector": "04 Manufacturing",
@@ -311,7 +340,7 @@
     {
       "term": "gold",
       "is_active_today": true,
-      "today_z": 1.917,
+      "today_z": 2.239,
       "hop1": {
         "ticker": "AMD",
         "sector": "04 Manufacturing",
@@ -567,31 +596,6 @@
           "implied_dir": "bear",
           "sector": null,
           "entity": null
-        }
-      ]
-    },
-    {
-      "term": "russia",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "BIIB",
-        "sector": "03 Life Sciences",
-        "entity": "BIOGEN INC.",
-        "corr": -0.3376,
-        "lag": -5,
-        "hit_rate": 1.0,
-        "direction": "bear",
-        "avg_ret_1d": 2.523,
-        "confidence": 0.577
-      },
-      "hop2": [
-        {
-          "ticker": "AMGN",
-          "ticker_corr": 0.553,
-          "implied_dir": "bear",
-          "sector": "03 Life Sciences",
-          "entity": "AMGEN INC"
         }
       ]
     },
@@ -1246,31 +1250,6 @@
       ]
     },
     {
-      "term": "revenue",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "INTC",
-        "sector": "04 Manufacturing",
-        "entity": "INTEL CORP",
-        "corr": 0.3606,
-        "lag": -1,
-        "hit_rate": 0.75,
-        "direction": "bull",
-        "avg_ret_1d": 5.683,
-        "confidence": 0.511
-      },
-      "hop2": [
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.511,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        }
-      ]
-    },
-    {
       "term": "project",
       "is_active_today": false,
       "today_z": null,
@@ -1373,6 +1352,31 @@
           "implied_dir": "bear",
           "sector": null,
           "entity": null
+        }
+      ]
+    },
+    {
+      "term": "crude",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "MRVL",
+        "sector": "04 Manufacturing",
+        "entity": "Marvell Technology, Inc.",
+        "corr": 0.315,
+        "lag": -4,
+        "hit_rate": 0.75,
+        "direction": "bull",
+        "avg_ret_1d": 2.644,
+        "confidence": 0.495
+      },
+      "hop2": [
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.523,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
         }
       ]
     },
@@ -4884,6 +4888,31 @@
       ]
     },
     {
+      "term": "crude",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "MDB",
+        "sector": "06 Technology",
+        "entity": "MongoDB, Inc.",
+        "corr": -0.3212,
+        "lag": -1,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": 1.357,
+        "confidence": 0.361
+      },
+      "hop2": [
+        {
+          "ticker": "DDOG",
+          "ticker_corr": 0.501,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Datadog, Inc."
+        }
+      ]
+    },
+    {
       "term": "minister",
       "is_active_today": false,
       "today_z": null,
@@ -7129,7 +7158,7 @@
           "term": "gold",
           "via": "AMD",
           "direction": "bear",
-          "today_z": 1.917,
+          "today_z": 2.239,
           "indirect": true
         }
       ]
@@ -7165,7 +7194,49 @@
           "term": "gold",
           "via": "AMD",
           "direction": "bear",
-          "today_z": 1.917,
+          "today_z": 2.239,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "BIIB",
+      "sector": "03 Life Sciences",
+      "entity": "BIOGEN INC.",
+      "fund_score": 0.426,
+      "inbound": [
+        {
+          "term": "russia",
+          "direction": "bear",
+          "today_z": 1.908,
+          "hit_rate": 1.0
+        },
+        {
+          "term": "gold",
+          "direction": "bull",
+          "today_z": 2.239,
+          "hit_rate": 0.714
+        }
+      ]
+    },
+    {
+      "ticker": "AMGN",
+      "sector": "03 Life Sciences",
+      "entity": "AMGEN INC",
+      "fund_score": 0.523,
+      "inbound": [
+        {
+          "term": "russia",
+          "via": "BIIB",
+          "direction": "bear",
+          "today_z": 1.908,
+          "indirect": true
+        },
+        {
+          "term": "gold",
+          "via": "BIIB",
+          "direction": "bull",
+          "today_z": 2.239,
           "indirect": true
         }
       ]
@@ -7187,7 +7258,7 @@
           "term": "gold",
           "via": "AMD",
           "direction": "bear",
-          "today_z": 1.917,
+          "today_z": 2.239,
           "indirect": true
         }
       ]
@@ -7217,20 +7288,6 @@
           "direction": "bear",
           "today_z": 1.51,
           "hit_rate": 1.0
-        }
-      ]
-    },
-    {
-      "ticker": "BIIB",
-      "sector": "03 Life Sciences",
-      "entity": "BIOGEN INC.",
-      "fund_score": 0.426,
-      "inbound": [
-        {
-          "term": "gold",
-          "direction": "bull",
-          "today_z": 1.917,
-          "hit_rate": 0.714
         }
       ]
     },
@@ -7285,7 +7342,7 @@
         {
           "term": "gold",
           "direction": "bull",
-          "today_z": 1.917,
+          "today_z": 2.239,
           "hit_rate": 0.571
         }
       ]
@@ -7313,7 +7370,7 @@
         {
           "term": "gold",
           "direction": "bear",
-          "today_z": 1.917,
+          "today_z": 2.239,
           "hit_rate": 0.571
         }
       ]
@@ -7374,21 +7431,6 @@
           "via": "TSLA",
           "direction": "bear",
           "today_z": 1.51,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "AMGN",
-      "sector": "03 Life Sciences",
-      "entity": "AMGEN INC",
-      "fund_score": 0.523,
-      "inbound": [
-        {
-          "term": "gold",
-          "via": "BIIB",
-          "direction": "bull",
-          "today_z": 1.917,
           "indirect": true
         }
       ]
@@ -7508,7 +7550,7 @@
           "term": "gold",
           "via": "AMD",
           "direction": "bear",
-          "today_z": 1.917,
+          "today_z": 2.239,
           "indirect": true
         }
       ]
@@ -7523,7 +7565,7 @@
           "term": "gold",
           "via": "AMD",
           "direction": "bear",
-          "today_z": 1.917,
+          "today_z": 2.239,
           "indirect": true
         }
       ]
@@ -7531,7 +7573,7 @@
   ],
   "quality": {
     "data_window_days": 180,
-    "stock_signals": 185,
+    "stock_signals": 186,
     "macro_signals": 25,
     "sector_diversity": 9,
     "grade": "A",
