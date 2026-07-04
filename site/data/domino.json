@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-04T16:35:56+00:00",
+  "generated_at": "2026-07-04T18:23:48+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-04T16:34:43Z",
+    "signal_corr_updated": "2026-07-04T18:22:39Z",
     "n_pairs_total": 3419,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,11 +21,58 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "agent": 3.011,
-    "built": 2.268,
-    "lost": 1.639
+    "february": 1.585,
+    "agent": 2.357,
+    "built": 1.685,
+    "code": 2.502,
+    "visit": 2.149,
+    "lost": 1.542,
+    "phone": 1.963,
+    "developing": 1.962
   },
   "stock_chains": [
+    {
+      "term": "february",
+      "is_active_today": true,
+      "today_z": 1.585,
+      "hop1": {
+        "ticker": "ENPH",
+        "sector": "04 Manufacturing",
+        "entity": "Enphase Energy, Inc.",
+        "corr": 0.3658,
+        "lag": -2,
+        "hit_rate": 0.636,
+        "direction": "bull",
+        "avg_ret_1d": 2.643,
+        "confidence": 0.444
+      },
+      "hop2": [
+        {
+          "ticker": "SEDG",
+          "ticker_corr": 0.732,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "SOLAREDGE TECHNOLOGIES, INC."
+        }
+      ]
+    },
+    {
+      "term": "february",
+      "is_active_today": true,
+      "today_z": 1.585,
+      "hop1": {
+        "ticker": "CHTR",
+        "sector": "06 Technology",
+        "entity": "CHARTER COMMUNICATIONS, INC. /MO/",
+        "corr": 0.3201,
+        "lag": -5,
+        "hit_rate": 0.545,
+        "direction": "bull",
+        "avg_ret_1d": 0.389,
+        "confidence": 0.379
+      },
+      "hop2": []
+    },
     {
       "term": "intelligence",
       "is_active_today": false,
@@ -2546,31 +2593,6 @@
       ]
     },
     {
-      "term": "february",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "ENPH",
-        "sector": "04 Manufacturing",
-        "entity": "Enphase Energy, Inc.",
-        "corr": 0.3658,
-        "lag": -2,
-        "hit_rate": 0.636,
-        "direction": "bull",
-        "avg_ret_1d": 2.643,
-        "confidence": 0.444
-      },
-      "hop2": [
-        {
-          "ticker": "SEDG",
-          "ticker_corr": 0.732,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "SOLAREDGE TECHNOLOGIES, INC."
-        }
-      ]
-    },
-    {
       "term": "line",
       "is_active_today": false,
       "today_z": null,
@@ -4794,23 +4816,6 @@
           "entity": "AMGEN INC"
         }
       ]
-    },
-    {
-      "term": "february",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CHTR",
-        "sector": "06 Technology",
-        "entity": "CHARTER COMMUNICATIONS, INC. /MO/",
-        "corr": 0.3201,
-        "lag": -5,
-        "hit_rate": 0.545,
-        "direction": "bull",
-        "avg_ret_1d": 0.389,
-        "confidence": 0.379
-      },
-      "hop2": []
     },
     {
       "term": "store",
@@ -8142,7 +8147,51 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "ENPH",
+      "sector": "04 Manufacturing",
+      "entity": "Enphase Energy, Inc.",
+      "fund_score": 0.349,
+      "inbound": [
+        {
+          "term": "february",
+          "direction": "bull",
+          "today_z": 1.585,
+          "hit_rate": 0.636
+        }
+      ]
+    },
+    {
+      "ticker": "CHTR",
+      "sector": "06 Technology",
+      "entity": "CHARTER COMMUNICATIONS, INC. /MO/",
+      "fund_score": 0.271,
+      "inbound": [
+        {
+          "term": "february",
+          "direction": "bull",
+          "today_z": 1.585,
+          "hit_rate": 0.545
+        }
+      ]
+    },
+    {
+      "ticker": "SEDG",
+      "sector": "04 Manufacturing",
+      "entity": "SOLAREDGE TECHNOLOGIES, INC.",
+      "fund_score": 0.168,
+      "inbound": [
+        {
+          "term": "february",
+          "via": "ENPH",
+          "direction": "bull",
+          "today_z": 1.585,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 216,
