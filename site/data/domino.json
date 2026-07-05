@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-05T15:02:29+00:00",
+  "generated_at": "2026-07-05T16:37:35+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-05T15:01:21Z",
+    "signal_corr_updated": "2026-07-05T16:36:22Z",
     "n_pairs_total": 3464,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,9 +21,53 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "trends": 3.4
+    "february": 1.695,
+    "trends": 4.298,
+    "developing": 1.866
   },
   "stock_chains": [
+    {
+      "term": "february",
+      "is_active_today": true,
+      "today_z": 1.695,
+      "hop1": {
+        "ticker": "ENPH",
+        "sector": "04 Manufacturing",
+        "entity": "Enphase Energy, Inc.",
+        "corr": 0.3585,
+        "lag": -2,
+        "hit_rate": 0.636,
+        "direction": "bull",
+        "avg_ret_1d": 2.643,
+        "confidence": 0.442
+      },
+      "hop2": [
+        {
+          "ticker": "SEDG",
+          "ticker_corr": 0.732,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "SOLAREDGE TECHNOLOGIES, INC."
+        }
+      ]
+    },
+    {
+      "term": "february",
+      "is_active_today": true,
+      "today_z": 1.695,
+      "hop1": {
+        "ticker": "CHTR",
+        "sector": "06 Technology",
+        "entity": "CHARTER COMMUNICATIONS, INC. /MO/",
+        "corr": 0.3116,
+        "lag": -5,
+        "hit_rate": 0.545,
+        "direction": "bull",
+        "avg_ret_1d": 0.389,
+        "confidence": 0.376
+      },
+      "hop2": []
+    },
     {
       "term": "earnings",
       "is_active_today": false,
@@ -2566,31 +2610,6 @@
           "implied_dir": "bull",
           "sector": null,
           "entity": null
-        }
-      ]
-    },
-    {
-      "term": "february",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "ENPH",
-        "sector": "04 Manufacturing",
-        "entity": "Enphase Energy, Inc.",
-        "corr": 0.3585,
-        "lag": -2,
-        "hit_rate": 0.636,
-        "direction": "bull",
-        "avg_ret_1d": 2.643,
-        "confidence": 0.442
-      },
-      "hop2": [
-        {
-          "ticker": "SEDG",
-          "ticker_corr": 0.732,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "SOLAREDGE TECHNOLOGIES, INC."
         }
       ]
     },
@@ -5177,23 +5196,6 @@
           "entity": "NVIDIA CORP"
         }
       ]
-    },
-    {
-      "term": "february",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CHTR",
-        "sector": "06 Technology",
-        "entity": "CHARTER COMMUNICATIONS, INC. /MO/",
-        "corr": 0.3116,
-        "lag": -5,
-        "hit_rate": 0.545,
-        "direction": "bull",
-        "avg_ret_1d": 0.389,
-        "confidence": 0.376
-      },
-      "hop2": []
     },
     {
       "term": "leading",
@@ -8041,7 +8043,51 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "ENPH",
+      "sector": "04 Manufacturing",
+      "entity": "Enphase Energy, Inc.",
+      "fund_score": 0.349,
+      "inbound": [
+        {
+          "term": "february",
+          "direction": "bull",
+          "today_z": 1.695,
+          "hit_rate": 0.636
+        }
+      ]
+    },
+    {
+      "ticker": "CHTR",
+      "sector": "06 Technology",
+      "entity": "CHARTER COMMUNICATIONS, INC. /MO/",
+      "fund_score": 0.271,
+      "inbound": [
+        {
+          "term": "february",
+          "direction": "bull",
+          "today_z": 1.695,
+          "hit_rate": 0.545
+        }
+      ]
+    },
+    {
+      "ticker": "SEDG",
+      "sector": "04 Manufacturing",
+      "entity": "SOLAREDGE TECHNOLOGIES, INC.",
+      "fund_score": 0.168,
+      "inbound": [
+        {
+          "term": "february",
+          "via": "ENPH",
+          "direction": "bull",
+          "today_z": 1.695,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 219,
