@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-06T11:49:37+00:00",
+  "generated_at": "2026-07-06T14:45:37+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-06T11:48:28Z",
+    "signal_corr_updated": "2026-07-06T14:44:26Z",
     "n_pairs_total": 3461,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,9 +21,14 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "loss": 1.543,
-    "individual": 2.053,
-    "ultra": 1.815
+    "samsung": 1.525,
+    "loss": 1.949,
+    "design": 1.768,
+    "single": 1.526,
+    "breaks": 1.746,
+    "active": 2.502,
+    "keeps": 1.604,
+    "book": 1.598
   },
   "stock_chains": [
     {
@@ -44,38 +49,77 @@
       "hop2": [
         {
           "ticker": "QQQ",
-          "ticker_corr": 0.687,
+          "ticker_corr": 0.684,
           "implied_dir": "bull",
           "sector": null,
           "entity": "INVESCO QQQ TRUST, SERIES 1"
         },
         {
           "ticker": "SPY",
-          "ticker_corr": 0.602,
+          "ticker_corr": 0.599,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "NVDA",
-          "ticker_corr": 0.578,
+          "ticker_corr": 0.573,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NVIDIA CORP"
         },
         {
           "ticker": "ASML",
-          "ticker_corr": 0.571,
+          "ticker_corr": 0.572,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "ASML HOLDING NV"
         },
         {
           "ticker": "TSM",
-          "ticker_corr": 0.555,
+          "ticker_corr": 0.556,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
+        }
+      ]
+    },
+    {
+      "term": "sales",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "OKTA",
+        "sector": "06 Technology",
+        "entity": "Okta, Inc.",
+        "corr": -0.3894,
+        "lag": -5,
+        "hit_rate": 0.909,
+        "direction": "bear",
+        "avg_ret_1d": 3.83,
+        "confidence": 0.601
+      },
+      "hop2": [
+        {
+          "ticker": "ZS",
+          "ticker_corr": 0.56,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Zscaler, Inc."
+        },
+        {
+          "ticker": "CRM",
+          "ticker_corr": 0.559,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Salesforce, Inc."
+        },
+        {
+          "ticker": "PANW",
+          "ticker_corr": 0.549,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Palo Alto Networks Inc"
         }
       ]
     },
@@ -121,78 +165,39 @@
       },
       "hop2": [
         {
-          "ticker": "QQQ",
-          "ticker_corr": 0.605,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
           "ticker": "NXPI",
-          "ticker_corr": 0.604,
+          "ticker_corr": 0.606,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
         },
         {
+          "ticker": "QQQ",
+          "ticker_corr": 0.604,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
           "ticker": "SPY",
-          "ticker_corr": 0.565,
+          "ticker_corr": 0.564,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.545,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "AMD",
-          "ticker_corr": 0.532,
+          "ticker_corr": 0.536,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ADVANCED MICRO DEVICES INC"
-        }
-      ]
-    },
-    {
-      "term": "sales",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "OKTA",
-        "sector": "06 Technology",
-        "entity": "Okta, Inc.",
-        "corr": -0.3894,
-        "lag": -5,
-        "hit_rate": 0.9,
-        "direction": "bear",
-        "avg_ret_1d": 3.79,
-        "confidence": 0.59
-      },
-      "hop2": [
-        {
-          "ticker": "CRM",
-          "ticker_corr": 0.563,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Salesforce, Inc."
-        },
-        {
-          "ticker": "ZS",
-          "ticker_corr": 0.56,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Zscaler, Inc."
-        },
-        {
-          "ticker": "PANW",
-          "ticker_corr": 0.547,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Palo Alto Networks Inc"
         }
       ]
     },
@@ -214,7 +219,7 @@
       "hop2": [
         {
           "ticker": "TSM",
-          "ticker_corr": 0.565,
+          "ticker_corr": 0.563,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
@@ -228,7 +233,7 @@
         },
         {
           "ticker": "AMD",
-          "ticker_corr": 0.536,
+          "ticker_corr": 0.529,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ADVANCED MICRO DEVICES INC"
@@ -239,6 +244,38 @@
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "LAM RESEARCH CORP"
+        }
+      ]
+    },
+    {
+      "term": "second",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "FTNT",
+        "sector": "06 Technology",
+        "entity": "Fortinet, Inc.",
+        "corr": 0.3419,
+        "lag": -1,
+        "hit_rate": 1.0,
+        "direction": "bull",
+        "avg_ret_1d": 6.082,
+        "confidence": 0.579
+      },
+      "hop2": [
+        {
+          "ticker": "PANW",
+          "ticker_corr": 0.621,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "Palo Alto Networks Inc"
+        },
+        {
+          "ticker": "ZS",
+          "ticker_corr": 0.515,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "Zscaler, Inc."
         }
       ]
     },
@@ -276,13 +313,6 @@
       },
       "hop2": [
         {
-          "ticker": "CRM",
-          "ticker_corr": 0.563,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "Salesforce, Inc."
-        },
-        {
           "ticker": "ZS",
           "ticker_corr": 0.56,
           "implied_dir": "bull",
@@ -290,36 +320,18 @@
           "entity": "Zscaler, Inc."
         },
         {
+          "ticker": "CRM",
+          "ticker_corr": 0.559,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "Salesforce, Inc."
+        },
+        {
           "ticker": "PANW",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.549,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "Palo Alto Networks Inc"
-        }
-      ]
-    },
-    {
-      "term": "russia",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "BIIB",
-        "sector": "03 Life Sciences",
-        "entity": "BIOGEN INC.",
-        "corr": -0.3271,
-        "lag": -5,
-        "hit_rate": 1.0,
-        "direction": "bear",
-        "avg_ret_1d": 2.523,
-        "confidence": 0.574
-      },
-      "hop2": [
-        {
-          "ticker": "AMGN",
-          "ticker_corr": 0.553,
-          "implied_dir": "bear",
-          "sector": "03 Life Sciences",
-          "entity": "AMGEN INC"
         }
       ]
     },
@@ -348,14 +360,14 @@
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.741,
+          "ticker_corr": 0.742,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.736,
+          "ticker_corr": 0.737,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -369,7 +381,7 @@
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.52,
+          "ticker_corr": 0.519,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -401,7 +413,7 @@
         },
         {
           "ticker": "ADBE",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.548,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "ADOBE INC."
@@ -424,38 +436,6 @@
         "confidence": 0.568
       },
       "hop2": []
-    },
-    {
-      "term": "second",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "FTNT",
-        "sector": "06 Technology",
-        "entity": "Fortinet, Inc.",
-        "corr": 0.3419,
-        "lag": -1,
-        "hit_rate": 1.0,
-        "direction": "bull",
-        "avg_ret_1d": 7.098,
-        "confidence": 0.568
-      },
-      "hop2": [
-        {
-          "ticker": "PANW",
-          "ticker_corr": 0.62,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "Palo Alto Networks Inc"
-        },
-        {
-          "ticker": "ZS",
-          "ticker_corr": 0.514,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "Zscaler, Inc."
-        }
-      ]
     },
     {
       "term": "party",
@@ -482,7 +462,7 @@
         },
         {
           "ticker": "MS",
-          "ticker_corr": 0.732,
+          "ticker_corr": 0.73,
           "implied_dir": "bear",
           "sector": "02 Finance",
           "entity": "MORGAN STANLEY"
@@ -528,21 +508,21 @@
       "hop2": [
         {
           "ticker": "MCHP",
-          "ticker_corr": 0.741,
+          "ticker_corr": 0.742,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "MICROCHIP TECHNOLOGY INC"
         },
         {
           "ticker": "ADI",
-          "ticker_corr": 0.688,
+          "ticker_corr": 0.689,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ANALOG DEVICES INC"
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.672,
+          "ticker_corr": 0.673,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -595,21 +575,21 @@
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.575,
+          "ticker_corr": 0.574,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "HYG",
-          "ticker_corr": 0.562,
+          "ticker_corr": 0.561,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "NVDA",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.546,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "NVIDIA CORP"
@@ -641,7 +621,7 @@
         },
         {
           "ticker": "ADI",
-          "ticker_corr": 0.723,
+          "ticker_corr": 0.724,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "ANALOG DEVICES INC"
@@ -655,12 +635,29 @@
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.625,
+          "ticker_corr": 0.626,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
         }
       ]
+    },
+    {
+      "term": "sales",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "CRWD",
+        "sector": "06 Technology",
+        "entity": "CrowdStrike Holdings, Inc.",
+        "corr": -0.3887,
+        "lag": -5,
+        "hit_rate": 0.818,
+        "direction": "bear",
+        "avg_ret_1d": 2.767,
+        "confidence": 0.552
+      },
+      "hop2": []
     },
     {
       "term": "apple",
@@ -687,7 +684,7 @@
         },
         {
           "ticker": "USO",
-          "ticker_corr": 0.635,
+          "ticker_corr": 0.632,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -712,14 +709,14 @@
       "hop2": [
         {
           "ticker": "MCHP",
-          "ticker_corr": 0.736,
+          "ticker_corr": 0.737,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "MICROCHIP TECHNOLOGY INC"
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.672,
+          "ticker_corr": 0.673,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
@@ -733,36 +730,19 @@
         },
         {
           "ticker": "TXN",
-          "ticker_corr": 0.625,
+          "ticker_corr": 0.626,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "TEXAS INSTRUMENTS INC"
         },
         {
           "ticker": "SPY",
-          "ticker_corr": 0.624,
+          "ticker_corr": 0.623,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         }
       ]
-    },
-    {
-      "term": "sales",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CRWD",
-        "sector": "06 Technology",
-        "entity": "CrowdStrike Holdings, Inc.",
-        "corr": -0.3887,
-        "lag": -5,
-        "hit_rate": 0.8,
-        "direction": "bear",
-        "avg_ret_1d": 2.571,
-        "confidence": 0.535
-      },
-      "hop2": []
     },
     {
       "term": "april",
@@ -782,7 +762,7 @@
       "hop2": [
         {
           "ticker": "JPM",
-          "ticker_corr": 0.793,
+          "ticker_corr": 0.792,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "JPMORGAN CHASE & CO"
@@ -803,14 +783,14 @@
         },
         {
           "ticker": "DIA",
-          "ticker_corr": 0.694,
+          "ticker_corr": 0.693,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.647,
+          "ticker_corr": 0.645,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -849,21 +829,21 @@
         },
         {
           "ticker": "AVGO",
-          "ticker_corr": 0.642,
+          "ticker_corr": 0.641,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "Broadcom Inc."
         },
         {
           "ticker": "TSM",
-          "ticker_corr": 0.598,
+          "ticker_corr": 0.596,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
         },
         {
           "ticker": "ASML",
-          "ticker_corr": 0.586,
+          "ticker_corr": 0.585,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "ASML HOLDING NV"
@@ -912,7 +892,7 @@
         },
         {
           "ticker": "MS",
-          "ticker_corr": 0.732,
+          "ticker_corr": 0.73,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "MORGAN STANLEY"
@@ -958,7 +938,7 @@
       "hop2": [
         {
           "ticker": "TSM",
-          "ticker_corr": 0.565,
+          "ticker_corr": 0.563,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
@@ -972,7 +952,7 @@
         },
         {
           "ticker": "AMD",
-          "ticker_corr": 0.536,
+          "ticker_corr": 0.529,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ADVANCED MICRO DEVICES INC"
@@ -1004,7 +984,7 @@
       "hop2": [
         {
           "ticker": "BAC",
-          "ticker_corr": 0.793,
+          "ticker_corr": 0.792,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "BANK OF AMERICA CORP /DE/"
@@ -1018,7 +998,7 @@
         },
         {
           "ticker": "MS",
-          "ticker_corr": 0.764,
+          "ticker_corr": 0.762,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "MORGAN STANLEY"
@@ -1074,7 +1054,7 @@
       "hop2": [
         {
           "ticker": "FTNT",
-          "ticker_corr": 0.62,
+          "ticker_corr": 0.621,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Fortinet, Inc."
@@ -1087,18 +1067,18 @@
           "entity": "Zscaler, Inc."
         },
         {
-          "ticker": "DDOG",
-          "ticker_corr": 0.548,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Datadog, Inc."
-        },
-        {
           "ticker": "OKTA",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.549,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Okta, Inc."
+        },
+        {
+          "ticker": "DDOG",
+          "ticker_corr": 0.544,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Datadog, Inc."
         }
       ]
     },
@@ -1120,14 +1100,14 @@
       "hop2": [
         {
           "ticker": "MCHP",
-          "ticker_corr": 0.736,
+          "ticker_corr": 0.737,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "MICROCHIP TECHNOLOGY INC"
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.672,
+          "ticker_corr": 0.673,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
@@ -1141,14 +1121,14 @@
         },
         {
           "ticker": "TXN",
-          "ticker_corr": 0.625,
+          "ticker_corr": 0.626,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "TEXAS INSTRUMENTS INC"
         },
         {
           "ticker": "SPY",
-          "ticker_corr": 0.624,
+          "ticker_corr": 0.623,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -1214,21 +1194,21 @@
         },
         {
           "ticker": "TXN",
-          "ticker_corr": 0.723,
+          "ticker_corr": 0.724,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "TEXAS INSTRUMENTS INC"
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.688,
+          "ticker_corr": 0.689,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.619,
+          "ticker_corr": 0.62,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -1267,7 +1247,7 @@
         },
         {
           "ticker": "ADI",
-          "ticker_corr": 0.723,
+          "ticker_corr": 0.724,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ANALOG DEVICES INC"
@@ -1281,7 +1261,7 @@
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.625,
+          "ticker_corr": 0.626,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -1339,6 +1319,31 @@
       ]
     },
     {
+      "term": "russia",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "BIIB",
+        "sector": "03 Life Sciences",
+        "entity": "BIOGEN INC.",
+        "corr": -0.3271,
+        "lag": -5,
+        "hit_rate": 0.8,
+        "direction": "bear",
+        "avg_ret_1d": 1.538,
+        "confidence": 0.475
+      },
+      "hop2": [
+        {
+          "ticker": "AMGN",
+          "ticker_corr": 0.556,
+          "implied_dir": "bear",
+          "sector": "03 Life Sciences",
+          "entity": "AMGEN INC"
+        }
+      ]
+    },
+    {
       "term": "reports",
       "is_active_today": false,
       "today_z": null,
@@ -1356,7 +1361,7 @@
       "hop2": [
         {
           "ticker": "BIIB",
-          "ticker_corr": 0.553,
+          "ticker_corr": 0.556,
           "implied_dir": "bull",
           "sector": "03 Life Sciences",
           "entity": "BIOGEN INC."
@@ -1388,7 +1393,7 @@
         },
         {
           "ticker": "DIA",
-          "ticker_corr": 0.801,
+          "ticker_corr": 0.8,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -1402,14 +1407,14 @@
         },
         {
           "ticker": "SPY",
-          "ticker_corr": 0.762,
+          "ticker_corr": 0.761,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.759,
+          "ticker_corr": 0.758,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -1502,14 +1507,14 @@
       "hop2": [
         {
           "ticker": "MCHP",
-          "ticker_corr": 0.736,
+          "ticker_corr": 0.737,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "MICROCHIP TECHNOLOGY INC"
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.672,
+          "ticker_corr": 0.673,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
@@ -1523,14 +1528,14 @@
         },
         {
           "ticker": "TXN",
-          "ticker_corr": 0.625,
+          "ticker_corr": 0.626,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "TEXAS INSTRUMENTS INC"
         },
         {
           "ticker": "SPY",
-          "ticker_corr": 0.624,
+          "ticker_corr": 0.623,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -1562,7 +1567,7 @@
         },
         {
           "ticker": "LRCX",
-          "ticker_corr": 0.692,
+          "ticker_corr": 0.691,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "LAM RESEARCH CORP"
@@ -1583,7 +1588,7 @@
         },
         {
           "ticker": "AMAT",
-          "ticker_corr": 0.64,
+          "ticker_corr": 0.639,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "APPLIED MATERIALS INC /DE"
@@ -1608,7 +1613,7 @@
       "hop2": [
         {
           "ticker": "JPM",
-          "ticker_corr": 0.793,
+          "ticker_corr": 0.792,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "JPMORGAN CHASE & CO"
@@ -1629,14 +1634,14 @@
         },
         {
           "ticker": "DIA",
-          "ticker_corr": 0.694,
+          "ticker_corr": 0.693,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.647,
+          "ticker_corr": 0.645,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -1661,7 +1666,7 @@
       "hop2": [
         {
           "ticker": "JPM",
-          "ticker_corr": 0.793,
+          "ticker_corr": 0.792,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "JPMORGAN CHASE & CO"
@@ -1682,14 +1687,14 @@
         },
         {
           "ticker": "DIA",
-          "ticker_corr": 0.694,
+          "ticker_corr": 0.693,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.647,
+          "ticker_corr": 0.645,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -1747,23 +1752,6 @@
       ]
     },
     {
-      "term": "sales",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "BMRN",
-        "sector": "03 Life Sciences",
-        "entity": "BIOMARIN PHARMACEUTICAL INC",
-        "corr": 0.3301,
-        "lag": -3,
-        "hit_rate": 0.7,
-        "direction": "bull",
-        "avg_ret_1d": 1.21,
-        "confidence": 0.46
-      },
-      "hop2": []
-    },
-    {
       "term": "trading",
       "is_active_today": false,
       "today_z": null,
@@ -1813,7 +1801,7 @@
         },
         {
           "ticker": "MS",
-          "ticker_corr": 0.732,
+          "ticker_corr": 0.73,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "MORGAN STANLEY"
@@ -1900,7 +1888,7 @@
         },
         {
           "ticker": "ASML",
-          "ticker_corr": 0.816,
+          "ticker_corr": 0.814,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "ASML HOLDING NV"
@@ -1913,18 +1901,18 @@
           "entity": "MICRON TECHNOLOGY INC"
         },
         {
-          "ticker": "TSM",
-          "ticker_corr": 0.692,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
-        },
-        {
           "ticker": "QQQ",
-          "ticker_corr": 0.692,
+          "ticker_corr": 0.691,
           "implied_dir": "bull",
           "sector": null,
           "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "TSM",
+          "ticker_corr": 0.691,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
         }
       ]
     },
@@ -1946,7 +1934,7 @@
       "hop2": [
         {
           "ticker": "JPM",
-          "ticker_corr": 0.793,
+          "ticker_corr": 0.792,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "JPMORGAN CHASE & CO"
@@ -1967,14 +1955,14 @@
         },
         {
           "ticker": "DIA",
-          "ticker_corr": 0.694,
+          "ticker_corr": 0.693,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.647,
+          "ticker_corr": 0.645,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -2132,21 +2120,21 @@
         },
         {
           "ticker": "AVGO",
-          "ticker_corr": 0.642,
+          "ticker_corr": 0.641,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "Broadcom Inc."
         },
         {
           "ticker": "TSM",
-          "ticker_corr": 0.598,
+          "ticker_corr": 0.596,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
         },
         {
           "ticker": "ASML",
-          "ticker_corr": 0.586,
+          "ticker_corr": 0.585,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "ASML HOLDING NV"
@@ -2171,7 +2159,7 @@
       "hop2": [
         {
           "ticker": "BAC",
-          "ticker_corr": 0.793,
+          "ticker_corr": 0.792,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "BANK OF AMERICA CORP /DE/"
@@ -2185,7 +2173,7 @@
         },
         {
           "ticker": "MS",
-          "ticker_corr": 0.764,
+          "ticker_corr": 0.762,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "MORGAN STANLEY"
@@ -2263,7 +2251,7 @@
         },
         {
           "ticker": "MS",
-          "ticker_corr": 0.732,
+          "ticker_corr": 0.73,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "MORGAN STANLEY"
@@ -2334,7 +2322,7 @@
       "hop2": [
         {
           "ticker": "BIIB",
-          "ticker_corr": 0.553,
+          "ticker_corr": 0.556,
           "implied_dir": "bear",
           "sector": "03 Life Sciences",
           "entity": "BIOGEN INC."
@@ -2366,21 +2354,21 @@
         },
         {
           "ticker": "TXN",
-          "ticker_corr": 0.723,
+          "ticker_corr": 0.724,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "TEXAS INSTRUMENTS INC"
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.688,
+          "ticker_corr": 0.689,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.619,
+          "ticker_corr": 0.62,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -2436,7 +2424,7 @@
         },
         {
           "ticker": "QQQ",
-          "ticker_corr": 0.67,
+          "ticker_corr": 0.669,
           "implied_dir": "bear",
           "sector": null,
           "entity": "INVESCO QQQ TRUST, SERIES 1"
@@ -2450,7 +2438,7 @@
         },
         {
           "ticker": "ASML",
-          "ticker_corr": 0.607,
+          "ticker_corr": 0.606,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "ASML HOLDING NV"
@@ -2594,21 +2582,21 @@
         },
         {
           "ticker": "TXN",
-          "ticker_corr": 0.723,
+          "ticker_corr": 0.724,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "TEXAS INSTRUMENTS INC"
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.688,
+          "ticker_corr": 0.689,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.619,
+          "ticker_corr": 0.62,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -2688,21 +2676,21 @@
         },
         {
           "ticker": "JPM",
-          "ticker_corr": 0.764,
+          "ticker_corr": 0.762,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "JPMORGAN CHASE & CO"
         },
         {
           "ticker": "DIA",
-          "ticker_corr": 0.758,
+          "ticker_corr": 0.755,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "SPY",
-          "ticker_corr": 0.753,
+          "ticker_corr": 0.75,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -2793,21 +2781,21 @@
         },
         {
           "ticker": "INTU",
-          "ticker_corr": 0.581,
+          "ticker_corr": 0.582,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "INTUIT INC."
         },
         {
           "ticker": "DOCU",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.548,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "DOCUSIGN, INC."
         },
         {
           "ticker": "ADP",
-          "ticker_corr": 0.521,
+          "ticker_corr": 0.522,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "AUTOMATIC DATA PROCESSING INC"
@@ -2868,18 +2856,18 @@
       ]
     },
     {
-      "term": "russia",
+      "term": "sales",
       "is_active_today": false,
       "today_z": null,
       "hop1": {
-        "ticker": "GILD",
+        "ticker": "BMRN",
         "sector": "03 Life Sciences",
-        "entity": "GILEAD SCIENCES, INC.",
-        "corr": -0.3112,
-        "lag": -5,
-        "hit_rate": 0.75,
-        "direction": "bear",
-        "avg_ret_1d": 1.519,
+        "entity": "BIOMARIN PHARMACEUTICAL INC",
+        "corr": 0.3301,
+        "lag": -3,
+        "hit_rate": 0.636,
+        "direction": "bull",
+        "avg_ret_1d": 0.934,
         "confidence": 0.432
       },
       "hop2": []
@@ -2901,36 +2889,36 @@
       },
       "hop2": [
         {
-          "ticker": "QQQ",
-          "ticker_corr": 0.605,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
           "ticker": "NXPI",
-          "ticker_corr": 0.604,
+          "ticker_corr": 0.606,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
         },
         {
+          "ticker": "QQQ",
+          "ticker_corr": 0.604,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
           "ticker": "SPY",
-          "ticker_corr": 0.565,
+          "ticker_corr": 0.564,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.545,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "AMD",
-          "ticker_corr": 0.532,
+          "ticker_corr": 0.536,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ADVANCED MICRO DEVICES INC"
@@ -3003,21 +2991,21 @@
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.575,
+          "ticker_corr": 0.574,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "HYG",
-          "ticker_corr": 0.562,
+          "ticker_corr": 0.561,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "NVDA",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.546,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NVIDIA CORP"
@@ -3042,7 +3030,7 @@
       "hop2": [
         {
           "ticker": "JPM",
-          "ticker_corr": 0.793,
+          "ticker_corr": 0.792,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "JPMORGAN CHASE & CO"
@@ -3063,19 +3051,36 @@
         },
         {
           "ticker": "DIA",
-          "ticker_corr": 0.694,
+          "ticker_corr": 0.693,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.647,
+          "ticker_corr": 0.645,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         }
       ]
+    },
+    {
+      "term": "store",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "MRNA",
+        "sector": "03 Life Sciences",
+        "entity": "Moderna, Inc.",
+        "corr": -0.3019,
+        "lag": -4,
+        "hit_rate": 0.75,
+        "direction": "bear",
+        "avg_ret_1d": 5.159,
+        "confidence": 0.429
+      },
+      "hop2": []
     },
     {
       "term": "real",
@@ -3095,14 +3100,14 @@
       "hop2": [
         {
           "ticker": "MCHP",
-          "ticker_corr": 0.736,
+          "ticker_corr": 0.737,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "MICROCHIP TECHNOLOGY INC"
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.672,
+          "ticker_corr": 0.673,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
@@ -3116,14 +3121,14 @@
         },
         {
           "ticker": "TXN",
-          "ticker_corr": 0.625,
+          "ticker_corr": 0.626,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "TEXAS INSTRUMENTS INC"
         },
         {
           "ticker": "SPY",
-          "ticker_corr": 0.624,
+          "ticker_corr": 0.623,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -3155,21 +3160,21 @@
         },
         {
           "ticker": "TXN",
-          "ticker_corr": 0.723,
+          "ticker_corr": 0.724,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "TEXAS INSTRUMENTS INC"
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.688,
+          "ticker_corr": 0.689,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.619,
+          "ticker_corr": 0.62,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -3201,7 +3206,7 @@
       "hop2": [
         {
           "ticker": "BAC",
-          "ticker_corr": 0.793,
+          "ticker_corr": 0.792,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "BANK OF AMERICA CORP /DE/"
@@ -3215,7 +3220,7 @@
         },
         {
           "ticker": "MS",
-          "ticker_corr": 0.764,
+          "ticker_corr": 0.762,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "MORGAN STANLEY"
@@ -3253,36 +3258,36 @@
       },
       "hop2": [
         {
-          "ticker": "QQQ",
-          "ticker_corr": 0.605,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
           "ticker": "NXPI",
-          "ticker_corr": 0.604,
+          "ticker_corr": 0.606,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
         },
         {
+          "ticker": "QQQ",
+          "ticker_corr": 0.604,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
           "ticker": "SPY",
-          "ticker_corr": 0.565,
+          "ticker_corr": 0.564,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.545,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "AMD",
-          "ticker_corr": 0.532,
+          "ticker_corr": 0.536,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ADVANCED MICRO DEVICES INC"
@@ -3331,7 +3336,7 @@
         },
         {
           "ticker": "ADI",
-          "ticker_corr": 0.723,
+          "ticker_corr": 0.724,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ANALOG DEVICES INC"
@@ -3345,7 +3350,7 @@
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.625,
+          "ticker_corr": 0.626,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -3370,14 +3375,14 @@
       "hop2": [
         {
           "ticker": "LRCX",
-          "ticker_corr": 0.816,
+          "ticker_corr": 0.814,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "LAM RESEARCH CORP"
         },
         {
           "ticker": "AMAT",
-          "ticker_corr": 0.778,
+          "ticker_corr": 0.777,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "APPLIED MATERIALS INC /DE"
@@ -3398,7 +3403,7 @@
         },
         {
           "ticker": "SPY",
-          "ticker_corr": 0.649,
+          "ticker_corr": 0.648,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -3454,21 +3459,21 @@
         },
         {
           "ticker": "FTNT",
-          "ticker_corr": 0.514,
+          "ticker_corr": 0.515,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Fortinet, Inc."
         },
         {
           "ticker": "DDOG",
-          "ticker_corr": 0.51,
+          "ticker_corr": 0.509,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Datadog, Inc."
         },
         {
           "ticker": "CRM",
-          "ticker_corr": 0.508,
+          "ticker_corr": 0.507,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Salesforce, Inc."
@@ -3493,35 +3498,35 @@
       "hop2": [
         {
           "ticker": "QQQ",
-          "ticker_corr": 0.687,
+          "ticker_corr": 0.684,
           "implied_dir": "bear",
           "sector": null,
           "entity": "INVESCO QQQ TRUST, SERIES 1"
         },
         {
           "ticker": "SPY",
-          "ticker_corr": 0.602,
+          "ticker_corr": 0.599,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "NVDA",
-          "ticker_corr": 0.578,
+          "ticker_corr": 0.573,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "NVIDIA CORP"
         },
         {
           "ticker": "ASML",
-          "ticker_corr": 0.571,
+          "ticker_corr": 0.572,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "ASML HOLDING NV"
         },
         {
           "ticker": "TSM",
-          "ticker_corr": 0.555,
+          "ticker_corr": 0.556,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
@@ -3546,7 +3551,7 @@
       "hop2": [
         {
           "ticker": "JPM",
-          "ticker_corr": 0.793,
+          "ticker_corr": 0.792,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "JPMORGAN CHASE & CO"
@@ -3567,14 +3572,14 @@
         },
         {
           "ticker": "DIA",
-          "ticker_corr": 0.694,
+          "ticker_corr": 0.693,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.647,
+          "ticker_corr": 0.645,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -3684,7 +3689,7 @@
       "hop2": [
         {
           "ticker": "HOOD",
-          "ticker_corr": 0.616,
+          "ticker_corr": 0.614,
           "implied_dir": "bear",
           "sector": "09 Crypto Assets",
           "entity": "Robinhood Markets, Inc."
@@ -3697,18 +3702,18 @@
           "entity": null
         },
         {
-          "ticker": "COIN",
-          "ticker_corr": 0.542,
-          "implied_dir": "bear",
-          "sector": "09 Crypto Assets",
-          "entity": "Coinbase Global, Inc."
-        },
-        {
           "ticker": "QQQ",
           "ticker_corr": 0.541,
           "implied_dir": "bear",
           "sector": null,
           "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "COIN",
+          "ticker_corr": 0.54,
+          "implied_dir": "bear",
+          "sector": "09 Crypto Assets",
+          "entity": "Coinbase Global, Inc."
         },
         {
           "ticker": "IWM",
@@ -3751,21 +3756,21 @@
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.575,
+          "ticker_corr": 0.574,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "HYG",
-          "ticker_corr": 0.562,
+          "ticker_corr": 0.561,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "NVDA",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.546,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NVIDIA CORP"
@@ -3937,14 +3942,14 @@
         },
         {
           "ticker": "OKTA",
-          "ticker_corr": 0.563,
+          "ticker_corr": 0.559,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Okta, Inc."
         },
         {
           "ticker": "MSFT",
-          "ticker_corr": 0.519,
+          "ticker_corr": 0.52,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "MICROSOFT CORP"
@@ -4008,21 +4013,21 @@
         },
         {
           "ticker": "JPM",
-          "ticker_corr": 0.764,
+          "ticker_corr": 0.762,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "JPMORGAN CHASE & CO"
         },
         {
           "ticker": "DIA",
-          "ticker_corr": 0.758,
+          "ticker_corr": 0.755,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "SPY",
-          "ticker_corr": 0.753,
+          "ticker_corr": 0.75,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -4071,7 +4076,7 @@
         },
         {
           "ticker": "ADI",
-          "ticker_corr": 0.723,
+          "ticker_corr": 0.724,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "ANALOG DEVICES INC"
@@ -4085,7 +4090,7 @@
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.625,
+          "ticker_corr": 0.626,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -4110,7 +4115,7 @@
       "hop2": [
         {
           "ticker": "BIIB",
-          "ticker_corr": 0.553,
+          "ticker_corr": 0.556,
           "implied_dir": "bear",
           "sector": "03 Life Sciences",
           "entity": "BIOGEN INC."
@@ -4188,7 +4193,7 @@
       "hop2": [
         {
           "ticker": "JPM",
-          "ticker_corr": 0.793,
+          "ticker_corr": 0.792,
           "implied_dir": "bear",
           "sector": "02 Finance",
           "entity": "JPMORGAN CHASE & CO"
@@ -4209,14 +4214,14 @@
         },
         {
           "ticker": "DIA",
-          "ticker_corr": 0.694,
+          "ticker_corr": 0.693,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.647,
+          "ticker_corr": 0.645,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
@@ -4287,14 +4292,14 @@
         },
         {
           "ticker": "OKTA",
-          "ticker_corr": 0.563,
+          "ticker_corr": 0.559,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Okta, Inc."
         },
         {
           "ticker": "MSFT",
-          "ticker_corr": 0.519,
+          "ticker_corr": 0.52,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "MICROSOFT CORP"
@@ -4344,52 +4349,6 @@
       ]
     },
     {
-      "term": "sales",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "COIN",
-        "sector": "09 Crypto Assets",
-        "entity": "Coinbase Global, Inc.",
-        "corr": 0.3054,
-        "lag": -1,
-        "hit_rate": 0.6,
-        "direction": "bull",
-        "avg_ret_1d": 4.221,
-        "confidence": 0.397
-      },
-      "hop2": [
-        {
-          "ticker": "HOOD",
-          "ticker_corr": 0.708,
-          "implied_dir": "bull",
-          "sector": "09 Crypto Assets",
-          "entity": "Robinhood Markets, Inc."
-        },
-        {
-          "ticker": "SOFI",
-          "ticker_corr": 0.542,
-          "implied_dir": "bull",
-          "sector": "02 Finance",
-          "entity": "SoFi Technologies, Inc."
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.532,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "SPY",
-          "ticker_corr": 0.528,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": null
-        }
-      ]
-    },
-    {
       "term": "april",
       "is_active_today": false,
       "today_z": null,
@@ -4407,7 +4366,7 @@
       "hop2": [
         {
           "ticker": "FTNT",
-          "ticker_corr": 0.62,
+          "ticker_corr": 0.621,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Fortinet, Inc."
@@ -4420,18 +4379,18 @@
           "entity": "Zscaler, Inc."
         },
         {
-          "ticker": "DDOG",
-          "ticker_corr": 0.548,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Datadog, Inc."
-        },
-        {
           "ticker": "OKTA",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.549,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Okta, Inc."
+        },
+        {
+          "ticker": "DDOG",
+          "ticker_corr": 0.544,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Datadog, Inc."
         }
       ]
     },
@@ -4501,21 +4460,21 @@
         },
         {
           "ticker": "FTNT",
-          "ticker_corr": 0.514,
+          "ticker_corr": 0.515,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Fortinet, Inc."
         },
         {
           "ticker": "DDOG",
-          "ticker_corr": 0.51,
+          "ticker_corr": 0.509,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Datadog, Inc."
         },
         {
           "ticker": "CRM",
-          "ticker_corr": 0.508,
+          "ticker_corr": 0.507,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Salesforce, Inc."
@@ -4540,52 +4499,6 @@
       "hop2": []
     },
     {
-      "term": "store",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "ADBE",
-        "sector": "06 Technology",
-        "entity": "ADOBE INC.",
-        "corr": -0.3485,
-        "lag": -3,
-        "hit_rate": 0.667,
-        "direction": "bear",
-        "avg_ret_1d": 1.38,
-        "confidence": 0.388
-      },
-      "hop2": [
-        {
-          "ticker": "CRM",
-          "ticker_corr": 0.73,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Salesforce, Inc."
-        },
-        {
-          "ticker": "INTU",
-          "ticker_corr": 0.581,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "INTUIT INC."
-        },
-        {
-          "ticker": "DOCU",
-          "ticker_corr": 0.547,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "DOCUSIGN, INC."
-        },
-        {
-          "ticker": "ADP",
-          "ticker_corr": 0.521,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "AUTOMATIC DATA PROCESSING INC"
-        }
-      ]
-    },
-    {
       "term": "foreign",
       "is_active_today": false,
       "today_z": null,
@@ -4603,7 +4516,7 @@
       "hop2": [
         {
           "ticker": "AMGN",
-          "ticker_corr": 0.553,
+          "ticker_corr": 0.556,
           "implied_dir": "bull",
           "sector": "03 Life Sciences",
           "entity": "AMGEN INC"
@@ -4645,14 +4558,14 @@
       "hop2": [
         {
           "ticker": "MCHP",
-          "ticker_corr": 0.736,
+          "ticker_corr": 0.737,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "MICROCHIP TECHNOLOGY INC"
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.672,
+          "ticker_corr": 0.673,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
@@ -4666,14 +4579,14 @@
         },
         {
           "ticker": "TXN",
-          "ticker_corr": 0.625,
+          "ticker_corr": 0.626,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "TEXAS INSTRUMENTS INC"
         },
         {
           "ticker": "SPY",
-          "ticker_corr": 0.624,
+          "ticker_corr": 0.623,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
@@ -4756,7 +4669,7 @@
         },
         {
           "ticker": "ADBE",
-          "ticker_corr": 0.581,
+          "ticker_corr": 0.582,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "ADOBE INC."
@@ -4781,7 +4694,7 @@
       "hop2": [
         {
           "ticker": "BAC",
-          "ticker_corr": 0.793,
+          "ticker_corr": 0.792,
           "implied_dir": "bear",
           "sector": "02 Finance",
           "entity": "BANK OF AMERICA CORP /DE/"
@@ -4795,7 +4708,7 @@
         },
         {
           "ticker": "MS",
-          "ticker_corr": 0.764,
+          "ticker_corr": 0.762,
           "implied_dir": "bear",
           "sector": "02 Finance",
           "entity": "MORGAN STANLEY"
@@ -4866,29 +4779,12 @@
         },
         {
           "ticker": "ADBE",
-          "ticker_corr": 0.581,
+          "ticker_corr": 0.582,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "ADOBE INC."
         }
       ]
-    },
-    {
-      "term": "store",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PYPL",
-        "sector": "07 Trade & Services",
-        "entity": "PayPal Holdings, Inc.",
-        "corr": -0.3214,
-        "lag": -4,
-        "hit_rate": 0.667,
-        "direction": "bear",
-        "avg_ret_1d": 1.774,
-        "confidence": 0.379
-      },
-      "hop2": []
     },
     {
       "term": "investment",
@@ -4932,21 +4828,21 @@
         },
         {
           "ticker": "TXN",
-          "ticker_corr": 0.723,
+          "ticker_corr": 0.724,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "TEXAS INSTRUMENTS INC"
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.688,
+          "ticker_corr": 0.689,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.619,
+          "ticker_corr": 0.62,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -5019,7 +4915,7 @@
         },
         {
           "ticker": "ADBE",
-          "ticker_corr": 0.581,
+          "ticker_corr": 0.582,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "ADOBE INC."
@@ -5051,7 +4947,7 @@
         },
         {
           "ticker": "LRCX",
-          "ticker_corr": 0.692,
+          "ticker_corr": 0.691,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "LAM RESEARCH CORP"
@@ -5072,7 +4968,7 @@
         },
         {
           "ticker": "AMAT",
-          "ticker_corr": 0.64,
+          "ticker_corr": 0.639,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "APPLIED MATERIALS INC /DE"
@@ -5104,7 +5000,7 @@
         },
         {
           "ticker": "MS",
-          "ticker_corr": 0.732,
+          "ticker_corr": 0.73,
           "implied_dir": "bear",
           "sector": "02 Finance",
           "entity": "MORGAN STANLEY"
@@ -5150,7 +5046,7 @@
       "hop2": [
         {
           "ticker": "HOOD",
-          "ticker_corr": 0.616,
+          "ticker_corr": 0.614,
           "implied_dir": "bear",
           "sector": "09 Crypto Assets",
           "entity": "Robinhood Markets, Inc."
@@ -5163,13 +5059,6 @@
           "entity": null
         },
         {
-          "ticker": "COIN",
-          "ticker_corr": 0.542,
-          "implied_dir": "bear",
-          "sector": "09 Crypto Assets",
-          "entity": "Coinbase Global, Inc."
-        },
-        {
           "ticker": "QQQ",
           "ticker_corr": 0.541,
           "implied_dir": "bear",
@@ -5177,9 +5066,62 @@
           "entity": "INVESCO QQQ TRUST, SERIES 1"
         },
         {
+          "ticker": "COIN",
+          "ticker_corr": 0.54,
+          "implied_dir": "bear",
+          "sector": "09 Crypto Assets",
+          "entity": "Coinbase Global, Inc."
+        },
+        {
           "ticker": "IWM",
           "ticker_corr": 0.534,
           "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        }
+      ]
+    },
+    {
+      "term": "sales",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "COIN",
+        "sector": "09 Crypto Assets",
+        "entity": "Coinbase Global, Inc.",
+        "corr": 0.3054,
+        "lag": -1,
+        "hit_rate": 0.545,
+        "direction": "bull",
+        "avg_ret_1d": 3.558,
+        "confidence": 0.374
+      },
+      "hop2": [
+        {
+          "ticker": "HOOD",
+          "ticker_corr": 0.708,
+          "implied_dir": "bull",
+          "sector": "09 Crypto Assets",
+          "entity": "Robinhood Markets, Inc."
+        },
+        {
+          "ticker": "SOFI",
+          "ticker_corr": 0.54,
+          "implied_dir": "bull",
+          "sector": "02 Finance",
+          "entity": "SoFi Technologies, Inc."
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.531,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.528,
+          "implied_dir": "bull",
           "sector": null,
           "entity": null
         }
@@ -5217,21 +5159,21 @@
         },
         {
           "ticker": "JPM",
-          "ticker_corr": 0.764,
+          "ticker_corr": 0.762,
           "implied_dir": "bull",
           "sector": "02 Finance",
           "entity": "JPMORGAN CHASE & CO"
         },
         {
           "ticker": "DIA",
-          "ticker_corr": 0.758,
+          "ticker_corr": 0.755,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "SPY",
-          "ticker_corr": 0.753,
+          "ticker_corr": 0.75,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -5256,35 +5198,35 @@
       "hop2": [
         {
           "ticker": "SPY",
-          "ticker_corr": 0.715,
+          "ticker_corr": 0.714,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "QQQ",
-          "ticker_corr": 0.668,
+          "ticker_corr": 0.667,
           "implied_dir": "bear",
           "sector": null,
           "entity": "INVESCO QQQ TRUST, SERIES 1"
         },
         {
           "ticker": "DIA",
-          "ticker_corr": 0.649,
+          "ticker_corr": 0.648,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "HYG",
-          "ticker_corr": 0.562,
+          "ticker_corr": 0.561,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.556,
+          "ticker_corr": 0.554,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
@@ -5309,7 +5251,7 @@
       "hop2": [
         {
           "ticker": "BIIB",
-          "ticker_corr": 0.553,
+          "ticker_corr": 0.556,
           "implied_dir": "bear",
           "sector": "03 Life Sciences",
           "entity": "BIOGEN INC."
@@ -5341,7 +5283,7 @@
         },
         {
           "ticker": "ADBE",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.548,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "ADOBE INC."
@@ -5390,7 +5332,7 @@
         },
         {
           "ticker": "QQQ",
-          "ticker_corr": 0.67,
+          "ticker_corr": 0.669,
           "implied_dir": "bear",
           "sector": null,
           "entity": "INVESCO QQQ TRUST, SERIES 1"
@@ -5404,7 +5346,7 @@
         },
         {
           "ticker": "ASML",
-          "ticker_corr": 0.607,
+          "ticker_corr": 0.606,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "ASML HOLDING NV"
@@ -5443,7 +5385,7 @@
         },
         {
           "ticker": "ADI",
-          "ticker_corr": 0.723,
+          "ticker_corr": 0.724,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ANALOG DEVICES INC"
@@ -5457,7 +5399,7 @@
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.625,
+          "ticker_corr": 0.626,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -5494,23 +5436,6 @@
         "hit_rate": 0.667,
         "direction": "bear",
         "avg_ret_1d": -0.206,
-        "confidence": 0.372
-      },
-      "hop2": []
-    },
-    {
-      "term": "store",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "MRNA",
-        "sector": "03 Life Sciences",
-        "entity": "Moderna, Inc.",
-        "corr": -0.3019,
-        "lag": -4,
-        "hit_rate": 0.667,
-        "direction": "bear",
-        "avg_ret_1d": 5.673,
         "confidence": 0.372
       },
       "hop2": []
@@ -5564,21 +5489,21 @@
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.575,
+          "ticker_corr": 0.574,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "HYG",
-          "ticker_corr": 0.562,
+          "ticker_corr": 0.561,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "NVDA",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.546,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "NVIDIA CORP"
@@ -5627,14 +5552,14 @@
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.741,
+          "ticker_corr": 0.742,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.736,
+          "ticker_corr": 0.737,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -5648,7 +5573,7 @@
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.52,
+          "ticker_corr": 0.519,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -5680,7 +5605,7 @@
         },
         {
           "ticker": "ADI",
-          "ticker_corr": 0.723,
+          "ticker_corr": 0.724,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "ANALOG DEVICES INC"
@@ -5694,7 +5619,7 @@
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.625,
+          "ticker_corr": 0.626,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -5736,35 +5661,35 @@
       "hop2": [
         {
           "ticker": "QQQ",
-          "ticker_corr": 0.687,
+          "ticker_corr": 0.684,
           "implied_dir": "bear",
           "sector": null,
           "entity": "INVESCO QQQ TRUST, SERIES 1"
         },
         {
           "ticker": "SPY",
-          "ticker_corr": 0.602,
+          "ticker_corr": 0.599,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "NVDA",
-          "ticker_corr": 0.578,
+          "ticker_corr": 0.573,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "NVIDIA CORP"
         },
         {
           "ticker": "ASML",
-          "ticker_corr": 0.571,
+          "ticker_corr": 0.572,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "ASML HOLDING NV"
         },
         {
           "ticker": "TSM",
-          "ticker_corr": 0.555,
+          "ticker_corr": 0.556,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
@@ -5821,21 +5746,21 @@
         },
         {
           "ticker": "INTU",
-          "ticker_corr": 0.581,
+          "ticker_corr": 0.582,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "INTUIT INC."
         },
         {
           "ticker": "DOCU",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.548,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "DOCUSIGN, INC."
         },
         {
           "ticker": "ADP",
-          "ticker_corr": 0.521,
+          "ticker_corr": 0.522,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "AUTOMATIC DATA PROCESSING INC"
@@ -5856,6 +5781,23 @@
         "direction": "bull",
         "avg_ret_1d": 0.429,
         "confidence": 0.361
+      },
+      "hop2": []
+    },
+    {
+      "term": "russia",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "GILD",
+        "sector": "03 Life Sciences",
+        "entity": "GILEAD SCIENCES, INC.",
+        "corr": -0.3112,
+        "lag": -5,
+        "hit_rate": 0.6,
+        "direction": "bear",
+        "avg_ret_1d": 0.928,
+        "confidence": 0.36
       },
       "hop2": []
     },
@@ -5884,7 +5826,7 @@
         },
         {
           "ticker": "MS",
-          "ticker_corr": 0.732,
+          "ticker_corr": 0.73,
           "implied_dir": "bear",
           "sector": "02 Finance",
           "entity": "MORGAN STANLEY"
@@ -6000,7 +5942,7 @@
       "hop2": [
         {
           "ticker": "FTNT",
-          "ticker_corr": 0.62,
+          "ticker_corr": 0.621,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Fortinet, Inc."
@@ -6013,37 +5955,20 @@
           "entity": "Zscaler, Inc."
         },
         {
-          "ticker": "DDOG",
-          "ticker_corr": 0.548,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Datadog, Inc."
-        },
-        {
           "ticker": "OKTA",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.549,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Okta, Inc."
+        },
+        {
+          "ticker": "DDOG",
+          "ticker_corr": 0.544,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Datadog, Inc."
         }
       ]
-    },
-    {
-      "term": "capital",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "SBUX",
-        "sector": "07 Trade & Services",
-        "entity": "STARBUCKS CORP",
-        "corr": 0.3011,
-        "lag": -4,
-        "hit_rate": 0.6,
-        "direction": "bull",
-        "avg_ret_1d": 0.473,
-        "confidence": 0.356
-      },
-      "hop2": []
     },
     {
       "term": "economic",
@@ -6070,7 +5995,7 @@
         },
         {
           "ticker": "ADI",
-          "ticker_corr": 0.723,
+          "ticker_corr": 0.724,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ANALOG DEVICES INC"
@@ -6084,7 +6009,7 @@
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.625,
+          "ticker_corr": 0.626,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -6116,7 +6041,7 @@
         },
         {
           "ticker": "MS",
-          "ticker_corr": 0.732,
+          "ticker_corr": 0.73,
           "implied_dir": "bear",
           "sector": "02 Finance",
           "entity": "MORGAN STANLEY"
@@ -6141,31 +6066,6 @@
           "implied_dir": "bear",
           "sector": null,
           "entity": null
-        }
-      ]
-    },
-    {
-      "term": "thursday",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "SNPS",
-        "sector": "06 Technology",
-        "entity": "SYNOPSYS INC",
-        "corr": -0.31,
-        "lag": -5,
-        "hit_rate": 0.5,
-        "direction": "bear",
-        "avg_ret_1d": -0.282,
-        "confidence": 0.344
-      },
-      "hop2": [
-        {
-          "ticker": "CDNS",
-          "ticker_corr": 0.687,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "CADENCE DESIGN SYSTEMS INC"
         }
       ]
     },
@@ -6211,7 +6111,7 @@
         },
         {
           "ticker": "ADI",
-          "ticker_corr": 0.723,
+          "ticker_corr": 0.724,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "ANALOG DEVICES INC"
@@ -6225,7 +6125,7 @@
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.625,
+          "ticker_corr": 0.626,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -6257,21 +6157,21 @@
         },
         {
           "ticker": "TXN",
-          "ticker_corr": 0.723,
+          "ticker_corr": 0.724,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "TEXAS INSTRUMENTS INC"
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.688,
+          "ticker_corr": 0.689,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.619,
+          "ticker_corr": 0.62,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -6328,14 +6228,14 @@
       "hop2": [
         {
           "ticker": "PANW",
-          "ticker_corr": 0.62,
+          "ticker_corr": 0.621,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Palo Alto Networks Inc"
         },
         {
           "ticker": "ZS",
-          "ticker_corr": 0.514,
+          "ticker_corr": 0.515,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Zscaler, Inc."
@@ -6367,7 +6267,7 @@
         },
         {
           "ticker": "QQQ",
-          "ticker_corr": 0.556,
+          "ticker_corr": 0.555,
           "implied_dir": "bear",
           "sector": null,
           "entity": "INVESCO QQQ TRUST, SERIES 1"
@@ -6381,14 +6281,14 @@
         },
         {
           "ticker": "CRM",
-          "ticker_corr": 0.519,
+          "ticker_corr": 0.52,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Salesforce, Inc."
         },
         {
           "ticker": "AMZN",
-          "ticker_corr": 0.506,
+          "ticker_corr": 0.507,
           "implied_dir": "bear",
           "sector": "07 Trade & Services",
           "entity": "AMAZON COM INC"
@@ -6427,21 +6327,21 @@
         },
         {
           "ticker": "AVGO",
-          "ticker_corr": 0.642,
+          "ticker_corr": 0.641,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "Broadcom Inc."
         },
         {
           "ticker": "TSM",
-          "ticker_corr": 0.598,
+          "ticker_corr": 0.596,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
         },
         {
           "ticker": "ASML",
-          "ticker_corr": 0.586,
+          "ticker_corr": 0.585,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "ASML HOLDING NV"
@@ -6490,7 +6390,7 @@
         },
         {
           "ticker": "USO",
-          "ticker_corr": 0.589,
+          "ticker_corr": 0.588,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -6522,7 +6422,7 @@
         },
         {
           "ticker": "QQQ",
-          "ticker_corr": 0.67,
+          "ticker_corr": 0.669,
           "implied_dir": "bear",
           "sector": null,
           "entity": "INVESCO QQQ TRUST, SERIES 1"
@@ -6536,7 +6436,7 @@
         },
         {
           "ticker": "ASML",
-          "ticker_corr": 0.607,
+          "ticker_corr": 0.606,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "ASML HOLDING NV"
@@ -6616,21 +6516,21 @@
         },
         {
           "ticker": "JPM",
-          "ticker_corr": 0.764,
+          "ticker_corr": 0.762,
           "implied_dir": "bear",
           "sector": "02 Finance",
           "entity": "JPMORGAN CHASE & CO"
         },
         {
           "ticker": "DIA",
-          "ticker_corr": 0.758,
+          "ticker_corr": 0.755,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "SPY",
-          "ticker_corr": 0.753,
+          "ticker_corr": 0.75,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
@@ -6662,21 +6562,21 @@
         },
         {
           "ticker": "INTU",
-          "ticker_corr": 0.581,
+          "ticker_corr": 0.582,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "INTUIT INC."
         },
         {
           "ticker": "DOCU",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.548,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "DOCUSIGN, INC."
         },
         {
           "ticker": "ADP",
-          "ticker_corr": 0.521,
+          "ticker_corr": 0.522,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "AUTOMATIC DATA PROCESSING INC"
@@ -6708,14 +6608,14 @@
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.741,
+          "ticker_corr": 0.742,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.736,
+          "ticker_corr": 0.737,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -6729,7 +6629,7 @@
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.52,
+          "ticker_corr": 0.519,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
@@ -6761,14 +6661,14 @@
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.741,
+          "ticker_corr": 0.742,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.736,
+          "ticker_corr": 0.737,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -6782,7 +6682,7 @@
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.52,
+          "ticker_corr": 0.519,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
@@ -6814,7 +6714,7 @@
         },
         {
           "ticker": "MS",
-          "ticker_corr": 0.732,
+          "ticker_corr": 0.73,
           "implied_dir": "bear",
           "sector": "02 Finance",
           "entity": "MORGAN STANLEY"
@@ -6860,21 +6760,21 @@
       "hop2": [
         {
           "ticker": "MCHP",
-          "ticker_corr": 0.741,
+          "ticker_corr": 0.742,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "MICROCHIP TECHNOLOGY INC"
         },
         {
           "ticker": "ADI",
-          "ticker_corr": 0.688,
+          "ticker_corr": 0.689,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "ANALOG DEVICES INC"
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.672,
+          "ticker_corr": 0.673,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -6955,6 +6855,23 @@
       ]
     },
     {
+      "term": "capital",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "SBUX",
+        "sector": "07 Trade & Services",
+        "entity": "STARBUCKS CORP",
+        "corr": 0.3011,
+        "lag": -4,
+        "hit_rate": 0.5,
+        "direction": "bull",
+        "avg_ret_1d": -0.184,
+        "confidence": 0.311
+      },
+      "hop2": []
+    },
+    {
       "term": "line",
       "is_active_today": false,
       "today_z": null,
@@ -6979,7 +6896,7 @@
         },
         {
           "ticker": "LRCX",
-          "ticker_corr": 0.692,
+          "ticker_corr": 0.691,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "LAM RESEARCH CORP"
@@ -7000,10 +6917,56 @@
         },
         {
           "ticker": "AMAT",
-          "ticker_corr": 0.64,
+          "ticker_corr": 0.639,
           "implied_dir": "bear",
           "sector": "04 Manufacturing",
           "entity": "APPLIED MATERIALS INC /DE"
+        }
+      ]
+    },
+    {
+      "term": "store",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "ADBE",
+        "sector": "06 Technology",
+        "entity": "ADOBE INC.",
+        "corr": -0.3485,
+        "lag": -3,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": 0.491,
+        "confidence": 0.309
+      },
+      "hop2": [
+        {
+          "ticker": "CRM",
+          "ticker_corr": 0.73,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Salesforce, Inc."
+        },
+        {
+          "ticker": "INTU",
+          "ticker_corr": 0.582,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "INTUIT INC."
+        },
+        {
+          "ticker": "DOCU",
+          "ticker_corr": 0.548,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "DOCUSIGN, INC."
+        },
+        {
+          "ticker": "ADP",
+          "ticker_corr": 0.522,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "AUTOMATIC DATA PROCESSING INC"
         }
       ]
     },
@@ -7024,36 +6987,36 @@
       },
       "hop2": [
         {
-          "ticker": "QQQ",
-          "ticker_corr": 0.605,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
           "ticker": "NXPI",
-          "ticker_corr": 0.604,
+          "ticker_corr": 0.606,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
         },
         {
+          "ticker": "QQQ",
+          "ticker_corr": 0.604,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
           "ticker": "SPY",
-          "ticker_corr": 0.565,
+          "ticker_corr": 0.564,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.545,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "AMD",
-          "ticker_corr": 0.532,
+          "ticker_corr": 0.536,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ADVANCED MICRO DEVICES INC"
@@ -7110,14 +7073,14 @@
         },
         {
           "ticker": "ON",
-          "ticker_corr": 0.741,
+          "ticker_corr": 0.742,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "ON SEMICONDUCTOR CORP"
         },
         {
           "ticker": "NXPI",
-          "ticker_corr": 0.736,
+          "ticker_corr": 0.737,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NXP Semiconductors N.V."
@@ -7131,7 +7094,7 @@
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.52,
+          "ticker_corr": 0.519,
           "implied_dir": "bull",
           "sector": null,
           "entity": null
@@ -7170,26 +7133,43 @@
         },
         {
           "ticker": "AVGO",
-          "ticker_corr": 0.642,
+          "ticker_corr": 0.641,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "Broadcom Inc."
         },
         {
           "ticker": "TSM",
-          "ticker_corr": 0.598,
+          "ticker_corr": 0.596,
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
         },
         {
           "ticker": "ASML",
-          "ticker_corr": 0.586,
+          "ticker_corr": 0.585,
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "ASML HOLDING NV"
         }
       ]
+    },
+    {
+      "term": "store",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "PYPL",
+        "sector": "07 Trade & Services",
+        "entity": "PayPal Holdings, Inc.",
+        "corr": -0.3214,
+        "lag": -4,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": 0.927,
+        "confidence": 0.299
+      },
+      "hop2": []
     },
     {
       "term": "defense",
@@ -7217,6 +7197,59 @@
       ]
     },
     {
+      "term": "ukraine",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "BAC",
+        "sector": "02 Finance",
+        "entity": "BANK OF AMERICA CORP /DE/",
+        "corr": -0.3148,
+        "lag": -1,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": -0.461,
+        "confidence": 0.297
+      },
+      "hop2": [
+        {
+          "ticker": "JPM",
+          "ticker_corr": 0.792,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "JPMORGAN CHASE & CO"
+        },
+        {
+          "ticker": "MS",
+          "ticker_corr": 0.775,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "MORGAN STANLEY"
+        },
+        {
+          "ticker": "GS",
+          "ticker_corr": 0.7,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "GOLDMAN SACHS GROUP INC"
+        },
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.693,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "IWM",
+          "ticker_corr": 0.645,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        }
+      ]
+    },
+    {
       "term": "traders",
       "is_active_today": false,
       "today_z": null,
@@ -7232,6 +7265,52 @@
         "confidence": 0.296
       },
       "hop2": []
+    },
+    {
+      "term": "second",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "ROKU",
+        "sector": "06 Technology",
+        "entity": "ROKU, INC",
+        "corr": -0.3118,
+        "lag": -4,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": 0.048,
+        "confidence": 0.296
+      },
+      "hop2": [
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.548,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.539,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "ABNB",
+          "ticker_corr": 0.525,
+          "implied_dir": "bear",
+          "sector": "07 Trade & Services",
+          "entity": "Airbnb, Inc."
+        },
+        {
+          "ticker": "AMZN",
+          "ticker_corr": 0.513,
+          "implied_dir": "bear",
+          "sector": "07 Trade & Services",
+          "entity": "AMAZON COM INC"
+        }
+      ]
     },
     {
       "term": "video",
@@ -7250,13 +7329,6 @@
       },
       "hop2": [
         {
-          "ticker": "CRM",
-          "ticker_corr": 0.563,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Salesforce, Inc."
-        },
-        {
           "ticker": "ZS",
           "ticker_corr": 0.56,
           "implied_dir": "bear",
@@ -7264,8 +7336,15 @@
           "entity": "Zscaler, Inc."
         },
         {
+          "ticker": "CRM",
+          "ticker_corr": 0.559,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Salesforce, Inc."
+        },
+        {
           "ticker": "PANW",
-          "ticker_corr": 0.547,
+          "ticker_corr": 0.549,
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Palo Alto Networks Inc"
@@ -7290,35 +7369,35 @@
       "hop2": [
         {
           "ticker": "SPY",
-          "ticker_corr": 0.715,
+          "ticker_corr": 0.714,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "QQQ",
-          "ticker_corr": 0.668,
+          "ticker_corr": 0.667,
           "implied_dir": "bear",
           "sector": null,
           "entity": "INVESCO QQQ TRUST, SERIES 1"
         },
         {
           "ticker": "DIA",
-          "ticker_corr": 0.649,
+          "ticker_corr": 0.648,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "HYG",
-          "ticker_corr": 0.562,
+          "ticker_corr": 0.561,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
         },
         {
           "ticker": "IWM",
-          "ticker_corr": 0.556,
+          "ticker_corr": 0.554,
           "implied_dir": "bear",
           "sector": null,
           "entity": null
@@ -7454,6 +7533,15 @@
       "is_active_today": false
     },
     {
+      "term": "capital",
+      "ticker": "GLD",
+      "corr": 0.3057,
+      "lag": -4,
+      "hit_rate": 0.667,
+      "direction": "bull",
+      "is_active_today": false
+    },
+    {
       "term": "ceasefire",
       "ticker": "SPY",
       "corr": 0.3891,
@@ -7526,15 +7614,6 @@
       "is_active_today": false
     },
     {
-      "term": "capital",
-      "ticker": "GLD",
-      "corr": 0.3057,
-      "lag": -4,
-      "hit_rate": 0.6,
-      "direction": "bull",
-      "is_active_today": false
-    },
-    {
       "term": "nuclear",
       "ticker": "GLD",
       "corr": -0.3006,
@@ -7583,7 +7662,7 @@
   "ticker_pressure": [],
   "quality": {
     "data_window_days": 180,
-    "stock_signals": 205,
+    "stock_signals": 206,
     "macro_signals": 28,
     "sector_diversity": 9,
     "grade": "A",
