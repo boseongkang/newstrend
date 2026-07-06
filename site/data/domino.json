@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-06T14:45:37+00:00",
+  "generated_at": "2026-07-06T18:02:21+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-06T14:44:26Z",
+    "signal_corr_updated": "2026-07-06T18:01:12Z",
     "n_pairs_total": 3461,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,16 +21,70 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "samsung": 1.525,
-    "loss": 1.949,
-    "design": 1.768,
-    "single": 1.526,
-    "breaks": 1.746,
-    "active": 2.502,
-    "keeps": 1.604,
-    "book": 1.598
+    "health": 2.099,
+    "target": 1.501,
+    "brand": 1.62,
+    "samsung": 1.974,
+    "unlike": 5.196,
+    "loss": 2.254,
+    "design": 2.131,
+    "single": 2.014,
+    "breaks": 1.929,
+    "active": 2.839,
+    "keeps": 2.053,
+    "book": 2.078
   },
   "stock_chains": [
+    {
+      "term": "health",
+      "is_active_today": true,
+      "today_z": 2.099,
+      "hop1": {
+        "ticker": "SNPS",
+        "sector": "06 Technology",
+        "entity": "SYNOPSYS INC",
+        "corr": -0.3178,
+        "lag": -5,
+        "hit_rate": 0.75,
+        "direction": "bear",
+        "avg_ret_1d": 0.902,
+        "confidence": 0.434
+      },
+      "hop2": [
+        {
+          "ticker": "CDNS",
+          "ticker_corr": 0.687,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "CADENCE DESIGN SYSTEMS INC"
+        }
+      ]
+    },
+    {
+      "term": "health",
+      "is_active_today": true,
+      "today_z": 2.099,
+      "hop1": {
+        "ticker": "INTC",
+        "sector": "04 Manufacturing",
+        "entity": "INTEL CORP",
+        "corr": -0.3268,
+        "lag": -5,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": 3.647,
+        "confidence": 0.301
+      },
+      "hop2": [
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.511,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        }
+      ]
+    },
     {
       "term": "earnings",
       "is_active_today": false,
@@ -2694,31 +2748,6 @@
           "implied_dir": "bull",
           "sector": null,
           "entity": null
-        }
-      ]
-    },
-    {
-      "term": "health",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "SNPS",
-        "sector": "06 Technology",
-        "entity": "SYNOPSYS INC",
-        "corr": -0.3178,
-        "lag": -5,
-        "hit_rate": 0.75,
-        "direction": "bear",
-        "avg_ret_1d": 0.902,
-        "confidence": 0.434
-      },
-      "hop2": [
-        {
-          "ticker": "CDNS",
-          "ticker_corr": 0.687,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "CADENCE DESIGN SYSTEMS INC"
         }
       ]
     },
@@ -7024,31 +7053,6 @@
       ]
     },
     {
-      "term": "health",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "INTC",
-        "sector": "04 Manufacturing",
-        "entity": "INTEL CORP",
-        "corr": -0.3268,
-        "lag": -5,
-        "hit_rate": 0.5,
-        "direction": "bear",
-        "avg_ret_1d": 3.647,
-        "confidence": 0.301
-      },
-      "hop2": [
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.511,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        }
-      ]
-    },
-    {
       "term": "analyst",
       "is_active_today": false,
       "today_z": null,
@@ -7659,7 +7663,66 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "SNPS",
+      "sector": "06 Technology",
+      "entity": "SYNOPSYS INC",
+      "fund_score": 0.491,
+      "inbound": [
+        {
+          "term": "health",
+          "direction": "bear",
+          "today_z": 2.099,
+          "hit_rate": 0.75
+        }
+      ]
+    },
+    {
+      "ticker": "INTC",
+      "sector": "04 Manufacturing",
+      "entity": "INTEL CORP",
+      "fund_score": 0.112,
+      "inbound": [
+        {
+          "term": "health",
+          "direction": "bear",
+          "today_z": 2.099,
+          "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "CDNS",
+      "sector": "06 Technology",
+      "entity": "CADENCE DESIGN SYSTEMS INC",
+      "fund_score": 0.522,
+      "inbound": [
+        {
+          "term": "health",
+          "via": "SNPS",
+          "direction": "bear",
+          "today_z": 2.099,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "health",
+          "via": "INTC",
+          "direction": "bear",
+          "today_z": 2.099,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 206,
