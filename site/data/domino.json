@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-07T10:39:37+00:00",
+  "generated_at": "2026-07-07T12:18:51+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-07T10:38:27Z",
+    "signal_corr_updated": "2026-07-07T12:17:57Z",
     "n_pairs_total": 3319,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,13 +21,35 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "samsung": 4.448,
-    "hong": 1.965,
-    "kong": 2.035,
-    "netflix": 6.543,
-    "operation": 1.516
+    "gold": 1.502,
+    "performance": 1.723,
+    "samsung": 7.322,
+    "meet": 1.638,
+    "visit": 1.69,
+    "profit": 1.558,
+    "hong": 2.348,
+    "kong": 2.426,
+    "netflix": 5.196,
+    "fell": 1.552
   },
   "stock_chains": [
+    {
+      "term": "gold",
+      "is_active_today": true,
+      "today_z": 1.502,
+      "hop1": {
+        "ticker": "MRNA",
+        "sector": "03 Life Sciences",
+        "entity": "Moderna, Inc.",
+        "corr": 0.309,
+        "lag": -1,
+        "hit_rate": 0.5,
+        "direction": "bull",
+        "avg_ret_1d": 2.891,
+        "confidence": 0.33
+      },
+      "hop2": []
+    },
     {
       "term": "earnings",
       "is_active_today": false,
@@ -5542,23 +5564,6 @@
       "hop2": []
     },
     {
-      "term": "gold",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "MRNA",
-        "sector": "03 Life Sciences",
-        "entity": "Moderna, Inc.",
-        "corr": 0.309,
-        "lag": -1,
-        "hit_rate": 0.5,
-        "direction": "bull",
-        "avg_ret_1d": 2.891,
-        "confidence": 0.33
-      },
-      "hop2": []
-    },
-    {
       "term": "concerns",
       "is_active_today": false,
       "today_z": null,
@@ -6573,7 +6578,22 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "MRNA",
+      "sector": "03 Life Sciences",
+      "entity": "Moderna, Inc.",
+      "fund_score": 0.136,
+      "inbound": [
+        {
+          "term": "gold",
+          "direction": "bull",
+          "today_z": 1.502,
+          "hit_rate": 0.5
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 186,
