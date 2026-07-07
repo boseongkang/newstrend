@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-07T15:28:02+00:00",
+  "generated_at": "2026-07-07T17:35:49+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-07T15:26:46Z",
+    "signal_corr_updated": "2026-07-07T17:34:45Z",
     "n_pairs_total": 3325,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,26 +21,34 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "gold": 2.439,
-    "sale": 1.588,
-    "defense": 2.543,
-    "performance": 1.723,
-    "budget": 3.092,
-    "strategic": 1.859,
-    "samsung": 9.813,
-    "systems": 2.244,
-    "meet": 1.724,
-    "special": 1.71,
-    "visit": 2.22,
-    "profit": 1.998,
-    "hong": 2.233,
-    "kong": 2.309
+    "series": 1.655,
+    "capital": 1.764,
+    "gold": 2.8,
+    "sale": 2.269,
+    "europe": 1.957,
+    "defense": 3.403,
+    "site": 1.907,
+    "performance": 1.935,
+    "budget": 3.757,
+    "strategic": 2.598,
+    "samsung": 10.771,
+    "systems": 2.64,
+    "conference": 1.659,
+    "spending": 1.762,
+    "wants": 1.717,
+    "meet": 2.07,
+    "special": 2.082,
+    "visit": 2.75,
+    "profit": 2.218,
+    "hong": 2.271,
+    "kong": 2.348,
+    "gaza": 1.509
   },
   "stock_chains": [
     {
       "term": "defense",
       "is_active_today": true,
-      "today_z": 2.543,
+      "today_z": 3.403,
       "hop1": {
         "ticker": "AAPL",
         "sector": "06 Technology",
@@ -91,9 +99,26 @@
       ]
     },
     {
+      "term": "capital",
+      "is_active_today": true,
+      "today_z": 1.764,
+      "hop1": {
+        "ticker": "SBUX",
+        "sector": "07 Trade & Services",
+        "entity": "STARBUCKS CORP",
+        "corr": 0.3051,
+        "lag": -4,
+        "hit_rate": 0.571,
+        "direction": "bull",
+        "avg_ret_1d": 0.176,
+        "confidence": 0.359
+      },
+      "hop2": []
+    },
+    {
       "term": "gold",
       "is_active_today": true,
-      "today_z": 2.439,
+      "today_z": 2.8,
       "hop1": {
         "ticker": "MRNA",
         "sector": "03 Life Sciences",
@@ -110,7 +135,7 @@
     {
       "term": "defense",
       "is_active_today": true,
-      "today_z": 2.543,
+      "today_z": 3.403,
       "hop1": {
         "ticker": "MDB",
         "sector": "06 Technology",
@@ -129,6 +154,105 @@
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Datadog, Inc."
+        }
+      ]
+    },
+    {
+      "term": "series",
+      "is_active_today": true,
+      "today_z": 1.655,
+      "hop1": {
+        "ticker": "MCHP",
+        "sector": "04 Manufacturing",
+        "entity": "MICROCHIP TECHNOLOGY INC",
+        "corr": -0.3119,
+        "lag": -1,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": 0.324,
+        "confidence": 0.296
+      },
+      "hop2": [
+        {
+          "ticker": "TXN",
+          "ticker_corr": 0.778,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "TEXAS INSTRUMENTS INC"
+        },
+        {
+          "ticker": "ON",
+          "ticker_corr": 0.748,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "ON SEMICONDUCTOR CORP"
+        },
+        {
+          "ticker": "NXPI",
+          "ticker_corr": 0.742,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "NXP Semiconductors N.V."
+        },
+        {
+          "ticker": "ADI",
+          "ticker_corr": 0.739,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "ANALOG DEVICES INC"
+        },
+        {
+          "ticker": "IWM",
+          "ticker_corr": 0.519,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        }
+      ]
+    },
+    {
+      "term": "series",
+      "is_active_today": true,
+      "today_z": 1.655,
+      "hop1": {
+        "ticker": "TXN",
+        "sector": "04 Manufacturing",
+        "entity": "TEXAS INSTRUMENTS INC",
+        "corr": -0.3024,
+        "lag": -2,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": 0.404,
+        "confidence": 0.292
+      },
+      "hop2": [
+        {
+          "ticker": "MCHP",
+          "ticker_corr": 0.778,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "MICROCHIP TECHNOLOGY INC"
+        },
+        {
+          "ticker": "ADI",
+          "ticker_corr": 0.729,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "ANALOG DEVICES INC"
+        },
+        {
+          "ticker": "ON",
+          "ticker_corr": 0.676,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "ON SEMICONDUCTOR CORP"
+        },
+        {
+          "ticker": "NXPI",
+          "ticker_corr": 0.632,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "NXP Semiconductors N.V."
         }
       ]
     },
@@ -5177,23 +5301,6 @@
       ]
     },
     {
-      "term": "capital",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "SBUX",
-        "sector": "07 Trade & Services",
-        "entity": "STARBUCKS CORP",
-        "corr": 0.3051,
-        "lag": -4,
-        "hit_rate": 0.571,
-        "direction": "bull",
-        "avg_ret_1d": 0.176,
-        "confidence": 0.359
-      },
-      "hop2": []
-    },
-    {
       "term": "canada",
       "is_active_today": false,
       "today_z": null,
@@ -6300,59 +6407,6 @@
       "hop2": []
     },
     {
-      "term": "series",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "MCHP",
-        "sector": "04 Manufacturing",
-        "entity": "MICROCHIP TECHNOLOGY INC",
-        "corr": -0.3119,
-        "lag": -1,
-        "hit_rate": 0.5,
-        "direction": "bear",
-        "avg_ret_1d": 0.324,
-        "confidence": 0.296
-      },
-      "hop2": [
-        {
-          "ticker": "TXN",
-          "ticker_corr": 0.778,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "TEXAS INSTRUMENTS INC"
-        },
-        {
-          "ticker": "ON",
-          "ticker_corr": 0.748,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "ON SEMICONDUCTOR CORP"
-        },
-        {
-          "ticker": "NXPI",
-          "ticker_corr": 0.742,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "NXP Semiconductors N.V."
-        },
-        {
-          "ticker": "ADI",
-          "ticker_corr": 0.739,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "ANALOG DEVICES INC"
-        },
-        {
-          "ticker": "IWM",
-          "ticker_corr": 0.519,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        }
-      ]
-    },
-    {
       "term": "platform",
       "is_active_today": false,
       "today_z": null,
@@ -6483,52 +6537,6 @@
           "implied_dir": "bear",
           "sector": "03 Life Sciences",
           "entity": "AMGEN INC"
-        }
-      ]
-    },
-    {
-      "term": "series",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "TXN",
-        "sector": "04 Manufacturing",
-        "entity": "TEXAS INSTRUMENTS INC",
-        "corr": -0.3024,
-        "lag": -2,
-        "hit_rate": 0.5,
-        "direction": "bear",
-        "avg_ret_1d": 0.404,
-        "confidence": 0.292
-      },
-      "hop2": [
-        {
-          "ticker": "MCHP",
-          "ticker_corr": 0.778,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "MICROCHIP TECHNOLOGY INC"
-        },
-        {
-          "ticker": "ADI",
-          "ticker_corr": 0.729,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "ANALOG DEVICES INC"
-        },
-        {
-          "ticker": "ON",
-          "ticker_corr": 0.676,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "ON SEMICONDUCTOR CORP"
-        },
-        {
-          "ticker": "NXPI",
-          "ticker_corr": 0.632,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "NXP Semiconductors N.V."
         }
       ]
     }
@@ -6676,7 +6684,7 @@
       "lag": -4,
       "hit_rate": 0.571,
       "direction": "bull",
-      "is_active_today": false
+      "is_active_today": true
     },
     {
       "term": "foreign",
@@ -6726,103 +6734,43 @@
   ],
   "ticker_pressure": [
     {
-      "ticker": "AAPL",
-      "sector": "06 Technology",
-      "entity": "Apple Inc.",
-      "fund_score": 0.431,
-      "inbound": [
-        {
-          "term": "defense",
-          "direction": "bear",
-          "today_z": 2.543,
-          "hit_rate": 0.833
-        }
-      ]
-    },
-    {
-      "ticker": "MRNA",
-      "sector": "03 Life Sciences",
-      "entity": "Moderna, Inc.",
-      "fund_score": 0.136,
-      "inbound": [
-        {
-          "term": "gold",
-          "direction": "bull",
-          "today_z": 2.439,
-          "hit_rate": 0.5
-        }
-      ]
-    },
-    {
-      "ticker": "MDB",
-      "sector": "06 Technology",
-      "entity": "MongoDB, Inc.",
+      "ticker": "MCHP",
+      "sector": "04 Manufacturing",
+      "entity": "MICROCHIP TECHNOLOGY INC",
       "fund_score": 0.285,
       "inbound": [
         {
-          "term": "defense",
+          "term": "series",
           "direction": "bear",
-          "today_z": 2.543,
+          "today_z": 1.655,
           "hit_rate": 0.5
-        }
-      ]
-    },
-    {
-      "ticker": "SPY",
-      "sector": null,
-      "entity": null,
-      "fund_score": null,
-      "inbound": [
+        },
         {
-          "term": "defense",
-          "via": "AAPL",
+          "term": "series",
+          "via": "TXN",
           "direction": "bear",
-          "today_z": 2.543,
+          "today_z": 1.655,
           "indirect": true
         }
       ]
     },
     {
-      "ticker": "QQQ",
-      "sector": null,
-      "entity": "INVESCO QQQ TRUST, SERIES 1",
-      "fund_score": null,
+      "ticker": "TXN",
+      "sector": "04 Manufacturing",
+      "entity": "TEXAS INSTRUMENTS INC",
+      "fund_score": 0.544,
       "inbound": [
         {
-          "term": "defense",
-          "via": "AAPL",
+          "term": "series",
           "direction": "bear",
-          "today_z": 2.543,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "DIA",
-      "sector": null,
-      "entity": null,
-      "fund_score": null,
-      "inbound": [
+          "today_z": 1.655,
+          "hit_rate": 0.5
+        },
         {
-          "term": "defense",
-          "via": "AAPL",
+          "term": "series",
+          "via": "MCHP",
           "direction": "bear",
-          "today_z": 2.543,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "HYG",
-      "sector": null,
-      "entity": null,
-      "fund_score": null,
-      "inbound": [
-        {
-          "term": "defense",
-          "via": "AAPL",
-          "direction": "bear",
-          "today_z": 2.543,
+          "today_z": 1.655,
           "indirect": true
         }
       ]
@@ -6837,7 +6785,196 @@
           "term": "defense",
           "via": "AAPL",
           "direction": "bear",
-          "today_z": 2.543,
+          "today_z": 3.403,
+          "indirect": true
+        },
+        {
+          "term": "series",
+          "via": "MCHP",
+          "direction": "bear",
+          "today_z": 1.655,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ON",
+      "sector": "04 Manufacturing",
+      "entity": "ON SEMICONDUCTOR CORP",
+      "fund_score": 0.285,
+      "inbound": [
+        {
+          "term": "series",
+          "via": "MCHP",
+          "direction": "bear",
+          "today_z": 1.655,
+          "indirect": true
+        },
+        {
+          "term": "series",
+          "via": "TXN",
+          "direction": "bear",
+          "today_z": 1.655,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "NXPI",
+      "sector": "04 Manufacturing",
+      "entity": "NXP Semiconductors N.V.",
+      "fund_score": 0.418,
+      "inbound": [
+        {
+          "term": "series",
+          "via": "MCHP",
+          "direction": "bear",
+          "today_z": 1.655,
+          "indirect": true
+        },
+        {
+          "term": "series",
+          "via": "TXN",
+          "direction": "bear",
+          "today_z": 1.655,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ADI",
+      "sector": "04 Manufacturing",
+      "entity": "ANALOG DEVICES INC",
+      "fund_score": 0.377,
+      "inbound": [
+        {
+          "term": "series",
+          "via": "MCHP",
+          "direction": "bear",
+          "today_z": 1.655,
+          "indirect": true
+        },
+        {
+          "term": "series",
+          "via": "TXN",
+          "direction": "bear",
+          "today_z": 1.655,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "sector": "06 Technology",
+      "entity": "Apple Inc.",
+      "fund_score": 0.431,
+      "inbound": [
+        {
+          "term": "defense",
+          "direction": "bear",
+          "today_z": 3.403,
+          "hit_rate": 0.833
+        }
+      ]
+    },
+    {
+      "ticker": "SBUX",
+      "sector": "07 Trade & Services",
+      "entity": "STARBUCKS CORP",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "capital",
+          "direction": "bull",
+          "today_z": 1.764,
+          "hit_rate": 0.571
+        }
+      ]
+    },
+    {
+      "ticker": "MRNA",
+      "sector": "03 Life Sciences",
+      "entity": "Moderna, Inc.",
+      "fund_score": 0.136,
+      "inbound": [
+        {
+          "term": "gold",
+          "direction": "bull",
+          "today_z": 2.8,
+          "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "MDB",
+      "sector": "06 Technology",
+      "entity": "MongoDB, Inc.",
+      "fund_score": 0.285,
+      "inbound": [
+        {
+          "term": "defense",
+          "direction": "bear",
+          "today_z": 3.403,
+          "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "SPY",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "defense",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 3.403,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "defense",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 3.403,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "DIA",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "defense",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 3.403,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "HYG",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "defense",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 3.403,
           "indirect": true
         }
       ]
@@ -6852,7 +6989,7 @@
           "term": "defense",
           "via": "MDB",
           "direction": "bear",
-          "today_z": 2.543,
+          "today_z": 3.403,
           "indirect": true
         }
       ]
