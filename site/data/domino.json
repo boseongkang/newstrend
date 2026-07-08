@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-08T03:57:36+00:00",
+  "generated_at": "2026-07-08T06:48:42+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-08T03:56:27Z",
+    "signal_corr_updated": "2026-07-08T06:47:25Z",
     "n_pairs_total": 3289,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,9 +21,45 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "sites": 3.482
+    "strikes": 1.624,
+    "sites": 6.349,
+    "developing": 1.738
   },
   "stock_chains": [
+    {
+      "term": "strikes",
+      "is_active_today": true,
+      "today_z": 1.624,
+      "hop1": {
+        "ticker": "NFLX",
+        "sector": "07 Trade & Services",
+        "entity": "NETFLIX INC",
+        "corr": 0.3193,
+        "lag": -5,
+        "hit_rate": 0.545,
+        "direction": "bull",
+        "avg_ret_1d": 0.053,
+        "confidence": 0.378
+      },
+      "hop2": []
+    },
+    {
+      "term": "strikes",
+      "is_active_today": true,
+      "today_z": 1.624,
+      "hop1": {
+        "ticker": "FSLR",
+        "sector": "04 Manufacturing",
+        "entity": "FIRST SOLAR, INC.",
+        "corr": -0.3077,
+        "lag": -4,
+        "hit_rate": 0.545,
+        "direction": "bear",
+        "avg_ret_1d": 0.194,
+        "confidence": 0.374
+      },
+      "hop2": []
+    },
     {
       "term": "sales",
       "is_active_today": false,
@@ -4349,23 +4385,6 @@
       ]
     },
     {
-      "term": "strikes",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "NFLX",
-        "sector": "07 Trade & Services",
-        "entity": "NETFLIX INC",
-        "corr": 0.3193,
-        "lag": -5,
-        "hit_rate": 0.545,
-        "direction": "bull",
-        "avg_ret_1d": 0.053,
-        "confidence": 0.378
-      },
-      "hop2": []
-    },
-    {
       "term": "crypto",
       "is_active_today": false,
       "today_z": null,
@@ -4512,23 +4531,6 @@
           "entity": "NXP Semiconductors N.V."
         }
       ]
-    },
-    {
-      "term": "strikes",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "FSLR",
-        "sector": "04 Manufacturing",
-        "entity": "FIRST SOLAR, INC.",
-        "corr": -0.3077,
-        "lag": -4,
-        "hit_rate": 0.545,
-        "direction": "bear",
-        "avg_ret_1d": 0.194,
-        "confidence": 0.374
-      },
-      "hop2": []
     },
     {
       "term": "bitcoin",
@@ -6885,7 +6887,36 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "NFLX",
+      "sector": "07 Trade & Services",
+      "entity": "NETFLIX INC",
+      "fund_score": 0.725,
+      "inbound": [
+        {
+          "term": "strikes",
+          "direction": "bull",
+          "today_z": 1.624,
+          "hit_rate": 0.545
+        }
+      ]
+    },
+    {
+      "ticker": "FSLR",
+      "sector": "04 Manufacturing",
+      "entity": "FIRST SOLAR, INC.",
+      "fund_score": 0.681,
+      "inbound": [
+        {
+          "term": "strikes",
+          "direction": "bear",
+          "today_z": 1.624,
+          "hit_rate": 0.545
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 192,
