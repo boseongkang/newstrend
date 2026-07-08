@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-08T09:48:46+00:00",
+  "generated_at": "2026-07-08T12:05:44+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-08T09:47:45Z",
+    "signal_corr_updated": "2026-07-08T12:04:49Z",
     "n_pairs_total": 3289,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -22,10 +22,18 @@
   },
   "active_terms": {
     "strikes": 2.146,
-    "attacks": 1.796,
-    "sites": 7.942,
-    "tensions": 1.857,
-    "australia": 1.744,
+    "department": 2.632,
+    "attacks": 2.558,
+    "control": 1.775,
+    "sites": 6.349,
+    "tensions": 2.061,
+    "australia": 1.845,
+    "loss": 2.003,
+    "speed": 2.184,
+    "care": 2.172,
+    "travel": 4.064,
+    "fresh": 1.547,
+    "trends": 2.311,
     "developing": 2.256
   },
   "stock_chains": [
@@ -62,6 +70,59 @@
         "confidence": 0.374
       },
       "hop2": []
+    },
+    {
+      "term": "department",
+      "is_active_today": true,
+      "today_z": 2.632,
+      "hop1": {
+        "ticker": "NXPI",
+        "sector": "04 Manufacturing",
+        "entity": "NXP Semiconductors N.V.",
+        "corr": 0.3012,
+        "lag": -3,
+        "hit_rate": 0.5,
+        "direction": "bull",
+        "avg_ret_1d": -0.875,
+        "confidence": 0.311
+      },
+      "hop2": [
+        {
+          "ticker": "MCHP",
+          "ticker_corr": 0.742,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "MICROCHIP TECHNOLOGY INC"
+        },
+        {
+          "ticker": "ON",
+          "ticker_corr": 0.68,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "ON SEMICONDUCTOR CORP"
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.646,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "TXN",
+          "ticker_corr": 0.632,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "TEXAS INSTRUMENTS INC"
+        },
+        {
+          "ticker": "ADI",
+          "ticker_corr": 0.627,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "ANALOG DEVICES INC"
+        }
+      ]
     },
     {
       "term": "sales",
@@ -6237,59 +6298,6 @@
       ]
     },
     {
-      "term": "department",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "NXPI",
-        "sector": "04 Manufacturing",
-        "entity": "NXP Semiconductors N.V.",
-        "corr": 0.3012,
-        "lag": -3,
-        "hit_rate": 0.5,
-        "direction": "bull",
-        "avg_ret_1d": -0.875,
-        "confidence": 0.311
-      },
-      "hop2": [
-        {
-          "ticker": "MCHP",
-          "ticker_corr": 0.742,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "MICROCHIP TECHNOLOGY INC"
-        },
-        {
-          "ticker": "ON",
-          "ticker_corr": 0.68,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "ON SEMICONDUCTOR CORP"
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.646,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "TXN",
-          "ticker_corr": 0.632,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "TEXAS INSTRUMENTS INC"
-        },
-        {
-          "ticker": "ADI",
-          "ticker_corr": 0.627,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "ANALOG DEVICES INC"
-        }
-      ]
-    },
-    {
       "term": "analyst",
       "is_active_today": false,
       "today_z": null,
@@ -6916,6 +6924,95 @@
           "direction": "bear",
           "today_z": 2.146,
           "hit_rate": 0.545
+        }
+      ]
+    },
+    {
+      "ticker": "NXPI",
+      "sector": "04 Manufacturing",
+      "entity": "NXP Semiconductors N.V.",
+      "fund_score": 0.418,
+      "inbound": [
+        {
+          "term": "department",
+          "direction": "bull",
+          "today_z": 2.632,
+          "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "MCHP",
+      "sector": "04 Manufacturing",
+      "entity": "MICROCHIP TECHNOLOGY INC",
+      "fund_score": 0.285,
+      "inbound": [
+        {
+          "term": "department",
+          "via": "NXPI",
+          "direction": "bull",
+          "today_z": 2.632,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ON",
+      "sector": "04 Manufacturing",
+      "entity": "ON SEMICONDUCTOR CORP",
+      "fund_score": 0.285,
+      "inbound": [
+        {
+          "term": "department",
+          "via": "NXPI",
+          "direction": "bull",
+          "today_z": 2.632,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "department",
+          "via": "NXPI",
+          "direction": "bull",
+          "today_z": 2.632,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "TXN",
+      "sector": "04 Manufacturing",
+      "entity": "TEXAS INSTRUMENTS INC",
+      "fund_score": 0.544,
+      "inbound": [
+        {
+          "term": "department",
+          "via": "NXPI",
+          "direction": "bull",
+          "today_z": 2.632,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ADI",
+      "sector": "04 Manufacturing",
+      "entity": "ANALOG DEVICES INC",
+      "fund_score": 0.377,
+      "inbound": [
+        {
+          "term": "department",
+          "via": "NXPI",
+          "direction": "bull",
+          "today_z": 2.632,
+          "indirect": true
         }
       ]
     }
