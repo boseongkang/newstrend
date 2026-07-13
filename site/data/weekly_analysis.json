@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-13T00:22:21Z",
+  "updated": "2026-07-13T04:14:06Z",
   "week": "2026-W27",
   "week_summary": {
     "week": "2026-W27",
@@ -73,13 +73,23 @@
   "top_issues": [
     {
       "dimension": "by_sector",
+      "bucket": "Unknown",
+      "n": 66,
+      "avg_abs_gap_pct": 9.562,
+      "avg_signed_gap_pct": -1.115,
+      "directional_acc": 0.258,
+      "severity": 14.402,
+      "reason": "|gap|=9.56% \u00b7 dir_acc=26%"
+    },
+    {
+      "dimension": "by_sector",
       "bucket": "Technology",
-      "n": 2194,
-      "avg_abs_gap_pct": 7.411,
-      "avg_signed_gap_pct": -1.346,
-      "directional_acc": 0.22,
-      "severity": 13.011,
-      "reason": "|gap|=7.41% \u00b7 dir_acc=22%"
+      "n": 2128,
+      "avg_abs_gap_pct": 7.344,
+      "avg_signed_gap_pct": -1.353,
+      "directional_acc": 0.219,
+      "severity": 12.964,
+      "reason": "|gap|=7.34% \u00b7 dir_acc=22%"
     },
     {
       "dimension": "by_action",
@@ -110,25 +120,22 @@
       "directional_acc": 0.225,
       "severity": 11.653,
       "reason": "|gap|=6.15% \u00b7 dir_acc=22%"
-    },
-    {
-      "dimension": "by_sector",
-      "bucket": "Financial Services",
-      "n": 236,
-      "avg_abs_gap_pct": 6.608,
-      "avg_signed_gap_pct": -1.017,
-      "directional_acc": 0.275,
-      "severity": 11.108,
-      "reason": "|gap|=6.61% \u00b7 dir_acc=28%"
     }
   ],
   "improvement_plan": [
     {
+      "id": "sector_Unknown",
+      "target": "sector Unknown",
+      "issue": "|gap|=9.56% across this sector (n=66).",
+      "suggestion": "Audit the pillar that's largest contributor to Unknown-sector calls; defer untested signals.",
+      "severity": 14.402
+    },
+    {
       "id": "sector_Technology",
       "target": "sector Technology",
-      "issue": "|gap|=7.41% across this sector (n=2194).",
+      "issue": "|gap|=7.34% across this sector (n=2128).",
       "suggestion": "Audit the pillar that's largest contributor to Technology-sector calls; defer untested signals.",
-      "severity": 13.011
+      "severity": 12.964
     },
     {
       "id": "action_HOLD",
@@ -150,13 +157,6 @@
       "issue": "|gap|=6.15% in this band (n=2976).",
       "suggestion": "Add confidence-conditional position sizing \u2014 smaller bets in this band.",
       "severity": 11.653
-    },
-    {
-      "id": "sector_Financial Services",
-      "target": "sector Financial Services",
-      "issue": "|gap|=6.61% across this sector (n=236).",
-      "suggestion": "Audit the pillar that's largest contributor to Financial Services-sector calls; defer untested signals.",
-      "severity": 11.108
     },
     {
       "id": "pillar_grad_news_best_conf",
@@ -187,5 +187,5 @@
     "direction": "improved",
     "improvement_pct": 32.53
   },
-  "calibration_runs_total": 624
+  "calibration_runs_total": 625
 }
