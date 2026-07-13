@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-13T15:23:13+00:00",
+  "generated_at": "2026-07-13T17:31:41+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-13T15:22:07Z",
+    "signal_corr_updated": "2026-07-13T17:30:29Z",
     "n_pairs_total": 3572,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,24 +21,75 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "revenue": 1.687,
+    "concerns": 1.931,
+    "revenue": 2.04,
     "sites": 1.945,
-    "powered": 2.517,
+    "powered": 3.187,
+    "death": 1.564,
     "brand": 3.015,
-    "disney": 1.861,
-    "film": 7.217,
-    "fresh": 2.51,
-    "multiple": 1.547,
-    "product": 4.785,
-    "securities": 1.964,
-    "worth": 2.708,
-    "popular": 3.627,
-    "hard": 1.844,
-    "total": 1.679,
-    "savings": 1.708,
-    "developing": 1.66
+    "disney": 2.393,
+    "film": 8.564,
+    "fresh": 2.807,
+    "multiple": 2.071,
+    "product": 5.705,
+    "securities": 2.36,
+    "worth": 3.042,
+    "popular": 4.147,
+    "hard": 2.097,
+    "total": 2.174,
+    "savings": 2.206,
+    "developing": 2.16
   },
   "stock_chains": [
+    {
+      "term": "concerns",
+      "is_active_today": true,
+      "today_z": 1.931,
+      "hop1": {
+        "ticker": "BMRN",
+        "sector": "03 Life Sciences",
+        "entity": "BIOMARIN PHARMACEUTICAL INC",
+        "corr": 0.3312,
+        "lag": -3,
+        "hit_rate": 0.714,
+        "direction": "bull",
+        "avg_ret_1d": 1.467,
+        "confidence": 0.446
+      },
+      "hop2": []
+    },
+    {
+      "term": "concerns",
+      "is_active_today": true,
+      "today_z": 1.931,
+      "hop1": {
+        "ticker": "INTU",
+        "sector": "06 Technology",
+        "entity": "INTUIT INC.",
+        "corr": -0.3082,
+        "lag": -3,
+        "hit_rate": 0.571,
+        "direction": "bear",
+        "avg_ret_1d": -2.639,
+        "confidence": 0.36
+      },
+      "hop2": [
+        {
+          "ticker": "CRM",
+          "ticker_corr": 0.625,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Salesforce, Inc."
+        },
+        {
+          "ticker": "ADBE",
+          "ticker_corr": 0.6,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "ADOBE INC."
+        }
+      ]
+    },
     {
       "term": "investment",
       "is_active_today": false,
@@ -2206,23 +2257,6 @@
         "hit_rate": 0.714,
         "direction": "bull",
         "avg_ret_1d": 1.334,
-        "confidence": 0.446
-      },
-      "hop2": []
-    },
-    {
-      "term": "concerns",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "BMRN",
-        "sector": "03 Life Sciences",
-        "entity": "BIOMARIN PHARMACEUTICAL INC",
-        "corr": 0.3312,
-        "lag": -3,
-        "hit_rate": 0.714,
-        "direction": "bull",
-        "avg_ret_1d": 1.467,
         "confidence": 0.446
       },
       "hop2": []
@@ -5892,38 +5926,6 @@
       ]
     },
     {
-      "term": "concerns",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "INTU",
-        "sector": "06 Technology",
-        "entity": "INTUIT INC.",
-        "corr": -0.3082,
-        "lag": -3,
-        "hit_rate": 0.571,
-        "direction": "bear",
-        "avg_ret_1d": -2.639,
-        "confidence": 0.36
-      },
-      "hop2": [
-        {
-          "ticker": "CRM",
-          "ticker_corr": 0.625,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Salesforce, Inc."
-        },
-        {
-          "ticker": "ADBE",
-          "ticker_corr": 0.6,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "ADOBE INC."
-        }
-      ]
-    },
-    {
       "term": "rise",
       "is_active_today": false,
       "today_z": null,
@@ -7832,7 +7834,66 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "BMRN",
+      "sector": "03 Life Sciences",
+      "entity": "BIOMARIN PHARMACEUTICAL INC",
+      "fund_score": 0.641,
+      "inbound": [
+        {
+          "term": "concerns",
+          "direction": "bull",
+          "today_z": 1.931,
+          "hit_rate": 0.714
+        }
+      ]
+    },
+    {
+      "ticker": "INTU",
+      "sector": "06 Technology",
+      "entity": "INTUIT INC.",
+      "fund_score": 0.628,
+      "inbound": [
+        {
+          "term": "concerns",
+          "direction": "bear",
+          "today_z": 1.931,
+          "hit_rate": 0.571
+        }
+      ]
+    },
+    {
+      "ticker": "CRM",
+      "sector": "06 Technology",
+      "entity": "Salesforce, Inc.",
+      "fund_score": 0.497,
+      "inbound": [
+        {
+          "term": "concerns",
+          "via": "INTU",
+          "direction": "bear",
+          "today_z": 1.931,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ADBE",
+      "sector": "06 Technology",
+      "entity": "ADOBE INC.",
+      "fund_score": 0.581,
+      "inbound": [
+        {
+          "term": "concerns",
+          "via": "INTU",
+          "direction": "bear",
+          "today_z": 1.931,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 219,
