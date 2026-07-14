@@ -14,6 +14,51 @@ from datetime import datetime
 from pathlib import Path
 
 
+# ── 포트폴리오 회계 / 위험 지표 ──
+ROUND_TRIP_COST_PCT = 0.15      # 15 bps 왕복 거래비용 (슬리피지+수수료)
+MIN_TRADES_FOR_SHARPE = 10      # n<10 종목은 Sharpe 무의미 → null
+
+
+def portfolio_equity(trades):
+    """날짜별 동일가중 횡단면 수익을 낸 뒤 날짜 복리로 equity curve 생성.
+
+    같은 날짜에 열린 거래는 동시 보유하는 동일가중 바스켓이므로 그 날의
+    수익을 '평균'하고, 바스켓을 날짜 간에만 복리한다. 기존 코드는 모든
+    거래(종목·날짜 무관)를 한 리스트로 이어 순차 복리해서, 날짜당 14~29개
+    동시 포지션을 하나의 순차 재투자 사슬처럼 다뤘고 → 기하급수 폭발
+    (V2 cum_ret 72770% vs 실제 ~55%). 반환: (누적배수, equity_curve)."""
+    by_date = defaultdict(list)
+    for t in trades:
+        by_date[t["date"]].append(t["ret"])
+    cum, curve = 1.0, [1.0]
+    for d in sorted(by_date):
+        day_ret = sum(by_date[d]) / len(by_date[d])
+        cum *= (1 + day_ret / 100)
+        curve.append(cum)
+    return cum, curve
+
+
+def max_drawdown(curve):
+    peak, mdd = curve[0], 0.0
+    for v in curve:
+        peak = max(peak, v)
+        mdd = max(mdd, (peak - v) / peak * 100)
+    return mdd
+
+
+def compute_sharpe(rets):
+    """연율화 Sharpe + 최소 거래 gate. n<10이면 None(2거래 'Sharpe 323'은
+    실력이 아니라 잡음). 표본표준편차(n-1) 사용."""
+    if len(rets) < MIN_TRADES_FOR_SHARPE:
+        return None
+    m = sum(rets) / len(rets)
+    var = sum((r - m) ** 2 for r in rets) / (len(rets) - 1)
+    s = math.sqrt(var)
+    if s == 0:
+        return None
+    return round((m / s) * math.sqrt(252 / 5), 2)
+
+
 # ── 통계 ──
 def zscore_at(counts, i, window=28):
     if i < 3 or i >= len(counts): return 0
@@ -268,6 +313,9 @@ def backtest_ticker(ticker, T, P_data, blacklist):
 
         trade = simulate_trade(p_closes, pi)
         if not trade: continue
+        # #5 왕복 거래비용을 실현 수익에 반영 (손절/익절 트리거는 gross 가격
+        # 기준 그대로 — 비용은 체결 시 실현되는 것이므로 net 수익에서 차감)
+        trade["ret"] = round(trade["ret"] - ROUND_TRIP_COST_PCT, 2)
 
         trades.append({
             "date": d, **trade,
@@ -285,23 +333,9 @@ def backtest_ticker(ticker, T, P_data, blacklist):
     wins = [r for r in rets if r > 0]
     losses = [r for r in rets if r < 0]
 
-    cum_ret = 1.0
-    equity_curve = [1.0]
-    for r in rets:
-        cum_ret *= (1 + r / 100)
-        equity_curve.append(cum_ret)
-
-    peak, mdd = equity_curve[0], 0
-    for v in equity_curve:
-        peak = max(peak, v)
-        dd = (peak - v) / peak * 100
-        mdd = max(mdd, dd)
-
-    sharpe = 0
-    if len(rets) > 1:
-        m = sum(rets) / len(rets)
-        s = math.sqrt(sum((r - m) ** 2 for r in rets) / len(rets))
-        sharpe = (m / s) * math.sqrt(252 / 5) if s > 0 else 0
+    cum_ret, equity_curve = portfolio_equity(trades)
+    mdd = max_drawdown(equity_curve)
+    sharpe = compute_sharpe(rets)
 
     return {
         "ticker": ticker,
@@ -312,7 +346,7 @@ def backtest_ticker(ticker, T, P_data, blacklist):
         "avg_loss": round(sum(losses) / len(losses), 2) if losses else 0,
         "total_ret": round((cum_ret - 1) * 100, 2),
         "mdd": round(mdd, 2),
-        "sharpe": round(sharpe, 2),
+        "sharpe": sharpe,
         "stop_count": sum(1 for t in trades if t["exit_reason"] == "STOP_LOSS"),
         "take_count": sum(1 for t in trades if t["exit_reason"] == "TRAILING"),
         "trade_log": trades,
@@ -364,15 +398,9 @@ def main():
     rets = [t["ret"] for t in all_trades]
     wins = [r for r in rets if r > 0]
 
-    cum_ret = 1.0
-    equity = [1.0]
-    for r in rets:
-        cum_ret *= (1 + r / 100)
-        equity.append(cum_ret)
-    peak, mdd = equity[0], 0
-    for v in equity:
-        peak = max(peak, v)
-        mdd = max(mdd, (peak - v) / peak * 100)
+    # #1 날짜별 동일가중 횡단면 → 날짜 복리 (순차-전거래 복리 아티팩트 제거)
+    cum_ret, equity = portfolio_equity(all_trades)
+    mdd = max_drawdown(equity)
 
     stop_count = sum(1 for t in all_trades if t["exit_reason"] == "STOP_LOSS")
     take_count = sum(1 for t in all_trades if t["exit_reason"] == "TRAILING")

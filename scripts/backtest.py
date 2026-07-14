@@ -21,6 +21,50 @@ from datetime import datetime
 from pathlib import Path
 
 
+# ── 포트폴리오 회계 / 위험 지표 ──────────────────────────────────────────────
+ROUND_TRIP_COST_PCT = 0.15      # 15 bps 왕복 거래비용 (슬리피지+수수료)
+MIN_TRADES_FOR_SHARPE = 10      # n<10 종목은 Sharpe 무의미 → null
+
+
+def portfolio_equity(trades):
+    """날짜별 동일가중 횡단면 수익을 낸 뒤 날짜 복리로 equity curve 생성.
+
+    같은 날짜에 열린 거래는 동시 보유하는 동일가중 바스켓이므로 그 날의
+    수익을 '평균'하고, 바스켓을 날짜 간에만 복리한다. 기존 코드는 모든
+    거래를 한 리스트로 이어 순차 복리해서, 동시 포지션을 하나의 순차 재투자
+    사슬처럼 다뤘고 → 기하급수 폭발(V1은 부호까지 반전: +42% vs 실제 -1.9%).
+    반환: (누적배수, equity_curve)."""
+    by_date = defaultdict(list)
+    for t in trades:
+        by_date[t["date"]].append(t["ret"])
+    cum, curve = 1.0, [1.0]
+    for d in sorted(by_date):
+        day_ret = sum(by_date[d]) / len(by_date[d])
+        cum *= (1 + day_ret / 100)
+        curve.append(cum)
+    return cum, curve
+
+
+def max_drawdown(curve):
+    peak, mdd = curve[0], 0.0
+    for v in curve:
+        peak = max(peak, v)
+        mdd = max(mdd, (peak - v) / peak * 100)
+    return mdd
+
+
+def compute_sharpe(rets):
+    """연율화 Sharpe + 최소 거래 gate. n<10이면 None. 표본표준편차(n-1)."""
+    if len(rets) < MIN_TRADES_FOR_SHARPE:
+        return None
+    m = sum(rets) / len(rets)
+    var = sum((r - m) ** 2 for r in rets) / (len(rets) - 1)
+    s = math.sqrt(var)
+    if s == 0:
+        return None
+    return round((m / s) * math.sqrt(252 / 5), 2)
+
+
 # ── 통계 ──────────────────────────────────────────────────────────────────────
 def zscore_at(counts, i, window=28):
     if i < 3 or i >= len(counts):
@@ -206,7 +250,7 @@ def backtest_ticker(ticker, T, P_data, hold_days=5):
         exit_price = p_closes[pi + hold_days]
         if entry is None or exit_price is None: continue
 
-        ret = (exit_price / entry - 1) * 100
+        ret = (exit_price / entry - 1) * 100 - ROUND_TRIP_COST_PCT  # #5 왕복 15bps
         trades.append({
             "date": d,
             "entry": round(entry, 2),
@@ -225,28 +269,11 @@ def backtest_ticker(ticker, T, P_data, hold_days=5):
     wins = [r for r in rets if r > 0]
     losses = [r for r in rets if r < 0]
 
-    # 누적 수익률 (복리)
-    cum_ret = 1.0
-    equity_curve = [1.0]
-    for r in rets:
-        cum_ret *= (1 + r/100)
-        equity_curve.append(cum_ret)
-
-    # MDD
-    peak = equity_curve[0]
-    mdd = 0
-    for v in equity_curve:
-        peak = max(peak, v)
-        dd = (peak - v) / peak * 100
-        mdd = max(mdd, dd)
-
-    # Sharpe (단순화)
-    if len(rets) > 1:
-        mean_ret = sum(rets) / len(rets)
-        std = math.sqrt(sum((r - mean_ret)**2 for r in rets) / len(rets))
-        sharpe = (mean_ret / std) * math.sqrt(252/5) if std > 0 else 0
-    else:
-        sharpe = 0
+    # #1 날짜별 동일가중 횡단면 → 날짜 복리 (순차-전거래 복리 아티팩트 제거)
+    cum_ret, equity_curve = portfolio_equity(trades)
+    mdd = max_drawdown(equity_curve)
+    # #3 Sharpe: n>=10 gate + 표본 std, 미달 시 None
+    sharpe = compute_sharpe(rets)
 
     return {
         "ticker": ticker,
@@ -257,7 +284,7 @@ def backtest_ticker(ticker, T, P_data, hold_days=5):
         "avg_loss": round(sum(losses) / len(losses), 2) if losses else 0,
         "total_ret": round((cum_ret - 1) * 100, 2),
         "mdd": round(mdd, 2),
-        "sharpe": round(sharpe, 2),
+        "sharpe": sharpe,
         "trade_log": trades,
     }
 
@@ -302,8 +329,7 @@ def main():
     rets = [t["ret"] for t in all_trades]
     wins = [r for r in rets if r > 0]
 
-    cum_ret = 1.0
-    for r in rets: cum_ret *= (1 + r/100)
+    cum_ret, _ = portfolio_equity(all_trades)  # #1 날짜 복리
 
     print(f"{'='*70}")
     print(f"📊 BACKTEST RESULTS")
@@ -323,9 +349,10 @@ def main():
     sorted_tickers = sorted(results.values(), key=lambda x: -x.get("total_ret", 0))
     for r in sorted_tickers:
         if r["trades"] < 3: continue
+        sh = f"{r['sharpe']:>7.2f}" if r['sharpe'] is not None else "    n/a"
         print(f"{r['ticker']:<7} {r['trades']:>7} {r['win_rate']:>6.1f}% "
               f"{r['avg_ret']:>+7.2f}% {r['total_ret']:>+7.2f}% "
-              f"{r['mdd']:>6.2f}% {r['sharpe']:>7.2f}")
+              f"{r['mdd']:>6.2f}% {sh}")
 
     # Save
     Path(args.out).write_text(json.dumps({
