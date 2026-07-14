@@ -22,7 +22,7 @@ Walk-forward OOS evaluation (357 records, 14 folds) shows:
 4. **Data collection continues** — target: 1785 test records + at least 1 RISK-OFF cycle
 5. `validate.py` runs daily in CI, tracking progress automatically
 
-### ML Alpha Signal (2026-05-25)
+### ML Alpha Signal (2026-05-25) — ⚠️ FALSIFIED FORWARD, see below
 Walk-forward ML evaluation showed RF/GBM passing adoption gate with
 OOS alpha +1.7~2.0% vs SPY. 5-point audit (look-ahead, paired test,
 long-short, autocorrelation, multiple testing) found no evidence of
@@ -31,12 +31,35 @@ fake alpha. However: 14 folds, single regime, borderline p-values.
 **Forward tracking active** via `ml_monitor.py`. Trains on data <= 2026-05-25,
 evaluates only on NEW data after that date. This is the real test.
 
-### Unfreeze Conditions
-Both must be true simultaneously:
-1. Forward-only alpha (post-2026-05-25 data) is positive AND p < 0.05
-2. At least 1 RISK-OFF cycle observed in forward data
+### ML Forward Alpha Falsification (2026-07-14)
+The forward-only tracker (installed 2026-05-25) **falsified** the historical
+ML alpha after ~50 days of out-of-sample data. The +1.7~2.0% was a
+false positive:
+- RF forward alpha: **−0.39%** (p=0.0095) — significantly NEGATIVE
+- GB forward alpha: **−0.59%** (p=0.0033) — significantly NEGATIVE
+- predict.py OOS alpha: **−0.73%** (p=0.034) → gate FAIL vs always-buy (+0.38%)
+- Directional accuracy: 48–51% (coin flip)
+- Data target MET: 2009/1785 test records (112.5%)
+- RISK-OFF cycle: observed=true
 
-Until then: model frozen, data collection continues, monitoring automatic.
+**Conclusion:** the historical alpha did not survive forward testing.
+Model freeze REMAINS JUSTIFIED — not for lack of data (target met), but
+because the edge is disproven. This is the forward tracker working as
+designed: it caught an overfit signal that all 5 historical audits missed.
+
+Side warning: `long_ratio 84.6%` — the system is systematically long and
+rarely goes short; part of the "alpha" was just bull-market beta.
+
+### Unfreeze Conditions (revised 2026-07-14)
+Both must be true simultaneously:
+1. Forward-only alpha (post-2026-05-25 data) is **significantly positive**
+   (p < 0.05) — the data target alone is NOT sufficient (it is already met)
+2. **Both** RF and GB agree on positive forward alpha (not one cherry-picked)
+   AND at least 1 RISK-OFF cycle observed (already satisfied)
+
+Given forward alpha is now significantly negative, unfreeze is not on the
+table. Until forward alpha flips positive: model frozen, data collection
+continues, monitoring automatic.
 
 ### Validation
 ```bash

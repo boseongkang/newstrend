@@ -1,5 +1,15 @@
 """
-ml_walkforward.py — Walk-forward ML evaluation.
+ml_walkforward.py — Walk-forward ML evaluation (HISTORICAL / FALSIFIED).
+
+⚠️ 2026-07-14: the +1.7~2.0% OOS alpha this script reported on data
+<= 2026-05-25 was FALSIFIED by forward-only tracking. On ~50 days of
+genuinely out-of-sample data, RF forward alpha = −0.39% (p=0.0095) and
+GB = −0.59% (p=0.0033) — significantly NEGATIVE. The historical result
+was a false positive that all 5 historical audits missed. Trust
+`ml_monitor.py` (forward-only), NOT this script, for the live verdict.
+This file is kept for reproducibility of the falsified claim only; do
+NOT cite its alpha as evidence for unfreezing. See CLAUDE.md
+"ML Forward Alpha Falsification (2026-07-14)".
 
 Trains sklearn models on expanding train windows, predicts on test folds.
 Converts predicted return → BUY/SELL action → evaluates vs always-buy.
@@ -7,6 +17,9 @@ Converts predicted return → BUY/SELL action → evaluates vs always-buy.
 GUARDRAIL 1: Does NOT touch predict.py. Research/evaluation only.
 GUARDRAIL 2: Strict walk-forward — model sees only past data at each fold.
 GUARDRAIL 3: Self-test included.
+GUARDRAIL 4: Historical in-sample-adjacent alpha is NOT proof — a metric
+that looks like success (positive walk-forward alpha) must be confirmed
+forward-only before it is believed. Forward > historical, always.
 
 Usage:
     python3 scripts/ml_walkforward.py               # full evaluation
