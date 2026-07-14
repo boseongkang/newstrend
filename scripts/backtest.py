@@ -245,9 +245,12 @@ def backtest_ticker(ticker, T, P_data, hold_days=5):
         if d not in p_dates: continue
         pi = p_dates.index(d)
 
-        if pi + hold_days >= len(p_closes): continue
-        entry = p_closes[pi]
-        exit_price = p_closes[pi + hold_days]
+        # #4 look-ahead 제거: 신호는 신호일 d의 뉴스+종가로 산출되므로 같은 날
+        # 종가에 진입할 수 없다. V2 simulate_trade와 동일하게 '다음날'(pi+1)
+        # 진입 후 hold_days 보유. 마지막 날 신호는 진입 불가 → skip.
+        if pi + 1 + hold_days >= len(p_closes): continue
+        entry = p_closes[pi + 1]
+        exit_price = p_closes[pi + 1 + hold_days]
         if entry is None or exit_price is None: continue
 
         ret = (exit_price / entry - 1) * 100 - ROUND_TRIP_COST_PCT  # #5 왕복 15bps
