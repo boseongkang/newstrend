@@ -418,8 +418,16 @@ def self_test_random_noise(rows: list[dict], n_random: int = 200) -> dict:
                 continue
 
             y_test = np.array([r["fwd_5d_return"] for r in test_rows])
-            # Random predictions: shuffle the actual returns (destroys signal, keeps distribution)
-            preds = np_rng.permutation(y_test)
+            # Random predictions INDEPENDENT of the target — a true null.
+            # NOTE: previously this permuted y_test ("keeps distribution"), but a
+            # permutation inherits the market's sign-imbalance (in a bull market
+            # ~53% of fwd returns are positive), so the "noise" systems carried
+            # real drift-correlated alpha (mean ~+0.8%). As folds accumulated the
+            # per-system t-stats grew until ~96/200 survived BH FDR, flipping this
+            # self-test RED (~2026-07-08) and — via `|| true` + the freshness gate
+            # — reddening every trend-site run. Independent noise restores a clean
+            # null so FDR correctly rejects all of it regardless of data scale.
+            preds = np_rng.standard_normal(len(test_rows))
 
             actions = np.where(preds > 0, 1, -1)
             trade_rets = np.where(actions == 1, y_test, -y_test)
