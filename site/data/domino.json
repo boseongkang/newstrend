@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-17T09:31:42+00:00",
+  "generated_at": "2026-07-17T11:52:08+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-17T09:30:27Z",
-    "n_pairs_total": 3575,
+    "signal_corr_updated": "2026-07-17T11:50:57Z",
+    "n_pairs_total": 3584,
     "n_dates": 180,
     "prices_tickers": 90,
     "trends_terms": 600
@@ -21,18 +21,57 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "intelligence": 4.231,
-    "election": 10.887,
-    "hong": 2.154,
-    "kong": 2.093,
-    "community": 2.994,
-    "developing": 2.066
+    "china": 1.953,
+    "intelligence": 3.367,
+    "chinese": 2.919,
+    "election": 9.499,
+    "leading": 2.24,
+    "super": 2.523,
+    "systems": 1.986,
+    "hong": 2.56,
+    "kong": 2.503,
+    "available": 1.506,
+    "community": 2.856,
+    "developing": 2.569,
+    "book": 8.429
   },
   "stock_chains": [
     {
+      "term": "chinese",
+      "is_active_today": true,
+      "today_z": 2.919,
+      "hop1": {
+        "ticker": "INTU",
+        "sector": "06 Technology",
+        "entity": "INTUIT INC.",
+        "corr": -0.3138,
+        "lag": -5,
+        "hit_rate": 0.833,
+        "direction": "bear",
+        "avg_ret_1d": 1.476,
+        "confidence": 0.497
+      },
+      "hop2": [
+        {
+          "ticker": "CRM",
+          "ticker_corr": 0.628,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Salesforce, Inc."
+        },
+        {
+          "ticker": "ADBE",
+          "ticker_corr": 0.603,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "ADOBE INC."
+        }
+      ]
+    },
+    {
       "term": "intelligence",
       "is_active_today": true,
-      "today_z": 4.231,
+      "today_z": 3.367,
       "hop1": {
         "ticker": "INTC",
         "sector": "04 Manufacturing",
@@ -62,9 +101,48 @@
       ]
     },
     {
+      "term": "chinese",
+      "is_active_today": true,
+      "today_z": 2.919,
+      "hop1": {
+        "ticker": "ADP",
+        "sector": "06 Technology",
+        "entity": "AUTOMATIC DATA PROCESSING INC",
+        "corr": 0.3279,
+        "lag": -1,
+        "hit_rate": 0.667,
+        "direction": "bull",
+        "avg_ret_1d": 0.932,
+        "confidence": 0.411
+      },
+      "hop2": [
+        {
+          "ticker": "PAYX",
+          "ticker_corr": 0.836,
+          "implied_dir": "bull",
+          "sector": "07 Trade & Services",
+          "entity": "PAYCHEX INC"
+        },
+        {
+          "ticker": "ADBE",
+          "ticker_corr": 0.538,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "ADOBE INC."
+        },
+        {
+          "ticker": "CRM",
+          "ticker_corr": 0.513,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "Salesforce, Inc."
+        }
+      ]
+    },
+    {
       "term": "intelligence",
       "is_active_today": true,
-      "today_z": 4.231,
+      "today_z": 3.367,
       "hop1": {
         "ticker": "NXPI",
         "sector": "04 Manufacturing",
@@ -115,9 +193,34 @@
       ]
     },
     {
+      "term": "china",
+      "is_active_today": true,
+      "today_z": 1.953,
+      "hop1": {
+        "ticker": "SEDG",
+        "sector": "04 Manufacturing",
+        "entity": "SOLAREDGE TECHNOLOGIES, INC.",
+        "corr": 0.3034,
+        "lag": -2,
+        "hit_rate": 0.583,
+        "direction": "bull",
+        "avg_ret_1d": 3.106,
+        "confidence": 0.4
+      },
+      "hop2": [
+        {
+          "ticker": "ENPH",
+          "ticker_corr": 0.734,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "Enphase Energy, Inc."
+        }
+      ]
+    },
+    {
       "term": "intelligence",
       "is_active_today": true,
-      "today_z": 4.231,
+      "today_z": 3.367,
       "hop1": {
         "ticker": "CHTR",
         "sector": "06 Technology",
@@ -510,23 +613,6 @@
           "entity": null
         }
       ]
-    },
-    {
-      "term": "pressure",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PDD",
-        "sector": "07 Trade & Services",
-        "entity": "PDD Holdings Inc.",
-        "corr": -0.3113,
-        "lag": -2,
-        "hit_rate": 0.875,
-        "direction": "bear",
-        "avg_ret_1d": 2.065,
-        "confidence": 0.535
-      },
-      "hop2": []
     },
     {
       "term": "growing",
@@ -1209,38 +1295,6 @@
           "implied_dir": "bull",
           "sector": null,
           "entity": null
-        }
-      ]
-    },
-    {
-      "term": "chinese",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "INTU",
-        "sector": "06 Technology",
-        "entity": "INTUIT INC.",
-        "corr": -0.3138,
-        "lag": -5,
-        "hit_rate": 0.833,
-        "direction": "bear",
-        "avg_ret_1d": 1.476,
-        "confidence": 0.497
-      },
-      "hop2": [
-        {
-          "ticker": "CRM",
-          "ticker_corr": 0.628,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Salesforce, Inc."
-        },
-        {
-          "ticker": "ADBE",
-          "ticker_corr": 0.603,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "ADOBE INC."
         }
       ]
     },
@@ -2025,23 +2079,6 @@
           "entity": null
         }
       ]
-    },
-    {
-      "term": "pressure",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "ETSY",
-        "sector": "07 Trade & Services",
-        "entity": "ETSY INC",
-        "corr": 0.3087,
-        "lag": -1,
-        "hit_rate": 0.75,
-        "direction": "bull",
-        "avg_ret_1d": 1.139,
-        "confidence": 0.466
-      },
-      "hop2": []
     },
     {
       "term": "nvidia",
@@ -3133,23 +3170,6 @@
       ]
     },
     {
-      "term": "pressure",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "KLAC",
-        "sector": "08 Industrial Applications and Services",
-        "entity": "KLA CORP",
-        "corr": 0.3933,
-        "lag": -1,
-        "hit_rate": 0.625,
-        "direction": "bull",
-        "avg_ret_1d": 2.063,
-        "confidence": 0.427
-      },
-      "hop2": []
-    },
-    {
       "term": "google",
       "is_active_today": false,
       "today_z": null,
@@ -3245,31 +3265,6 @@
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "NVIDIA CORP"
-        }
-      ]
-    },
-    {
-      "term": "pressure",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "ENPH",
-        "sector": "04 Manufacturing",
-        "entity": "Enphase Energy, Inc.",
-        "corr": -0.3856,
-        "lag": -4,
-        "hit_rate": 0.625,
-        "direction": "bear",
-        "avg_ret_1d": 2.05,
-        "confidence": 0.425
-      },
-      "hop2": [
-        {
-          "ticker": "SEDG",
-          "ticker_corr": 0.734,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "SOLAREDGE TECHNOLOGIES, INC."
         }
       ]
     },
@@ -3749,45 +3744,6 @@
       ]
     },
     {
-      "term": "chinese",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "ADP",
-        "sector": "06 Technology",
-        "entity": "AUTOMATIC DATA PROCESSING INC",
-        "corr": 0.3279,
-        "lag": -1,
-        "hit_rate": 0.667,
-        "direction": "bull",
-        "avg_ret_1d": 0.932,
-        "confidence": 0.411
-      },
-      "hop2": [
-        {
-          "ticker": "PAYX",
-          "ticker_corr": 0.836,
-          "implied_dir": "bull",
-          "sector": "07 Trade & Services",
-          "entity": "PAYCHEX INC"
-        },
-        {
-          "ticker": "ADBE",
-          "ticker_corr": 0.538,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "ADOBE INC."
-        },
-        {
-          "ticker": "CRM",
-          "ticker_corr": 0.513,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "Salesforce, Inc."
-        }
-      ]
-    },
-    {
       "term": "tuesday",
       "is_active_today": false,
       "today_z": null,
@@ -4250,31 +4206,6 @@
         "confidence": 0.4
       },
       "hop2": []
-    },
-    {
-      "term": "china",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "SEDG",
-        "sector": "04 Manufacturing",
-        "entity": "SOLAREDGE TECHNOLOGIES, INC.",
-        "corr": 0.3034,
-        "lag": -2,
-        "hit_rate": 0.583,
-        "direction": "bull",
-        "avg_ret_1d": 3.106,
-        "confidence": 0.4
-      },
-      "hop2": [
-        {
-          "ticker": "ENPH",
-          "ticker_corr": 0.734,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "Enphase Energy, Inc."
-        }
-      ]
     },
     {
       "term": "costs",
@@ -8597,6 +8528,50 @@
   ],
   "ticker_pressure": [
     {
+      "ticker": "CRM",
+      "sector": "06 Technology",
+      "entity": "Salesforce, Inc.",
+      "fund_score": 0.497,
+      "inbound": [
+        {
+          "term": "chinese",
+          "via": "INTU",
+          "direction": "bear",
+          "today_z": 2.919,
+          "indirect": true
+        },
+        {
+          "term": "chinese",
+          "via": "ADP",
+          "direction": "bull",
+          "today_z": 2.919,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ADBE",
+      "sector": "06 Technology",
+      "entity": "ADOBE INC.",
+      "fund_score": 0.581,
+      "inbound": [
+        {
+          "term": "chinese",
+          "via": "INTU",
+          "direction": "bear",
+          "today_z": 2.919,
+          "indirect": true
+        },
+        {
+          "term": "chinese",
+          "via": "ADP",
+          "direction": "bull",
+          "today_z": 2.919,
+          "indirect": true
+        }
+      ]
+    },
+    {
       "ticker": "QQQ",
       "sector": null,
       "entity": "INVESCO QQQ TRUST, SERIES 1",
@@ -8606,15 +8581,29 @@
           "term": "intelligence",
           "via": "INTC",
           "direction": "bull",
-          "today_z": 4.231,
+          "today_z": 3.367,
           "indirect": true
         },
         {
           "term": "intelligence",
           "via": "NXPI",
           "direction": "bull",
-          "today_z": 4.231,
+          "today_z": 3.367,
           "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "INTU",
+      "sector": "06 Technology",
+      "entity": "INTUIT INC.",
+      "fund_score": 0.628,
+      "inbound": [
+        {
+          "term": "chinese",
+          "direction": "bear",
+          "today_z": 2.919,
+          "hit_rate": 0.833
         }
       ]
     },
@@ -8627,8 +8616,22 @@
         {
           "term": "intelligence",
           "direction": "bull",
-          "today_z": 4.231,
+          "today_z": 3.367,
           "hit_rate": 0.833
+        }
+      ]
+    },
+    {
+      "ticker": "ADP",
+      "sector": "06 Technology",
+      "entity": "AUTOMATIC DATA PROCESSING INC",
+      "fund_score": 0.456,
+      "inbound": [
+        {
+          "term": "chinese",
+          "direction": "bull",
+          "today_z": 2.919,
+          "hit_rate": 0.667
         }
       ]
     },
@@ -8641,8 +8644,22 @@
         {
           "term": "intelligence",
           "direction": "bull",
-          "today_z": 4.231,
+          "today_z": 3.367,
           "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "SEDG",
+      "sector": "04 Manufacturing",
+      "entity": "SOLAREDGE TECHNOLOGIES, INC.",
+      "fund_score": 0.168,
+      "inbound": [
+        {
+          "term": "china",
+          "direction": "bull",
+          "today_z": 1.953,
+          "hit_rate": 0.583
         }
       ]
     },
@@ -8655,7 +8672,7 @@
         {
           "term": "intelligence",
           "direction": "bear",
-          "today_z": 4.231,
+          "today_z": 3.367,
           "hit_rate": 0.5
         }
       ]
@@ -8670,7 +8687,22 @@
           "term": "intelligence",
           "via": "INTC",
           "direction": "bull",
-          "today_z": 4.231,
+          "today_z": 3.367,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "PAYX",
+      "sector": "07 Trade & Services",
+      "entity": "PAYCHEX INC",
+      "fund_score": 0.497,
+      "inbound": [
+        {
+          "term": "chinese",
+          "via": "ADP",
+          "direction": "bull",
+          "today_z": 2.919,
           "indirect": true
         }
       ]
@@ -8685,7 +8717,7 @@
           "term": "intelligence",
           "via": "NXPI",
           "direction": "bull",
-          "today_z": 4.231,
+          "today_z": 3.367,
           "indirect": true
         }
       ]
@@ -8700,7 +8732,7 @@
           "term": "intelligence",
           "via": "NXPI",
           "direction": "bull",
-          "today_z": 4.231,
+          "today_z": 3.367,
           "indirect": true
         }
       ]
@@ -8715,7 +8747,7 @@
           "term": "intelligence",
           "via": "NXPI",
           "direction": "bull",
-          "today_z": 4.231,
+          "today_z": 3.367,
           "indirect": true
         }
       ]
@@ -8730,7 +8762,22 @@
           "term": "intelligence",
           "via": "NXPI",
           "direction": "bull",
-          "today_z": 4.231,
+          "today_z": 3.367,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ENPH",
+      "sector": "04 Manufacturing",
+      "entity": "Enphase Energy, Inc.",
+      "fund_score": 0.349,
+      "inbound": [
+        {
+          "term": "china",
+          "via": "SEDG",
+          "direction": "bull",
+          "today_z": 1.953,
           "indirect": true
         }
       ]
@@ -8738,7 +8785,7 @@
   ],
   "quality": {
     "data_window_days": 180,
-    "stock_signals": 237,
+    "stock_signals": 233,
     "macro_signals": 19,
     "sector_diversity": 9,
     "grade": "A",
