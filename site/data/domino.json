@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-17T15:55:07+00:00",
+  "generated_at": "2026-07-17T17:40:42+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-17T15:53:58Z",
+    "signal_corr_updated": "2026-07-17T17:39:40Z",
     "n_pairs_total": 3650,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,37 +21,46 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "china": 3.641,
-    "intelligence": 4.586,
-    "chinese": 4.375,
-    "largest": 1.534,
-    "infrastructure": 2.256,
-    "claims": 3.063,
-    "election": 11.966,
-    "leading": 3.113,
-    "development": 2.187,
-    "super": 4.04,
-    "systems": 2.783,
-    "hong": 2.855,
+    "china": 3.913,
+    "friday": 1.953,
+    "intelligence": 4.637,
+    "live": 1.838,
+    "chinese": 4.484,
+    "largest": 1.799,
+    "infrastructure": 3.131,
+    "meeting": 2.057,
+    "claims": 3.216,
+    "election": 11.812,
+    "leading": 3.2,
+    "performance": 1.715,
+    "development": 3.391,
+    "super": 3.281,
+    "systems": 2.583,
+    "hong": 2.708,
     "streaming": 3.349,
-    "kong": 2.802,
-    "commission": 1.584,
-    "multiple": 1.684,
-    "warning": 1.549,
-    "available": 2.423,
-    "safety": 1.626,
+    "kong": 2.653,
+    "commission": 1.948,
+    "multiple": 1.928,
+    "load": 4.118,
+    "warning": 1.637,
+    "available": 2.117,
+    "fast": 2.22,
+    "safety": 1.771,
+    "netflix": 2.056,
+    "turn": 1.867,
+    "files": 1.6,
     "community": 2.718,
-    "cash": 1.654,
+    "cash": 1.922,
     "developing": 2.066,
-    "book": 7.89,
-    "minnesota": 1.852,
-    "geopolitical": 3.129
+    "book": 8.429,
+    "minnesota": 2.037,
+    "geopolitical": 3.537
   },
   "stock_chains": [
     {
       "term": "chinese",
       "is_active_today": true,
-      "today_z": 4.375,
+      "today_z": 4.484,
       "hop1": {
         "ticker": "INTU",
         "sector": "06 Technology",
@@ -83,7 +92,7 @@
     {
       "term": "intelligence",
       "is_active_today": true,
-      "today_z": 4.586,
+      "today_z": 4.637,
       "hop1": {
         "ticker": "INTC",
         "sector": "04 Manufacturing",
@@ -120,9 +129,26 @@
       ]
     },
     {
+      "term": "friday",
+      "is_active_today": true,
+      "today_z": 1.953,
+      "hop1": {
+        "ticker": "KLAC",
+        "sector": "08 Industrial Applications and Services",
+        "entity": "KLA CORP",
+        "corr": -0.3509,
+        "lag": -5,
+        "hit_rate": 0.643,
+        "direction": "bear",
+        "avg_ret_1d": 1.68,
+        "confidence": 0.461
+      },
+      "hop2": []
+    },
+    {
       "term": "claims",
       "is_active_today": true,
-      "today_z": 3.063,
+      "today_z": 3.216,
       "hop1": {
         "ticker": "COIN",
         "sector": "09 Crypto Assets",
@@ -166,9 +192,108 @@
       ]
     },
     {
+      "term": "friday",
+      "is_active_today": true,
+      "today_z": 1.953,
+      "hop1": {
+        "ticker": "MCHP",
+        "sector": "04 Manufacturing",
+        "entity": "MICROCHIP TECHNOLOGY INC",
+        "corr": 0.3172,
+        "lag": -3,
+        "hit_rate": 0.643,
+        "direction": "bull",
+        "avg_ret_1d": 0.446,
+        "confidence": 0.449
+      },
+      "hop2": [
+        {
+          "ticker": "TXN",
+          "ticker_corr": 0.779,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "TEXAS INSTRUMENTS INC"
+        },
+        {
+          "ticker": "ON",
+          "ticker_corr": 0.755,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "ON SEMICONDUCTOR CORP"
+        },
+        {
+          "ticker": "NXPI",
+          "ticker_corr": 0.75,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "NXP Semiconductors N.V."
+        },
+        {
+          "ticker": "ADI",
+          "ticker_corr": 0.746,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "ANALOG DEVICES INC"
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.533,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        }
+      ]
+    },
+    {
+      "term": "friday",
+      "is_active_today": true,
+      "today_z": 1.953,
+      "hop1": {
+        "ticker": "TXN",
+        "sector": "04 Manufacturing",
+        "entity": "TEXAS INSTRUMENTS INC",
+        "corr": 0.3111,
+        "lag": -3,
+        "hit_rate": 0.643,
+        "direction": "bull",
+        "avg_ret_1d": 0.654,
+        "confidence": 0.447
+      },
+      "hop2": [
+        {
+          "ticker": "MCHP",
+          "ticker_corr": 0.779,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "MICROCHIP TECHNOLOGY INC"
+        },
+        {
+          "ticker": "ADI",
+          "ticker_corr": 0.733,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "ANALOG DEVICES INC"
+        },
+        {
+          "ticker": "ON",
+          "ticker_corr": 0.677,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "ON SEMICONDUCTOR CORP"
+        },
+        {
+          "ticker": "NXPI",
+          "ticker_corr": 0.641,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "NXP Semiconductors N.V."
+        }
+      ]
+    },
+    {
       "term": "claims",
       "is_active_today": true,
-      "today_z": 3.063,
+      "today_z": 3.216,
       "hop1": {
         "ticker": "ABNB",
         "sector": "07 Trade & Services",
@@ -221,7 +346,7 @@
     {
       "term": "chinese",
       "is_active_today": true,
-      "today_z": 4.375,
+      "today_z": 4.484,
       "hop1": {
         "ticker": "ADP",
         "sector": "06 Technology",
@@ -260,7 +385,7 @@
     {
       "term": "intelligence",
       "is_active_today": true,
-      "today_z": 4.586,
+      "today_z": 4.637,
       "hop1": {
         "ticker": "NXPI",
         "sector": "04 Manufacturing",
@@ -313,7 +438,7 @@
     {
       "term": "china",
       "is_active_today": true,
-      "today_z": 3.641,
+      "today_z": 3.913,
       "hop1": {
         "ticker": "SEDG",
         "sector": "04 Manufacturing",
@@ -338,7 +463,7 @@
     {
       "term": "claims",
       "is_active_today": true,
-      "today_z": 3.063,
+      "today_z": 3.216,
       "hop1": {
         "ticker": "TSM",
         "sector": "04 Manufacturing",
@@ -391,7 +516,7 @@
     {
       "term": "claims",
       "is_active_today": true,
-      "today_z": 3.063,
+      "today_z": 3.216,
       "hop1": {
         "ticker": "ADI",
         "sector": "04 Manufacturing",
@@ -444,7 +569,7 @@
     {
       "term": "intelligence",
       "is_active_today": true,
-      "today_z": 4.586,
+      "today_z": 4.637,
       "hop1": {
         "ticker": "CHTR",
         "sector": "06 Technology",
@@ -457,6 +582,59 @@
         "confidence": 0.314
       },
       "hop2": []
+    },
+    {
+      "term": "live",
+      "is_active_today": true,
+      "today_z": 1.838,
+      "hop1": {
+        "ticker": "LRCX",
+        "sector": "06 Technology",
+        "entity": "LAM RESEARCH CORP",
+        "corr": -0.307,
+        "lag": -2,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": -1.23,
+        "confidence": 0.313
+      },
+      "hop2": [
+        {
+          "ticker": "AMAT",
+          "ticker_corr": 0.889,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "APPLIED MATERIALS INC /DE"
+        },
+        {
+          "ticker": "ASML",
+          "ticker_corr": 0.819,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "ASML HOLDING NV"
+        },
+        {
+          "ticker": "MU",
+          "ticker_corr": 0.713,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "MICRON TECHNOLOGY INC"
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.705,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "TSM",
+          "ticker_corr": 0.702,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
+        }
+      ]
     },
     {
       "term": "nuclear",
@@ -2308,23 +2486,6 @@
       ]
     },
     {
-      "term": "friday",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "KLAC",
-        "sector": "08 Industrial Applications and Services",
-        "entity": "KLA CORP",
-        "corr": -0.3509,
-        "lag": -5,
-        "hit_rate": 0.643,
-        "direction": "bear",
-        "avg_ret_1d": 1.68,
-        "confidence": 0.461
-      },
-      "hop2": []
-    },
-    {
       "term": "washington",
       "is_active_today": false,
       "today_z": null,
@@ -2606,59 +2767,6 @@
       "hop2": []
     },
     {
-      "term": "friday",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "MCHP",
-        "sector": "04 Manufacturing",
-        "entity": "MICROCHIP TECHNOLOGY INC",
-        "corr": 0.3172,
-        "lag": -3,
-        "hit_rate": 0.643,
-        "direction": "bull",
-        "avg_ret_1d": 0.446,
-        "confidence": 0.449
-      },
-      "hop2": [
-        {
-          "ticker": "TXN",
-          "ticker_corr": 0.779,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "TEXAS INSTRUMENTS INC"
-        },
-        {
-          "ticker": "ON",
-          "ticker_corr": 0.755,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "ON SEMICONDUCTOR CORP"
-        },
-        {
-          "ticker": "NXPI",
-          "ticker_corr": 0.75,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "NXP Semiconductors N.V."
-        },
-        {
-          "ticker": "ADI",
-          "ticker_corr": 0.746,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "ANALOG DEVICES INC"
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.533,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        }
-      ]
-    },
-    {
       "term": "crypto",
       "is_active_today": false,
       "today_z": null,
@@ -2733,52 +2841,6 @@
           "implied_dir": "bear",
           "sector": null,
           "entity": null
-        }
-      ]
-    },
-    {
-      "term": "friday",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "TXN",
-        "sector": "04 Manufacturing",
-        "entity": "TEXAS INSTRUMENTS INC",
-        "corr": 0.3111,
-        "lag": -3,
-        "hit_rate": 0.643,
-        "direction": "bull",
-        "avg_ret_1d": 0.654,
-        "confidence": 0.447
-      },
-      "hop2": [
-        {
-          "ticker": "MCHP",
-          "ticker_corr": 0.779,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "MICROCHIP TECHNOLOGY INC"
-        },
-        {
-          "ticker": "ADI",
-          "ticker_corr": 0.733,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "ANALOG DEVICES INC"
-        },
-        {
-          "ticker": "ON",
-          "ticker_corr": 0.677,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "ON SEMICONDUCTOR CORP"
-        },
-        {
-          "ticker": "NXPI",
-          "ticker_corr": 0.641,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "NXP Semiconductors N.V."
         }
       ]
     },
@@ -7634,59 +7696,6 @@
       "hop2": []
     },
     {
-      "term": "live",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "LRCX",
-        "sector": "06 Technology",
-        "entity": "LAM RESEARCH CORP",
-        "corr": -0.307,
-        "lag": -2,
-        "hit_rate": 0.5,
-        "direction": "bear",
-        "avg_ret_1d": -1.23,
-        "confidence": 0.313
-      },
-      "hop2": [
-        {
-          "ticker": "AMAT",
-          "ticker_corr": 0.889,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "APPLIED MATERIALS INC /DE"
-        },
-        {
-          "ticker": "ASML",
-          "ticker_corr": 0.819,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "ASML HOLDING NV"
-        },
-        {
-          "ticker": "MU",
-          "ticker_corr": 0.713,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "MICRON TECHNOLOGY INC"
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.705,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "TSM",
-          "ticker_corr": 0.702,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
-        }
-      ]
-    },
-    {
       "term": "action",
       "is_active_today": false,
       "today_z": null,
@@ -8513,35 +8522,225 @@
           "term": "intelligence",
           "via": "INTC",
           "direction": "bull",
-          "today_z": 4.586,
+          "today_z": 4.637,
           "indirect": true
         },
         {
           "term": "claims",
           "via": "COIN",
           "direction": "bull",
-          "today_z": 3.063,
+          "today_z": 3.216,
+          "indirect": true
+        },
+        {
+          "term": "friday",
+          "via": "MCHP",
+          "direction": "bull",
+          "today_z": 1.953,
           "indirect": true
         },
         {
           "term": "intelligence",
           "via": "NXPI",
           "direction": "bull",
-          "today_z": 4.586,
+          "today_z": 4.637,
           "indirect": true
         },
         {
           "term": "claims",
           "via": "TSM",
           "direction": "bear",
-          "today_z": 3.063,
+          "today_z": 3.216,
           "indirect": true
         },
         {
           "term": "claims",
           "via": "ADI",
           "direction": "bear",
-          "today_z": 3.063,
+          "today_z": 3.216,
+          "indirect": true
+        },
+        {
+          "term": "live",
+          "via": "LRCX",
+          "direction": "bear",
+          "today_z": 1.838,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MCHP",
+      "sector": "04 Manufacturing",
+      "entity": "MICROCHIP TECHNOLOGY INC",
+      "fund_score": 0.285,
+      "inbound": [
+        {
+          "term": "friday",
+          "direction": "bull",
+          "today_z": 1.953,
+          "hit_rate": 0.643
+        },
+        {
+          "term": "friday",
+          "via": "TXN",
+          "direction": "bull",
+          "today_z": 1.953,
+          "indirect": true
+        },
+        {
+          "term": "intelligence",
+          "via": "NXPI",
+          "direction": "bull",
+          "today_z": 4.637,
+          "indirect": true
+        },
+        {
+          "term": "claims",
+          "via": "ADI",
+          "direction": "bear",
+          "today_z": 3.216,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "TXN",
+      "sector": "04 Manufacturing",
+      "entity": "TEXAS INSTRUMENTS INC",
+      "fund_score": 0.544,
+      "inbound": [
+        {
+          "term": "friday",
+          "direction": "bull",
+          "today_z": 1.953,
+          "hit_rate": 0.643
+        },
+        {
+          "term": "friday",
+          "via": "MCHP",
+          "direction": "bull",
+          "today_z": 1.953,
+          "indirect": true
+        },
+        {
+          "term": "intelligence",
+          "via": "NXPI",
+          "direction": "bull",
+          "today_z": 4.637,
+          "indirect": true
+        },
+        {
+          "term": "claims",
+          "via": "ADI",
+          "direction": "bear",
+          "today_z": 3.216,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "NXPI",
+      "sector": "04 Manufacturing",
+      "entity": "NXP Semiconductors N.V.",
+      "fund_score": 0.418,
+      "inbound": [
+        {
+          "term": "intelligence",
+          "direction": "bull",
+          "today_z": 4.637,
+          "hit_rate": 0.667
+        },
+        {
+          "term": "friday",
+          "via": "MCHP",
+          "direction": "bull",
+          "today_z": 1.953,
+          "indirect": true
+        },
+        {
+          "term": "friday",
+          "via": "TXN",
+          "direction": "bull",
+          "today_z": 1.953,
+          "indirect": true
+        },
+        {
+          "term": "claims",
+          "via": "ADI",
+          "direction": "bear",
+          "today_z": 3.216,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ADI",
+      "sector": "04 Manufacturing",
+      "entity": "ANALOG DEVICES INC",
+      "fund_score": 0.377,
+      "inbound": [
+        {
+          "term": "claims",
+          "direction": "bear",
+          "today_z": 3.216,
+          "hit_rate": 0.556
+        },
+        {
+          "term": "friday",
+          "via": "MCHP",
+          "direction": "bull",
+          "today_z": 1.953,
+          "indirect": true
+        },
+        {
+          "term": "friday",
+          "via": "TXN",
+          "direction": "bull",
+          "today_z": 1.953,
+          "indirect": true
+        },
+        {
+          "term": "intelligence",
+          "via": "NXPI",
+          "direction": "bull",
+          "today_z": 4.637,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ON",
+      "sector": "04 Manufacturing",
+      "entity": "ON SEMICONDUCTOR CORP",
+      "fund_score": 0.285,
+      "inbound": [
+        {
+          "term": "friday",
+          "via": "MCHP",
+          "direction": "bull",
+          "today_z": 1.953,
+          "indirect": true
+        },
+        {
+          "term": "friday",
+          "via": "TXN",
+          "direction": "bull",
+          "today_z": 1.953,
+          "indirect": true
+        },
+        {
+          "term": "intelligence",
+          "via": "NXPI",
+          "direction": "bull",
+          "today_z": 4.637,
+          "indirect": true
+        },
+        {
+          "term": "claims",
+          "via": "ADI",
+          "direction": "bear",
+          "today_z": 3.216,
           "indirect": true
         }
       ]
@@ -8556,63 +8755,63 @@
           "term": "claims",
           "via": "COIN",
           "direction": "bull",
-          "today_z": 3.063,
+          "today_z": 3.216,
           "indirect": true
         },
         {
           "term": "claims",
           "via": "ABNB",
           "direction": "bull",
-          "today_z": 3.063,
+          "today_z": 3.216,
           "indirect": true
         },
         {
           "term": "claims",
           "via": "TSM",
           "direction": "bear",
-          "today_z": 3.063,
+          "today_z": 3.216,
           "indirect": true
         }
       ]
     },
     {
-      "ticker": "NXPI",
+      "ticker": "TSM",
       "sector": "04 Manufacturing",
-      "entity": "NXP Semiconductors N.V.",
-      "fund_score": 0.418,
-      "inbound": [
-        {
-          "term": "intelligence",
-          "direction": "bull",
-          "today_z": 4.586,
-          "hit_rate": 0.667
-        },
-        {
-          "term": "claims",
-          "via": "ADI",
-          "direction": "bear",
-          "today_z": 3.063,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "ADI",
-      "sector": "04 Manufacturing",
-      "entity": "ANALOG DEVICES INC",
-      "fund_score": 0.377,
+      "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+      "fund_score": null,
       "inbound": [
         {
           "term": "claims",
           "direction": "bear",
-          "today_z": 3.063,
+          "today_z": 3.216,
           "hit_rate": 0.556
         },
         {
-          "term": "intelligence",
-          "via": "NXPI",
-          "direction": "bull",
-          "today_z": 4.586,
+          "term": "live",
+          "via": "LRCX",
+          "direction": "bear",
+          "today_z": 1.838,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "LRCX",
+      "sector": "06 Technology",
+      "entity": "LAM RESEARCH CORP",
+      "fund_score": 0.618,
+      "inbound": [
+        {
+          "term": "live",
+          "direction": "bear",
+          "today_z": 1.838,
+          "hit_rate": 0.5
+        },
+        {
+          "term": "claims",
+          "via": "TSM",
+          "direction": "bear",
+          "today_z": 3.216,
           "indirect": true
         }
       ]
@@ -8627,14 +8826,14 @@
           "term": "chinese",
           "via": "INTU",
           "direction": "bear",
-          "today_z": 4.375,
+          "today_z": 4.484,
           "indirect": true
         },
         {
           "term": "chinese",
           "via": "ADP",
           "direction": "bull",
-          "today_z": 4.375,
+          "today_z": 4.484,
           "indirect": true
         }
       ]
@@ -8649,193 +8848,15 @@
           "term": "chinese",
           "via": "INTU",
           "direction": "bear",
-          "today_z": 4.375,
+          "today_z": 4.484,
           "indirect": true
         },
         {
           "term": "chinese",
           "via": "ADP",
           "direction": "bull",
-          "today_z": 4.375,
+          "today_z": 4.484,
           "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "MCHP",
-      "sector": "04 Manufacturing",
-      "entity": "MICROCHIP TECHNOLOGY INC",
-      "fund_score": 0.285,
-      "inbound": [
-        {
-          "term": "intelligence",
-          "via": "NXPI",
-          "direction": "bull",
-          "today_z": 4.586,
-          "indirect": true
-        },
-        {
-          "term": "claims",
-          "via": "ADI",
-          "direction": "bear",
-          "today_z": 3.063,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "ON",
-      "sector": "04 Manufacturing",
-      "entity": "ON SEMICONDUCTOR CORP",
-      "fund_score": 0.285,
-      "inbound": [
-        {
-          "term": "intelligence",
-          "via": "NXPI",
-          "direction": "bull",
-          "today_z": 4.586,
-          "indirect": true
-        },
-        {
-          "term": "claims",
-          "via": "ADI",
-          "direction": "bear",
-          "today_z": 3.063,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "TXN",
-      "sector": "04 Manufacturing",
-      "entity": "TEXAS INSTRUMENTS INC",
-      "fund_score": 0.544,
-      "inbound": [
-        {
-          "term": "intelligence",
-          "via": "NXPI",
-          "direction": "bull",
-          "today_z": 4.586,
-          "indirect": true
-        },
-        {
-          "term": "claims",
-          "via": "ADI",
-          "direction": "bear",
-          "today_z": 3.063,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "INTU",
-      "sector": "06 Technology",
-      "entity": "INTUIT INC.",
-      "fund_score": 0.628,
-      "inbound": [
-        {
-          "term": "chinese",
-          "direction": "bear",
-          "today_z": 4.375,
-          "hit_rate": 0.833
-        }
-      ]
-    },
-    {
-      "ticker": "INTC",
-      "sector": "04 Manufacturing",
-      "entity": "INTEL CORP",
-      "fund_score": 0.112,
-      "inbound": [
-        {
-          "term": "intelligence",
-          "direction": "bull",
-          "today_z": 4.586,
-          "hit_rate": 0.833
-        }
-      ]
-    },
-    {
-      "ticker": "COIN",
-      "sector": "09 Crypto Assets",
-      "entity": "Coinbase Global, Inc.",
-      "fund_score": 0.572,
-      "inbound": [
-        {
-          "term": "claims",
-          "direction": "bull",
-          "today_z": 3.063,
-          "hit_rate": 0.667
-        }
-      ]
-    },
-    {
-      "ticker": "ABNB",
-      "sector": "07 Trade & Services",
-      "entity": "Airbnb, Inc.",
-      "fund_score": 0.491,
-      "inbound": [
-        {
-          "term": "claims",
-          "direction": "bull",
-          "today_z": 3.063,
-          "hit_rate": 0.667
-        }
-      ]
-    },
-    {
-      "ticker": "ADP",
-      "sector": "06 Technology",
-      "entity": "AUTOMATIC DATA PROCESSING INC",
-      "fund_score": 0.456,
-      "inbound": [
-        {
-          "term": "chinese",
-          "direction": "bull",
-          "today_z": 4.375,
-          "hit_rate": 0.667
-        }
-      ]
-    },
-    {
-      "ticker": "SEDG",
-      "sector": "04 Manufacturing",
-      "entity": "SOLAREDGE TECHNOLOGIES, INC.",
-      "fund_score": 0.168,
-      "inbound": [
-        {
-          "term": "china",
-          "direction": "bull",
-          "today_z": 3.641,
-          "hit_rate": 0.583
-        }
-      ]
-    },
-    {
-      "ticker": "TSM",
-      "sector": "04 Manufacturing",
-      "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
-      "fund_score": null,
-      "inbound": [
-        {
-          "term": "claims",
-          "direction": "bear",
-          "today_z": 3.063,
-          "hit_rate": 0.556
-        }
-      ]
-    },
-    {
-      "ticker": "CHTR",
-      "sector": "06 Technology",
-      "entity": "CHARTER COMMUNICATIONS, INC. /MO/",
-      "fund_score": 0.271,
-      "inbound": [
-        {
-          "term": "intelligence",
-          "direction": "bear",
-          "today_z": 4.586,
-          "hit_rate": 0.5
         }
       ]
     },
@@ -8849,157 +8870,14 @@
           "term": "intelligence",
           "via": "INTC",
           "direction": "bull",
-          "today_z": 4.586,
+          "today_z": 4.637,
           "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "AMD",
-      "sector": "04 Manufacturing",
-      "entity": "ADVANCED MICRO DEVICES INC",
-      "fund_score": 0.579,
-      "inbound": [
+        },
         {
-          "term": "intelligence",
-          "via": "INTC",
-          "direction": "bull",
-          "today_z": 4.586,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "HOOD",
-      "sector": "09 Crypto Assets",
-      "entity": "Robinhood Markets, Inc.",
-      "fund_score": 0.478,
-      "inbound": [
-        {
-          "term": "claims",
-          "via": "COIN",
-          "direction": "bull",
-          "today_z": 3.063,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "SOFI",
-      "sector": "02 Finance",
-      "entity": "SoFi Technologies, Inc.",
-      "fund_score": 0.335,
-      "inbound": [
-        {
-          "term": "claims",
-          "via": "COIN",
-          "direction": "bull",
-          "today_z": 3.063,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "DIA",
-      "sector": null,
-      "entity": null,
-      "fund_score": null,
-      "inbound": [
-        {
-          "term": "claims",
-          "via": "ABNB",
-          "direction": "bull",
-          "today_z": 3.063,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "BKNG",
-      "sector": "01 Energy & Transportation",
-      "entity": "Booking Holdings Inc.",
-      "fund_score": null,
-      "inbound": [
-        {
-          "term": "claims",
-          "via": "ABNB",
-          "direction": "bull",
-          "today_z": 3.063,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "ROKU",
-      "sector": "06 Technology",
-      "entity": "ROKU, INC",
-      "fund_score": 0.372,
-      "inbound": [
-        {
-          "term": "claims",
-          "via": "ABNB",
-          "direction": "bull",
-          "today_z": 3.063,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "IWM",
-      "sector": null,
-      "entity": null,
-      "fund_score": null,
-      "inbound": [
-        {
-          "term": "claims",
-          "via": "ABNB",
-          "direction": "bull",
-          "today_z": 3.063,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "PAYX",
-      "sector": "07 Trade & Services",
-      "entity": "PAYCHEX INC",
-      "fund_score": 0.497,
-      "inbound": [
-        {
-          "term": "chinese",
-          "via": "ADP",
-          "direction": "bull",
-          "today_z": 4.375,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "ENPH",
-      "sector": "04 Manufacturing",
-      "entity": "Enphase Energy, Inc.",
-      "fund_score": 0.349,
-      "inbound": [
-        {
-          "term": "china",
-          "via": "SEDG",
-          "direction": "bull",
-          "today_z": 3.641,
-          "indirect": true
-        }
-      ]
-    },
-    {
-      "ticker": "LRCX",
-      "sector": "06 Technology",
-      "entity": "LAM RESEARCH CORP",
-      "fund_score": 0.618,
-      "inbound": [
-        {
-          "term": "claims",
-          "via": "TSM",
+          "term": "live",
+          "via": "LRCX",
           "direction": "bear",
-          "today_z": 3.063,
+          "today_z": 1.838,
           "indirect": true
         }
       ]
@@ -9014,7 +8892,14 @@
           "term": "claims",
           "via": "TSM",
           "direction": "bear",
-          "today_z": 3.063,
+          "today_z": 3.216,
+          "indirect": true
+        },
+        {
+          "term": "live",
+          "via": "LRCX",
+          "direction": "bear",
+          "today_z": 1.838,
           "indirect": true
         }
       ]
@@ -9029,7 +8914,261 @@
           "term": "claims",
           "via": "TSM",
           "direction": "bear",
-          "today_z": 3.063,
+          "today_z": 3.216,
+          "indirect": true
+        },
+        {
+          "term": "live",
+          "via": "LRCX",
+          "direction": "bear",
+          "today_z": 1.838,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "INTU",
+      "sector": "06 Technology",
+      "entity": "INTUIT INC.",
+      "fund_score": 0.628,
+      "inbound": [
+        {
+          "term": "chinese",
+          "direction": "bear",
+          "today_z": 4.484,
+          "hit_rate": 0.833
+        }
+      ]
+    },
+    {
+      "ticker": "INTC",
+      "sector": "04 Manufacturing",
+      "entity": "INTEL CORP",
+      "fund_score": 0.112,
+      "inbound": [
+        {
+          "term": "intelligence",
+          "direction": "bull",
+          "today_z": 4.637,
+          "hit_rate": 0.833
+        }
+      ]
+    },
+    {
+      "ticker": "KLAC",
+      "sector": "08 Industrial Applications and Services",
+      "entity": "KLA CORP",
+      "fund_score": 0.554,
+      "inbound": [
+        {
+          "term": "friday",
+          "direction": "bear",
+          "today_z": 1.953,
+          "hit_rate": 0.643
+        }
+      ]
+    },
+    {
+      "ticker": "COIN",
+      "sector": "09 Crypto Assets",
+      "entity": "Coinbase Global, Inc.",
+      "fund_score": 0.572,
+      "inbound": [
+        {
+          "term": "claims",
+          "direction": "bull",
+          "today_z": 3.216,
+          "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "ABNB",
+      "sector": "07 Trade & Services",
+      "entity": "Airbnb, Inc.",
+      "fund_score": 0.491,
+      "inbound": [
+        {
+          "term": "claims",
+          "direction": "bull",
+          "today_z": 3.216,
+          "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "ADP",
+      "sector": "06 Technology",
+      "entity": "AUTOMATIC DATA PROCESSING INC",
+      "fund_score": 0.456,
+      "inbound": [
+        {
+          "term": "chinese",
+          "direction": "bull",
+          "today_z": 4.484,
+          "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "SEDG",
+      "sector": "04 Manufacturing",
+      "entity": "SOLAREDGE TECHNOLOGIES, INC.",
+      "fund_score": 0.168,
+      "inbound": [
+        {
+          "term": "china",
+          "direction": "bull",
+          "today_z": 3.913,
+          "hit_rate": 0.583
+        }
+      ]
+    },
+    {
+      "ticker": "CHTR",
+      "sector": "06 Technology",
+      "entity": "CHARTER COMMUNICATIONS, INC. /MO/",
+      "fund_score": 0.271,
+      "inbound": [
+        {
+          "term": "intelligence",
+          "direction": "bear",
+          "today_z": 4.637,
+          "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "AMD",
+      "sector": "04 Manufacturing",
+      "entity": "ADVANCED MICRO DEVICES INC",
+      "fund_score": 0.579,
+      "inbound": [
+        {
+          "term": "intelligence",
+          "via": "INTC",
+          "direction": "bull",
+          "today_z": 4.637,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "HOOD",
+      "sector": "09 Crypto Assets",
+      "entity": "Robinhood Markets, Inc.",
+      "fund_score": 0.478,
+      "inbound": [
+        {
+          "term": "claims",
+          "via": "COIN",
+          "direction": "bull",
+          "today_z": 3.216,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "SOFI",
+      "sector": "02 Finance",
+      "entity": "SoFi Technologies, Inc.",
+      "fund_score": 0.335,
+      "inbound": [
+        {
+          "term": "claims",
+          "via": "COIN",
+          "direction": "bull",
+          "today_z": 3.216,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "DIA",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "claims",
+          "via": "ABNB",
+          "direction": "bull",
+          "today_z": 3.216,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "BKNG",
+      "sector": "01 Energy & Transportation",
+      "entity": "Booking Holdings Inc.",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "claims",
+          "via": "ABNB",
+          "direction": "bull",
+          "today_z": 3.216,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ROKU",
+      "sector": "06 Technology",
+      "entity": "ROKU, INC",
+      "fund_score": 0.372,
+      "inbound": [
+        {
+          "term": "claims",
+          "via": "ABNB",
+          "direction": "bull",
+          "today_z": 3.216,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "IWM",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "claims",
+          "via": "ABNB",
+          "direction": "bull",
+          "today_z": 3.216,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "PAYX",
+      "sector": "07 Trade & Services",
+      "entity": "PAYCHEX INC",
+      "fund_score": 0.497,
+      "inbound": [
+        {
+          "term": "chinese",
+          "via": "ADP",
+          "direction": "bull",
+          "today_z": 4.484,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ENPH",
+      "sector": "04 Manufacturing",
+      "entity": "Enphase Energy, Inc.",
+      "fund_score": 0.349,
+      "inbound": [
+        {
+          "term": "china",
+          "via": "SEDG",
+          "direction": "bull",
+          "today_z": 3.913,
           "indirect": true
         }
       ]
