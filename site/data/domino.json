@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-19T21:18:13+00:00",
+  "generated_at": "2026-07-19T22:20:23+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-19T21:16:59Z",
+    "signal_corr_updated": "2026-07-19T22:19:30Z",
     "n_pairs_total": 3826,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,13 +21,33 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "killed": 3.714,
-    "service": 3.469,
-    "final": 4.039,
-    "revealed": 1.861,
-    "missile": 1.522
+    "killed": 4.35,
+    "attack": 1.697,
+    "service": 4.025,
+    "rights": 1.532,
+    "final": 4.229,
+    "found": 1.504,
+    "revealed": 2.393,
+    "missile": 1.77
   },
   "stock_chains": [
+    {
+      "term": "attack",
+      "is_active_today": true,
+      "today_z": 1.697,
+      "hop1": {
+        "ticker": "COST",
+        "sector": "07 Trade & Services",
+        "entity": "COSTCO WHOLESALE CORP /NEW",
+        "corr": -0.3079,
+        "lag": -2,
+        "hit_rate": 0.6,
+        "direction": "bear",
+        "avg_ret_1d": 0.07,
+        "confidence": 0.359
+      },
+      "hop2": []
+    },
     {
       "term": "gold",
       "is_active_today": false,
@@ -5299,23 +5319,6 @@
       ]
     },
     {
-      "term": "attack",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "COST",
-        "sector": "07 Trade & Services",
-        "entity": "COSTCO WHOLESALE CORP /NEW",
-        "corr": -0.3079,
-        "lag": -2,
-        "hit_rate": 0.6,
-        "direction": "bear",
-        "avg_ret_1d": 0.07,
-        "confidence": 0.359
-      },
-      "hop2": []
-    },
-    {
       "term": "digital",
       "is_active_today": false,
       "today_z": null,
@@ -7314,7 +7317,7 @@
       "lag": -2,
       "hit_rate": 0.5,
       "direction": "bull",
-      "is_active_today": false
+      "is_active_today": true
     },
     {
       "term": "israel",
@@ -7326,7 +7329,22 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "COST",
+      "sector": "07 Trade & Services",
+      "entity": "COSTCO WHOLESALE CORP /NEW",
+      "fund_score": 0.327,
+      "inbound": [
+        {
+          "term": "attack",
+          "direction": "bear",
+          "today_z": 1.697,
+          "hit_rate": 0.6
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 204,
