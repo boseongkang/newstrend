@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-21T14:36:16+00:00",
+  "generated_at": "2026-07-21T16:56:47+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-21T14:35:06Z",
+    "signal_corr_updated": "2026-07-21T16:55:34Z",
     "n_pairs_total": 3823,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,29 +21,100 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "minister": 1.534,
-    "israeli": 2.388,
-    "health": 1.617,
-    "lebanon": 1.655,
-    "indian": 1.521,
-    "budget": 1.522,
-    "exchange": 1.632,
-    "generated": 4.292,
-    "details": 1.974,
-    "limited": 2.013,
-    "community": 1.898,
-    "hezbollah": 2.121,
-    "green": 1.927,
-    "regional": 2.802,
-    "tariffs": 8.154,
-    "drive": 2.519,
-    "cent": 1.994
+    "march": 1.836,
+    "minister": 1.927,
+    "prime": 1.756,
+    "israeli": 3.17,
+    "health": 2.243,
+    "lebanon": 2.157,
+    "cost": 1.658,
+    "indian": 1.913,
+    "black": 1.516,
+    "budget": 1.626,
+    "exchange": 1.837,
+    "generated": 5.347,
+    "john": 1.594,
+    "care": 1.722,
+    "legal": 1.797,
+    "additional": 1.564,
+    "details": 2.117,
+    "limited": 2.495,
+    "community": 2.294,
+    "hezbollah": 2.65,
+    "phone": 1.532,
+    "green": 2.44,
+    "regional": 2.884,
+    "tariffs": 9.005,
+    "southern": 1.56,
+    "drive": 3.065,
+    "cent": 2.156,
+    "date": 3.4,
+    "geopolitical": 1.516
   },
   "stock_chains": [
     {
+      "term": "cost",
+      "is_active_today": true,
+      "today_z": 1.658,
+      "hop1": {
+        "ticker": "LCID",
+        "sector": "04 Manufacturing",
+        "entity": "Lucid Group, Inc.",
+        "corr": 0.3748,
+        "lag": -1,
+        "hit_rate": 0.714,
+        "direction": "bull",
+        "avg_ret_1d": 1.282,
+        "confidence": 0.462
+      },
+      "hop2": []
+    },
+    {
+      "term": "cost",
+      "is_active_today": true,
+      "today_z": 1.658,
+      "hop1": {
+        "ticker": "PYPL",
+        "sector": "07 Trade & Services",
+        "entity": "PayPal Holdings, Inc.",
+        "corr": -0.3011,
+        "lag": -4,
+        "hit_rate": 0.714,
+        "direction": "bear",
+        "avg_ret_1d": 0.782,
+        "confidence": 0.436
+      },
+      "hop2": []
+    },
+    {
+      "term": "march",
+      "is_active_today": true,
+      "today_z": 1.836,
+      "hop1": {
+        "ticker": "MDB",
+        "sector": "06 Technology",
+        "entity": "MongoDB, Inc.",
+        "corr": -0.3426,
+        "lag": -1,
+        "hit_rate": 0.583,
+        "direction": "bear",
+        "avg_ret_1d": -0.894,
+        "confidence": 0.414
+      },
+      "hop2": [
+        {
+          "ticker": "DDOG",
+          "ticker_corr": 0.506,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Datadog, Inc."
+        }
+      ]
+    },
+    {
       "term": "lebanon",
       "is_active_today": true,
-      "today_z": 1.655,
+      "today_z": 2.157,
       "hop1": {
         "ticker": "ORCL",
         "sector": "06 Technology",
@@ -60,7 +131,7 @@
     {
       "term": "health",
       "is_active_today": true,
-      "today_z": 1.617,
+      "today_z": 2.243,
       "hop1": {
         "ticker": "ENPH",
         "sector": "04 Manufacturing",
@@ -83,9 +154,34 @@
       ]
     },
     {
+      "term": "cost",
+      "is_active_today": true,
+      "today_z": 1.658,
+      "hop1": {
+        "ticker": "AMGN",
+        "sector": "03 Life Sciences",
+        "entity": "AMGEN INC",
+        "corr": -0.3224,
+        "lag": -2,
+        "hit_rate": 0.571,
+        "direction": "bear",
+        "avg_ret_1d": -0.116,
+        "confidence": 0.365
+      },
+      "hop2": [
+        {
+          "ticker": "BIIB",
+          "ticker_corr": 0.545,
+          "implied_dir": "bear",
+          "sector": "03 Life Sciences",
+          "entity": "BIOGEN INC."
+        }
+      ]
+    },
+    {
       "term": "israeli",
       "is_active_today": true,
-      "today_z": 2.388,
+      "today_z": 3.17,
       "hop1": {
         "ticker": "COST",
         "sector": "07 Trade & Services",
@@ -100,9 +196,79 @@
       "hop2": []
     },
     {
+      "term": "prime",
+      "is_active_today": true,
+      "today_z": 1.756,
+      "hop1": {
+        "ticker": "AAPL",
+        "sector": "06 Technology",
+        "entity": "Apple Inc.",
+        "corr": -0.3244,
+        "lag": -5,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": -0.258,
+        "confidence": 0.335
+      },
+      "hop2": [
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.708,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.647,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.645,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "HYG",
+          "ticker_corr": 0.559,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "IWM",
+          "ticker_corr": 0.55,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        }
+      ]
+    },
+    {
+      "term": "prime",
+      "is_active_today": true,
+      "today_z": 1.756,
+      "hop1": {
+        "ticker": "KLAC",
+        "sector": "08 Industrial Applications and Services",
+        "entity": "KLA CORP",
+        "corr": 0.3013,
+        "lag": -4,
+        "hit_rate": 0.5,
+        "direction": "bull",
+        "avg_ret_1d": -1.81,
+        "confidence": 0.327
+      },
+      "hop2": []
+    },
+    {
       "term": "minister",
       "is_active_today": true,
-      "today_z": 1.534,
+      "today_z": 1.927,
       "hop1": {
         "ticker": "KLAC",
         "sector": "08 Industrial Applications and Services",
@@ -119,7 +285,7 @@
     {
       "term": "minister",
       "is_active_today": true,
-      "today_z": 1.534,
+      "today_z": 1.927,
       "hop1": {
         "ticker": "FSLR",
         "sector": "04 Manufacturing",
@@ -1694,23 +1860,6 @@
       ]
     },
     {
-      "term": "cost",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "LCID",
-        "sector": "04 Manufacturing",
-        "entity": "Lucid Group, Inc.",
-        "corr": 0.3748,
-        "lag": -1,
-        "hit_rate": 0.714,
-        "direction": "bull",
-        "avg_ret_1d": 1.282,
-        "confidence": 0.462
-      },
-      "hop2": []
-    },
-    {
       "term": "agency",
       "is_active_today": false,
       "today_z": null,
@@ -2820,23 +2969,6 @@
       ]
     },
     {
-      "term": "cost",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PYPL",
-        "sector": "07 Trade & Services",
-        "entity": "PayPal Holdings, Inc.",
-        "corr": -0.3011,
-        "lag": -4,
-        "hit_rate": 0.714,
-        "direction": "bear",
-        "avg_ret_1d": 0.782,
-        "confidence": 0.436
-      },
-      "hop2": []
-    },
-    {
       "term": "texas",
       "is_active_today": false,
       "today_z": null,
@@ -3429,31 +3561,6 @@
           "implied_dir": "bear",
           "sector": null,
           "entity": null
-        }
-      ]
-    },
-    {
-      "term": "march",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "MDB",
-        "sector": "06 Technology",
-        "entity": "MongoDB, Inc.",
-        "corr": -0.3426,
-        "lag": -1,
-        "hit_rate": 0.583,
-        "direction": "bear",
-        "avg_ret_1d": -0.894,
-        "confidence": 0.414
-      },
-      "hop2": [
-        {
-          "ticker": "DDOG",
-          "ticker_corr": 0.506,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Datadog, Inc."
         }
       ]
     },
@@ -5755,31 +5862,6 @@
       ]
     },
     {
-      "term": "cost",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "AMGN",
-        "sector": "03 Life Sciences",
-        "entity": "AMGEN INC",
-        "corr": -0.3224,
-        "lag": -2,
-        "hit_rate": 0.571,
-        "direction": "bear",
-        "avg_ret_1d": -0.116,
-        "confidence": 0.365
-      },
-      "hop2": [
-        {
-          "ticker": "BIIB",
-          "ticker_corr": 0.545,
-          "implied_dir": "bear",
-          "sector": "03 Life Sciences",
-          "entity": "BIOGEN INC."
-        }
-      ]
-    },
-    {
       "term": "crypto",
       "is_active_today": false,
       "today_z": null,
@@ -6996,59 +7078,6 @@
       ]
     },
     {
-      "term": "prime",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "AAPL",
-        "sector": "06 Technology",
-        "entity": "Apple Inc.",
-        "corr": -0.3244,
-        "lag": -5,
-        "hit_rate": 0.5,
-        "direction": "bear",
-        "avg_ret_1d": -0.258,
-        "confidence": 0.335
-      },
-      "hop2": [
-        {
-          "ticker": "SPY",
-          "ticker_corr": 0.708,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.647,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "DIA",
-          "ticker_corr": 0.645,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "HYG",
-          "ticker_corr": 0.559,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "IWM",
-          "ticker_corr": 0.55,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        }
-      ]
-    },
-    {
       "term": "chinese",
       "is_active_today": false,
       "today_z": null,
@@ -7288,23 +7317,6 @@
         "hit_rate": 0.5,
         "direction": "bear",
         "avg_ret_1d": -0.447,
-        "confidence": 0.327
-      },
-      "hop2": []
-    },
-    {
-      "term": "prime",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "KLAC",
-        "sector": "08 Industrial Applications and Services",
-        "entity": "KLA CORP",
-        "corr": 0.3013,
-        "lag": -4,
-        "hit_rate": 0.5,
-        "direction": "bull",
-        "avg_ret_1d": -1.81,
         "confidence": 0.327
       },
       "hop2": []
@@ -8232,6 +8244,68 @@
   ],
   "ticker_pressure": [
     {
+      "ticker": "KLAC",
+      "sector": "08 Industrial Applications and Services",
+      "entity": "KLA CORP",
+      "fund_score": 0.554,
+      "inbound": [
+        {
+          "term": "prime",
+          "direction": "bull",
+          "today_z": 1.756,
+          "hit_rate": 0.5
+        },
+        {
+          "term": "minister",
+          "direction": "bull",
+          "today_z": 1.927,
+          "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "LCID",
+      "sector": "04 Manufacturing",
+      "entity": "Lucid Group, Inc.",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "cost",
+          "direction": "bull",
+          "today_z": 1.658,
+          "hit_rate": 0.714
+        }
+      ]
+    },
+    {
+      "ticker": "PYPL",
+      "sector": "07 Trade & Services",
+      "entity": "PayPal Holdings, Inc.",
+      "fund_score": 0.475,
+      "inbound": [
+        {
+          "term": "cost",
+          "direction": "bear",
+          "today_z": 1.658,
+          "hit_rate": 0.714
+        }
+      ]
+    },
+    {
+      "ticker": "MDB",
+      "sector": "06 Technology",
+      "entity": "MongoDB, Inc.",
+      "fund_score": 0.285,
+      "inbound": [
+        {
+          "term": "march",
+          "direction": "bear",
+          "today_z": 1.836,
+          "hit_rate": 0.583
+        }
+      ]
+    },
+    {
       "ticker": "ORCL",
       "sector": "06 Technology",
       "entity": "ORACLE CORP",
@@ -8240,7 +8314,7 @@
         {
           "term": "lebanon",
           "direction": "bull",
-          "today_z": 1.655,
+          "today_z": 2.157,
           "hit_rate": 0.5
         }
       ]
@@ -8254,8 +8328,22 @@
         {
           "term": "health",
           "direction": "bull",
-          "today_z": 1.617,
+          "today_z": 2.243,
           "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "AMGN",
+      "sector": "03 Life Sciences",
+      "entity": "AMGEN INC",
+      "fund_score": 0.523,
+      "inbound": [
+        {
+          "term": "cost",
+          "direction": "bear",
+          "today_z": 1.658,
+          "hit_rate": 0.571
         }
       ]
     },
@@ -8268,21 +8356,21 @@
         {
           "term": "israeli",
           "direction": "bear",
-          "today_z": 2.388,
+          "today_z": 3.17,
           "hit_rate": 0.6
         }
       ]
     },
     {
-      "ticker": "KLAC",
-      "sector": "08 Industrial Applications and Services",
-      "entity": "KLA CORP",
-      "fund_score": 0.554,
+      "ticker": "AAPL",
+      "sector": "06 Technology",
+      "entity": "Apple Inc.",
+      "fund_score": 0.431,
       "inbound": [
         {
-          "term": "minister",
-          "direction": "bull",
-          "today_z": 1.534,
+          "term": "prime",
+          "direction": "bear",
+          "today_z": 1.756,
           "hit_rate": 0.5
         }
       ]
@@ -8296,8 +8384,23 @@
         {
           "term": "minister",
           "direction": "bull",
-          "today_z": 1.534,
+          "today_z": 1.927,
           "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "DDOG",
+      "sector": "06 Technology",
+      "entity": "Datadog, Inc.",
+      "fund_score": 0.44,
+      "inbound": [
+        {
+          "term": "march",
+          "via": "MDB",
+          "direction": "bear",
+          "today_z": 1.836,
+          "indirect": true
         }
       ]
     },
@@ -8311,7 +8414,97 @@
           "term": "health",
           "via": "ENPH",
           "direction": "bull",
-          "today_z": 1.617,
+          "today_z": 2.243,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "BIIB",
+      "sector": "03 Life Sciences",
+      "entity": "BIOGEN INC.",
+      "fund_score": 0.426,
+      "inbound": [
+        {
+          "term": "cost",
+          "via": "AMGN",
+          "direction": "bear",
+          "today_z": 1.658,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "SPY",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "prime",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 1.756,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "prime",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 1.756,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "DIA",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "prime",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 1.756,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "HYG",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "prime",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 1.756,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "IWM",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "prime",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 1.756,
           "indirect": true
         }
       ]
