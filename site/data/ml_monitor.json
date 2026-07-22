@@ -9379,10 +9379,30 @@
       "hash_ok": true,
       "ood": true,
       "unfreeze_ready": false
+    },
+    {
+      "updated": "2026-07-22T14:39:19Z",
+      "n_pred_total": 8820,
+      "n_evaluated": 7560,
+      "models": {
+        "RandomForest": {
+          "alpha": -0.417,
+          "p": 0.0013,
+          "n": 3780
+        },
+        "GradientBoosting": {
+          "alpha": -0.562,
+          "p": 0.0009,
+          "n": 3780
+        }
+      },
+      "hash_ok": true,
+      "ood": false,
+      "unfreeze_ready": false
     }
   ],
   "latest": {
-    "updated": "2026-07-22T12:18:19Z",
+    "updated": "2026-07-22T14:39:19Z",
     "baseline_date": "2026-05-25",
     "model_hashes": {
       "RandomForest": "a2947618dfbb05bd",
@@ -9395,31 +9415,31 @@
     },
     "prediction_log": {
       "total": 8820,
-      "evaluated": 7380,
-      "pending": 1440,
+      "evaluated": 7560,
+      "pending": 1260,
       "new_today": 0,
-      "newly_evaluated": 0
+      "newly_evaluated": 180
     },
     "forward": {
       "RandomForest": {
         "status": "tracking",
-        "n": 3690,
-        "n_folds": 41,
-        "cumulative_alpha_pct": -0.41,
+        "n": 3780,
+        "n_folds": 42,
+        "cumulative_alpha_pct": -0.417,
         "alpha_ci_95": [
-          -0.684,
-          -0.137
+          -0.685,
+          -0.148
         ],
-        "alpha_t": -3.095,
-        "alpha_p": 0.002,
+        "alpha_t": -3.215,
+        "alpha_p": 0.0013,
         "sig_status": "ok",
-        "cumulative_accuracy": 0.506,
+        "cumulative_accuracy": 0.5011,
         "by_regime": {
           "RISK-ON": {
-            "n": 3420,
-            "n_folds": 38,
-            "accuracy": 0.5006,
-            "alpha_mean_pct": -0.389,
+            "n": 3510,
+            "n_folds": 39,
+            "accuracy": 0.4954,
+            "alpha_mean_pct": -0.396,
             "provisional": false
           },
           "NEUTRAL": {
@@ -9433,23 +9453,23 @@
       },
       "GradientBoosting": {
         "status": "tracking",
-        "n": 3690,
-        "n_folds": 41,
-        "cumulative_alpha_pct": -0.57,
+        "n": 3780,
+        "n_folds": 42,
+        "cumulative_alpha_pct": -0.562,
         "alpha_ci_95": [
-          -0.846,
-          -0.294
+          -0.833,
+          -0.291
         ],
-        "alpha_t": -3.293,
-        "alpha_p": 0.001,
+        "alpha_t": -3.324,
+        "alpha_p": 0.0009,
         "sig_status": "ok",
-        "cumulative_accuracy": 0.4954,
+        "cumulative_accuracy": 0.4929,
         "by_regime": {
           "RISK-ON": {
-            "n": 3420,
-            "n_folds": 38,
-            "accuracy": 0.4901,
-            "alpha_mean_pct": -0.565,
+            "n": 3510,
+            "n_folds": 39,
+            "accuracy": 0.4875,
+            "alpha_mean_pct": -0.557,
             "provisional": false
           },
           "NEUTRAL": {
@@ -9463,29 +9483,28 @@
       }
     },
     "ood_check": {
-      "current_regime": "NEUTRAL",
-      "training_pct": 0,
-      "out_of_distribution": true,
-      "confidence_note": "UNTESTED REGIME: NEUTRAL was 0.0% of training data. Predictions unreliable."
+      "current_regime": "RISK-ON",
+      "training_pct": 98.3,
+      "out_of_distribution": false,
+      "confidence_note": "In-distribution: RISK-ON was 98.3% of training data."
     },
     "bias_monitor": {
       "n_total_predictions": 8820,
-      "n_evaluated": 7380,
+      "n_evaluated": 7560,
       "long_ratio": 0.851,
       "long_bias_warning": true,
       "top_sector": "Technology",
       "top_sector_pct": 39.8,
       "sector_concentration_warning": false,
       "calibration": {
-        "accuracy": 0.5007,
-        "mean_abs_predicted": 3.64,
-        "mean_abs_realized": 0.105,
-        "overconfidence_ratio": 34.795
+        "accuracy": 0.497,
+        "mean_abs_predicted": 3.649,
+        "mean_abs_realized": 0.056,
+        "overconfidence_ratio": 64.973
       }
     },
     "alerts": [
       "REGIME CHANGE: non-RISK-ON data detected in forward predictions",
-      "OOD: UNTESTED REGIME: NEUTRAL was 0.0% of training data. Predictions unreliable.",
       "BIAS: long_ratio=85.1% \u2014 model may be systematically long"
     ],
     "unfreeze_check": {
@@ -9495,5 +9514,5 @@
     },
     "label": "ADVISORY ONLY \u00b7 paper trading \u00b7 unverified \u00b7 single-regime baseline"
   },
-  "updated": "2026-07-22T12:18:19Z"
+  "updated": "2026-07-22T14:39:19Z"
 }
