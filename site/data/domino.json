@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-26T22:23:21+00:00",
+  "generated_at": "2026-07-26T23:23:39+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-26T22:22:18Z",
+    "signal_corr_updated": "2026-07-26T23:22:29Z",
     "n_pairs_total": 3940,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,20 +21,76 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "attack": 2.409,
-    "better": 1.786,
-    "event": 2.757,
-    "ground": 2.215,
+    "attack": 2.665,
+    "meeting": 1.508,
+    "better": 2.275,
+    "event": 3.106,
+    "ground": 2.463,
     "something": 1.631,
-    "ongoing": 2.377,
+    "ongoing": 2.636,
     "union": 3.721,
     "workers": 4.932,
     "republicans": 2.473,
-    "thousands": 2.114,
-    "domestic": 1.723,
+    "thousands": 2.297,
+    "reveals": 1.598,
+    "domestic": 1.984,
+    "staff": 1.584,
     "links": 4.118
   },
   "stock_chains": [
+    {
+      "term": "meeting",
+      "is_active_today": true,
+      "today_z": 1.508,
+      "hop1": {
+        "ticker": "MU",
+        "sector": "04 Manufacturing",
+        "entity": "MICRON TECHNOLOGY INC",
+        "corr": -0.3174,
+        "lag": -2,
+        "hit_rate": 0.571,
+        "direction": "bear",
+        "avg_ret_1d": -1.66,
+        "confidence": 0.364
+      },
+      "hop2": [
+        {
+          "ticker": "LRCX",
+          "ticker_corr": 0.714,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "LAM RESEARCH CORP"
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.67,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "AMAT",
+          "ticker_corr": 0.656,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "APPLIED MATERIALS INC /DE"
+        },
+        {
+          "ticker": "ASML",
+          "ticker_corr": 0.612,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "ASML HOLDING NV"
+        },
+        {
+          "ticker": "TSM",
+          "ticker_corr": 0.57,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
+        }
+      ]
+    },
     {
       "term": "tuesday",
       "is_active_today": false,
@@ -5319,59 +5375,6 @@
       ]
     },
     {
-      "term": "meeting",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "MU",
-        "sector": "04 Manufacturing",
-        "entity": "MICRON TECHNOLOGY INC",
-        "corr": -0.3174,
-        "lag": -2,
-        "hit_rate": 0.571,
-        "direction": "bear",
-        "avg_ret_1d": -1.66,
-        "confidence": 0.364
-      },
-      "hop2": [
-        {
-          "ticker": "LRCX",
-          "ticker_corr": 0.714,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "LAM RESEARCH CORP"
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.67,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "AMAT",
-          "ticker_corr": 0.656,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "APPLIED MATERIALS INC /DE"
-        },
-        {
-          "ticker": "ASML",
-          "ticker_corr": 0.612,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "ASML HOLDING NV"
-        },
-        {
-          "ticker": "TSM",
-          "ticker_corr": 0.57,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
-        }
-      ]
-    },
-    {
       "term": "real",
       "is_active_today": false,
       "today_z": null,
@@ -7555,7 +7558,97 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "MU",
+      "sector": "04 Manufacturing",
+      "entity": "MICRON TECHNOLOGY INC",
+      "fund_score": 0.512,
+      "inbound": [
+        {
+          "term": "meeting",
+          "direction": "bear",
+          "today_z": 1.508,
+          "hit_rate": 0.571
+        }
+      ]
+    },
+    {
+      "ticker": "LRCX",
+      "sector": "06 Technology",
+      "entity": "LAM RESEARCH CORP",
+      "fund_score": 0.618,
+      "inbound": [
+        {
+          "term": "meeting",
+          "via": "MU",
+          "direction": "bear",
+          "today_z": 1.508,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "meeting",
+          "via": "MU",
+          "direction": "bear",
+          "today_z": 1.508,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "AMAT",
+      "sector": "04 Manufacturing",
+      "entity": "APPLIED MATERIALS INC /DE",
+      "fund_score": 0.565,
+      "inbound": [
+        {
+          "term": "meeting",
+          "via": "MU",
+          "direction": "bear",
+          "today_z": 1.508,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ASML",
+      "sector": "06 Technology",
+      "entity": "ASML HOLDING NV",
+      "fund_score": 0.684,
+      "inbound": [
+        {
+          "term": "meeting",
+          "via": "MU",
+          "direction": "bear",
+          "today_z": 1.508,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "TSM",
+      "sector": "04 Manufacturing",
+      "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "meeting",
+          "via": "MU",
+          "direction": "bear",
+          "today_z": 1.508,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 223,
