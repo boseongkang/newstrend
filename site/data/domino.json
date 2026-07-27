@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-27T16:03:01+00:00",
+  "generated_at": "2026-07-27T18:05:37+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-27T16:01:55Z",
-    "n_pairs_total": 3989,
+    "signal_corr_updated": "2026-07-27T18:04:34Z",
+    "n_pairs_total": 3995,
     "n_dates": 180,
     "prices_tickers": 90,
     "trends_terms": 600
@@ -21,15 +21,154 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "project": 1.54,
-    "australia": 1.571,
+    "monday": 1.531,
+    "conflict": 1.969,
+    "nvidia": 2.156,
+    "meeting": 2.006,
+    "project": 2.265,
+    "partners": 1.787,
+    "climate": 1.689,
+    "generated": 1.815,
+    "negotiations": 1.69,
     "film": 2.747,
-    "france": 2.127,
-    "upcoming": 2.681,
-    "university": 3.4,
-    "links": 3.4
+    "france": 2.867,
+    "upcoming": 3.4,
+    "cash": 1.789,
+    "reveals": 1.661,
+    "savings": 1.814,
+    "memory": 1.752,
+    "links": 4.747
   },
   "stock_chains": [
+    {
+      "term": "nvidia",
+      "is_active_today": true,
+      "today_z": 2.156,
+      "hop1": {
+        "ticker": "BMRN",
+        "sector": "03 Life Sciences",
+        "entity": "BIOMARIN PHARMACEUTICAL INC",
+        "corr": -0.3258,
+        "lag": -2,
+        "hit_rate": 0.692,
+        "direction": "bear",
+        "avg_ret_1d": 0.862,
+        "confidence": 0.473
+      },
+      "hop2": []
+    },
+    {
+      "term": "monday",
+      "is_active_today": true,
+      "today_z": 1.531,
+      "hop1": {
+        "ticker": "CRWD",
+        "sector": "06 Technology",
+        "entity": "CrowdStrike Holdings, Inc.",
+        "corr": -0.318,
+        "lag": -3,
+        "hit_rate": 0.562,
+        "direction": "bear",
+        "avg_ret_1d": 0.197,
+        "confidence": 0.416
+      },
+      "hop2": []
+    },
+    {
+      "term": "monday",
+      "is_active_today": true,
+      "today_z": 1.531,
+      "hop1": {
+        "ticker": "SIRI",
+        "sector": "06 Technology",
+        "entity": "SIRIUS XM HOLDINGS INC.",
+        "corr": 0.3543,
+        "lag": -3,
+        "hit_rate": 0.5,
+        "direction": "bull",
+        "avg_ret_1d": -0.007,
+        "confidence": 0.395
+      },
+      "hop2": []
+    },
+    {
+      "term": "nvidia",
+      "is_active_today": true,
+      "today_z": 2.156,
+      "hop1": {
+        "ticker": "MDB",
+        "sector": "06 Technology",
+        "entity": "MongoDB, Inc.",
+        "corr": -0.3233,
+        "lag": -3,
+        "hit_rate": 0.538,
+        "direction": "bear",
+        "avg_ret_1d": 0.673,
+        "confidence": 0.388
+      },
+      "hop2": [
+        {
+          "ticker": "DDOG",
+          "ticker_corr": 0.512,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Datadog, Inc."
+        }
+      ]
+    },
+    {
+      "term": "meeting",
+      "is_active_today": true,
+      "today_z": 2.006,
+      "hop1": {
+        "ticker": "MU",
+        "sector": "04 Manufacturing",
+        "entity": "MICRON TECHNOLOGY INC",
+        "corr": -0.3121,
+        "lag": -2,
+        "hit_rate": 0.571,
+        "direction": "bear",
+        "avg_ret_1d": -1.66,
+        "confidence": 0.362
+      },
+      "hop2": [
+        {
+          "ticker": "LRCX",
+          "ticker_corr": 0.716,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "LAM RESEARCH CORP"
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.671,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "AMAT",
+          "ticker_corr": 0.66,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "APPLIED MATERIALS INC /DE"
+        },
+        {
+          "ticker": "ASML",
+          "ticker_corr": 0.615,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "ASML HOLDING NV"
+        },
+        {
+          "ticker": "TSM",
+          "ticker_corr": 0.573,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
+        }
+      ]
+    },
     {
       "term": "anthropic",
       "is_active_today": false,
@@ -1089,6 +1228,23 @@
       ]
     },
     {
+      "term": "supreme",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "CRWD",
+        "sector": "06 Technology",
+        "entity": "CrowdStrike Holdings, Inc.",
+        "corr": -0.356,
+        "lag": -1,
+        "hit_rate": 0.75,
+        "direction": "bear",
+        "avg_ret_1d": -0.637,
+        "confidence": 0.482
+      },
+      "hop2": []
+    },
+    {
       "term": "women",
       "is_active_today": false,
       "today_z": null,
@@ -1327,23 +1483,6 @@
           "entity": "INVESCO QQQ TRUST, SERIES 1"
         }
       ]
-    },
-    {
-      "term": "nvidia",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "BMRN",
-        "sector": "03 Life Sciences",
-        "entity": "BIOMARIN PHARMACEUTICAL INC",
-        "corr": -0.3258,
-        "lag": -2,
-        "hit_rate": 0.692,
-        "direction": "bear",
-        "avg_ret_1d": 0.862,
-        "confidence": 0.473
-      },
-      "hop2": []
     },
     {
       "term": "women",
@@ -3062,23 +3201,6 @@
       ]
     },
     {
-      "term": "monday",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CRWD",
-        "sector": "06 Technology",
-        "entity": "CrowdStrike Holdings, Inc.",
-        "corr": -0.318,
-        "lag": -3,
-        "hit_rate": 0.562,
-        "direction": "bear",
-        "avg_ret_1d": 0.197,
-        "confidence": 0.416
-      },
-      "hop2": []
-    },
-    {
       "term": "crypto",
       "is_active_today": false,
       "today_z": null,
@@ -4243,23 +4365,6 @@
       ]
     },
     {
-      "term": "monday",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "SIRI",
-        "sector": "06 Technology",
-        "entity": "SIRIUS XM HOLDINGS INC.",
-        "corr": 0.3543,
-        "lag": -3,
-        "hit_rate": 0.5,
-        "direction": "bull",
-        "avg_ret_1d": -0.007,
-        "confidence": 0.395
-      },
-      "hop2": []
-    },
-    {
       "term": "revenue",
       "is_active_today": false,
       "today_z": null,
@@ -4355,31 +4460,6 @@
           "implied_dir": "bear",
           "sector": null,
           "entity": "INVESCO QQQ TRUST, SERIES 1"
-        }
-      ]
-    },
-    {
-      "term": "nvidia",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "MDB",
-        "sector": "06 Technology",
-        "entity": "MongoDB, Inc.",
-        "corr": -0.3233,
-        "lag": -3,
-        "hit_rate": 0.538,
-        "direction": "bear",
-        "avg_ret_1d": 0.673,
-        "confidence": 0.388
-      },
-      "hop2": [
-        {
-          "ticker": "DDOG",
-          "ticker_corr": 0.512,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Datadog, Inc."
         }
       ]
     },
@@ -5977,59 +6057,6 @@
       ]
     },
     {
-      "term": "meeting",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "MU",
-        "sector": "04 Manufacturing",
-        "entity": "MICRON TECHNOLOGY INC",
-        "corr": -0.3121,
-        "lag": -2,
-        "hit_rate": 0.571,
-        "direction": "bear",
-        "avg_ret_1d": -1.66,
-        "confidence": 0.362
-      },
-      "hop2": [
-        {
-          "ticker": "LRCX",
-          "ticker_corr": 0.716,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "LAM RESEARCH CORP"
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.671,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "AMAT",
-          "ticker_corr": 0.66,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "APPLIED MATERIALS INC /DE"
-        },
-        {
-          "ticker": "ASML",
-          "ticker_corr": 0.615,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "ASML HOLDING NV"
-        },
-        {
-          "ticker": "TSM",
-          "ticker_corr": 0.573,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
-        }
-      ]
-    },
-    {
       "term": "coming",
       "is_active_today": false,
       "today_z": null,
@@ -6713,6 +6740,59 @@
           "implied_dir": "bull",
           "sector": "04 Manufacturing",
           "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
+        }
+      ]
+    },
+    {
+      "term": "supreme",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "BAC",
+        "sector": "02 Finance",
+        "entity": "BANK OF AMERICA CORP /DE/",
+        "corr": -0.3175,
+        "lag": -5,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": -0.694,
+        "confidence": 0.333
+      },
+      "hop2": [
+        {
+          "ticker": "JPM",
+          "ticker_corr": 0.796,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "JPMORGAN CHASE & CO"
+        },
+        {
+          "ticker": "MS",
+          "ticker_corr": 0.769,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "MORGAN STANLEY"
+        },
+        {
+          "ticker": "GS",
+          "ticker_corr": 0.695,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "GOLDMAN SACHS GROUP INC"
+        },
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.69,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "IWM",
+          "ticker_corr": 0.639,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
         }
       ]
     },
@@ -8040,10 +8120,171 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "BMRN",
+      "sector": "03 Life Sciences",
+      "entity": "BIOMARIN PHARMACEUTICAL INC",
+      "fund_score": 0.641,
+      "inbound": [
+        {
+          "term": "nvidia",
+          "direction": "bear",
+          "today_z": 2.156,
+          "hit_rate": 0.692
+        }
+      ]
+    },
+    {
+      "ticker": "CRWD",
+      "sector": "06 Technology",
+      "entity": "CrowdStrike Holdings, Inc.",
+      "fund_score": 0.26,
+      "inbound": [
+        {
+          "term": "monday",
+          "direction": "bear",
+          "today_z": 1.531,
+          "hit_rate": 0.562
+        }
+      ]
+    },
+    {
+      "ticker": "SIRI",
+      "sector": "06 Technology",
+      "entity": "SIRIUS XM HOLDINGS INC.",
+      "fund_score": 0.191,
+      "inbound": [
+        {
+          "term": "monday",
+          "direction": "bull",
+          "today_z": 1.531,
+          "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "MDB",
+      "sector": "06 Technology",
+      "entity": "MongoDB, Inc.",
+      "fund_score": 0.285,
+      "inbound": [
+        {
+          "term": "nvidia",
+          "direction": "bear",
+          "today_z": 2.156,
+          "hit_rate": 0.538
+        }
+      ]
+    },
+    {
+      "ticker": "MU",
+      "sector": "04 Manufacturing",
+      "entity": "MICRON TECHNOLOGY INC",
+      "fund_score": 0.512,
+      "inbound": [
+        {
+          "term": "meeting",
+          "direction": "bear",
+          "today_z": 2.006,
+          "hit_rate": 0.571
+        }
+      ]
+    },
+    {
+      "ticker": "DDOG",
+      "sector": "06 Technology",
+      "entity": "Datadog, Inc.",
+      "fund_score": 0.44,
+      "inbound": [
+        {
+          "term": "nvidia",
+          "via": "MDB",
+          "direction": "bear",
+          "today_z": 2.156,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "LRCX",
+      "sector": "06 Technology",
+      "entity": "LAM RESEARCH CORP",
+      "fund_score": 0.618,
+      "inbound": [
+        {
+          "term": "meeting",
+          "via": "MU",
+          "direction": "bear",
+          "today_z": 2.006,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "meeting",
+          "via": "MU",
+          "direction": "bear",
+          "today_z": 2.006,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "AMAT",
+      "sector": "04 Manufacturing",
+      "entity": "APPLIED MATERIALS INC /DE",
+      "fund_score": 0.565,
+      "inbound": [
+        {
+          "term": "meeting",
+          "via": "MU",
+          "direction": "bear",
+          "today_z": 2.006,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ASML",
+      "sector": "06 Technology",
+      "entity": "ASML HOLDING NV",
+      "fund_score": 0.684,
+      "inbound": [
+        {
+          "term": "meeting",
+          "via": "MU",
+          "direction": "bear",
+          "today_z": 2.006,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "TSM",
+      "sector": "04 Manufacturing",
+      "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "meeting",
+          "via": "MU",
+          "direction": "bear",
+          "today_z": 2.006,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
-    "stock_signals": 228,
+    "stock_signals": 230,
     "macro_signals": 23,
     "sector_diversity": 9,
     "grade": "A",
