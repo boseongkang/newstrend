@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-29T10:08:25+00:00",
+  "generated_at": "2026-07-29T12:32:17+00:00",
   "source": {
-    "signal_corr_updated": "2026-07-29T10:07:24Z",
+    "signal_corr_updated": "2026-07-29T12:31:11Z",
     "n_pairs_total": 4184,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,14 +21,22 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "store": 1.525,
-    "agent": 6.031
+    "anthropic": 1.647,
+    "store": 2.401,
+    "americans": 2.098,
+    "food": 1.537,
+    "profit": 1.879,
+    "agent": 5.606,
+    "multiple": 1.567,
+    "fight": 1.528,
+    "losses": 1.645,
+    "island": 2.043
   },
   "stock_chains": [
     {
       "term": "anthropic",
-      "is_active_today": false,
-      "today_z": null,
+      "is_active_today": true,
+      "today_z": 1.647,
       "hop1": {
         "ticker": "SOFI",
         "sector": "02 Finance",
@@ -80,8 +88,8 @@
     },
     {
       "term": "anthropic",
-      "is_active_today": false,
-      "today_z": null,
+      "is_active_today": true,
+      "today_z": 1.647,
       "hop1": {
         "ticker": "HOOD",
         "sector": "09 Crypto Assets",
@@ -119,6 +127,76 @@
           "ticker": "QQQ",
           "ticker_corr": 0.546,
           "implied_dir": "bull",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        }
+      ]
+    },
+    {
+      "term": "anthropic",
+      "is_active_today": true,
+      "today_z": 1.647,
+      "hop1": {
+        "ticker": "MRNA",
+        "sector": "03 Life Sciences",
+        "entity": "Moderna, Inc.",
+        "corr": 0.3264,
+        "lag": -3,
+        "hit_rate": 0.7,
+        "direction": "bull",
+        "avg_ret_1d": 1.696,
+        "confidence": 0.459
+      },
+      "hop2": []
+    },
+    {
+      "term": "anthropic",
+      "is_active_today": true,
+      "today_z": 1.647,
+      "hop1": {
+        "ticker": "AMAT",
+        "sector": "04 Manufacturing",
+        "entity": "APPLIED MATERIALS INC /DE",
+        "corr": -0.304,
+        "lag": -5,
+        "hit_rate": 0.7,
+        "direction": "bear",
+        "avg_ret_1d": 3.613,
+        "confidence": 0.451
+      },
+      "hop2": [
+        {
+          "ticker": "LRCX",
+          "ticker_corr": 0.892,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "LAM RESEARCH CORP"
+        },
+        {
+          "ticker": "ASML",
+          "ticker_corr": 0.795,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "ASML HOLDING NV"
+        },
+        {
+          "ticker": "MU",
+          "ticker_corr": 0.663,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "MICRON TECHNOLOGY INC"
+        },
+        {
+          "ticker": "TSM",
+          "ticker_corr": 0.658,
+          "implied_dir": "bear",
+          "sector": "04 Manufacturing",
+          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.653,
+          "implied_dir": "bear",
           "sector": null,
           "entity": "INVESCO QQQ TRUST, SERIES 1"
         }
@@ -2589,23 +2667,6 @@
       "hop2": []
     },
     {
-      "term": "anthropic",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "MRNA",
-        "sector": "03 Life Sciences",
-        "entity": "Moderna, Inc.",
-        "corr": 0.3264,
-        "lag": -3,
-        "hit_rate": 0.7,
-        "direction": "bull",
-        "avg_ret_1d": 1.696,
-        "confidence": 0.459
-      },
-      "hop2": []
-    },
-    {
       "term": "production",
       "is_active_today": false,
       "today_z": null,
@@ -2655,59 +2716,6 @@
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Salesforce, Inc."
-        }
-      ]
-    },
-    {
-      "term": "anthropic",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "AMAT",
-        "sector": "04 Manufacturing",
-        "entity": "APPLIED MATERIALS INC /DE",
-        "corr": -0.304,
-        "lag": -5,
-        "hit_rate": 0.7,
-        "direction": "bear",
-        "avg_ret_1d": 3.613,
-        "confidence": 0.451
-      },
-      "hop2": [
-        {
-          "ticker": "LRCX",
-          "ticker_corr": 0.892,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "LAM RESEARCH CORP"
-        },
-        {
-          "ticker": "ASML",
-          "ticker_corr": 0.795,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "ASML HOLDING NV"
-        },
-        {
-          "ticker": "MU",
-          "ticker_corr": 0.663,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "MICRON TECHNOLOGY INC"
-        },
-        {
-          "ticker": "TSM",
-          "ticker_corr": 0.658,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.653,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
         }
       ]
     },
@@ -9487,7 +9495,226 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "anthropic",
+          "via": "SOFI",
+          "direction": "bull",
+          "today_z": 1.647,
+          "indirect": true
+        },
+        {
+          "term": "anthropic",
+          "via": "HOOD",
+          "direction": "bull",
+          "today_z": 1.647,
+          "indirect": true
+        },
+        {
+          "term": "anthropic",
+          "via": "AMAT",
+          "direction": "bear",
+          "today_z": 1.647,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "SOFI",
+      "sector": "02 Finance",
+      "entity": "SoFi Technologies, Inc.",
+      "fund_score": 0.335,
+      "inbound": [
+        {
+          "term": "anthropic",
+          "direction": "bull",
+          "today_z": 1.647,
+          "hit_rate": 1.0
+        },
+        {
+          "term": "anthropic",
+          "via": "HOOD",
+          "direction": "bull",
+          "today_z": 1.647,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "HOOD",
+      "sector": "09 Crypto Assets",
+      "entity": "Robinhood Markets, Inc.",
+      "fund_score": 0.478,
+      "inbound": [
+        {
+          "term": "anthropic",
+          "direction": "bull",
+          "today_z": 1.647,
+          "hit_rate": 1.0
+        },
+        {
+          "term": "anthropic",
+          "via": "SOFI",
+          "direction": "bull",
+          "today_z": 1.647,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "SPY",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "anthropic",
+          "via": "SOFI",
+          "direction": "bull",
+          "today_z": 1.647,
+          "indirect": true
+        },
+        {
+          "term": "anthropic",
+          "via": "HOOD",
+          "direction": "bull",
+          "today_z": 1.647,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "COIN",
+      "sector": "09 Crypto Assets",
+      "entity": "Coinbase Global, Inc.",
+      "fund_score": 0.572,
+      "inbound": [
+        {
+          "term": "anthropic",
+          "via": "SOFI",
+          "direction": "bull",
+          "today_z": 1.647,
+          "indirect": true
+        },
+        {
+          "term": "anthropic",
+          "via": "HOOD",
+          "direction": "bull",
+          "today_z": 1.647,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MRNA",
+      "sector": "03 Life Sciences",
+      "entity": "Moderna, Inc.",
+      "fund_score": 0.136,
+      "inbound": [
+        {
+          "term": "anthropic",
+          "direction": "bull",
+          "today_z": 1.647,
+          "hit_rate": 0.7
+        }
+      ]
+    },
+    {
+      "ticker": "AMAT",
+      "sector": "04 Manufacturing",
+      "entity": "APPLIED MATERIALS INC /DE",
+      "fund_score": 0.565,
+      "inbound": [
+        {
+          "term": "anthropic",
+          "direction": "bear",
+          "today_z": 1.647,
+          "hit_rate": 0.7
+        }
+      ]
+    },
+    {
+      "ticker": "IWM",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "anthropic",
+          "via": "SOFI",
+          "direction": "bull",
+          "today_z": 1.647,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "LRCX",
+      "sector": "06 Technology",
+      "entity": "LAM RESEARCH CORP",
+      "fund_score": 0.618,
+      "inbound": [
+        {
+          "term": "anthropic",
+          "via": "AMAT",
+          "direction": "bear",
+          "today_z": 1.647,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ASML",
+      "sector": "06 Technology",
+      "entity": "ASML HOLDING NV",
+      "fund_score": 0.684,
+      "inbound": [
+        {
+          "term": "anthropic",
+          "via": "AMAT",
+          "direction": "bear",
+          "today_z": 1.647,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MU",
+      "sector": "04 Manufacturing",
+      "entity": "MICRON TECHNOLOGY INC",
+      "fund_score": 0.512,
+      "inbound": [
+        {
+          "term": "anthropic",
+          "via": "AMAT",
+          "direction": "bear",
+          "today_z": 1.647,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "TSM",
+      "sector": "04 Manufacturing",
+      "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "anthropic",
+          "via": "AMAT",
+          "direction": "bear",
+          "today_z": 1.647,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 268,
