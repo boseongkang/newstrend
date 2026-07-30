@@ -11139,10 +11139,30 @@
       "hash_ok": true,
       "ood": true,
       "unfreeze_ready": false
+    },
+    {
+      "updated": "2026-07-30T14:45:36Z",
+      "n_pred_total": 10260,
+      "n_evaluated": 9000,
+      "models": {
+        "RandomForest": {
+          "alpha": -0.474,
+          "p": 0.0,
+          "n": 4500
+        },
+        "GradientBoosting": {
+          "alpha": -0.548,
+          "p": 0.0001,
+          "n": 4500
+        }
+      },
+      "hash_ok": true,
+      "ood": true,
+      "unfreeze_ready": false
     }
   ],
   "latest": {
-    "updated": "2026-07-30T12:16:41Z",
+    "updated": "2026-07-30T14:45:36Z",
     "baseline_date": "2026-05-25",
     "model_hashes": {
       "RandomForest": "a2947618dfbb05bd",
@@ -11155,31 +11175,31 @@
     },
     "prediction_log": {
       "total": 10260,
-      "evaluated": 8820,
-      "pending": 1440,
+      "evaluated": 9000,
+      "pending": 1260,
       "new_today": 0,
-      "newly_evaluated": 0
+      "newly_evaluated": 180
     },
     "forward": {
       "RandomForest": {
         "status": "tracking",
-        "n": 4410,
-        "n_folds": 49,
-        "cumulative_alpha_pct": -0.483,
+        "n": 4500,
+        "n_folds": 50,
+        "cumulative_alpha_pct": -0.474,
         "alpha_ci_95": [
-          -0.724,
-          -0.243
+          -0.711,
+          -0.237
         ],
-        "alpha_t": -4.209,
+        "alpha_t": -4.197,
         "alpha_p": 0.0,
         "sig_status": "ok",
-        "cumulative_accuracy": 0.4782,
+        "cumulative_accuracy": 0.4787,
         "by_regime": {
           "RISK-ON": {
-            "n": 3960,
-            "n_folds": 44,
-            "accuracy": 0.4747,
-            "alpha_mean_pct": -0.446,
+            "n": 4050,
+            "n_folds": 45,
+            "accuracy": 0.4753,
+            "alpha_mean_pct": -0.437,
             "provisional": false
           },
           "NEUTRAL": {
@@ -11193,23 +11213,23 @@
       },
       "GradientBoosting": {
         "status": "tracking",
-        "n": 4410,
-        "n_folds": 49,
-        "cumulative_alpha_pct": -0.555,
+        "n": 4500,
+        "n_folds": 50,
+        "cumulative_alpha_pct": -0.548,
         "alpha_ci_95": [
-          -0.798,
-          -0.313
+          -0.787,
+          -0.309
         ],
-        "alpha_t": -3.77,
-        "alpha_p": 0.0002,
+        "alpha_t": -3.791,
+        "alpha_p": 0.0001,
         "sig_status": "ok",
-        "cumulative_accuracy": 0.4773,
+        "cumulative_accuracy": 0.4776,
         "by_regime": {
           "RISK-ON": {
-            "n": 3960,
-            "n_folds": 44,
-            "accuracy": 0.4737,
-            "alpha_mean_pct": -0.533,
+            "n": 4050,
+            "n_folds": 45,
+            "accuracy": 0.4741,
+            "alpha_mean_pct": -0.525,
             "provisional": false
           },
           "NEUTRAL": {
@@ -11230,17 +11250,17 @@
     },
     "bias_monitor": {
       "n_total_predictions": 10260,
-      "n_evaluated": 8820,
+      "n_evaluated": 9000,
       "long_ratio": 0.854,
       "long_bias_warning": true,
       "top_sector": "Technology",
       "top_sector_pct": 39.8,
       "sector_concentration_warning": false,
       "calibration": {
-        "accuracy": 0.4778,
-        "mean_abs_predicted": 3.729,
-        "mean_abs_realized": 0.293,
-        "overconfidence_ratio": 12.746
+        "accuracy": 0.4781,
+        "mean_abs_predicted": 3.72,
+        "mean_abs_realized": 0.284,
+        "overconfidence_ratio": 13.079
       }
     },
     "alerts": [
@@ -11255,5 +11275,5 @@
     },
     "label": "ADVISORY ONLY \u00b7 paper trading \u00b7 unverified \u00b7 single-regime baseline"
   },
-  "updated": "2026-07-30T12:16:41Z"
+  "updated": "2026-07-30T14:45:36Z"
 }
