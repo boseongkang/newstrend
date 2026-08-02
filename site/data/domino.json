@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-02T17:35:26+00:00",
+  "generated_at": "2026-08-02T19:46:20+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-02T17:34:00Z",
+    "signal_corr_updated": "2026-08-02T19:45:11Z",
     "n_pairs_total": 3732,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,15 +21,113 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "hold": 1.853,
-    "negotiations": 1.586,
-    "tools": 3.495,
-    "vance": 4.635,
-    "trying": 2.024,
-    "dead": 1.915,
-    "powerful": 2.557
+    "office": 1.696,
+    "digital": 1.549,
+    "case": 1.726,
+    "framework": 1.536,
+    "board": 1.632,
+    "hold": 2.193,
+    "negotiations": 1.798,
+    "tools": 4.201,
+    "opening": 1.626,
+    "vance": 5.48,
+    "trying": 2.576,
+    "dead": 2.085,
+    "powerful": 3.091
   },
   "stock_chains": [
+    {
+      "term": "case",
+      "is_active_today": true,
+      "today_z": 1.726,
+      "hop1": {
+        "ticker": "BAC",
+        "sector": "02 Finance",
+        "entity": "BANK OF AMERICA CORP /DE/",
+        "corr": 0.3087,
+        "lag": -4,
+        "hit_rate": 0.833,
+        "direction": "bull",
+        "avg_ret_1d": -0.024,
+        "confidence": 0.495
+      },
+      "hop2": [
+        {
+          "ticker": "JPM",
+          "ticker_corr": 0.796,
+          "implied_dir": "bull",
+          "sector": "02 Finance",
+          "entity": "JPMORGAN CHASE & CO"
+        },
+        {
+          "ticker": "MS",
+          "ticker_corr": 0.764,
+          "implied_dir": "bull",
+          "sector": "02 Finance",
+          "entity": "MORGAN STANLEY"
+        },
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.689,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "GS",
+          "ticker_corr": 0.689,
+          "implied_dir": "bull",
+          "sector": "02 Finance",
+          "entity": "GOLDMAN SACHS GROUP INC"
+        },
+        {
+          "ticker": "IWM",
+          "ticker_corr": 0.637,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": null
+        }
+      ]
+    },
+    {
+      "term": "office",
+      "is_active_today": true,
+      "today_z": 1.696,
+      "hop1": {
+        "ticker": "DDOG",
+        "sector": "06 Technology",
+        "entity": "Datadog, Inc.",
+        "corr": -0.3018,
+        "lag": -2,
+        "hit_rate": 0.571,
+        "direction": "bear",
+        "avg_ret_1d": 0.162,
+        "confidence": 0.358
+      },
+      "hop2": [
+        {
+          "ticker": "PANW",
+          "ticker_corr": 0.529,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Palo Alto Networks Inc"
+        },
+        {
+          "ticker": "MDB",
+          "ticker_corr": 0.514,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "MongoDB, Inc."
+        },
+        {
+          "ticker": "ZS",
+          "ticker_corr": 0.507,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Zscaler, Inc."
+        }
+      ]
+    },
     {
       "term": "prime",
       "is_active_today": false,
@@ -713,59 +811,6 @@
         "confidence": 0.501
       },
       "hop2": []
-    },
-    {
-      "term": "case",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "BAC",
-        "sector": "02 Finance",
-        "entity": "BANK OF AMERICA CORP /DE/",
-        "corr": 0.3087,
-        "lag": -4,
-        "hit_rate": 0.833,
-        "direction": "bull",
-        "avg_ret_1d": -0.024,
-        "confidence": 0.495
-      },
-      "hop2": [
-        {
-          "ticker": "JPM",
-          "ticker_corr": 0.796,
-          "implied_dir": "bull",
-          "sector": "02 Finance",
-          "entity": "JPMORGAN CHASE & CO"
-        },
-        {
-          "ticker": "MS",
-          "ticker_corr": 0.764,
-          "implied_dir": "bull",
-          "sector": "02 Finance",
-          "entity": "MORGAN STANLEY"
-        },
-        {
-          "ticker": "DIA",
-          "ticker_corr": 0.689,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "GS",
-          "ticker_corr": 0.689,
-          "implied_dir": "bull",
-          "sector": "02 Finance",
-          "entity": "GOLDMAN SACHS GROUP INC"
-        },
-        {
-          "ticker": "IWM",
-          "ticker_corr": 0.637,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": null
-        }
-      ]
     },
     {
       "term": "final",
@@ -5340,45 +5385,6 @@
       ]
     },
     {
-      "term": "office",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "DDOG",
-        "sector": "06 Technology",
-        "entity": "Datadog, Inc.",
-        "corr": -0.3018,
-        "lag": -2,
-        "hit_rate": 0.571,
-        "direction": "bear",
-        "avg_ret_1d": 0.162,
-        "confidence": 0.358
-      },
-      "hop2": [
-        {
-          "ticker": "PANW",
-          "ticker_corr": 0.529,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Palo Alto Networks Inc"
-        },
-        {
-          "ticker": "MDB",
-          "ticker_corr": 0.514,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "MongoDB, Inc."
-        },
-        {
-          "ticker": "ZS",
-          "ticker_corr": 0.507,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Zscaler, Inc."
-        }
-      ]
-    },
-    {
       "term": "washington",
       "is_active_today": false,
       "today_z": null,
@@ -7395,7 +7401,156 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "BAC",
+      "sector": "02 Finance",
+      "entity": "BANK OF AMERICA CORP /DE/",
+      "fund_score": 0.349,
+      "inbound": [
+        {
+          "term": "case",
+          "direction": "bull",
+          "today_z": 1.726,
+          "hit_rate": 0.833
+        }
+      ]
+    },
+    {
+      "ticker": "DDOG",
+      "sector": "06 Technology",
+      "entity": "Datadog, Inc.",
+      "fund_score": 0.44,
+      "inbound": [
+        {
+          "term": "office",
+          "direction": "bear",
+          "today_z": 1.696,
+          "hit_rate": 0.571
+        }
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "sector": "02 Finance",
+      "entity": "JPMORGAN CHASE & CO",
+      "fund_score": 0.477,
+      "inbound": [
+        {
+          "term": "case",
+          "via": "BAC",
+          "direction": "bull",
+          "today_z": 1.726,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MS",
+      "sector": "02 Finance",
+      "entity": "MORGAN STANLEY",
+      "fund_score": 0.423,
+      "inbound": [
+        {
+          "term": "case",
+          "via": "BAC",
+          "direction": "bull",
+          "today_z": 1.726,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "DIA",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "case",
+          "via": "BAC",
+          "direction": "bull",
+          "today_z": 1.726,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "GS",
+      "sector": "02 Finance",
+      "entity": "GOLDMAN SACHS GROUP INC",
+      "fund_score": 0.438,
+      "inbound": [
+        {
+          "term": "case",
+          "via": "BAC",
+          "direction": "bull",
+          "today_z": 1.726,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "IWM",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "case",
+          "via": "BAC",
+          "direction": "bull",
+          "today_z": 1.726,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "PANW",
+      "sector": "06 Technology",
+      "entity": "Palo Alto Networks Inc",
+      "fund_score": 0.361,
+      "inbound": [
+        {
+          "term": "office",
+          "via": "DDOG",
+          "direction": "bear",
+          "today_z": 1.696,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MDB",
+      "sector": "06 Technology",
+      "entity": "MongoDB, Inc.",
+      "fund_score": 0.285,
+      "inbound": [
+        {
+          "term": "office",
+          "via": "DDOG",
+          "direction": "bear",
+          "today_z": 1.696,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ZS",
+      "sector": "06 Technology",
+      "entity": "Zscaler, Inc.",
+      "fund_score": 0.268,
+      "inbound": [
+        {
+          "term": "office",
+          "via": "DDOG",
+          "direction": "bear",
+          "today_z": 1.696,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 201,
