@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-03T15:28:40+00:00",
+  "generated_at": "2026-08-03T17:33:34+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-03T15:27:40Z",
+    "signal_corr_updated": "2026-08-03T17:32:43Z",
     "n_pairs_total": 3929,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,24 +21,30 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "bitcoin": 1.917,
-    "future": 1.6,
-    "department": 1.738,
-    "japan": 2.641,
-    "auto": 1.616,
-    "climate": 2.954,
-    "value": 1.661,
-    "electric": 1.914,
-    "starting": 2.205,
-    "university": 2.052,
-    "firms": 1.633,
-    "venezuela": 2.797
+    "work": 1.62,
+    "bitcoin": 2.493,
+    "future": 2.016,
+    "department": 1.907,
+    "japan": 2.758,
+    "indian": 1.7,
+    "order": 1.844,
+    "auto": 1.811,
+    "climate": 3.037,
+    "value": 2.179,
+    "electric": 2.203,
+    "limited": 1.803,
+    "offers": 1.639,
+    "starting": 2.53,
+    "university": 2.421,
+    "firms": 1.708,
+    "venezuela": 2.797,
+    "began": 1.823
   },
   "stock_chains": [
     {
       "term": "department",
       "is_active_today": true,
-      "today_z": 1.738,
+      "today_z": 1.907,
       "hop1": {
         "ticker": "SNPS",
         "sector": "06 Technology",
@@ -61,9 +67,51 @@
       ]
     },
     {
+      "term": "work",
+      "is_active_today": true,
+      "today_z": 1.62,
+      "hop1": {
+        "ticker": "FSLR",
+        "sector": "04 Manufacturing",
+        "entity": "FIRST SOLAR, INC.",
+        "corr": -0.3651,
+        "lag": -3,
+        "hit_rate": 0.6,
+        "direction": "bear",
+        "avg_ret_1d": -0.094,
+        "confidence": 0.379
+      },
+      "hop2": []
+    },
+    {
+      "term": "work",
+      "is_active_today": true,
+      "today_z": 1.62,
+      "hop1": {
+        "ticker": "CDNS",
+        "sector": "06 Technology",
+        "entity": "CADENCE DESIGN SYSTEMS INC",
+        "corr": -0.3136,
+        "lag": -5,
+        "hit_rate": 0.6,
+        "direction": "bear",
+        "avg_ret_1d": -0.639,
+        "confidence": 0.361
+      },
+      "hop2": [
+        {
+          "ticker": "SNPS",
+          "ticker_corr": 0.699,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "SYNOPSYS INC"
+        }
+      ]
+    },
+    {
       "term": "future",
       "is_active_today": true,
-      "today_z": 1.6,
+      "today_z": 2.016,
       "hop1": {
         "ticker": "SEDG",
         "sector": "04 Manufacturing",
@@ -4605,23 +4653,6 @@
       ]
     },
     {
-      "term": "work",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "FSLR",
-        "sector": "04 Manufacturing",
-        "entity": "FIRST SOLAR, INC.",
-        "corr": -0.3651,
-        "lag": -3,
-        "hit_rate": 0.6,
-        "direction": "bear",
-        "avg_ret_1d": -0.094,
-        "confidence": 0.379
-      },
-      "hop2": []
-    },
-    {
       "term": "down",
       "is_active_today": false,
       "today_z": null,
@@ -5642,31 +5673,6 @@
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "Alphabet Inc."
-        }
-      ]
-    },
-    {
-      "term": "work",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CDNS",
-        "sector": "06 Technology",
-        "entity": "CADENCE DESIGN SYSTEMS INC",
-        "corr": -0.3136,
-        "lag": -5,
-        "hit_rate": 0.6,
-        "direction": "bear",
-        "avg_ret_1d": -0.639,
-        "confidence": 0.361
-      },
-      "hop2": [
-        {
-          "ticker": "SNPS",
-          "ticker_corr": 0.699,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "SYNOPSYS INC"
         }
       ]
     },
@@ -7705,8 +7711,50 @@
         {
           "term": "department",
           "direction": "bear",
-          "today_z": 1.738,
+          "today_z": 1.907,
           "hit_rate": 0.714
+        },
+        {
+          "term": "work",
+          "via": "CDNS",
+          "direction": "bear",
+          "today_z": 1.62,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "CDNS",
+      "sector": "06 Technology",
+      "entity": "CADENCE DESIGN SYSTEMS INC",
+      "fund_score": 0.522,
+      "inbound": [
+        {
+          "term": "work",
+          "direction": "bear",
+          "today_z": 1.62,
+          "hit_rate": 0.6
+        },
+        {
+          "term": "department",
+          "via": "SNPS",
+          "direction": "bear",
+          "today_z": 1.907,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "FSLR",
+      "sector": "04 Manufacturing",
+      "entity": "FIRST SOLAR, INC.",
+      "fund_score": 0.682,
+      "inbound": [
+        {
+          "term": "work",
+          "direction": "bear",
+          "today_z": 1.62,
+          "hit_rate": 0.6
         }
       ]
     },
@@ -7719,23 +7767,8 @@
         {
           "term": "future",
           "direction": "bear",
-          "today_z": 1.6,
+          "today_z": 2.016,
           "hit_rate": 0.5
-        }
-      ]
-    },
-    {
-      "ticker": "CDNS",
-      "sector": "06 Technology",
-      "entity": "CADENCE DESIGN SYSTEMS INC",
-      "fund_score": 0.522,
-      "inbound": [
-        {
-          "term": "department",
-          "via": "SNPS",
-          "direction": "bear",
-          "today_z": 1.738,
-          "indirect": true
         }
       ]
     },
@@ -7749,7 +7782,7 @@
           "term": "future",
           "via": "SEDG",
           "direction": "bear",
-          "today_z": 1.6,
+          "today_z": 2.016,
           "indirect": true
         }
       ]
