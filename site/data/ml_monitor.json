@@ -11939,10 +11939,30 @@
       "hash_ok": true,
       "ood": true,
       "unfreeze_ready": false
+    },
+    {
+      "updated": "2026-08-03T00:24:46Z",
+      "n_pred_total": 10980,
+      "n_evaluated": 9540,
+      "models": {
+        "RandomForest": {
+          "alpha": -0.435,
+          "p": 0.0001,
+          "n": 4770
+        },
+        "GradientBoosting": {
+          "alpha": -0.52,
+          "p": 0.0001,
+          "n": 4770
+        }
+      },
+      "hash_ok": true,
+      "ood": true,
+      "unfreeze_ready": false
     }
   ],
   "latest": {
-    "updated": "2026-08-02T23:23:43Z",
+    "updated": "2026-08-03T00:24:46Z",
     "baseline_date": "2026-05-25",
     "model_hashes": {
       "RandomForest": "a2947618dfbb05bd",
@@ -11954,10 +11974,10 @@
       "n_dates": 25
     },
     "prediction_log": {
-      "total": 10800,
+      "total": 10980,
       "evaluated": 9540,
-      "pending": 1260,
-      "new_today": 0,
+      "pending": 1440,
+      "new_today": 180,
       "newly_evaluated": 0
     },
     "forward": {
@@ -12029,9 +12049,9 @@
       "confidence_note": "UNTESTED REGIME: NEUTRAL was 0.0% of training data. Predictions unreliable."
     },
     "bias_monitor": {
-      "n_total_predictions": 10800,
+      "n_total_predictions": 10980,
       "n_evaluated": 9540,
-      "long_ratio": 0.854,
+      "long_ratio": 0.855,
       "long_bias_warning": true,
       "top_sector": "Technology",
       "top_sector_pct": 39.8,
@@ -12046,7 +12066,7 @@
     "alerts": [
       "REGIME CHANGE: non-RISK-ON data detected in forward predictions",
       "OOD: UNTESTED REGIME: NEUTRAL was 0.0% of training data. Predictions unreliable.",
-      "BIAS: long_ratio=85.4% \u2014 model may be systematically long"
+      "BIAS: long_ratio=85.5% \u2014 model may be systematically long"
     ],
     "unfreeze_check": {
       "forward_alpha_significant": false,
@@ -12055,5 +12075,5 @@
     },
     "label": "ADVISORY ONLY \u00b7 paper trading \u00b7 unverified \u00b7 single-regime baseline"
   },
-  "updated": "2026-08-02T23:23:43Z"
+  "updated": "2026-08-03T00:24:46Z"
 }
