@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-04T11:06:25+00:00",
+  "generated_at": "2026-08-04T13:20:05+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-04T11:05:21Z",
+    "signal_corr_updated": "2026-08-04T13:18:57Z",
     "n_pairs_total": 4111,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,13 +21,36 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
+    "life": 1.643,
     "women": 1.6,
-    "texas": 3.296,
-    "class": 2.184,
-    "republican": 1.796,
-    "university": 1.868
+    "texas": 4.361,
+    "race": 1.773,
+    "class": 2.535,
+    "points": 1.618,
+    "profit": 1.742,
+    "republicans": 1.827,
+    "republican": 2.266,
+    "university": 2.421,
+    "fellow": 1.604
   },
   "stock_chains": [
+    {
+      "term": "life",
+      "is_active_today": true,
+      "today_z": 1.643,
+      "hop1": {
+        "ticker": "BMRN",
+        "sector": "03 Life Sciences",
+        "entity": "BIOMARIN PHARMACEUTICAL INC",
+        "corr": -0.3132,
+        "lag": -4,
+        "hit_rate": 0.667,
+        "direction": "bear",
+        "avg_ret_1d": 0.202,
+        "confidence": 0.376
+      },
+      "hop2": []
+    },
     {
       "term": "prime",
       "is_active_today": false,
@@ -4644,23 +4667,6 @@
       ]
     },
     {
-      "term": "life",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "BMRN",
-        "sector": "03 Life Sciences",
-        "entity": "BIOMARIN PHARMACEUTICAL INC",
-        "corr": -0.3132,
-        "lag": -4,
-        "hit_rate": 0.667,
-        "direction": "bear",
-        "avg_ret_1d": 0.202,
-        "confidence": 0.376
-      },
-      "hop2": []
-    },
-    {
       "term": "times",
       "is_active_today": false,
       "today_z": null,
@@ -7421,7 +7427,22 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "BMRN",
+      "sector": "03 Life Sciences",
+      "entity": "BIOMARIN PHARMACEUTICAL INC",
+      "fund_score": 0.641,
+      "inbound": [
+        {
+          "term": "life",
+          "direction": "bear",
+          "today_z": 1.643,
+          "hit_rate": 0.667
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 206,
