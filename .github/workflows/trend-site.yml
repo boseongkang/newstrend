@@ -39,8 +39,10 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install -U pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
-          pip install yfinance pandas numpy orjson pyyaml || true
+          # fail-loud since STEP 4: requirements.txt is torch-free now, so a
+          # failed install means a real dependency problem — 40 downstream
+          # soft-fail steps would otherwise all break silently
+          pip install -r requirements.txt
 
       - name: Get latest warehouse run id
         env:
@@ -234,6 +236,34 @@ jobs:
             --out-csv-dir run || true
           gzip -f -k site/data/technical_analysis.json || true
 
+      - name: Gate — prices/TA regenerated this run (stale-input guard)
+        # fetch_prices_v2 / analyze_prices run under `|| true` above; if either
+        # crashes, predict.py would silently score yesterday's prices/TA and the
+        # end-of-job gate can't see it (these files are committed by
+        # fetch_prices.yml, not here, so predictions.json still looks fresh).
+        # Both scripts always stamp `updated` on success, so age>2h == crashed.
+        run: |
+          python3 - <<'PY'
+          import json, sys, datetime
+          now = datetime.datetime.now(datetime.timezone.utc)
+          bad = []
+          for path in ("site/data/prices.json", "site/data/technical_analysis.json"):
+              try:
+                  ts = json.load(open(path)).get("updated", "")
+                  dt = datetime.datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                  age_h = (now - dt).total_seconds() / 3600
+              except Exception as e:
+                  bad.append(f"{path}: unreadable ({e})"); continue
+              if age_h > 2:
+                  bad.append(f"{path}: updated={ts} ({age_h:.1f}h old) — generator crashed under '|| true'")
+              else:
+                  print(f"OK  {path} ({age_h*60:.0f}min old)")
+          if bad:
+              print("=== STALE-INPUT GATE: refusing to run predict on stale prices/TA ===", file=sys.stderr)
+              for b in bad: print("  ✗ " + b, file=sys.stderr)
+              sys.exit(1)
+          PY
+
       - name: Build signal correlations
         run: |
           python scripts/build_signal_corr.py \
@@ -323,6 +353,13 @@ jobs:
             --weights      site/data/ticker_weights.json \
             --out          site/data/predictions.json || true
 
+      - name: Archive predictions to history (stale-input rejecting)
+        # Moved out of weekly_report.py (STEP 4): archive right after predict
+        # so daily_verify sees today's snapshot, and refuse stale input instead
+        # of stamping the previous run's file with today's date.
+        run: |
+          python scripts/archive_predictions.py || true
+
       - name: Find hidden gems (4-Pillar synthesis)
         run: |
           python scripts/find_hidden_gems.py --top 30 || true
@@ -355,7 +392,6 @@ jobs:
           python scripts/weekly_report.py \
             --prices       site/data/prices.json \
             --pred-dir     site/data/predictions_history \
-            --current-pred site/data/predictions.json \
             --analysis-dir site/data/ticker_analysis \
             --out-dir      site/data/reports \
             --lookback-days 14 \
@@ -416,16 +452,20 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           # 1) 변경사항 없으면 종료
-          git add site/data/predictions_history/ site/data/reports/ \
-                  site/data/trends.json site/data/ticker_sentiment.json \
-                  site/data/trends_dow.json site/data/trends_weekly.json \
-                  site/data/trends_monthly.json \
-                  site/data/hidden_gems.json site/data/predictions.json \
-                  site/data/signal_corr.json site/data/backtest.json \
-                  site/data/backtest_v2.json site/data/verification/ \
-                  site/data/ticker_weights.json \
-                  site/data/domino.json site/data/domino_history.json \
-                  site/data/fundamentals.json 2>/dev/null || true
+          # per-path adds (STEP 4): one missing pathspec used to abort the
+          # ENTIRE list-form `git add ... || true`, silently staging nothing
+          for p in site/data/predictions_history/ site/data/reports/ \
+                   site/data/trends.json site/data/ticker_sentiment.json \
+                   site/data/trends_dow.json site/data/trends_weekly.json \
+                   site/data/trends_monthly.json \
+                   site/data/hidden_gems.json site/data/predictions.json \
+                   site/data/signal_corr.json site/data/backtest.json \
+                   site/data/backtest_v2.json site/data/verification/ \
+                   site/data/ticker_weights.json \
+                   site/data/domino.json site/data/domino_history.json \
+                   site/data/fundamentals.json; do
+            git add "$p" 2>/dev/null || echo "::warning::git add skipped: $p"
+          done
           if git diff --cached --quiet; then
             echo "No history changes to commit"
             exit 0
@@ -552,23 +592,27 @@ jobs:
           git config --global user.name  "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add site/data/paper_trading_history.json \
-                  site/data/prediction_accuracy.json \
-                  site/data/pillar_weights.json \
-                  site/data/calibration_history.json \
-                  site/data/gap_analysis.json \
-                  site/data/gap_history.json \
-                  site/data/ml_baseline.json \
-                  site/data/weekly_analysis.json \
-                  site/data/weekly_history.json \
-                  site/data/macro_themes.json \
-                  site/data/tickers.json \
-                  site/data/validation.json \
-                  site/data/ml_monitor.json \
-                  site/data/ml_prediction_log.json \
-                  site/data/ml_frozen_train.json \
-                  site/data/health.json \
-                  experiments/results.json 2>/dev/null || true
+          # per-path adds (STEP 4): one missing pathspec used to abort the
+          # ENTIRE list-form `git add ... || true`, silently staging nothing
+          for p in site/data/paper_trading_history.json \
+                   site/data/prediction_accuracy.json \
+                   site/data/pillar_weights.json \
+                   site/data/calibration_history.json \
+                   site/data/gap_analysis.json \
+                   site/data/gap_history.json \
+                   site/data/ml_baseline.json \
+                   site/data/weekly_analysis.json \
+                   site/data/weekly_history.json \
+                   site/data/macro_themes.json \
+                   site/data/tickers.json \
+                   site/data/validation.json \
+                   site/data/ml_monitor.json \
+                   site/data/ml_prediction_log.json \
+                   site/data/ml_frozen_train.json \
+                   site/data/health.json \
+                   experiments/results.json; do
+            git add "$p" 2>/dev/null || echo "::warning::git add skipped: $p"
+          done
           if git diff --cached --quiet; then
             echo "No self-correcting changes to commit"
             exit 0
@@ -586,6 +630,16 @@ jobs:
 
           git stash pop 2>/dev/null || true
           echo "Done"
+
+      # Moved before the validation gate (STEP 4): when the gate goes RED
+      # first, this step never ran and the root cause (local M3 launchd not
+      # pushing FinBERT scores) was invisible. The end-of-job gate can't catch
+      # this itself — aggregate always restamps ticker_sentiment.json fresh
+      # even from stale per-day inputs. All data commits happen above, so a
+      # RED here loses no data (deploy is skipped, which is intended: don't
+      # ship a dashboard scored on stale sentiment).
+      - name: Sentiment freshness health check
+        run: python scripts/health_check.py
 
       - name: Validation freshness gate (fail loud on silent staleness)
         # Recurrence guard for the 2026-05-25→06-05 silent-staleness bug: the
@@ -608,6 +662,13 @@ jobs:
               "site/data/ml_monitor.json": "updated",
               "site/data/ml_prediction_log.json": None,   # presence/commit only
               "experiments/results.json": "updated",
+              # Core pipeline outputs (added STEP 4, 2026-08-05): these were
+              # produced under `|| true` with no freshness check at all — a
+              # silent generator crash shipped yesterday's file green.
+              "site/data/predictions.json": "updated",
+              "site/data/hidden_gems.json": "generated_at",
+              "site/data/domino.json": "generated_at",
+              "site/data/ticker_sentiment.json": "generated",
           }
 
           def git(*a):
@@ -707,8 +768,3 @@ jobs:
       - id: deploy
         uses: actions/deploy-pages@v5
 
-      # Fail the workflow if sentiment is stale, so GitHub mobile notifies
-      # us regardless of laptop launchd state. Runs after deploy so the site
-      # still ships with whatever data we have.
-      - name: Sentiment freshness health check
-        run: python scripts/health_check.py

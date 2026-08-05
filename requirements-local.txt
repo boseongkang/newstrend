@@ -1,0 +1,11 @@
+# Local (M3) additions on top of requirements.txt — FinBERT sentiment stack.
+# Used by scripts/sentiment_finbert*.py via launchd; never installed in CI.
+#   pip install -r requirements.txt -r requirements-local.txt
+-r requirements.txt
+
+# ── Sentiment / NLP models (FinBERT — Phase 2 of trend system) ───────────────
+# ProsusAI/finbert (BERT-base, 110M) for ticker-level sentiment.
+# arm64 Mac MPS-accelerated; CPU fallback works.
+torch>=2.2.0
+transformers>=4.38.0
+tokenizers>=0.15.0

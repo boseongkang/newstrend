@@ -6,6 +6,10 @@ on:
         description: "Regenerate every daily CSV from master.jsonl (--multi-day)"
         type: boolean
         default: false
+      allow_empty_start:
+        description: "DANGER: proceed even when no previous warehouse artifact was restored (fresh start / deliberate reset)"
+        type: boolean
+        default: false
   schedule:
     - cron: "23 * * * *"
 
@@ -27,7 +31,6 @@ jobs:
         run: |
           python -m pip install -U pip
           pip install -r requirements.txt
-          pip install pandas numpy pyyaml || true
 
       - name: Download previous warehouse artifact
         uses: dawidd6/action-download-artifact@v17
@@ -44,6 +47,24 @@ jobs:
           SRC=prev_warehouse
           if [ -d prev_warehouse/warehouse ]; then SRC=prev_warehouse/warehouse; fi
           if [ -d "$SRC" ]; then rsync -a "$SRC"/ data/warehouse/; fi
+
+      - name: Floor check — refuse to run on an empty/vanished warehouse
+        # The warehouse exists ONLY as a run-to-run artifact chain. If the
+        # previous artifact expired or a broken run uploaded a near-empty one,
+        # this run would rebuild from a few hours of live files and upload a
+        # tiny warehouse — silently resetting months of history. Fail RED
+        # instead; a deliberate fresh start needs allow_empty_start=true.
+        run: |
+          set -euo pipefail
+          PREV_MASTER_LINES=$(wc -l < data/warehouse/master.jsonl 2>/dev/null || echo 0)
+          PREV_DAILY_FILES=$(ls data/warehouse/daily 2>/dev/null | wc -l | tr -d ' ')
+          echo "restored warehouse: master.jsonl=${PREV_MASTER_LINES} lines, daily files=${PREV_DAILY_FILES}"
+          echo "PREV_MASTER_LINES=${PREV_MASTER_LINES}" >> "$GITHUB_ENV"
+          echo "PREV_DAILY_FILES=${PREV_DAILY_FILES}"   >> "$GITHUB_ENV"
+          if [ "${PREV_MASTER_LINES}" -lt 1000 ] && [ "${{ github.event.inputs.allow_empty_start }}" != "true" ]; then
+            echo "::error::warehouse floor check FAILED — restored master.jsonl has ${PREV_MASTER_LINES} lines (<1000). Previous artifact missing/expired/corrupt. Refusing to overwrite history; re-run with allow_empty_start=true only for a deliberate reset."
+            exit 1
+          fi
 
       - name: Download latest live jsonl
         uses: dawidd6/action-download-artifact@v17
@@ -179,6 +200,26 @@ jobs:
           ls data/warehouse/daily/*.csv | wc -l
           ls -lt data/warehouse/daily/*.csv | head -10 || true
 
+
+      - name: Shrink check — never upload a warehouse smaller than restored
+        # master.jsonl is append-only and daily files only accumulate; any
+        # shrink means this run corrupted the merge. Failing here skips the
+        # upload, so the previous (good) artifact stays the newest.
+        run: |
+          set -euo pipefail
+          NOW_MASTER_LINES=$(wc -l < data/warehouse/master.jsonl 2>/dev/null || echo 0)
+          NOW_DAILY_FILES=$(ls data/warehouse/daily 2>/dev/null | wc -l | tr -d ' ')
+          echo "outgoing warehouse: master.jsonl=${NOW_MASTER_LINES} lines (prev ${PREV_MASTER_LINES}), daily files=${NOW_DAILY_FILES} (prev ${PREV_DAILY_FILES})"
+          if [ "${NOW_MASTER_LINES}" -lt "${PREV_MASTER_LINES}" ]; then
+            echo "::error::warehouse shrink check FAILED — master.jsonl ${PREV_MASTER_LINES} → ${NOW_MASTER_LINES} lines. Skipping upload to protect the previous artifact."
+            exit 1
+          fi
+          # backfill deliberately deletes *_tokens.* derivatives, so compare
+          # daily-file count only on normal incremental runs
+          if [ "${{ github.event.inputs.backfill }}" != "true" ] && [ "${NOW_DAILY_FILES}" -lt "${PREV_DAILY_FILES}" ]; then
+            echo "::error::warehouse shrink check FAILED — daily files ${PREV_DAILY_FILES} → ${NOW_DAILY_FILES}. Skipping upload."
+            exit 1
+          fi
 
       - name: Upload warehouse artifact
         uses: actions/upload-artifact@v6

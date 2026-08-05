@@ -2,8 +2,11 @@ name: entities-report
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "25 8 * * *"
+  # schedule disabled (STEP 4, 2026-08-05): the report went only to a 7-day
+  # `entities-report` artifact that nothing downloads — trend-site builds its
+  # own entities_daily.jsonl separately. Manual dispatch kept for ad-hoc use.
+  # schedule:
+  #   - cron: "25 8 * * *"
 
 permissions:
   contents: read

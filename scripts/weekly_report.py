@@ -205,8 +205,9 @@ def main():
     ap.add_argument("--prices",        default="site/data/prices.json")
     ap.add_argument("--pred-dir",      default="site/data/predictions_history",
                     help="과거 predictions.json들이 날짜별로 저장된 디렉토리")
-    ap.add_argument("--current-pred",  default="site/data/predictions.json",
-                    help="오늘의 predictions.json (아카이브할 대상)")
+    ap.add_argument("--current-pred",  default=None,
+                    help="(deprecated 2026-08-05) 아카이브는 archive_predictions.py가 "
+                         "predict 직후 수행 — 이 인자는 무시됨")
     ap.add_argument("--analysis-dir",  default="site/data/ticker_analysis")
     ap.add_argument("--out-dir",       default="site/data/reports")
     ap.add_argument("--lookback-days", type=int, default=7)
@@ -222,14 +223,12 @@ def main():
     pred_hist_dir = Path(args.pred_dir)
     pred_hist_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1) 오늘의 예측을 히스토리에 아카이브
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    current = load_json(Path(args.current_pred))
-    if current:
-        archive_path = pred_hist_dir / f"{today}.json"
-        archive_path.write_text(json.dumps(current, ensure_ascii=False,
-                                          separators=(",", ":")))
-        print(f"Archived today's prediction → {archive_path}")
+    # 1) (removed 2026-08-05) 아카이브 부수효과는 archive_predictions.py로 이동:
+    #    predict.py 직후 실행 + stale-input 거부. 여기서 아카이브하면 predict가
+    #    조용히 죽었을 때 이전 런의 stale 파일이 오늘 날짜로 히스토리에 박힌다.
+    if args.current_pred:
+        print("note: --current-pred is deprecated; archiving now happens in "
+              "archive_predictions.py right after predict.py")
 
     # 2) 지난 N일간 예측 파일 로드
     prices = load_json(Path(args.prices)) or {}

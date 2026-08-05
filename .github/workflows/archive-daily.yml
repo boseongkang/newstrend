@@ -27,12 +27,15 @@ jobs:
           python-version: "3.12"
 
       - id: when
+        # D-2, not yesterday: with SHIFT_MINUTES=1440 day D's warehouse file
+        # keeps growing through D+1, so D-1 is still incomplete at 00:08 UTC.
+        # D-2 is the freshest COMPLETE day (same rule as trend-site archiving).
         shell: bash
         run: |
-          if date -u -d yesterday +%F >/dev/null 2>&1; then
-            echo "date=$(date -u -d yesterday +%F)" >> "$GITHUB_OUTPUT"
+          if date -u -d "2 days ago" +%F >/dev/null 2>&1; then
+            echo "date=$(date -u -d '2 days ago' +%F)" >> "$GITHUB_OUTPUT"
           else
-            echo "date=$(date -u -v-1d +%F)" >> "$GITHUB_OUTPUT"
+            echo "date=$(date -u -v-2d +%F)" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Download latest warehouse artifact
@@ -53,7 +56,12 @@ jobs:
           mkdir -p out
           FOUND=""
           if [ -d artifacts ]; then
-            FOUND=$(find artifacts -type f -path "*/data/warehouse/daily/${D}.jsonl" -print -quit || true)
+            # upload-artifact strips the common parent (data/warehouse), and
+            # dawidd6 nests by artifact name, so the real layout is
+            # artifacts/warehouse/daily/D.jsonl — the old pattern
+            # "*/data/warehouse/daily/…" never matched, silently sending every
+            # release through the single-batch live fallback.
+            FOUND=$(find artifacts -type f -path "*/daily/${D}.jsonl" -print -quit || true)
           fi
           if [ -n "$FOUND" ]; then
             cp -v "$FOUND" "out/news_${D}.jsonl"
@@ -80,18 +88,29 @@ jobs:
           set -euo pipefail
           mkdir -p out
           python - << 'PY'
-          import os, glob, sys
+          import json, os, glob
           D = os.environ["D"]
           out = f"out/news_{D}.jsonl"
-          cnt = 0
+          cnt = skipped = 0
           with open(out, "w", encoding="utf-8") as w:
             for p in sorted(glob.glob("live_art/**/*.jsonl", recursive=True)):
               with open(p, "r", encoding="utf-8") as r:
                 for line in r:
-                  if line.strip():
-                    w.write(line)
-                    cnt += 1
-          print("written", cnt, "lines")
+                  if not line.strip():
+                    continue
+                  # keep only articles actually published on D — the latest
+                  # live batch spans other days (SHIFT window), and an
+                  # unfiltered dump mislabels them as day D
+                  try:
+                    if not str(json.loads(line).get("publishedAt", "")).startswith(D):
+                      skipped += 1
+                      continue
+                  except Exception:
+                    skipped += 1
+                    continue
+                  w.write(line)
+                  cnt += 1
+          print(f"written {cnt} lines for {D} (skipped {skipped} off-date/bad)")
           PY
 
       - id: verify

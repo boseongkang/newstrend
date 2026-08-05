@@ -13,7 +13,10 @@ import os
 import re
 import sys
 
-STALE_DAYS = 2
+# 1 (STEP 4, 2026-08-05): the local launchd pushes a same-day partial file
+# every run, so gap>1 already means "no push for a full day". At 2 the four
+# stale-CRITICAL incidents were each detected ~a day late.
+STALE_DAYS = 1
 SENTIMENT_DIR = "data/sentiment_per_day"
 PAT = re.compile(r"sentiment_(\d{4}-\d{2}-\d{2})\.json$")
 

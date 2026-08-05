@@ -337,6 +337,10 @@ function renderPipeline(health, localRuns, sentiment){
 
 function renderCalibration(weights, latestSnap){
   const md = weights?.mode_detail || {};
+  // Since the 2026-08-05 shadow demotion, mode_detail flags mean "would be
+  // applied if live" — labelling them ACTIVE while predict.py ignores them
+  // misread as a freeze violation. Show SHADOW instead.
+  const shadow = (weights?.mode || '') === 'shadow';
   const flags = [
     {key:'pillar_weights', label:'Pillar Weights'},
     {key:'pillar_weights_regime', label:'Regime Weights'},
@@ -345,15 +349,18 @@ function renderCalibration(weights, latestSnap){
   const banner = document.getElementById('mode-banner');
   const blendRegime = latestSnap?.learned_blend?.regime;
   const blendActive = latestSnap?.learned_blend?.active;
+  const pillState = f => !md[f.key] ? 'OFF' : (shadow ? 'SHADOW' : 'ACTIVE');
   banner.innerHTML = `
-    ${flags.map(f => `<span class="mode-pill ${md[f.key] ? 'on' : 'off'}">${f.label}: ${md[f.key] ? 'ACTIVE' : 'OFF'}</span>`).join('')}
-    <span class="mode-text">mode=${weights?.mode || '—'} · blend=${blendActive ? 'ACTIVE' : 'inactive'} · regime=${blendRegime || '—'}</span>
+    ${flags.map(f => `<span class="mode-pill ${md[f.key] && !shadow ? 'on' : 'off'}">${f.label}: ${pillState(f)}</span>`).join('')}
+    <span class="mode-text">mode=${weights?.mode || '—'}${shadow ? ' (weights recorded, NOT fed into predict.py)' : ''} · blend=${blendActive ? 'ACTIVE' : 'inactive'} · regime=${blendRegime || '—'}</span>
   `;
 
   const pillars = weights?.pillars || {};
   const rows = Object.keys(pillars).map(k => {
     const p = pillars[k];
-    const tag = p.applied ? '<span class="tag tag-on">APPLIED</span>' : '<span class="tag tag-off">advisory</span>';
+    const tag = p.applied
+      ? (shadow ? '<span class="tag tag-off">shadow</span>' : '<span class="tag tag-on">APPLIED</span>')
+      : '<span class="tag tag-off">advisory</span>';
     const reason = (p.reason || '').replace(/_/g,' ');
     return `<tr><td>${k}</td><td class="num">${p.n}</td><td>${tag}</td>
       <td class="num">${(p.ema_weight ?? 1).toFixed(3)}</td>

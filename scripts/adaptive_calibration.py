@@ -292,6 +292,20 @@ def run() -> None:
     gap_gradients = (gap.get("gradients") or {}) if gap else {}
     prev = _load_prev_calibration()
 
+    # Once-per-UTC-day gate (STEP 4, 2026-08-05): CI rotates ~10x/day and every
+    # rotation used to apply the EMA blend. With EMA_ALPHA=0.3 that is an
+    # effective daily decay of 1-0.7^10 ≈ 97% — the smoothing designed as
+    # "daily" acted per-run, and history logged ~10 near-duplicate entries/day.
+    # Skip when today's run already happened (override: FORCE_CALIBRATION=1).
+    import os
+    if prev and os.environ.get("FORCE_CALIBRATION") != "1":
+        prev_day = str(prev.get("updated", ""))[:10]
+        today = _now_iso()[:10]
+        if prev_day == today:
+            print(f"Skipping: calibration already ran today ({prev.get('updated')}). "
+                  f"EMA updates are gated to once per UTC day; set FORCE_CALIBRATION=1 to override.")
+            return
+
     # Resolve previous weights / threshold for EMA
     prev_weights: dict[str, float] = {}
     prev_weights_by_regime: dict[str, dict[str, float]] = {}

@@ -14,7 +14,10 @@ jobs:
     env:
       NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
       SHIFT_MINUTES: 1440
-      RECENT_MINUTES: 180
+      # 360 (STEP 4, 2026-08-05): GitHub cron regularly skips/delays runs under
+      # load; with a 180-min window any gap >3h lost articles permanently.
+      # Windows already overlap by design (dedup downstream), so widening is safe.
+      RECENT_MINUTES: 360
       MAX_PAGES: 10
       QUERY: >-
         (inflation OR fed OR tariff OR recession OR gdp OR cpi OR rates)
@@ -67,7 +70,18 @@ jobs:
             rm -f "${TMP}"
             echo "outfile=" >> "$GITHUB_OUTPUT"
             echo "bytes=0"  >> "$GITHUB_OUTPUT"
+            # A 6-hour window of global finance news is never actually empty —
+            # 0 bytes means the API call failed (expired/rate-limited key is
+            # swallowed by collect_shifted's bare except). Fail RED instead of
+            # shipping a green no-op that starves the warehouse for days.
+            echo "::error::collect returned 0 articles for ${FROM} → ${TO}. NEWSAPI_KEY expired/rate-limited or API down."
+            exit 1
           fi
+      - name: Fail when NEWSAPI_KEY secret is missing
+        if: env.NEWSAPI_KEY == ''
+        run: |
+          echo "::error::NEWSAPI_KEY secret is empty — collection silently skipped. Restore the secret."
+          exit 1
       - name: Upload artifact
         if: ${{ steps.collect.outputs.outfile != '' }}
         uses: actions/upload-artifact@v6

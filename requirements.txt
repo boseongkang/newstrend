@@ -1,32 +1,7 @@
-# core
-python-dateutil
-requests
-beautifulsoup4
-feedparser
-typer
-tqdm
-pyyaml>=6.0
-
-# data stack
-numpy>=1.26,<2.0
-pandas>=2.2,<2.3
-matplotlib>=3.8,<3.9
-
-# NLP / features
-scikit-learn>=1.4,<1.6
-
-# visualization / dashboard
-plotly>=5.24,<6
-streamlit>=1.36,<2
-
-# optional schema
-pydantic
-
-pandas>=2.0
-numpy>=1.24
-yfinance>=1.3.0,<2
-orjson>=3.10
-lxml>=4.9
+# CI-safe dependency set (deduped 2026-08-05, STEP 4).
+# FinBERT deps (torch/transformers — ~2GB) moved to requirements-local.txt:
+# FinBERT scoring runs ONLY locally on the M3 (launchd); no CI workflow
+# imports torch, yet every hourly update-warehouse run used to download it.
 
 # ── HTTP / feeds ─────────────────────────────────────────────────────────────
 requests>=2.32.0
@@ -34,22 +9,23 @@ feedparser>=6.0.11
 beautifulsoup4>=4.12.0
 python-dateutil>=2.9.0
 
-# ── Data stack ────────────────────────────────────────────────────────────────
+# ── Data stack ───────────────────────────────────────────────────────────────
 numpy>=1.26,<2.0
 pandas>=2.2,<2.3
 yfinance>=1.3.0,<2
+scikit-learn>=1.4,<1.6
+matplotlib>=3.8,<3.9
 
-# ── Serialization / config ────────────────────────────────────────────────────
+# ── Serialization / config ───────────────────────────────────────────────────
 orjson>=3.10.0
 pyyaml>=6.0.1
 lxml>=4.9.0
+pydantic
 
-# ── CLI helpers ───────────────────────────────────────────────────────────────
+# ── Visualization / dashboard ────────────────────────────────────────────────
+plotly>=5.24,<6
+streamlit>=1.36,<2
+
+# ── CLI helpers ──────────────────────────────────────────────────────────────
+typer
 tqdm>=4.66.0
-
-# ── Sentiment / NLP models (FinBERT — Phase 2 of trend system) ──────────────
-# ProsusAI/finbert (BERT-base, 110M) for ticker-level sentiment.
-# arm64 Mac MPS-accelerated; CPU fallback works.
-torch>=2.2.0
-transformers>=4.38.0
-tokenizers>=0.15.0
