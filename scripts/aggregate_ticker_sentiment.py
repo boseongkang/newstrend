@@ -15,11 +15,14 @@ import glob
 import json
 import re
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 CONF_THRESHOLD = 0.6
 MIN_ARTICLES = 5  # filtered_score is null when daily total < this
+LAG_DAYS = 2  # day D's warehouse file grows through D+1, so D-2 is the
+              # freshest COMPLETE day; newer dates are partial (~3% of
+              # articles) and downstream consumers read index -1 blindly
 
 
 def aggregate(per_day_files):
@@ -56,8 +59,13 @@ def aggregate(per_day_files):
     return by_ticker_date
 
 
-def to_output(agg, min_articles):
+def to_output(agg, min_articles, complete_through=None):
     all_dates = sorted({d for tk in agg.values() for d in tk.keys()})
+    if complete_through:
+        dropped = [d for d in all_dates if d > complete_through]
+        if dropped:
+            print(f"  dropping {len(dropped)} incomplete day(s) > {complete_through}: {dropped}")
+        all_dates = [d for d in all_dates if d <= complete_through]
     tickers = {}
     for tk, by_date in agg.items():
         bullish = [by_date.get(d, {}).get("bullish", 0) for d in all_dates]
@@ -92,6 +100,9 @@ def main():
     ap.add_argument("--output", required=True)
     ap.add_argument("--min-articles", type=int, default=MIN_ARTICLES,
                     help="filtered_score=null when daily total < this (default 5)")
+    ap.add_argument("--lag-days", type=int, default=LAG_DAYS,
+                    help="drop dates newer than today(UTC)-N (incomplete days; "
+                         "default 2, 0 disables)")
     args = ap.parse_args()
 
     files = []
@@ -104,9 +115,15 @@ def main():
     if not files:
         raise SystemExit(f"no input files matched: {args.inputs}")
 
-    print(f"aggregating {len(files)} per-day files (min_articles={args.min_articles})...")
+    complete_through = None
+    if args.lag_days > 0:
+        complete_through = (datetime.now(timezone.utc)
+                            - timedelta(days=args.lag_days)).strftime("%Y-%m-%d")
+
+    print(f"aggregating {len(files)} per-day files (min_articles={args.min_articles}, "
+          f"complete_through={complete_through or 'unclamped'})...")
     agg = aggregate(files)
-    out = to_output(agg, args.min_articles)
+    out = to_output(agg, args.min_articles, complete_through)
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(out, indent=2))
