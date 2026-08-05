@@ -425,6 +425,12 @@ def run() -> None:
         "by_pillar_tertile": by_pillar,
         "by_pillar_tertile_by_regime": by_pillar_by_regime,
         "records": records,
+        # Canonical stats input (STEP 3, 2026-08-05): one outcome per
+        # (ticker, fwd_5d_anchor_date). Fri/Sat/Sun snapshots share Friday's
+        # close, so pooling `records` counts the same realized move up to 4x
+        # (86 folds -> 27 redundant; accuracy p 0.0021 -> 0.0564 after dedup).
+        # walk_forward and adaptive_calibration must read THIS, not `records`.
+        "records_deduped": deduped,
     }
 
     OUT_FILE.write_text(json.dumps(out, indent=2, default=str))

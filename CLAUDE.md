@@ -53,6 +53,42 @@ independent of this taint**: it evaluates its own frozen models
 whose drift was ≤0.001 — the forward falsification (RF −0.39% p=0.0095,
 GB −0.59% p=0.0033) is unaffected.
 
+### Sentiment revival boundary (2026-08-05)
+The news archive truncation (2026-05-03 → 2026-08-04, ~97% of articles
+lost) was fixed and backfilled on 2026-08-05, and FinBERT rescored 168
+days. **The backfill fixes `sentiment_per_day` / `ticker_sentiment` only —
+historical predictions were NOT re-generated.** Every prediction snapshot
+from 2026-05-03 through 2026-08-04 was made with the sentiment pillar
+effectively dark (filtered_score null for ~all tickers) and stays that way
+in the record. Therefore:
+- **Forward data with a live sentiment pillar starts 2026-08-05.** Any
+  evaluation of "the system with sentiment" must use snapshots from that
+  date on. The ML forward falsification below is evidence against the
+  4-working-pillar system, not the 5-pillar design.
+- Sentiment now lags 2 days by design: the archive stores only complete
+  days, and with SHIFT_MINUTES=1440 day D's warehouse file keeps growing
+  through D+1 — so D-2 is the freshest complete day (a same-day snapshot
+  is structurally ~3% of the articles, which is what the original bug
+  silently shipped for 95 days).
+- **Permanent gap 2025-11-15 → 2026-02-02**: the warehouse's own daily
+  files for those 80 days contain token aggregates instead of articles;
+  no article-level source exists, so sentiment can never be computed for
+  that window.
+
+### Statistical corrections (STEP 3, 2026-08-05)
+Baseline snapshot before these landed: `docs/validation_baseline_2026-08-05.md`.
+- walk_forward reads `records_deduped` (one outcome per (ticker, anchor));
+  weekend snapshots no longer create duplicate folds (86 → ~60 folds).
+- Fold-level t-tests use Newey-West (lag 4) — daily folds with 5-day
+  returns have ρ1≈0.76; iid p-values are kept under `*_iid`.
+- MIN_TRAIN_DATES=0: the 2026-04-17 RISK-OFF snapshot (n=23) is no longer
+  burned; risk_off_n is nonzero for the first time (still ONE day — the
+  "RISK-OFF cycle observed" unfreeze condition remains unmet in spirit).
+- The adoption gate tests the paired per-fold (system − always-buy)
+  difference with a NW t-test instead of the system's own H0:alpha=0.
+- benchmark.py headline alpha nets the benchmark leg to average exposure
+  (~85% invested vs 100%-invested SPY); raw alpha kept as alpha_raw_pct.
+
 ### ML Alpha Signal (2026-05-25) — ⚠️ FALSIFIED FORWARD, see below
 Walk-forward ML evaluation showed RF/GBM passing adoption gate with
 OOS alpha +1.7~2.0% vs SPY. 5-point audit (look-ahead, paired test,

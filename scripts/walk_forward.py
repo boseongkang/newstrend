@@ -41,8 +41,17 @@ DATA = ROOT / "site" / "data"
 ACCURACY_FILE = DATA / "prediction_accuracy.json"
 PRICES_FILE = DATA / "prices.json"
 
-MIN_TRAIN_DATES = 3
+# 0 since STEP 3 (2026-08-05): in Phase 0 the train window is not used for
+# any computation, and a burn-in of 3 silently discarded the only RISK-OFF
+# snapshot in the corpus (2026-04-17). Restore burn-in only if a real
+# system_fn training phase is introduced.
+MIN_TRAIN_DATES = 0
 PROVISIONAL_N = 30
+
+# Newey-West lag for fold-level t-tests. Folds are daily but returns span 5
+# trading days, so adjacent folds share up to 4/5 of their return window;
+# measured fold-alpha autocorrelation before correction was rho1~0.76.
+NW_LAG = 4
 
 
 # ── price cache (for SPY benchmark alpha) ──────────────────────────────────
@@ -101,8 +110,15 @@ _spy_cache = _PriceCache()
 # ── helpers ────────────────────────────────────────────────────────────────
 
 def load_records(path: Path = ACCURACY_FILE) -> list[dict]:
+    """Load the anchor-deduped record set (one outcome per (ticker, anchor)).
+
+    `records_deduped` is exported by prediction_tracker (STEP 3): weekend
+    snapshots share Friday's close, so the raw `records` list counts the same
+    realized 5-day move up to 4x. Falls back to raw records only for
+    accuracy files predating the export."""
     acc = json.loads(path.read_text())
-    return [r for r in acc["records"] if r.get("correct_5d") is not None]
+    recs = acc.get("records_deduped") or acc["records"]
+    return [r for r in recs if r.get("correct_5d") is not None]
 
 
 def is_correct(action: str, fwd_return: float) -> bool | None:
@@ -141,7 +157,10 @@ def _norm_cdf(x: float) -> float:
 
 
 def mean_t_test(values: list[float]) -> tuple[float, float, float]:
-    """One-sample t-test H0: mean=0. Returns (mean, t_stat, p_value)."""
+    """One-sample t-test H0: mean=0, iid SE. Returns (mean, t_stat, p_value).
+
+    WARNING: fold series here are strongly autocorrelated (overlapping 5-day
+    returns on daily folds) — for headline inference use nw_t_test."""
     n = len(values)
     if n < 2:
         return (values[0] if values else 0.0), 0.0, 1.0
@@ -152,6 +171,33 @@ def mean_t_test(values: list[float]) -> tuple[float, float, float]:
         return m, 0.0, 1.0
     t = m / se
     # Approximate two-sided p from t using normal (good enough for n>10)
+    p = 2 * (1 - _norm_cdf(abs(t)))
+    return round(m, 4), round(t, 4), round(p, 4)
+
+
+def nw_t_test(values: list[float], lag: int = None,
+              mu0: float = 0.0) -> tuple[float, float, float]:
+    """One-sample test H0: mean=mu0 with Newey-West (HAC) standard error.
+
+    Bartlett-kernel long-run variance with `lag` autocovariance terms
+    (default NW_LAG=4, matching the 5-trading-day return overlap of daily
+    folds). Returns (mean, t_stat, p_value); two-sided normal p."""
+    if lag is None:
+        lag = NW_LAG
+    n = len(values)
+    if n < 2:
+        return (values[0] if values else 0.0), 0.0, 1.0
+    m = sum(values) / n
+    e = [v - m for v in values]
+    gamma0 = sum(x * x for x in e) / n
+    lrv = gamma0
+    for j in range(1, min(lag, n - 1) + 1):
+        gj = sum(e[i] * e[i - j] for i in range(j, n)) / n
+        lrv += 2 * (1 - j / (lag + 1)) * gj
+    if lrv <= 0:
+        return round(m, 4), 0.0, 1.0
+    se = math.sqrt(lrv / n)
+    t = (m - mu0) / se
     p = 2 * (1 - _norm_cdf(abs(t)))
     return round(m, 4), round(t, 4), round(p, 4)
 
@@ -300,7 +346,7 @@ def _aggregate(folds: list[dict]) -> dict:
         acc = g["correct"] / g["n"] if g["n"] else 0
         _, rlo, rhi = wilson_ci(g["correct"], g["n"])
         rz, rp = proportion_z(g["correct"], g["n"], 0.5)
-        a_mean, a_t, a_p = mean_t_test(g["alpha_trades"]) if g["alpha_trades"] else (None, None, None)
+        a_mean, a_t, a_p = nw_t_test(g["alpha_trades"]) if g["alpha_trades"] else (None, None, None)
         regime_summary[rg] = {
             "n": g["n"],
             "n_folds": g["folds"],
@@ -315,13 +361,23 @@ def _aggregate(folds: list[dict]) -> dict:
         }
 
     # ── Pooled alpha ──
+    # Headline t/p use Newey-West HAC SEs (folds are daily, returns 5-day,
+    # so adjacent folds are mechanically autocorrelated); the iid versions
+    # are kept under *_iid for comparison with pre-2026-08-05 history.
     alpha_trade_vals = [f["alpha_per_trade_pct"] for f in folds
                         if f["alpha_per_trade_pct"] is not None]
     alpha_port_vals = [f["alpha_portfolio_pct"] for f in folds
                        if f["alpha_portfolio_pct"] is not None]
 
-    at_mean, at_t, at_p = mean_t_test(alpha_trade_vals) if alpha_trade_vals else (None, None, None)
-    ap_mean, ap_t, ap_p = mean_t_test(alpha_port_vals) if alpha_port_vals else (None, None, None)
+    at_mean, at_t, at_p = nw_t_test(alpha_trade_vals) if alpha_trade_vals else (None, None, None)
+    ap_mean, ap_t, ap_p = nw_t_test(alpha_port_vals) if alpha_port_vals else (None, None, None)
+    _, at_t_iid, at_p_iid = mean_t_test(alpha_trade_vals) if alpha_trade_vals else (None, None, None)
+
+    # Fold-level accuracy vs coin with the same HAC correction: the pooled
+    # proportion z below treats every record as independent, which the 5-day
+    # overlap violates even after anchor dedup.
+    acc_series = [f["accuracy"] for f in folds]
+    _, acc_nw_t, acc_nw_p = nw_t_test(acc_series, mu0=0.5)
 
     return {
         "n_folds": len(folds),
@@ -333,10 +389,19 @@ def _aggregate(folds: list[dict]) -> dict:
         "pooled_edge_vs_coin_pp": round((pooled_acc - 0.5) * 100, 2),
         "z_vs_coin": z_coin,
         "p_vs_coin": p_coin,
+        "accuracy_nw": {
+            "mean_fold_accuracy": round(sum(acc_series) / len(acc_series), 4),
+            "t_vs_coin": acc_nw_t,
+            "p_vs_coin": acc_nw_p,
+            "nw_lag": NW_LAG,
+        },
         "alpha": {
             "per_trade_mean_pct": at_mean,
             "per_trade_t": at_t,
             "per_trade_p": at_p,
+            "per_trade_t_iid": at_t_iid,
+            "per_trade_p_iid": at_p_iid,
+            "nw_lag": NW_LAG,
             "portfolio_mean_pct": ap_mean,
             "portfolio_t": ap_t,
             "portfolio_p": ap_p,

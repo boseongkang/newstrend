@@ -69,21 +69,32 @@ def evaluate_strategies() -> dict:
         final = vh[-1]["total"]
         strat_ret = (final / initial - 1) if initial > 0 else 0
 
+        cash_ratios = [v["cash"] / v["total"] for v in vh if v["total"] > 0]
+        avg_invested = round((1 - sum(cash_ratios) / len(cash_ratios)) * 100, 1) if cash_ratios else 0
+
+        # Exposure-adjusted alpha (STEP 3, 2026-08-05): the paper portfolio
+        # averages only ~80-94% invested, so comparing its raw return against
+        # a 100%-invested benchmark charges the strategy a mechanical
+        # exposure drag of (1 - invested) * bm_ret (~0.7-1.3pp over this
+        # period — larger than the alphas being reported). Headline alpha
+        # nets the benchmark leg to the strategy's average exposure; the
+        # unadjusted number is kept as alpha_raw_pct.
         benchmarks = {}
+        exposure = avg_invested / 100.0
         for bm in BENCHMARKS:
             bm_ret = _benchmark_return(prices, bm, start_date, end_date)
             if bm_ret is not None:
-                alpha = strat_ret - bm_ret
+                alpha_raw = strat_ret - bm_ret
+                alpha_adj = strat_ret - exposure * bm_ret
                 benchmarks[bm] = {
                     "return_pct": round(bm_ret * 100, 2),
-                    "alpha_pct": round(alpha * 100, 2),
+                    "alpha_pct": round(alpha_adj * 100, 2),
+                    "alpha_raw_pct": round(alpha_raw * 100, 2),
+                    "exposure_used": round(exposure, 3),
                 }
 
         # Regime distribution from predictions in that period
         regime_label = "RISK-ON"  # all paper-trade data is from this period
-
-        cash_ratios = [v["cash"] / v["total"] for v in vh if v["total"] > 0]
-        avg_invested = round((1 - sum(cash_ratios) / len(cash_ratios)) * 100, 1) if cash_ratios else 0
 
         results[name] = {
             "period": {"start": start_date, "end": end_date},

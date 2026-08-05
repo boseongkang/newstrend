@@ -332,7 +332,11 @@ def run() -> None:
         pillars_by_regime[regime] = rg_pillars
 
     # ── confidence threshold ───────────────────────────────────────────
-    sweep = _threshold_sweep(accuracy.get("records") or [], horizon=5)
+    # STEP 3 (2026-08-05): sweep on the anchor-deduped records — the raw list
+    # counts weekend-duplicated outcomes up to 4x, which inflated the sweep's
+    # sqrt(n) score by ~1.2x and helped overfit the 0.85 recommendation.
+    sweep = _threshold_sweep(accuracy.get("records_deduped")
+                             or accuracy.get("records") or [], horizon=5)
     thr_rec = _recommend_threshold(sweep, prev_threshold)
 
     # ── stop loss (diagnostic only) ────────────────────────────────────

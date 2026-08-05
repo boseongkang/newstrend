@@ -29,7 +29,7 @@ OUT_FILE = DATA / "validation.json"
 
 sys.path.insert(0, str(SCRIPTS))
 
-from walk_forward import load_records, walk_forward, run_self_tests as wf_self_tests
+from walk_forward import load_records, walk_forward, nw_t_test, run_self_tests as wf_self_tests
 from benchmark import evaluate_strategies, run_self_tests as bm_self_tests
 from naive_baselines import compare_vs_baselines, run_self_tests as nb_self_tests
 
@@ -56,9 +56,11 @@ def run_validation() -> dict:
     bm = evaluate_strategies()
     nb = compare_vs_baselines(records)
 
-    # Verdict: summarize the key findings
+    # Verdict: summarize the key findings. Accuracy inference uses the
+    # Newey-West fold-level test (STEP 3) — the pooled-record z remains in
+    # walk_forward output but is anti-conservative under 5-day overlap.
     acc = wf["pooled_accuracy"]
-    p = wf["p_vs_coin"]
+    p = wf.get("accuracy_nw", {}).get("p_vs_coin", wf["p_vs_coin"])
     alpha_info = wf.get("alpha", {})
     alpha_mean = alpha_info.get("per_trade_mean_pct")
     alpha_p = alpha_info.get("per_trade_p")
@@ -84,27 +86,39 @@ def run_validation() -> dict:
         verdict_lines.append(f"Edge vs {edge['vs_best_baseline']}: {edge['edge_pp']:+.1f}pp (p={edge['p_value']:.4f})")
 
     # ── PASS/FAIL gate ──
-    # Criterion: system must beat always-buy on alpha AND p < 0.05.
-    # "always-buy alpha" is the always-buy system's per-trade alpha vs SPY.
+    # Criterion (STEP 3, 2026-08-05): paired per-fold difference
+    # (system alpha − always-buy alpha, matched by test_date) must be
+    # positive with Newey-West p < 0.05, AND system alpha itself > 0.
+    # Both series are evaluated on the same records and share the SPY leg,
+    # so the old substitute — testing the system's own H0:alpha=0 — used
+    # the wrong SE for the question the gate asks.
     buy_res = walk_forward(records, system_fn=lambda r: "BUY")
     buy_alpha_info = buy_res.get("alpha", {})
     buy_alpha = buy_alpha_info.get("per_trade_mean_pct")
 
+    sys_by_date = {f["test_date"]: f["alpha_per_trade_pct"]
+                   for f in wf.get("folds", [])
+                   if f.get("alpha_per_trade_pct") is not None}
+    buy_by_date = {f["test_date"]: f["alpha_per_trade_pct"]
+                   for f in buy_res.get("folds", [])
+                   if f.get("alpha_per_trade_pct") is not None}
+    common_dates = sorted(set(sys_by_date) & set(buy_by_date))
+    diffs = [sys_by_date[d] - buy_by_date[d] for d in common_dates]
+
     gate_pass = False
     gate_reason = ""
-    if alpha_mean is not None and buy_alpha is not None:
-        alpha_edge = alpha_mean - buy_alpha
-        # Test: is system alpha significantly better than buy alpha?
-        # Use the system's alpha t-test directly — if system alpha > buy alpha
-        # AND system alpha itself is significantly positive (p<0.05), pass.
-        # More practically: system alpha > buy alpha AND system p < 0.05 AND alpha > 0
-        if alpha_mean > buy_alpha and alpha_p < 0.05 and alpha_mean > 0:
+    diff_mean = diff_t = diff_p = None
+    if alpha_mean is not None and buy_alpha is not None and len(diffs) >= 2:
+        diff_mean, diff_t, diff_p = nw_t_test(diffs)
+        if diff_mean > 0 and diff_p < 0.05 and alpha_mean > 0:
             gate_pass = True
-            gate_reason = (f"PASS: system alpha ({alpha_mean:+.2f}%) > "
-                           f"always-buy alpha ({buy_alpha:+.2f}%) with p={alpha_p:.4f}")
+            gate_reason = (f"PASS: paired (system − always-buy) alpha "
+                           f"{diff_mean:+.2f}pp, NW p={diff_p:.4f} "
+                           f"(system {alpha_mean:+.2f}%, buy {buy_alpha:+.2f}%)")
         else:
-            gate_reason = (f"FAIL: system alpha ({alpha_mean:+.2f}%) vs "
-                           f"always-buy alpha ({buy_alpha:+.2f}%), p={alpha_p:.4f}")
+            gate_reason = (f"FAIL: paired (system − always-buy) alpha "
+                           f"{diff_mean:+.2f}pp, NW p={diff_p:.4f} "
+                           f"(system {alpha_mean:+.2f}%, buy {buy_alpha:+.2f}%)")
     else:
         gate_reason = "FAIL: insufficient data for alpha gate"
 
@@ -167,10 +181,15 @@ def run_validation() -> dict:
         "taint": taint,
         "gate": {
             "pass": gate_pass,
-            "criterion": "walk-forward OOS alpha vs SPY > always-buy alpha, p<0.05",
+            "criterion": ("paired per-fold (system − always-buy) alpha > 0 "
+                          "with Newey-West p<0.05, and system alpha > 0"),
             "system_alpha_pct": alpha_mean,
             "always_buy_alpha_pct": buy_alpha,
             "system_alpha_p": alpha_p,
+            "paired_diff_pp": diff_mean,
+            "paired_t": diff_t,
+            "paired_p": diff_p,
+            "paired_n_folds": len(diffs),
             "reason": gate_reason,
         },
         "walk_forward": wf,
