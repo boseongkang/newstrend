@@ -102,19 +102,38 @@ jobs:
             exit 1
           fi
 
-          # raw JSONL 누적 (없는 파일만 복사)
+          # raw 뉴스 보존 — gzip 통일(.jsonl.gz), D-2 이전 완결일만.
+          # SHIFT_MINUTES=1440 구조상 날짜 D의 warehouse 파일은 D+1까지 계속
+          # 자라므로, D-2 이하만 스냅샷해야 항상 완결본이다. 대상 날짜의
+          # 아카이브 사본이 warehouse 원본보다 작으면 갱신한다(과거 절단본
+          # 자가 치유). 2026-08-05: 기존 copy-once 가드는 자정 직후의 부분
+          # 파일을 한 번 복사하면 영영 갱신하지 않아 2026-05-03부터 95일간
+          # 일일 기사 ~97%가 아카이브에서 유실됐다 — 그 버그의 수정이다.
           mkdir -p /tmp/news-archive/data/news_archive
+          CUTOFF=$(date -u -d "2 days ago" +%Y-%m-%d)
           NEW_COUNT=0
           for f in data/warehouse/daily/*.jsonl; do
             [ -f "$f" ] || continue
-            name=$(basename "$f")
+            name=$(basename "$f" .jsonl)
             case "$name" in
-              *_tokens.jsonl) continue ;;
+              *_tokens) continue ;;
             esac
-            dst="/tmp/news-archive/data/news_archive/$name"
-            if [ ! -f "$dst" ]; then
-              cp "$f" "$dst"
-              echo "Archived: $name"
+            if [ "$name" \> "$CUTOFF" ]; then
+              continue
+            fi
+            dst="/tmp/news-archive/data/news_archive/${name}.jsonl.gz"
+            legacy="/tmp/news-archive/data/news_archive/${name}.jsonl"
+            src_bytes=$(wc -c < "$f")
+            cur_bytes=0
+            if [ -f "$dst" ]; then
+              cur_bytes=$(gzip -dc "$dst" | wc -c)
+            elif [ -f "$legacy" ]; then
+              cur_bytes=$(wc -c < "$legacy")
+            fi
+            if [ "$src_bytes" -gt "$cur_bytes" ]; then
+              gzip -9 -c "$f" > "$dst"
+              rm -f "$legacy"
+              echo "Archived: ${name}.jsonl.gz (raw ${src_bytes}B, was ${cur_bytes}B)"
               NEW_COUNT=$((NEW_COUNT + 1))
             fi
           done

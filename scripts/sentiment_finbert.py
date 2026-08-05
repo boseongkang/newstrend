@@ -12,6 +12,7 @@ Usage:
         --output /tmp/sentiment_test.json
 """
 import argparse
+import gzip
 import json
 import re
 import time
@@ -58,7 +59,11 @@ def find_tickers(text: str, symbol_pat, alias_pats) -> set:
 
 def load_articles(path: Path, dedup: bool = True):
     seen = set()
-    with path.open(encoding="utf-8", errors="ignore") as f:
+    if path.suffix == ".gz":
+        opener = gzip.open(path, "rt", encoding="utf-8", errors="ignore")
+    else:
+        opener = path.open(encoding="utf-8", errors="ignore")
+    with opener as f:
         for line in f:
             line = line.strip()
             if not line:

@@ -24,7 +24,7 @@ import re
 import subprocess
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -69,36 +69,53 @@ def list_news_days(cache_dir: Path) -> list[tuple[str, Path]]:
         print(f"[error] {news_dir} not found — is the worktree on data-cache?",
               file=sys.stderr)
         sys.exit(1)
-    out: list[tuple[str, Path]] = []
+    # Canonical format is {date}.jsonl.gz (unified 2026-08-05); plain
+    # {date}.jsonl is accepted for transition, with .gz winning on collision.
+    by_date: dict[str, Path] = {}
     for p in sorted(news_dir.iterdir()):
-        if not p.is_file() or p.suffix != ".jsonl":
+        if not p.is_file():
+            continue
+        if not (p.name.endswith(".jsonl") or p.name.endswith(".jsonl.gz")):
             continue
         if "_tokens" in p.name:
             continue
         m = DATE_RE.match(p.name)
         if not m:
             continue
-        out.append((m.group(1), p))
-    return out
+        date = m.group(1)
+        if date not in by_date or p.name.endswith(".gz"):
+            by_date[date] = p
+    return sorted(by_date.items())
 
 
-def ensure_today_in_news(cache_dir: Path, news: list[tuple[str, Path]],
-                         max_attempts: int = 3, sleep_s: int = 30) -> list[tuple[str, Path]]:
-    """If the latest news file isn't today (UTC), retry fetch.
+def expected_latest_date() -> str:
+    """Newest archive date the D-2 policy can have produced.
 
-    trend-site.yml's "Preserve raw news to data-cache" step pushes today's
-    raw JSONL asynchronously from CI; launchd fires us at a fixed hour and
-    can race ahead of that push, leaving today out of `news_archive/`. The
-    script would then declare missing=0 and move on, leaving sentiment one
-    day behind until tomorrow's cycle. Retry the fetch a few times to give
-    trend-site a chance to land today's file before we plan the window.
+    Since 2026-08-05 trend-site.yml archives only days <= D-2: with
+    SHIFT_MINUTES=1440, day D's warehouse file keeps growing through D+1,
+    so anything newer would be a partial snapshot (the pre-2026-08-05 bug
+    archived day D at ~03% completeness). The freshest complete file is
+    therefore today-2 (UTC)."""
+    return (datetime.now(timezone.utc) - timedelta(days=2)).strftime("%Y-%m-%d")
+
+
+def ensure_fresh_news(cache_dir: Path, news: list[tuple[str, Path]],
+                      max_attempts: int = 3, sleep_s: int = 30) -> list[tuple[str, Path]]:
+    """If the latest news file is older than D-2 (UTC), retry fetch.
+
+    trend-site.yml's "Preserve raw news to data-cache" step pushes archive
+    files asynchronously from CI; launchd fires us at a fixed hour and can
+    race ahead of that push. The script would then declare missing=0 and
+    move on, leaving sentiment behind until the next cycle. Retry the fetch
+    a few times to give trend-site a chance to land the D-2 file before we
+    plan the window.
     """
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    expected = expected_latest_date()
     latest = news[-1][0] if news else None
-    if latest == today:
+    if latest is not None and latest >= expected:
         return news
     for attempt in range(1, max_attempts + 1):
-        print(f"[fetch-retry] latest news = {latest}, expected {today} — "
+        print(f"[fetch-retry] latest news = {latest}, expected >= {expected} — "
               f"trend-site may not have pushed yet (attempt {attempt}/{max_attempts})")
         time.sleep(sleep_s)
         subprocess.run(["git", "fetch", "origin", "data-cache"],
@@ -107,10 +124,10 @@ def ensure_today_in_news(cache_dir: Path, news: list[tuple[str, Path]],
                        cwd=cache_dir, check=False, capture_output=True)
         news = list_news_days(cache_dir)
         latest = news[-1][0] if news else None
-        if latest == today:
-            print(f"[fetch-retry] picked up {today} after attempt {attempt}")
+        if latest is not None and latest >= expected:
+            print(f"[fetch-retry] picked up {latest} after attempt {attempt}")
             return news
-    print(f"[fetch-retry] warning: today's news ({today}) still missing after "
+    print(f"[fetch-retry] warning: news at/after {expected} still missing after "
           f"{max_attempts} attempts — deferring to next cycle", file=sys.stderr)
     return news
 
@@ -234,9 +251,9 @@ def main() -> None:
     if not news:
         print("[error] no news_archive daily files found", file=sys.stderr)
         sys.exit(1)
-    news = ensure_today_in_news(cache_dir, news)
-    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    fetch_ok = bool(news) and news[-1][0] == today_str
+    news = ensure_fresh_news(cache_dir, news)
+    expected_str = expected_latest_date()
+    fetch_ok = bool(news) and news[-1][0] >= expected_str
     target = news[-args.window_days:]                         # most recent N days
     cached = cached_dates(cache_dir)
     missing = [(d, p) for d, p in target if d not in cached]
@@ -249,10 +266,10 @@ def main() -> None:
     if not missing:
         print("[plan] all target days already cached — nothing to do")
         if args.commit:
-            # Guard C: fetch failure — if today's news never landed, don't push
+            # Guard C: fetch failure — if the D-2 file never landed, don't push
             # a misleading "everything caught up" local_runs timestamp.
             if not fetch_ok:
-                print(f"[skip-commit] news_archive missing today ({today_str}) — "
+                print(f"[skip-commit] news_archive missing {expected_str} — "
                       "fetch incomplete, deferring to next cycle")
                 return
             # Guard B: worktree clean — avoid pushing a commit that only bumps
