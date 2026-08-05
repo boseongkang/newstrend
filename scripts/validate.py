@@ -38,6 +38,53 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
+def _gate_v2_fold_diffs(records: list[dict]) -> tuple[list[float], int, int]:
+    """Adoption Gate v2 — 매칭 페어 (docs/gate_v2_definition.md).
+
+    정의는 적용 전에 동결됨 (해당 문서 참조). 요약: 각 dedup 의사결정
+    (BUY/WATCH=+1, SELL/REDUCE=−1, HOLD 제외)에 대해 같은 anchor·같은
+    sector의 전체 레코드(HOLD 포함, ex-self) 동일가중 바스켓을 페어로 붙여
+    d_i = s_i·r_i − r̄_basket. 섹터 ex-self 표본 <5면 유니버스 ex-self로
+    fallback. anchor date별 평균 → fold 시계열 반환 (pp 단위).
+    """
+    by_anchor: dict[str, list[dict]] = {}
+    for r in records:
+        a = r.get("fwd_5d_anchor_date")
+        if a is not None and r.get("fwd_5d_return") is not None:
+            by_anchor.setdefault(a, []).append(r)
+
+    fold_ds: dict[str, float] = {}
+    n_pairs = 0
+    n_sector_basket = 0
+    for a, recs in by_anchor.items():
+        ds = []
+        for r in recs:
+            act = r.get("action")
+            if act in ("BUY", "WATCH"):
+                s = 1.0
+            elif act in ("SELL", "REDUCE"):
+                s = -1.0
+            else:
+                continue
+            sec = r.get("sector")
+            peers = ([x["fwd_5d_return"] for x in recs
+                      if x is not r and x.get("sector") == sec]
+                     if sec else [])
+            if len(peers) >= 5:
+                basket = sum(peers) / len(peers)
+                n_sector_basket += 1
+            else:
+                uni = [x["fwd_5d_return"] for x in recs if x is not r]
+                if not uni:
+                    continue
+                basket = sum(uni) / len(uni)
+            ds.append((s * r["fwd_5d_return"] - basket) * 100)
+        if ds:
+            fold_ds[a] = sum(ds) / len(ds)
+            n_pairs += len(ds)
+    return [fold_ds[d] for d in sorted(fold_ds)], n_pairs, n_sector_basket
+
+
 def _load_previous_validation() -> dict | None:
     if not OUT_FILE.exists():
         return None
@@ -122,7 +169,22 @@ def run_validation() -> dict:
     else:
         gate_reason = "FAIL: insufficient data for alpha gate"
 
-    verdict_lines.append(f"Gate: {gate_reason}")
+    # ── Gate v2 (2026-08-06): 매칭 페어 — docs/gate_v2_definition.md에
+    # 적용 전 동결된 정의. v1은 gate_v1_legacy로 병행 보고.
+    v2_diffs, v2_n_pairs, v2_n_sector = _gate_v2_fold_diffs(records)
+    v2_pass = False
+    v2_mean = v2_t = v2_p = None
+    if len(v2_diffs) >= 2:
+        v2_mean, v2_t, v2_p = nw_t_test(v2_diffs)
+        v2_pass = bool(v2_mean > 0 and v2_p < 0.05)
+        v2_reason = (f"{'PASS' if v2_pass else 'FAIL'}: sector-matched paired "
+                     f"alpha {v2_mean:+.2f}pp, NW p={v2_p:.4f} "
+                     f"({v2_n_pairs} pairs, {len(v2_diffs)} folds)")
+    else:
+        v2_reason = "FAIL: insufficient data for gate v2"
+
+    verdict_lines.append(f"Gate v2: {v2_reason}")
+    verdict_lines.append(f"Gate v1 (legacy): {gate_reason}")
 
     # Regime coverage warning + change detection
     regime_warnings = []
@@ -180,6 +242,24 @@ def run_validation() -> dict:
         "updated": _now_iso(),
         "taint": taint,
         "gate": {
+            "version": "v2-sector-matched",
+            "definition": "docs/gate_v2_definition.md (frozen before application)",
+            "pass": v2_pass,
+            "criterion": ("per-decision matched pair vs same-anchor same-sector "
+                          "ex-self basket (fallback: universe ex-self when "
+                          "sector n<5); fold-mean NW lag-4; PASS iff mean>0 "
+                          "and p<0.05"),
+            "system_alpha_pct": alpha_mean,
+            "system_alpha_p": alpha_p,
+            "paired_diff_pp": v2_mean,
+            "paired_t": v2_t,
+            "paired_p": v2_p,
+            "paired_n_folds": len(v2_diffs),
+            "n_pairs": v2_n_pairs,
+            "n_sector_basket_pairs": v2_n_sector,
+            "reason": v2_reason,
+        },
+        "gate_v1_legacy": {
             "pass": gate_pass,
             "criterion": ("paired per-fold (system − always-buy) alpha > 0 "
                           "with Newey-West p<0.05, and system alpha > 0"),
