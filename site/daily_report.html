@@ -160,14 +160,15 @@ select{background:var(--bg2);color:var(--t1);border:1px solid var(--b2);
   <!-- 3. 뉴스 -->
   <div class="section">
     <div class="sec-hdr"><span class="sec-title">3 · 뉴스에서 뜬 것 (D-2)</span>
-      <span class="sec-meta" id="news-meta">기사량 급증 = 종목별 기사 수 vs 자기 14일 평균 (오늘 5건 이상만) · 섹터 sentiment</span></div>
+      <span class="sec-meta" id="news-meta">기사량 급증 vs 자기 14일 평균 · "이후 반응"은 뉴스일 이후 이미 확정된 수익률 (예측 아님)</span></div>
     <div class="sec-body">
       <div class="lag-banner" id="lag-note"></div>
-      <div class="chips" id="surge" style="margin-bottom:16px"></div>
+      <div id="surge" style="margin-bottom:16px"></div>
       <div style="overflow-x:auto"><table id="sentiment-table">
-        <thead><tr><th>섹터</th><th class="num">기사 수</th><th class="num">종목 수</th><th class="num">평균 score</th></tr></thead>
-        <tbody><tr><td colspan="4" class="empty">—</td></tr></tbody>
+        <thead><tr><th>섹터</th><th class="num">기사 수</th><th class="num">종목 수</th><th class="num">score</th><th class="num">Δ vs 7일 평균</th></tr></thead>
+        <tbody><tr><td colspan="5" class="empty">—</td></tr></tbody>
       </table></div>
+      <div class="sec-meta" style="margin-top:8px">Δ는 직전 7일 중 5일 이상 데이터 + 당일 10건 이상일 때만 표시 — 소표본 섹터는 일간 변동이 신호보다 커서 흐리게 처리</div>
     </div>
   </div>
 
@@ -253,19 +254,41 @@ function renderSectors(d){
     mv.down.map(x => `<span class="chip"><b>${x.ticker}</b> <span class="neg">${fmtSign(x.ret_pct,1)}%</span> <span class="dim">${x.sector}</span></span>`).join('');
 }
 
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
 function renderNews(d){
   const n = d.news || {};
-  document.getElementById('surge').innerHTML = (n.surge && n.surge.length)
-    ? n.surge.map(s => `<span class="chip"><b>${s.ticker}</b> ${s.articles}건 <span class="pos">×${s.ratio}</span> <span class="dim">14d평균 ${s.avg_14d} · ${s.sector}</span></span>`).join('')
+  const surgeEl = document.getElementById('surge');
+  surgeEl.innerHTML = (n.surge && n.surge.length)
+    ? n.surge.map(s => {
+        const senti = `긍정 ${s.bullish ?? 0} · 부정 ${s.bearish ?? 0} · 중립 ${s.neutral ?? 0}`;
+        const react = s.react_pct == null ? '' :
+          `<span style="margin-left:12px">이후 ${s.react_days}일 반응
+           <b class="${cls(s.react_pct)}">${fmtSign(s.react_pct,1)}%</b>${
+           s.react_excess_pp == null ? '' :
+           ` <span class="dim">(섹터 대비 <span class="${cls(s.react_excess_pp)}">${fmtSign(s.react_excess_pp,1)}pp</span>)</span>`}</span>`;
+        const head = s.headline ? `<div style="font-size:12px;color:var(--t2);margin-top:5px">
+          “${esc(s.headline)}”${s.headline_url ? ` <a href="${esc(s.headline_url)}" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:none">↗</a>` : ''}</div>` : '';
+        return `<div style="border:1px solid var(--b2);background:var(--bg2);padding:10px 14px;margin-bottom:8px">
+          <span class="chip" style="border:none;background:none;padding:0"><b>${s.ticker}</b>
+            ${s.articles}건 <span class="pos">×${s.ratio}</span>
+            <span class="dim">14d평균 ${s.avg_14d} · ${s.sector} · ${senti}</span></span>
+          ${react}${head}</div>`;
+      }).join('')
     : '<span class="chip" style="color:var(--t3)">기사량 급증 종목 없음 (기준: 5건 이상 & 14일 평균의 2배 이상)</span>';
   document.getElementById('lag-note').innerHTML = `<b>D-2 지연</b> — ${n.lag_note || ''}`;
   const tb = document.querySelector('#sentiment-table tbody');
   const rows = n.sentiment_by_sector || [];
   tb.innerHTML = rows.length ? rows.map(s => `
-    <tr><td>${s.sector}</td><td class="num">${s.total_articles}</td>
+    <tr${s.low_confidence ? ' style="opacity:.45"' : ''}>
+      <td>${s.sector}${s.low_confidence ? ' <span style="color:var(--amber);font-size:9px">저신뢰</span>' : ''}</td>
+      <td class="num">${s.total_articles}</td>
       <td class="num">${s.n_tickers}</td>
-      <td class="num ${cls(s.avg_score)}">${fmtSign(s.avg_score, 3)}</td></tr>`).join('')
-    : '<tr><td colspan="4" class="empty">—</td></tr>';
+      <td class="num ${cls(s.avg_score)}">${fmtSign(s.avg_score, 3)}</td>
+      <td class="num ${s.delta_7d == null ? '' : cls(s.delta_7d)}">${
+        s.delta_7d == null ? '—' : fmtSign(s.delta_7d, 3)}</td></tr>`).join('')
+    : '<tr><td colspan="5" class="empty">—</td></tr>';
 }
 
 function renderRegime(d){

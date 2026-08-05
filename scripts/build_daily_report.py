@@ -120,7 +120,37 @@ def build_movers(rets: dict[str, float], smap: dict[str, str], k: int = 5) -> di
     return {"up": fmt(stocks[:k]), "down": fmt(stocks[-k:][::-1])}
 
 
-def build_news(smap: dict[str, str]) -> dict:
+def _cum_return_after(prices: dict, ticker: str, after_date: str) -> tuple[float, int] | None:
+    """after_date '이후' 거래일들의 누적 수익률(%)과 일수. 이미 확정된 사실."""
+    v = (prices.get("tickers") or {}).get(ticker)
+    if not v:
+        return None
+    dates, rets = v.get("dates") or [], v.get("returns") or []
+    cum, n = 1.0, 0
+    for d, r in zip(dates, rets):
+        if d > after_date and r is not None:
+            cum *= 1 + r
+            n += 1
+    return (round((cum - 1) * 100, 2), n) if n else None
+
+
+def _load_headlines(sent_date: str) -> dict[str, list[dict]]:
+    """sentiment_per_day에서 종목별 기사 목록 (text/label/confidence/url)."""
+    f = ROOT / "data" / "sentiment_per_day" / f"sentiment_{sent_date}.json"
+    d = _load(f)
+    out: dict[str, list[dict]] = {}
+    for r in d.get("results") or []:
+        for tk in r.get("tickers") or []:
+            label = r.get("label")
+            conf = (r.get("scores") or {}).get(label, 0)
+            out.setdefault(tk, []).append({
+                "text": (r.get("text") or "")[:120],
+                "label": label, "conf": conf, "url": r.get("url"),
+            })
+    return out
+
+
+def build_news(smap: dict[str, str], prices: dict) -> dict:
     # ⚠ predictions.json의 news_z_today는 쓰지 않는다: trends.json hot 20
     # 단어의 |z| 합계 = 날짜당 단일 전역값이 전 종목에 복사된 것이라
     # 종목별 급증 지표가 아니다 (docs/ISSUES.md F-new-1).
@@ -130,6 +160,7 @@ def build_news(smap: dict[str, str]) -> dict:
 
     # (a) 종목별 기사량 급증 — D-2 완성일의 기사 수를 자기 자신의 직전
     #     14일 평균과 비교. 오늘 5건 미만은 배율이 무의미하므로 제외.
+    headlines = _load_headlines(sent_date) if sent_date else {}
     surge = []
     for tk, v in (ts.get("tickers") or {}).items():
         totals = v.get("total") or []
@@ -140,32 +171,85 @@ def build_news(smap: dict[str, str]) -> dict:
             continue
         baseline = statistics.mean(totals[-(SURGE_BASELINE_DAYS + 1):-1])
         ratio = today / baseline if baseline > 0 else float(today)
-        if ratio >= SURGE_MIN_RATIO:
-            surge.append({"ticker": tk, "articles": today,
-                          "avg_14d": round(baseline, 1),
-                          "ratio": round(ratio, 1),
-                          "sector": smap.get(tk, "?")})
+        if ratio < SURGE_MIN_RATIO:
+            continue
+        item = {"ticker": tk, "articles": today,
+                "avg_14d": round(baseline, 1),
+                "ratio": round(ratio, 1),
+                "sector": smap.get(tk, "?"),
+                "bullish": (v.get("bullish") or [0])[-1],
+                "bearish": (v.get("bearish") or [0])[-1],
+                "neutral": (v.get("neutral") or [0])[-1]}
+
+        # ① 대표 헤드라인: 다수 감성 방향에서 confidence 최대 (없으면 전체 최대)
+        arts = headlines.get(tk) or []
+        if arts:
+            major = ("positive" if item["bullish"] > item["bearish"]
+                     else "negative" if item["bearish"] > item["bullish"] else None)
+            pool = [a for a in arts if a["label"] == major] if major else []
+            best = max(pool or arts, key=lambda a: a["conf"])
+            item["headline"] = best["text"]
+            item["headline_url"] = best["url"]
+
+        # ② 뉴스 이후 가격 반응 — 이미 확정된 사실 (예측 아님).
+        #    섹터 대비 초과 병기: 섹터 ex-self 평균(표본<5면 유니버스 ex-self).
+        r = _cum_return_after(prices, tk, sent_date)
+        if r:
+            item["react_pct"], item["react_days"] = r
+            sec = smap.get(tk)
+            peers = [t for t, s in smap.items()
+                     if s == sec and t != tk and s != "ETF"] if sec else []
+            if len(peers) < 5:
+                peers = [t for t, s in smap.items() if t != tk and s != "ETF"]
+            peer_rets = [pr[0] for t in peers
+                         if (pr := _cum_return_after(prices, t, sent_date))]
+            if peer_rets:
+                item["react_excess_pp"] = round(
+                    item["react_pct"] - statistics.mean(peer_rets), 2)
+        surge.append(item)
     surge.sort(key=lambda x: -x["ratio"])
-    # (b) 섹터별 sentiment — D-2 완성일 기준 (클램프된 ticker_sentiment)
-    by_sector: dict[str, dict] = {}
+    # (b) 섹터별 sentiment — D-2 완성일 기준 (클램프된 ticker_sentiment).
+    # ③ Δ7d: 자기 자신의 직전 7일 평균 대비 변화 (FinBERT의 금융뉴스 부정
+    #   편향 때문에 레벨보다 변화가 해석 가능). baseline 검증(2026-08-06)
+    #   결과에 따른 표시 규칙: 직전 7일 중 데이터 ≥5일 AND 당일 기사 ≥10건
+    #   일 때만 Δ 표시 — 미달 섹터(Energy/Cons.Def/Health급)는 일간 sd가
+    #   0.5~0.65로 신호보다 커서 Δ가 노이즈.
+    # ④ 당일 기사 <10건 섹터는 low_confidence로 흐림.
+    n_days = len(dates)
+    day_cells: dict[str, dict[int, dict]] = {}
     for tk, v in (ts.get("tickers") or {}).items():
         sec = smap.get(tk)
         if not sec or sec == "ETF" or not dates:
             continue
-        total = (v.get("total") or [0])[-1]
-        score = (v.get("score") or [0])[-1]
-        if total <= 0:
-            continue
-        cell = by_sector.setdefault(sec, {"sector": sec, "n_tickers": 0,
-                                          "total_articles": 0, "scores": []})
-        cell["n_tickers"] += 1
-        cell["total_articles"] += total
-        cell["scores"].append(score)
+        totals, scores = v.get("total") or [], v.get("score") or []
+        for i in range(max(0, n_days - 8), n_days):
+            if i < len(totals) and totals[i] > 0:
+                cell = day_cells.setdefault(sec, {}).setdefault(
+                    i, {"scores": [], "arts": 0, "tickers": 0})
+                cell["scores"].append(scores[i])
+                cell["arts"] += totals[i]
+                cell["tickers"] += 1
     sentiment = []
-    for cell in by_sector.values():
-        scores = cell.pop("scores")
-        cell["avg_score"] = round(statistics.mean(scores), 3)
-        sentiment.append(cell)
+    for sec, days in day_cells.items():
+        today_i = n_days - 1
+        if today_i not in days:
+            continue
+        today = days[today_i]
+        today_score = statistics.mean(today["scores"])
+        prior = [statistics.mean(days[i]["scores"])
+                 for i in range(max(0, n_days - 8), today_i) if i in days]
+        low_conf = today["arts"] < 10
+        delta = (round(today_score - statistics.mean(prior), 3)
+                 if len(prior) >= 5 and not low_conf else None)
+        sentiment.append({
+            "sector": sec,
+            "n_tickers": today["tickers"],
+            "total_articles": today["arts"],
+            "avg_score": round(today_score, 3),
+            "delta_7d": delta,
+            "baseline_days": len(prior),
+            "low_confidence": low_conf,
+        })
     sentiment.sort(key=lambda x: -x["total_articles"])
 
     return {
@@ -283,7 +367,7 @@ def main() -> int:
         "sectors": build_sectors(rets, smap),
         "macro_etf": build_macro(rets),
         "movers": build_movers(rets, smap),
-        "news": build_news(smap),
+        "news": build_news(smap, prices),
         "regime": {
             "regime": mr.get("regime"),
             "regime_note": mr.get("regime_note"),
