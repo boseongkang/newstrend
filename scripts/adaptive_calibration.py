@@ -60,6 +60,15 @@ PILLAR_KEYS = (
 PRIOR_WEIGHT = 1.0
 DEFAULT_THRESHOLD = 0.70
 
+# 2026-08-05 STEP 1: calibrator demoted to shadow tracking. While LIVE_MODE is
+# False, mode is written as "shadow" so predict.py's load_pillar_multipliers()
+# (which requires mode == "active") becomes a no-op — predict.py runs on its
+# hardcoded weights only. Weights are still computed and recorded every run for
+# later evaluation. Do NOT flip back to True until the calibrator passes the
+# CLAUDE.md adoption gate via walk_forward(records, system_fn=...) with weights
+# refit only on each fold's train window (OOS, alpha > always-buy, p < 0.05).
+LIVE_MODE = False
+
 # Tunables
 MIN_N_PILLAR = 30          # below this n, global weight stays advisory
 MIN_N_PILLAR_REGIME = 12   # lower bar for regime-conditional (records split across regimes)
@@ -341,7 +350,10 @@ def run() -> None:
         "confidence_threshold":   threshold_applied,
     }
     any_applied = pillar_applied or pillar_regime_applied or threshold_applied
-    mode = "active" if any_applied else "advisory"
+    if LIVE_MODE:
+        mode = "active" if any_applied else "advisory"
+    else:
+        mode = "shadow"
 
     payload = {
         "updated": _now_iso(),

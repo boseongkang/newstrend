@@ -22,6 +22,23 @@ Walk-forward OOS evaluation (357 records, 14 folds) shows:
 4. **Data collection continues** — target: 1785 test records + at least 1 RISK-OFF cycle
 5. `validate.py` runs daily in CI, tracking progress automatically
 
+### Calibrator demoted to shadow (2026-08-05)
+The adaptive calibrator (`adaptive_calibration.py` → `pillar_weights.json`)
+had been LIVE since 2026-05-15: `mode="active"` fed daily EMA multipliers into
+predict.py (sentiment/fundamental/insider weights + news mult), fitted
+in-sample on realized outcomes — bypassing rule 1 and making the "frozen"
+model's behaviour drift daily. 74/86 walk-forward folds (89.9% of records)
+were generated under this drift, so historical walk-forward alpha is the
+score of a *changing* system, not the frozen predict.py.
+
+Now demoted: `LIVE_MODE = False` in adaptive_calibration.py writes
+`mode="shadow"`, which predict.py treats as no-op (hardcoded weights only).
+Weights are still computed and recorded every run for later evaluation.
+**Re-activation requires passing the adoption gate (rule 2) via
+`walk_forward(records, system_fn=...)` with weights refit only on each
+fold's train window.** Flipping `LIVE_MODE` back without that is a freeze
+violation.
+
 ### ML Alpha Signal (2026-05-25) — ⚠️ FALSIFIED FORWARD, see below
 Walk-forward ML evaluation showed RF/GBM passing adoption gate with
 OOS alpha +1.7~2.0% vs SPY. 5-point audit (look-ahead, paired test,
