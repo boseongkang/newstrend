@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-05T23:23:32Z",
+  "updated": "2026-08-05T23:28:52Z",
   "taint": {
     "calibrator_live_window": [
       "2026-05-16",
@@ -11,21 +11,7 @@
     "note": "folds with test_date in this window are not fixed-system forward results; measured behavioural drift was small (0 action flips, max conf delta 0.001 in same-day A/B)"
   },
   "gate": {
-    "version": "v2-sector-matched",
-    "definition": "docs/gate_v2_definition.md (frozen before application)",
-    "pass": false,
-    "criterion": "per-decision matched pair vs same-anchor same-sector ex-self basket (fallback: universe ex-self when sector n<5); fold-mean NW lag-4; PASS iff mean>0 and p<0.05",
-    "system_alpha_pct": -0.737,
-    "system_alpha_p": 0.1898,
-    "paired_diff_pp": -0.9397,
-    "paired_t": -0.9599,
-    "paired_p": 0.3371,
-    "paired_n_folds": 63,
-    "n_pairs": 2046,
-    "n_sector_basket_pairs": 1070,
-    "reason": "FAIL: sector-matched paired alpha -0.94pp, NW p=0.3371 (2046 pairs, 63 folds)"
-  },
-  "gate_v1_legacy": {
+    "version": "v1",
     "pass": false,
     "criterion": "paired per-fold (system \u2212 always-buy) alpha > 0 with Newey-West p<0.05, and system alpha > 0",
     "system_alpha_pct": -0.737,
@@ -36,6 +22,18 @@
     "paired_p": 0.261,
     "paired_n_folds": 63,
     "reason": "FAIL: paired (system \u2212 always-buy) alpha -0.88pp, NW p=0.2610 (system -0.74%, buy +0.14%)"
+  },
+  "gate_v2_failed": {
+    "note": "FAILED redesign (2026-08-06) \u2014 \uc815\ubc00\ub3c4 \uac1c\uc120 \uc2e4\ud328\ub85c \uc6d0\ubcf5. docs/gate_v2_definition.md \uacb0\uacfc \uc808 + checkpoint_registration.json GATE-V2 \ud56d\ubaa9 \ucc38\uc870. \ud310\uc815\uc740 v1\uacfc \ub3d9\uc77c(FAIL)\uc774\ubbc0\ub85c \uc6d0\ubcf5\uc740 \uc815\ubc00\ub3c4 \uadfc\uac70.",
+    "definition": "docs/gate_v2_definition.md (frozen aff11ec6d)",
+    "pass": false,
+    "paired_diff_pp": -0.9397,
+    "paired_t": -0.9599,
+    "paired_p": 0.3371,
+    "paired_n_folds": 63,
+    "n_pairs": 2046,
+    "n_sector_basket_pairs": 1070,
+    "reason": "FAIL: sector-matched paired alpha -0.94pp, NW p=0.3371 (2046 pairs, 63 folds)"
   },
   "walk_forward": {
     "n_folds": 63,
@@ -1713,8 +1711,8 @@
     "Accuracy 48.2% not significantly different from 50% (p=0.4126)",
     "Alpha -0.74% not significant (p=0.1898)",
     "Edge vs random_99: -2.8pp (p=0.0116)",
-    "Gate v2: FAIL: sector-matched paired alpha -0.94pp, NW p=0.3371 (2046 pairs, 63 folds)",
-    "Gate v1 (legacy): FAIL: paired (system \u2212 always-buy) alpha -0.88pp, NW p=0.2610 (system -0.74%, buy +0.14%)"
+    "Gate: FAIL: paired (system \u2212 always-buy) alpha -0.88pp, NW p=0.2610 (system -0.74%, buy +0.14%)",
+    "Gate v2 (failed redesign, reference): FAIL: sector-matched paired alpha -0.94pp, NW p=0.3371 (2046 pairs, 63 folds)"
   ],
   "alerts": [],
   "regime_warnings": [

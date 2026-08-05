@@ -169,8 +169,12 @@ def run_validation() -> dict:
     else:
         gate_reason = "FAIL: insufficient data for alpha gate"
 
-    # ── Gate v2 (2026-08-06): 매칭 페어 — docs/gate_v2_definition.md에
-    # 적용 전 동결된 정의. v1은 gate_v1_legacy로 병행 보고.
+    # ── Gate v2 — FAILED redesign, 참조용 병행 보고 (2026-08-06 원복).
+    # 정의는 적용 전 동결됐으나(aff11ec6d) 정밀도 개선에 실패: NW sd
+    # 6.19→7.77pp (short 페어에서 d=-(r+basket)로 공통성분이 2배 진입하는
+    # 대수 결함 — docs/gate_v2_definition.md 결과 절 참조). 양쪽 판정이
+    # FAIL로 동일해 v1 원복은 결과 기반 선택이 아니라 정밀도 근거
+    # (checkpoint_registration.json GATE-V2-REVERT 항목).
     v2_diffs, v2_n_pairs, v2_n_sector = _gate_v2_fold_diffs(records)
     v2_pass = False
     v2_mean = v2_t = v2_p = None
@@ -183,8 +187,8 @@ def run_validation() -> dict:
     else:
         v2_reason = "FAIL: insufficient data for gate v2"
 
-    verdict_lines.append(f"Gate v2: {v2_reason}")
-    verdict_lines.append(f"Gate v1 (legacy): {gate_reason}")
+    verdict_lines.append(f"Gate: {gate_reason}")
+    verdict_lines.append(f"Gate v2 (failed redesign, reference): {v2_reason}")
 
     # Regime coverage warning + change detection
     regime_warnings = []
@@ -242,24 +246,7 @@ def run_validation() -> dict:
         "updated": _now_iso(),
         "taint": taint,
         "gate": {
-            "version": "v2-sector-matched",
-            "definition": "docs/gate_v2_definition.md (frozen before application)",
-            "pass": v2_pass,
-            "criterion": ("per-decision matched pair vs same-anchor same-sector "
-                          "ex-self basket (fallback: universe ex-self when "
-                          "sector n<5); fold-mean NW lag-4; PASS iff mean>0 "
-                          "and p<0.05"),
-            "system_alpha_pct": alpha_mean,
-            "system_alpha_p": alpha_p,
-            "paired_diff_pp": v2_mean,
-            "paired_t": v2_t,
-            "paired_p": v2_p,
-            "paired_n_folds": len(v2_diffs),
-            "n_pairs": v2_n_pairs,
-            "n_sector_basket_pairs": v2_n_sector,
-            "reason": v2_reason,
-        },
-        "gate_v1_legacy": {
+            "version": "v1",
             "pass": gate_pass,
             "criterion": ("paired per-fold (system − always-buy) alpha > 0 "
                           "with Newey-West p<0.05, and system alpha > 0"),
@@ -271,6 +258,21 @@ def run_validation() -> dict:
             "paired_p": diff_p,
             "paired_n_folds": len(diffs),
             "reason": gate_reason,
+        },
+        "gate_v2_failed": {
+            "note": ("FAILED redesign (2026-08-06) — 정밀도 개선 실패로 원복. "
+                     "docs/gate_v2_definition.md 결과 절 + "
+                     "checkpoint_registration.json GATE-V2 항목 참조. "
+                     "판정은 v1과 동일(FAIL)이므로 원복은 정밀도 근거."),
+            "definition": "docs/gate_v2_definition.md (frozen aff11ec6d)",
+            "pass": v2_pass,
+            "paired_diff_pp": v2_mean,
+            "paired_t": v2_t,
+            "paired_p": v2_p,
+            "paired_n_folds": len(v2_diffs),
+            "n_pairs": v2_n_pairs,
+            "n_sector_basket_pairs": v2_n_sector,
+            "reason": v2_reason,
         },
         "walk_forward": wf,
         "benchmark": bm,

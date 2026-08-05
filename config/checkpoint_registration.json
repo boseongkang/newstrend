@@ -56,7 +56,16 @@
         "정의 수정(예: short를 s·(r−basket)으로)은 v2 결과를 본 뒤의 선택이므로 이 항목에서 결정하지 않는다 — 채택하려면 새 항목(v3)으로 동결 절차를 다시 밟아야 하며, 선택 기준이 판정 방향이 아니라 정밀도(sd)임을 명시해야 한다.",
         "CP-2026-11-01 판정 지표(live-sentiment forward alpha 점추정)는 게이트가 아니므로 이 변경의 영향을 받지 않는다."
       ],
-      "operative_gate_note": "validation.json의 gate는 동결 커밋대로 v2, v1은 gate_v1_legacy로 병행 보고 중. 정밀도 악화가 측정되었으므로 운영 게이트를 v1로 되돌릴지는 별도 결정 사항 (판정 방향과 무관한 정밀도 근거의 선택이며, 양쪽 판정이 동일하므로 verdict-shopping이 아님)"
+      "operative_gate_note": "validation.json의 gate는 동결 커밋대로 v2, v1은 gate_v1_legacy로 병행 보고 중. 정밀도 악화가 측정되었으므로 운영 게이트를 v1로 되돌릴지는 별도 결정 사항 (판정 방향과 무관한 정밀도 근거의 선택이며, 양쪽 판정이 동일하므로 verdict-shopping이 아님)",
+      "superseded_by": "GATE-V2-REVERT-2026-08-06"
+    },
+    {
+      "id": "GATE-V2-REVERT-2026-08-06",
+      "type": "gate_operative_revert",
+      "registered_at": "2026-08-06T00:40:00Z",
+      "decision": "GATE-V2 원복. 운영 게이트를 v1로 되돌린다. 판정 동일(양쪽 FAIL), 정밀도 근거(v2 NW sd 7.77pp > v1 6.19pp). v2 결과와 진단은 gate_v2_failed 필드와 docs/gate_v2_definition.md에 보존.",
+      "v3_status": "정의만 기록, 보류 — short 페어를 s·(r−basket)으로 수정하는 정의를 docs/gate_v2_definition.md에 문서화(동결·적용 안 함). 보류 근거: (a) 실패 직후 재시도는 반복 시행의 시작점, (b) forward 반증(n=5040, p≈0)이 단단한 상황에서 병목은 게이트 sd가 아니라 점추정 부호, (c) 11월 체크포인트에서 점추정이 양수일 때 비로소 정밀도가 병목 — 그때 동결 절차로 재개.",
+      "lesson": "페어 정의는 부호별 대수 전개를 먼저 검증할 것 (v2의 short 페어 결함은 데이터 없이 잡을 수 있었음)"
     }
   ]
 }
