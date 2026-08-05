@@ -23,7 +23,14 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  # false (2026-08-06): cancel-in-progress:true caused 3 consecutive
+  # cancellations on 2026-08-05 22:19–22:34 when triggers (hourly
+  # update-warehouse + pushes) arrived faster than the ~18min runtime —
+  # runs died before reaching the freshness gates and deploy. With false,
+  # GitHub keeps at most ONE pending run per group (a newer trigger
+  # replaces the pending one), so the queue is capped at 1 and worst-case
+  # latency is bounded by one running + one pending run (~40min).
+  cancel-in-progress: false
 
 jobs:
   build:
