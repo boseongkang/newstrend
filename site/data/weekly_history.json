@@ -2484,7 +2484,7 @@
       "calibration_runs_total": 869
     },
     {
-      "updated": "2026-08-05T19:07:56Z",
+      "updated": "2026-08-05T21:00:13Z",
       "week": "2026-W31",
       "week_summary": {
         "week": "2026-W31",
@@ -2559,12 +2559,12 @@
         {
           "dimension": "by_sector",
           "bucket": "Technology",
-          "n": 3058,
-          "avg_abs_gap_pct": 7.142,
-          "avg_signed_gap_pct": -0.49,
-          "directional_acc": 0.232,
-          "severity": 12.502,
-          "reason": "|gap|=7.14% \u00b7 dir_acc=23%"
+          "n": 3473,
+          "avg_abs_gap_pct": 7.243,
+          "avg_signed_gap_pct": -0.466,
+          "directional_acc": 0.234,
+          "severity": 12.563,
+          "reason": "|gap|=7.24% \u00b7 dir_acc=23%"
         },
         {
           "dimension": "by_action",
@@ -2587,16 +2587,6 @@
           "reason": "|gap|=6.99% \u00b7 dir_acc=25%"
         },
         {
-          "dimension": "by_sector",
-          "bucket": "Financial Services",
-          "n": 332,
-          "avg_abs_gap_pct": 6.561,
-          "avg_signed_gap_pct": -0.515,
-          "directional_acc": 0.262,
-          "severity": 11.321,
-          "reason": "|gap|=6.56% \u00b7 dir_acc=26%"
-        },
-        {
           "dimension": "by_confidence",
           "bucket": "[0.0, 0.5)",
           "n": 3924,
@@ -2605,15 +2595,25 @@
           "directional_acc": 0.236,
           "severity": 11.083,
           "reason": "|gap|=5.80% \u00b7 dir_acc=24%"
+        },
+        {
+          "dimension": "by_confidence",
+          "bucket": "[0.5, 0.7)",
+          "n": 2115,
+          "avg_abs_gap_pct": 5.597,
+          "avg_signed_gap_pct": 0.14,
+          "directional_acc": 0.238,
+          "severity": 10.837,
+          "reason": "|gap|=5.60% \u00b7 dir_acc=24%"
         }
       ],
       "improvement_plan": [
         {
           "id": "sector_Technology",
           "target": "sector Technology",
-          "issue": "|gap|=7.14% across this sector (n=3058).",
+          "issue": "|gap|=7.24% across this sector (n=3473).",
           "suggestion": "Audit the pillar that's largest contributor to Technology-sector calls; defer untested signals.",
-          "severity": 12.502
+          "severity": 12.563
         },
         {
           "id": "action_HOLD",
@@ -2630,18 +2630,18 @@
           "severity": 11.993
         },
         {
-          "id": "sector_Financial Services",
-          "target": "sector Financial Services",
-          "issue": "|gap|=6.56% across this sector (n=332).",
-          "suggestion": "Audit the pillar that's largest contributor to Financial Services-sector calls; defer untested signals.",
-          "severity": 11.321
-        },
-        {
           "id": "conf_[0.0, 0.5)",
           "target": "confidence band [0.0, 0.5)",
           "issue": "|gap|=5.80% in this band (n=3924).",
           "suggestion": "Add confidence-conditional position sizing \u2014 smaller bets in this band.",
           "severity": 11.083
+        },
+        {
+          "id": "conf_[0.5, 0.7)",
+          "target": "confidence band [0.5, 0.7)",
+          "issue": "|gap|=5.60% in this band (n=2115).",
+          "suggestion": "Add confidence-conditional position sizing \u2014 smaller bets in this band.",
+          "severity": 10.837
         },
         {
           "id": "pillar_grad_health_score",
@@ -2675,5 +2675,5 @@
       "calibration_runs_total": 894
     }
   ],
-  "updated": "2026-08-05T19:07:56Z"
+  "updated": "2026-08-05T21:00:13Z"
 }
