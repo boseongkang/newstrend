@@ -34,7 +34,9 @@ OUT_DIR = DATA / "daily_reports"
 
 ARCHIVE_DAYS = 30
 LOW_CONFIDENCE_N = 5   # 섹터 종목 수가 이보다 적으면 평균은 노이즈 — 저신뢰 표시
-NEWS_Z_THRESHOLD = 2.0
+SURGE_MIN_ARTICLES = 5    # 오늘(D-2) 기사 수 하한 — 적은 n은 배율이 폭발
+SURGE_BASELINE_DAYS = 14  # 자기 자신 대비 배율의 기준 창
+SURGE_MIN_RATIO = 2.0
 
 ETF_LABELS = {
     "SPY": "S&P 500", "QQQ": "Nasdaq 100", "DIA": "Dow", "IWM": "Russell 2000",
@@ -118,20 +120,33 @@ def build_movers(rets: dict[str, float], smap: dict[str, str], k: int = 5) -> di
     return {"up": fmt(stocks[:k]), "down": fmt(stocks[-k:][::-1])}
 
 
-def build_news(predictions: dict, smap: dict[str, str]) -> dict:
-    # (a) 뉴스 급증 — word-count 기반 z-score, 오늘자
-    surge = []
-    for p in predictions.get("predictions") or []:
-        z = (p.get("news") or {}).get("news_z_today")
-        if z is not None and z >= NEWS_Z_THRESHOLD:
-            surge.append({"ticker": p["ticker"], "news_z": round(z, 1),
-                          "sector": smap.get(p["ticker"], "?")})
-    surge.sort(key=lambda x: -x["news_z"])
-
-    # (b) 섹터별 sentiment — D-2 완성일 기준 (클램프된 ticker_sentiment)
+def build_news(smap: dict[str, str]) -> dict:
+    # ⚠ predictions.json의 news_z_today는 쓰지 않는다: trends.json hot 20
+    # 단어의 |z| 합계 = 날짜당 단일 전역값이 전 종목에 복사된 것이라
+    # 종목별 급증 지표가 아니다 (docs/ISSUES.md F-new-1).
     ts = _load(DATA / "ticker_sentiment.json")
     dates = ts.get("dates") or []
     sent_date = dates[-1] if dates else None
+
+    # (a) 종목별 기사량 급증 — D-2 완성일의 기사 수를 자기 자신의 직전
+    #     14일 평균과 비교. 오늘 5건 미만은 배율이 무의미하므로 제외.
+    surge = []
+    for tk, v in (ts.get("tickers") or {}).items():
+        totals = v.get("total") or []
+        if len(totals) < SURGE_BASELINE_DAYS + 1:
+            continue
+        today = totals[-1]
+        if today < SURGE_MIN_ARTICLES:
+            continue
+        baseline = statistics.mean(totals[-(SURGE_BASELINE_DAYS + 1):-1])
+        ratio = today / baseline if baseline > 0 else float(today)
+        if ratio >= SURGE_MIN_RATIO:
+            surge.append({"ticker": tk, "articles": today,
+                          "avg_14d": round(baseline, 1),
+                          "ratio": round(ratio, 1),
+                          "sector": smap.get(tk, "?")})
+    surge.sort(key=lambda x: -x["ratio"])
+    # (b) 섹터별 sentiment — D-2 완성일 기준 (클램프된 ticker_sentiment)
     by_sector: dict[str, dict] = {}
     for tk, v in (ts.get("tickers") or {}).items():
         sec = smap.get(tk)
@@ -156,8 +171,9 @@ def build_news(predictions: dict, smap: dict[str, str]) -> dict:
     return {
         "surge": surge[:8],
         "sentiment_date": sent_date,
-        "lag_note": (f"sentiment는 {sent_date} 기준 (D-2) — 뉴스 아카이브가 "
-                     "완성된 날만 보관하는 설계라 이틀 늦다. 오늘 뉴스가 아니다."
+        "lag_note": (f"이 섹션 전체(기사량 급증·섹터 sentiment)는 {sent_date} "
+                     "기준 (D-2) — 뉴스 아카이브가 완성된 날만 보관하는 설계라 "
+                     "이틀 늦다. 오늘 뉴스가 아니다."
                      if sent_date else "sentiment 데이터 없음"),
         "sentiment_by_sector": sentiment,
     }
@@ -267,7 +283,7 @@ def main() -> int:
         "sectors": build_sectors(rets, smap),
         "macro_etf": build_macro(rets),
         "movers": build_movers(rets, smap),
-        "news": build_news(predictions, smap),
+        "news": build_news(smap),
         "regime": {
             "regime": mr.get("regime"),
             "regime_note": mr.get("regime_note"),
