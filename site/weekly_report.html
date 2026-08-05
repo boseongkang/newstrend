@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Newstrend · Weekly Report</title>
+<title>Newstrend · Weekly Verification Log</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -27,82 +27,80 @@ nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
       border:1px solid transparent;transition:all .12s}
 nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
 .hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
-.live{display:flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10px;color:var(--green)}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 #unified-ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
 
-main{max-width:1300px;margin:20px auto;padding:0 24px}
+main{max-width:1100px;margin:20px auto;padding:0 24px}
 h1{font-family:var(--fm);font-size:14px;font-weight:600;letter-spacing:.14em;
    text-transform:uppercase;margin-bottom:6px}
-.subtitle{font-family:var(--fm);font-size:11px;color:var(--t3);margin-bottom:20px}
+.subtitle{font-family:var(--fm);font-size:11px;color:var(--t3);margin-bottom:16px}
 
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1);
-          border:1px solid var(--b1);margin-bottom:24px}
-.kpi{background:var(--bg1);padding:18px 14px;text-align:center}
-.kpi-label{font-family:var(--fm);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
-           color:var(--t3);margin-bottom:8px}
-.kpi-val{font-family:var(--fm);font-size:24px;font-weight:600;color:var(--t1);font-feature-settings:"tnum"}
-.kpi-val.up{color:var(--green)}.kpi-val.down{color:var(--red)}
-.kpi-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:4px}
+/* 성격 배너 — 항상 최상단 고정 콘텐츠 */
+.nature-banner{border:1px solid var(--amber);background:rgba(255,179,0,.06);
+  padding:16px 20px;margin-bottom:22px;font-size:13px;line-height:1.75;color:var(--t1)}
+.nature-banner b{color:var(--amber)}
+.nature-banner .sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:8px}
 
 .section{background:var(--bg1);border:1px solid var(--b1);margin-bottom:20px}
-.sec-hdr{padding:14px 20px;border-bottom:1px solid var(--b1);display:flex;
-         align-items:center;justify-content:space-between}
-.sec-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.14em;
-           text-transform:uppercase;color:var(--t1)}
+.sec-hdr{padding:13px 20px;border-bottom:1px solid var(--b1);display:flex;
+  justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.sec-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--cyan)}
 .sec-meta{font-family:var(--fm);font-size:10px;color:var(--t3)}
 .sec-body{padding:18px 20px}
 
-.split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;
+  background:var(--b1);border:1px solid var(--b1)}
+.stat{background:var(--bg2);padding:14px}
+.stat-label{font-family:var(--fm);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--t3);margin-bottom:6px}
+.stat-val{font-family:var(--fm);font-size:19px;font-weight:600;font-feature-settings:"tnum"}
+.stat-val.neg{color:var(--red)}.stat-val.pos{color:var(--green)}.stat-val.neu{color:var(--t1)}
+.stat-sub{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:4px;line-height:1.5}
 
-.issue{background:var(--bg2);padding:12px 14px;border-left:3px solid var(--red);margin-bottom:8px}
-.issue.s2{border-left-color:var(--amber)}
-.issue.s3{border-left-color:var(--cyan)}
-.issue-head{display:flex;align-items:center;gap:10px;font-family:var(--fm);font-size:11px;font-weight:600}
-.issue-sev{font-family:var(--fm);font-size:10px;color:var(--red);background:rgba(255,68,68,.1);padding:2px 8px;border:1px solid var(--red)}
-.issue-sev.s2{color:var(--amber);border-color:var(--amber);background:rgba(255,179,0,.1)}
-.issue-sev.s3{color:var(--cyan);border-color:var(--cyan);background:rgba(0,212,255,.1)}
-.issue-target{font-family:var(--fm);font-size:11px;color:var(--t1)}
-.issue-reason{font-family:var(--fm);font-size:10px;color:var(--t2);margin-top:6px}
+.defect{border:1px solid var(--b2);background:var(--bg2);margin-bottom:12px}
+.defect-hdr{padding:10px 14px;border-bottom:1px solid var(--b1);display:flex;gap:10px;
+  align-items:baseline;flex-wrap:wrap}
+.defect-title{font-family:var(--fm);font-size:12px;font-weight:600;color:var(--t1)}
+.defect-commit{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.defect-grid{display:grid;grid-template-columns:84px 1fr;gap:6px 12px;padding:12px 14px;
+  font-size:12px;line-height:1.65}
+.defect-grid dt{font-family:var(--fm);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--t3);padding-top:2px}
+.defect-grid dd{color:var(--t1)}
 
-.plan-item{background:var(--bg2);padding:14px 16px;margin-bottom:8px;display:flex;gap:14px;align-items:flex-start}
-.plan-num{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);min-width:30px}
-.plan-body{flex:1}
-.plan-target{font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t1);margin-bottom:4px}
-.plan-issue{font-family:var(--fm);font-size:10px;color:var(--t3);margin-bottom:6px}
-.plan-sugg{font-family:var(--fs);font-size:12px;color:var(--cyan);line-height:1.5}
+table{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:11px}
+th{padding:9px 12px;text-align:left;color:var(--t3);font-size:9px;letter-spacing:.1em;
+   text-transform:uppercase;background:var(--bg2);border-bottom:1px solid var(--b1)}
+td{padding:9px 12px;border-bottom:1px solid var(--b1);font-feature-settings:"tnum"}
+td.num,th.num{text-align:right}
 
-.validation{background:var(--bg2);padding:18px 20px;display:flex;align-items:center;gap:24px}
-.validation.improved{border-left:4px solid var(--green)}
-.validation.worsened{border-left:4px solid var(--red)}
-.validation.flat{border-left:4px solid var(--amber)}
-.validation.unavailable{border-left:4px solid var(--t3)}
-.val-icon{font-family:var(--fm);font-size:42px;font-weight:600}
-.val-icon.improved{color:var(--green)}
-.val-icon.worsened{color:var(--red)}
-.val-icon.flat{color:var(--amber)}
-.val-detail{flex:1}
-.val-line{font-family:var(--fm);font-size:13px;color:var(--t1);margin-bottom:4px}
-.val-sub{font-family:var(--fm);font-size:11px;color:var(--t2)}
+.progress-wrap{margin:6px 0 4px}
+.progress-bar{height:8px;background:var(--bg2);border:1px solid var(--b2);position:relative}
+.progress-fill{height:100%;background:var(--cyan);opacity:.7}
+.rule-quote{border-left:2px solid var(--b2);padding:10px 14px;margin-top:12px;
+  font-size:12px;line-height:1.75;color:var(--t2);white-space:pre-line}
 
-.tag{font-family:var(--fm);font-size:9px;padding:2px 8px;letter-spacing:.06em;text-transform:uppercase}
-.tag-strat{color:var(--cyan);background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25)}
+.warn-box{border:1px solid var(--red);background:rgba(255,68,68,.05);padding:10px 14px;
+  font-family:var(--fm);font-size:11px;line-height:1.7;color:var(--t2);margin-bottom:14px}
+.warn-box b{color:var(--red)}
 
-.empty{text-align:center;padding:30px;color:var(--t3);font-family:var(--fm);font-size:11px}
-.spinner{width:18px;height:18px;border:2px solid var(--b2);border-top-color:var(--cyan);
-         border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
-@keyframes spin{to{transform:rotate(360deg)}}
+.narrative{font-size:13px;line-height:1.85;color:var(--t1);white-space:pre-line;
+  border-left:2px solid var(--cyan);padding:4px 16px;margin-bottom:16px}
+.narrative-meta{font-family:var(--fm);font-size:10px;color:var(--t3);margin-bottom:14px}
 
-@media(max-width:1024px){
-  .kpi-grid{grid-template-columns:repeat(2,1fr)}
-  .split{grid-template-columns:1fr}
-}
+.empty{padding:30px;text-align:center;color:var(--t3);font-family:var(--fm);font-size:11px}
+select{background:var(--bg2);color:var(--t1);border:1px solid var(--b2);
+  font-family:var(--fm);font-size:11px;padding:5px 10px}
+.badge{display:inline-block;font-family:var(--fm);font-size:9px;letter-spacing:.1em;
+  padding:2px 8px;border:1px solid;text-transform:uppercase}
+.badge.fail{color:var(--red);border-color:var(--red)}
+.badge.pass{color:var(--green);border-color:var(--green)}
+@media(max-width:800px){.defect-grid{grid-template-columns:1fr}.defect-grid dt{padding-top:8px}}
 </style>
 </head>
 <body>
 <header class="unified-header">
-  <div class="brand">NEWSTREND <em>// WEEKLY REPORT</em></div>
+  <div class="brand">NEWSTREND <em>// WEEKLY VERIFICATION LOG</em></div>
   <nav>
     <a href="./index.html">DASHBOARD</a>
     <a href="./signals.html">SIGNALS</a>
@@ -116,173 +114,221 @@ h1{font-family:var(--fm);font-size:14px;font-weight:600;letter-spacing:.14em;
     <a href="./system_evolution.html">EVOLUTION</a>
     <a href="./gap_minimization.html">GAP</a>
     <a href="./weekly_report.html" class="on">WEEKLY_R</a>
-      <a href="./ml_baseline.html">ML</a>
-      <a href="./system_health.html">HEALTH</a>
+    <a href="./ml_baseline.html">ML</a>
+    <a href="./system_health.html">HEALTH</a>
   </nav>
   <div class="hdr-right">
-    <div class="live"><span class="dot"></span>WEEKLY CYCLE</div>
+    <select id="week-select" title="아카이브 주 선택"><option>최신</option></select>
     <div id="unified-ts">—</div>
   </div>
 </header>
 
 <main>
-  <h1 id="title">Weekly Synthesis</h1>
-  <div class="subtitle" id="subtitle">Auto-generated weekly meta-report · this-week summary + improvement plan + last-week validation</div>
+  <h1 id="title">주간 검증 로그</h1>
+  <div class="subtitle">이번 주의 추천이 아니라 이번 주의 검증 기록 · 매주 1회 생성</div>
 
-  <div class="kpi-grid" id="kpi-grid"><div class="kpi"><div class="empty"><div class="spinner"></div>Loading…</div></div></div>
-
-  <div class="section">
-    <div class="sec-hdr"><span class="sec-title">Last-Week Plan Validation</span>
-      <span class="sec-meta" id="val-meta">Did the previous week's calibration close the gap?</span></div>
-    <div class="sec-body" style="padding:0"><div id="validation"></div></div>
+  <div class="nature-banner">
+    <b>이 시스템은 벤치마크를 이기지 못한다는 것이 세 번의 독립 검증에서 확인됨</b>
+    (walk-forward, ML forward 반증, 통계 보정 후 재검정).
+    <b>이 리포트는 투자 추천이 아니라 측정 로그임.</b>
+    <div class="sub">시스템이 스스로의 결함을 찾아 고치는 과정을 기록한다. 아래의 어떤 수치도 매수·매도 판단의 근거가 아니다.</div>
   </div>
 
-  <div class="split">
-    <div class="section">
-      <div class="sec-hdr"><span class="sec-title">Top Issues This Week</span>
-        <span class="sec-meta" id="issues-meta">|gap| ≥ 5% or directional acc ≤ 40%</span></div>
-      <div class="sec-body" id="issues"><div class="empty">—</div></div>
-    </div>
-    <div class="section">
-      <div class="sec-hdr"><span class="sec-title">Improvement Plan</span>
-        <span class="sec-meta" id="plan-meta">Actionable next-week items</span></div>
-      <div class="sec-body" id="plan"><div class="empty">—</div></div>
+  <!-- 1. 시스템 상태 -->
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">1 · 시스템 상태</span>
+      <span class="sec-meta" id="status-meta">forward alpha · adoption gate · 누적 fold</span></div>
+    <div class="sec-body">
+      <div class="stat-row" id="status-stats"><div class="empty" style="grid-column:1/-1">로딩…</div></div>
+      <div class="rule-quote" id="gate-reason"></div>
     </div>
   </div>
 
+  <!-- 2. 이번 주 발견된 결함 -->
   <div class="section">
-    <div class="sec-hdr"><span class="sec-title">Strategy Snapshots</span>
-      <span class="sec-meta">Equity-curve summary at end of week</span></div>
-    <div class="sec-body" style="padding:0"><table id="strat-table" style="width:100%;border-collapse:collapse;font-family:var(--fm);font-size:11px">
-      <thead><tr style="background:var(--bg2)">
-        <th style="padding:10px;text-align:left;color:var(--t3);font-size:9px;letter-spacing:.1em">STRATEGY</th>
-        <th style="padding:10px;text-align:right;color:var(--t3);font-size:9px;letter-spacing:.1em">RETURN</th>
-        <th style="padding:10px;text-align:right;color:var(--t3);font-size:9px;letter-spacing:.1em">VALUE</th>
-        <th style="padding:10px;text-align:right;color:var(--t3);font-size:9px;letter-spacing:.1em">TRADES</th>
-        <th style="padding:10px;text-align:right;color:var(--t3);font-size:9px;letter-spacing:.1em">OPEN</th>
-        <th style="padding:10px;text-align:right;color:var(--t3);font-size:9px;letter-spacing:.1em">WIN%</th>
-      </tr></thead>
-      <tbody><tr><td colspan="6" class="empty">—</td></tr></tbody>
-    </table></div>
+    <div class="sec-hdr"><span class="sec-title">2 · 이번 주 발견된 결함</span>
+      <span class="sec-meta">증상 / 진단 / 수정 / 영향 — 이 리포트의 실질 콘텐츠</span></div>
+    <div class="sec-body">
+      <div id="narrative-block"></div>
+      <div id="defects"><div class="empty">—</div></div>
+    </div>
+  </div>
+
+  <!-- 3. 검정력 현황 -->
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">3 · 검정력 현황</span>
+      <span class="sec-meta" id="power-meta">현재 분산으로 어느 크기의 엣지를 언제 검출할 수 있는가</span></div>
+    <div class="sec-body" style="padding:0">
+      <table id="power-table">
+        <thead><tr><th>진짜 엣지 (5일당)</th><th>연환산 근사</th><th class="num">필요 fold</th><th class="num">필요 기간</th></tr></thead>
+        <tbody><tr><td colspan="4" class="empty">—</td></tr></tbody>
+      </table>
+      <div class="sec-body" style="border-top:1px solid var(--b1)">
+        <div class="rule-quote" id="power-note"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 체크포인트 진행률 -->
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">4 · 사전 등록 체크포인트</span>
+      <span class="sec-meta" id="cp-meta">—</span></div>
+    <div class="sec-body">
+      <div id="cp-progress"></div>
+      <div class="rule-quote" id="cp-rule"></div>
+    </div>
+  </div>
+
+  <!-- 5. 원시 신호 (참고용) -->
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">5 · 원시 신호 (참고용 부산물)</span>
+      <span class="sec-meta">시스템이 이번 주에 낸 신호 — 검증 대상이지 추천이 아님</span></div>
+    <div class="sec-body">
+      <div class="warn-box"><b>경고</b> — 이 신호들은 벤치마크를 이기지 못하는 것으로 확인된 시스템의 출력이다.
+        여기 있는 이유는 이 신호들이 검증의 <i>대상</i>이기 때문이다. 참고용 부산물이며 추천이 아니다.</div>
+      <div style="overflow-x:auto"><table id="signals-table">
+        <thead><tr><th>Ticker</th><th>Action</th><th class="num">Confidence</th><th class="num">횟수 (주간)</th></tr></thead>
+        <tbody><tr><td colspan="4" class="empty">—</td></tr></tbody>
+      </table></div>
+    </div>
   </div>
 </main>
 
 <script>
 const fmt = (v, d=2) => v == null ? '—' : (Math.round(v*Math.pow(10,d))/Math.pow(10,d)).toFixed(d);
 const fmtSign = (v, d=2) => v == null ? '—' : (v >= 0 ? '+' : '') + fmt(v, d);
-const fmtPct  = (v, d=2) => v == null ? '—' : fmt(v, d) + '%';
-const fmtMoney = v => v == null ? '—' : '$' + Math.round(v).toLocaleString();
 async function loadJSON(p){
   const r = await fetch(`./data/${p}?v=${Date.now()}`, {cache:'no-store'});
   if(!r.ok) throw new Error(`Failed ${p}: ${r.status}`);
   return r.json();
 }
 
-function renderKPIs(d){
-  const w = d.week_summary || {};
-  const gs = d.gap_summary || {};
-  const v = d.last_week_validation || {};
-  const dirAccPct = w.directional_acc == null ? null : w.directional_acc * 100;
-  const kpis = [
-    {label: 'ISO Week', val: d.week || '—', sub: `${w.n || 0} actionable predictions`},
-    {label: 'Avg |Gap|', val: fmtPct(w.avg_abs_gap_pct), cls: w.avg_abs_gap_pct == null ? '' : w.avg_abs_gap_pct < 4 ? 'up' : w.avg_abs_gap_pct < 6 ? '' : 'down', sub: `signed ${fmtSign(w.avg_signed_gap_pct,2)}%`},
-    {label: 'Directional Acc', val: dirAccPct == null ? '—' : dirAccPct.toFixed(1) + '%', cls: dirAccPct != null && dirAccPct > 50 ? 'up' : 'down', sub: w.n == null ? '—' : `n=${w.n}`},
-    {label: 'Δ vs Last Week', val: v.available ? fmtSign(v.delta_abs_gap_pct, 2) + 'pp' : 'no prior',
-     cls: !v.available ? '' : v.direction === 'improved' ? 'up' : v.direction === 'worsened' ? 'down' : '',
-     sub: v.direction || 'no_data'},
+function renderStatus(s){
+  const el = document.getElementById('status-stats');
+  const ci = s.forward_alpha_ci95 || [null, null];
+  const ls = s.live_sentiment || {};
+  const stats = [
+    {label: 'Forward alpha (전체, 5d)', val: fmtSign(s.forward_alpha_pct) + '%',
+     cls: s.forward_alpha_pct == null ? 'neu' : s.forward_alpha_pct < 0 ? 'neg' : 'pos',
+     sub: `NW 95% CI [${fmtSign(ci[0])}, ${fmtSign(ci[1])}] · p=${fmt(s.forward_alpha_p_nw, 3)}<br>점추정이며 유의하지 않음 (CI가 0을 포함)`},
+    {label: 'Live-sentiment 구간 alpha', val: ls.n_folds ? fmtSign(ls.alpha_pct) + '%' : '표본 없음',
+     cls: ls.n_folds ? (ls.alpha_pct < 0 ? 'neg' : 'pos') : 'neu',
+     sub: `${ls.since || '2026-08-06'} 이후 ${ls.n_folds || 0} folds · 체크포인트 판정 대상`},
+    {label: 'Adoption gate', val: s.gate && s.gate.pass ? 'PASS' : 'FAIL',
+     cls: s.gate && s.gate.pass ? 'pos' : 'neg',
+     sub: s.gate ? `paired ${fmtSign(s.gate.paired_diff_pp)}pp · NW p=${fmt(s.gate.paired_p,3)}` : '—'},
+    {label: '누적 fold', val: s.n_folds_total ?? '—', cls: 'neu',
+     sub: '중복 제거(ticker×anchor) 후'},
   ];
-  document.getElementById('kpi-grid').innerHTML = kpis.map(k => `
-    <div class="kpi"><div class="kpi-label">${k.label}</div>
-      <div class="kpi-val ${k.cls||''}">${k.val}</div>
-      <div class="kpi-sub">${k.sub || ''}</div></div>`).join('');
-  document.getElementById('title').textContent = `Weekly Synthesis · ${d.week || ''}`;
+  el.innerHTML = stats.map(k => `
+    <div class="stat"><div class="stat-label">${k.label}</div>
+      <div class="stat-val ${k.cls}">${k.val}</div>
+      <div class="stat-sub">${k.sub}</div></div>`).join('');
+  document.getElementById('gate-reason').textContent = s.gate ? `gate 판정 근거: ${s.gate.reason}` : '';
 }
 
-function renderValidation(v){
-  const c = document.getElementById('validation');
-  if(!v || !v.available){
-    c.innerHTML = `<div class="validation unavailable"><div class="val-icon" style="color:var(--t3)">·</div>
-      <div class="val-detail">
-        <div class="val-line">No prior-week comparison yet</div>
-        <div class="val-sub">${v ? v.reason : 'gap_history.json missing'}</div>
-      </div></div>`;
+function renderDefects(defects, narrative){
+  const nb = document.getElementById('narrative-block');
+  if(narrative && narrative.generated){
+    nb.innerHTML = `<div class="narrative">${narrative.text}</div>
+      <div class="narrative-meta">서술: ${narrative.model} 생성 · 숫자는 전부 파이프라인이 계산한 값이며 서술은 그 값만 참조함 · 제약: 유의성/점추정 구분, 검정력 부족≠증거 부재, 추천·전망·낙관 금지</div>`;
+  } else {
+    nb.innerHTML = `<div class="narrative-meta">서술 미생성 (${narrative ? narrative.reason : 'no data'}) — 아래 결함 목록은 커밋 로그에서 추출된 구조화 데이터.</div>`;
+  }
+  const el = document.getElementById('defects');
+  if(!defects || !defects.length){
+    el.innerHTML = '<div class="empty">이번 주 기록된 결함 없음 — 발견이 없다는 뜻이지 결함이 없다는 뜻이 아님</div>';
     return;
   }
-  const sym = v.direction === 'improved' ? '↘' : v.direction === 'worsened' ? '↗' : '→';
-  const dirCls = v.direction;
-  const this_w = v.this_week, last_w = v.last_week;
-  c.innerHTML = `<div class="validation ${dirCls}">
-    <div class="val-icon ${dirCls}">${sym}</div>
-    <div class="val-detail">
-      <div class="val-line">${last_w.week} → ${this_w.week} · |gap| ${fmt(last_w.avg_abs_gap_pct)}% → ${fmt(this_w.avg_abs_gap_pct)}% (${fmtSign(v.delta_abs_gap_pct)}pp${v.improvement_pct != null ? ', ' + (v.improvement_pct >= 0 ? '+' : '') + v.improvement_pct + '%' : ''})</div>
-      <div class="val-sub">Directional acc: ${(last_w.directional_acc*100).toFixed(0)}% → ${(this_w.directional_acc*100).toFixed(0)}% · status: <strong style="color:${dirCls==='improved'?'#00e676':dirCls==='worsened'?'#ff4444':'#ffb300'}">${v.direction.toUpperCase()}</strong></div>
-    </div></div>`;
-}
-
-function renderIssues(issues){
-  const c = document.getElementById('issues');
-  if(!issues || !issues.length){ c.innerHTML = '<div class="empty">No issues flagged this week — system inside thresholds.</div>'; return; }
-  c.innerHTML = issues.map((iss, i) => {
-    const sevCls = i === 0 ? '' : i === 1 ? 's2' : 's3';
-    return `<div class="issue ${sevCls}">
-      <div class="issue-head">
-        <span class="issue-sev ${sevCls}">SEV ${fmt(iss.severity, 1)}</span>
-        <span class="issue-target">${iss.dimension} → <strong>${iss.bucket}</strong> (n=${iss.n})</span>
-      </div>
-      <div class="issue-reason">${iss.reason}</div>
-    </div>`;
-  }).join('');
-  document.getElementById('issues-meta').textContent = `${issues.length} flagged`;
-}
-
-function renderPlan(plan){
-  const c = document.getElementById('plan');
-  if(!plan || !plan.length){ c.innerHTML = '<div class="empty">No actions queued — keep current calibration.</div>'; return; }
-  c.innerHTML = plan.map((p, i) => `
-    <div class="plan-item">
-      <div class="plan-num">${i+1}.</div>
-      <div class="plan-body">
-        <div class="plan-target">${p.target}</div>
-        <div class="plan-issue">${p.issue}</div>
-        <div class="plan-sugg">${p.suggestion}</div>
-      </div>
+  el.innerHTML = defects.map(d => `
+    <div class="defect">
+      <div class="defect-hdr"><span class="defect-title">${d.title}</span>
+        <span class="defect-commit">${d.commits ? d.commits.join(' · ') : ''}</span></div>
+      <dl class="defect-grid">
+        <dt>증상</dt><dd>${d.symptom || '—'}</dd>
+        <dt>진단</dt><dd>${d.diagnosis || '—'}</dd>
+        <dt>수정</dt><dd>${d.fix || '—'}</dd>
+        <dt>영향</dt><dd>${d.impact || '—'}</dd>
+      </dl>
     </div>`).join('');
-  document.getElementById('plan-meta').textContent = `${plan.length} suggestions`;
 }
 
-function renderStrategies(d){
-  const tbody = document.querySelector('#strat-table tbody');
-  const m = (d.trade_summary || {}).strategies || {};
-  const rows = Object.entries(m);
-  if(!rows.length){ tbody.innerHTML = '<tr><td colspan="6" class="empty">No paper trading data</td></tr>'; return; }
-  tbody.innerHTML = rows.map(([name, s]) => {
-    const ret = s.total_return_pct;
-    const cls = ret == null ? '' : ret > 0 ? 'up' : ret < 0 ? 'down' : '';
-    const wr = s.win_rate == null ? '—' : (s.win_rate*100).toFixed(0) + '%';
-    return `<tr style="border-bottom:1px solid var(--b1)">
-      <td style="padding:10px"><span class="tag tag-strat">${name}</span></td>
-      <td style="padding:10px;text-align:right;color:${cls==='up'?'#00e676':cls==='down'?'#ff4444':'inherit'}">${fmtSign(ret)}%</td>
-      <td style="padding:10px;text-align:right">${fmtMoney(s.current_value)}</td>
-      <td style="padding:10px;text-align:right">${s.n_trades_total ?? '—'}</td>
-      <td style="padding:10px;text-align:right">${s.n_open ?? '—'}</td>
-      <td style="padding:10px;text-align:right">${wr}</td>
-    </tr>`;
-  }).join('');
+function renderPower(p){
+  const tb = document.querySelector('#power-table tbody');
+  if(!p || !p.rows){ tb.innerHTML = '<tr><td colspan="4" class="empty">—</td></tr>'; return; }
+  tb.innerHTML = p.rows.map(r => `
+    <tr><td>${fmtSign(r.effect_pct, 1)}pp</td><td>${r.annualized || '—'}</td>
+      <td class="num">${r.folds_needed == null ? '—' : Math.round(r.folds_needed).toLocaleString()}</td>
+      <td class="num">${r.months_needed == null ? '—' : r.months_needed > 120 ? (r.months_needed/12).toFixed(0) + '년+' : r.months_needed.toFixed(0) + '개월'}</td></tr>`).join('');
+  document.getElementById('power-meta').textContent =
+    `NW 등가 sd ${fmt(p.nw_sd_pct)}pp · ${p.n_folds} folds 기준`;
+  document.getElementById('power-note').textContent = p.note || '';
 }
 
-(async () => {
-  try {
-    const d = await loadJSON('weekly_analysis.json');
-    document.getElementById('unified-ts').textContent = d.updated;
-    renderKPIs(d);
-    renderValidation(d.last_week_validation);
-    renderIssues(d.top_issues);
-    renderPlan(d.improvement_plan);
-    renderStrategies(d);
-  } catch (e) {
-    document.querySelector('main').innerHTML = `<div class="empty" style="padding:60px">Error loading weekly_analysis.json: ${e.message}<br><br>Run: <code>python3 scripts/weekly_analyzer.py</code></div>`;
+function renderCheckpoint(cp){
+  const meta = document.getElementById('cp-meta');
+  const prog = document.getElementById('cp-progress');
+  const rule = document.getElementById('cp-rule');
+  if(!cp){ prog.innerHTML = '<div class="empty">체크포인트 미등록</div>'; return; }
+  meta.textContent = `${cp.id} · 판정일 ${cp.decision_date} · 등록 ${cp.registered_at ? cp.registered_at.slice(0,10) : '—'}`;
+  const pct = Math.min(100, Math.round(100 * (cp.elapsed_folds || 0) / (cp.expected_folds || 1)));
+  prog.innerHTML = `
+    <div class="stat-row">
+      <div class="stat"><div class="stat-label">판정 대상 fold (live-sentiment)</div>
+        <div class="stat-val neu">${cp.elapsed_folds ?? 0} / ${cp.expected_folds}</div>
+        <div class="stat-sub">2026-08-06 이후 스냅샷만</div></div>
+      <div class="stat"><div class="stat-label">진행률</div>
+        <div class="stat-val neu">${pct}%</div>
+        <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div></div>
+      <div class="stat"><div class="stat-label">최소 검출 가능 효과 (판정일 기준)</div>
+        <div class="stat-val neu">±${fmt(cp.mde_pct)}pp</div>
+        <div class="stat-sub">그래서 판정은 유의성이 아니라 점추정 부호 + 기대 가치 기준</div></div>
+    </div>`;
+  rule.textContent = `판정 규칙 (사전 등록, config/checkpoint_registration.json — append-only):\n${cp.rule_summary}`;
+}
+
+function renderSignals(rs){
+  const tb = document.querySelector('#signals-table tbody');
+  if(!rs || !rs.items || !rs.items.length){
+    tb.innerHTML = '<tr><td colspan="4" class="empty">—</td></tr>'; return;
   }
-})();
+  tb.innerHTML = rs.items.map(s => `
+    <tr><td>${s.ticker}</td><td>${s.action}</td>
+      <td class="num">${fmt(s.confidence)}</td><td class="num">${s.count ?? '—'}</td></tr>`).join('');
+}
+
+function renderAll(d){
+  document.getElementById('title').textContent = `주간 검증 로그 · ${d.week || ''}`;
+  document.getElementById('unified-ts').textContent = d.generated_at ? d.generated_at.slice(0,16).replace('T',' ') + 'Z' : '—';
+  renderStatus(d.status || {});
+  renderDefects(d.defects, d.narrative);
+  renderPower(d.power);
+  renderCheckpoint(d.checkpoint);
+  renderSignals(d.raw_signals);
+}
+
+async function boot(){
+  // 아카이브 목록
+  let index = null;
+  try { index = await loadJSON('weekly_narratives/index.json'); } catch(e) {}
+  const sel = document.getElementById('week-select');
+  if(index && index.weeks && index.weeks.length){
+    sel.innerHTML = index.weeks.slice().reverse().map((w,i) =>
+      `<option value="${w}">${w}${i===0 ? ' (최신)' : ''}</option>`).join('');
+    sel.onchange = async () => {
+      try { renderAll(await loadJSON(`weekly_narratives/${sel.value}.json`)); }
+      catch(e){ document.querySelector('main').insertAdjacentHTML('beforeend', `<div class="empty">${e.message}</div>`); }
+    };
+  }
+  try {
+    renderAll(await loadJSON('weekly_narrative.json'));
+  } catch(e) {
+    document.getElementById('status-stats').innerHTML =
+      `<div class="empty" style="grid-column:1/-1">weekly_narrative.json 없음 — 첫 주간 생성 전이거나 생성 실패.<br>
+       수동 실행: <code>python3 scripts/build_weekly_narrative.py</code></div>`;
+  }
+}
+boot();
 </script>
 </body>
 </html>

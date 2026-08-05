@@ -1,0 +1,38 @@
+{
+  "purpose": "사전 등록된 판정 체크포인트. 판정일에 규칙을 소급 변경하는 것을 막기 위해 기준을 미리 고정한다.",
+  "registrations": [
+    {
+      "id": "CP-2026-11-01",
+      "registered_at": "2026-08-05T22:10:00Z",
+      "registered_parent_commit": "686d985d8a834bce5a0d4d005508f231975e5b21",
+      "registered_commit_note": "이 파일을 추가한 커밋 자체가 등록 시점의 증거다 (git log --follow config/checkpoint_registration.json 첫 커밋).",
+      "decision_date": "2026-11-01",
+      "target": {
+        "metric": "live-sentiment forward portfolio alpha 점추정 (5d, %)",
+        "population": "2026-08-06 이후 생성된 예측 스냅샷만 (sentiment pillar가 실제로 켜진 최초 시점; CLAUDE.md 'Sentiment revival boundary' 참조)",
+        "source": "validation.json walk_forward folds 중 test_date >= 2026-08-06"
+      },
+      "decision_rule": {
+        "if": "판정일 기준 live-sentiment forward alpha 점추정이 양수가 아니면",
+        "then": "탐색 중단. 근거: 이 표본으로는 현실적 크기의 엣지 유무를 판정할 수 없고, 무기한 대기의 기대 가치가 음수이므로 중단한다. 이는 '엣지가 없음이 증명됐다'가 아니라 '이 설계로는 알 수 없다'이다.",
+        "else": "탐색 유지 및 다음 체크포인트 등록 (양수 점추정은 계속 관측할 이유이지 엣지의 증거가 아님 — 유의성 판정이 아니다)"
+      },
+      "precomputed_power": {
+        "note": "등록 시점(2026-08-05)에 63 folds로 미리 계산. 판정일에 재계산한 값이 아니라 이 값이 기준이다.",
+        "expected_folds_by_decision_date": 61,
+        "assumed_trading_days": "2026-08-06 ~ 2026-11-01 평일, Labor Day 제외",
+        "fold_alpha_sd_pct": 2.719,
+        "nw_variance_inflation": 3.39,
+        "nw_equivalent_sd_pct": 5.01,
+        "minimum_detectable_effect_pct_5d": 1.26,
+        "interpretation": "n=61에서 p<0.05로 검출 가능한 최소 효과는 5일당 ±1.26pp (연환산 ~80%). 현실적 크기의 엣지(연 10~30%)는 이 표본에서 유의성으로 판정할 수 없다. 그래서 판정 규칙이 유의성이 아니라 점추정 부호와 기대 가치에 근거한다."
+      },
+      "explicit_notes": [
+        "2026-11-01은 5-pillar(sentiment 포함)가 다 켜진 상태의 첫 관측이지 마지막이 아니다.",
+        "이 판정은 predict.py 모델 freeze와 별개다. freeze 해제 조건은 CLAUDE.md 'Unfreeze Conditions'가 계속 지배한다.",
+        "sentiment는 설계상 D-2 지연이므로 (아카이브가 완성일만 보관), 이 체크포인트는 'D-2 지연 sentiment를 포함한 시스템'을 관측하는 것이다."
+      ],
+      "amendment_policy": "이 등록의 수정·폐기는 registrations 배열에 새 항목을 append하는 방식으로만 허용된다 (superseded_by 필드로 연결). 기존 항목의 필드를 덮어쓰는 커밋은 사전 등록 위반이다. 판정일에 임박한 규칙 변경은 등록의 의미를 소멸시킨다."
+    }
+  ]
+}

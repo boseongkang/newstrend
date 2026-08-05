@@ -31,6 +31,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          # ~1 week of commit history for build_weekly_narrative.py's defect
+          # extraction (git log --since); default depth=1 sees nothing
+          fetch-depth: 300
 
       - uses: actions/setup-python@v6
         with:
@@ -539,6 +543,16 @@ jobs:
         run: |
           python scripts/experiment_engine.py || true
 
+      - name: Weekly verification log (Saturdays; data-only without API key)
+        # Runs after validate.py so the narrative reflects this run's stats.
+        # The script self-gates: Saturday UTC only, once per ISO week.
+        # All numbers are computed in Python; Claude (if ANTHROPIC_API_KEY is
+        # set) writes narrative text + defect descriptions only.
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python scripts/build_weekly_narrative.py || true
+
       - name: Generate site/data/health.json
         env:
           GH_RUN_ID: ${{ github.run_id }}
@@ -610,6 +624,8 @@ jobs:
                    site/data/ml_prediction_log.json \
                    site/data/ml_frozen_train.json \
                    site/data/health.json \
+                   site/data/weekly_narrative.json \
+                   site/data/weekly_narratives/ \
                    experiments/results.json; do
             git add "$p" 2>/dev/null || echo "::warning::git add skipped: $p"
           done
