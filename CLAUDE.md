@@ -39,6 +39,20 @@ Weights are still computed and recorded every run for later evaluation.
 fold's train window.** Flipping `LIVE_MODE` back without that is a freeze
 violation.
 
+**Taint boundary:** predict.py evaluation metrics for snapshots
+**2026-05-15 → 2026-08-05 are NOT fixed-system forward results** — the
+scorer drifted daily in that window. `validation.json` carries a `taint`
+block marking affected folds. Measured materiality is low (same-day A/B
+2026-08-05: 0/90 action flips, max confidence delta 0.001, because the
+multiplied channels — sentiment/news/insider — are largely dark), so the
+negative-alpha conclusion likely stands, but treat pooled numbers spanning
+the window accordingly. **ml_monitor (RF/GB forward) is materially
+independent of this taint**: it evaluates its own frozen models
+(hash-verified), and the only calibrator-downstream input is the
+`confidence` feature (importance: RF 6.3% rank 6/34, GB 9.5% rank 4/34)
+whose drift was ≤0.001 — the forward falsification (RF −0.39% p=0.0095,
+GB −0.59% p=0.0033) is unaffected.
+
 ### ML Alpha Signal (2026-05-25) — ⚠️ FALSIFIED FORWARD, see below
 Walk-forward ML evaluation showed RF/GBM passing adoption gate with
 OOS alpha +1.7~2.0% vs SPY. 5-point audit (look-ahead, paired test,

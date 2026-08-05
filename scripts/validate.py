@@ -139,8 +139,32 @@ def run_validation() -> dict:
     pct_n = round(wf["total_test_n"] / target_n * 100, 1) if target_n else 0
     data_ready = wf["total_test_n"] >= target_n and n_regimes >= target_min_regimes
 
+    # Calibrator-taint marker (2026-08-05 audit). pillar_weights.json was
+    # mode="active" with multipliers deviating from 1.0 between 2026-05-15
+    # and 2026-08-05 (demoted to shadow in commit 515e58178). Snapshots in
+    # that window were produced by a daily-drifting scorer, so pooled
+    # walk-forward stats over it measure a changing system, not the frozen
+    # predict.py. Measured impact on outputs was small (same-day A/B on
+    # 2026-08-05: 0 action flips, max confidence delta 0.001), but folds in
+    # the window are formally not fixed-system forward results.
+    TAINT_START, TAINT_END = "2026-05-16", "2026-08-05"
+    tainted_folds = [f for f in wf.get("folds", [])
+                     if TAINT_START <= f.get("test_date", "") <= TAINT_END]
+    taint = {
+        "calibrator_live_window": [TAINT_START, TAINT_END],
+        "cause": "pillar_weights.json mode=active fed in-sample EMA multipliers "
+                 "into predict.py daily (demoted to shadow 2026-08-05, "
+                 "commit 515e58178)",
+        "n_folds_affected": len(tainted_folds),
+        "n_records_affected": sum(f.get("n", 0) for f in tainted_folds),
+        "note": "folds with test_date in this window are not fixed-system "
+                "forward results; measured behavioural drift was small "
+                "(0 action flips, max conf delta 0.001 in same-day A/B)",
+    }
+
     return {
         "updated": _now_iso(),
+        "taint": taint,
         "gate": {
             "pass": gate_pass,
             "criterion": "walk-forward OOS alpha vs SPY > always-buy alpha, p<0.05",
