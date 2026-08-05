@@ -180,33 +180,6 @@ def build_checkpoint(status: dict) -> dict | None:
     }
 
 
-def build_defect_inputs(days: int = 7) -> list[dict]:
-    """이번 주 non-data 커밋을 결함 후보 원자료로 수집."""
-    try:
-        out = subprocess.run(
-            ["git", "log", f"--since={days} days ago", "--no-merges",
-             "--pretty=format:%H%x00%s%x00%b%x01"],
-            capture_output=True, text=True, cwd=ROOT, check=True,
-        ).stdout
-    except subprocess.CalledProcessError:
-        return []
-    commits = []
-    for chunk in out.split("\x01"):
-        chunk = chunk.strip()
-        if not chunk:
-            continue
-        parts = chunk.split("\x00")
-        if len(parts) < 2:
-            continue
-        sha, subject = parts[0].strip(), parts[1].strip()
-        body = parts[2].strip() if len(parts) > 2 else ""
-        # 자동 데이터 커밋은 결함 로그가 아니다
-        if subject.startswith(("data:", "prices:", "archive predictions")):
-            continue
-        commits.append({"sha": sha[:9], "subject": subject, "body": body[:1500]})
-    return commits
-
-
 def build_raw_signals(week: str) -> dict:
     """이번 ISO 주의 predictions_history에서 참고용 원시 신호 집계."""
     hist_dir = DATA / "predictions_history"
@@ -245,25 +218,8 @@ NARRATIVE_SCHEMA = {
             "type": "string",
             "description": "이번 주 검증 활동 요약 서술 (한국어, 3-6문장)",
         },
-        "defects": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "title": {"type": "string"},
-                    "symptom": {"type": "string"},
-                    "diagnosis": {"type": "string"},
-                    "fix": {"type": "string"},
-                    "impact": {"type": "string"},
-                    "commits": {"type": "array", "items": {"type": "string"}},
-                },
-                "required": ["title", "symptom", "diagnosis", "fix", "impact",
-                             "commits"],
-                "additionalProperties": False,
-            },
-        },
     },
-    "required": ["narrative", "defects"],
+    "required": ["narrative"],
     "additionalProperties": False,
 }
 
@@ -282,13 +238,11 @@ SYSTEM_PROMPT = """\
    미래에 대한 문장은 사전 등록 체크포인트의 기계적 규칙 인용만 허용.
 
 할 일:
-- narrative: 이번 주의 검증 활동(무엇을 재고 무엇을 고쳤는가)을 3-6문장으로.
-  시스템 성과 자랑이 아니라 측정·수정 과정의 기록이다.
-- defects: 커밋 로그에서 실제 결함 수정만 골라 증상/진단/수정/영향으로 구조화.
-  기능 추가·문서 정리는 결함이 아니면 제외. 커밋 메시지에 있는 사실만 쓸 것."""
+- narrative: 이번 주의 측정 결과를 3-6문장으로. 시스템 성과 자랑이 아니라
+  측정 기록이다."""
 
 
-def generate_narrative(payload: dict, commits: list[dict]) -> dict:
+def generate_narrative(payload: dict) -> dict:
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         return {"generated": False, "reason": "ANTHROPIC_API_KEY 없음"}
@@ -300,8 +254,7 @@ def generate_narrative(payload: dict, commits: list[dict]) -> dict:
     user_content = json.dumps(
         {"computed_numbers": {k: payload[k] for k in
                               ("week", "status", "week_activity", "power",
-                               "checkpoint")},
-         "this_week_commits": commits},
+                               "checkpoint")},},
         ensure_ascii=False, indent=1,
     )
     try:
@@ -372,18 +325,7 @@ def main() -> int:
         "raw_signals": build_raw_signals(week),
     }
 
-    commits = build_defect_inputs()
-    narrative = generate_narrative(payload, commits)
-    if narrative.get("generated"):
-        payload["defects"] = narrative.pop("defects", [])
-    else:
-        # 데이터-only 강등: 커밋 원자료를 최소 구조로
-        payload["defects"] = [
-            {"title": c["subject"], "symptom": "", "diagnosis": "",
-             "fix": (c["body"].split("\n")[0] if c["body"] else c["subject"]),
-             "impact": "", "commits": [c["sha"]]}
-            for c in commits
-        ]
+    narrative = generate_narrative(payload)
     payload["narrative"] = narrative
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -400,7 +342,6 @@ def main() -> int:
 
     print(f"weekly_narrative: {week} 생성 "
           f"(narrative={'생성됨' if narrative.get('generated') else '데이터-only: ' + str(narrative.get('reason'))}, "
-          f"defects={len(payload['defects'])}, "
           f"live_folds={status['live_sentiment']['n_folds']})")
     return 0
 

@@ -38,10 +38,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          # ~1 week of commit history for build_weekly_narrative.py's defect
-          # extraction (git log --since); default depth=1 sees nothing
-          fetch-depth: 300
 
       - uses: actions/setup-python@v6
         with:
