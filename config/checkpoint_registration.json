@@ -33,6 +33,30 @@
         "sentiment는 설계상 D-2 지연이므로 (아카이브가 완성일만 보관), 이 체크포인트는 'D-2 지연 sentiment를 포함한 시스템'을 관측하는 것이다."
       ],
       "amendment_policy": "이 등록의 수정·폐기는 registrations 배열에 새 항목을 append하는 방식으로만 허용된다 (superseded_by 필드로 연결). 기존 항목의 필드를 덮어쓰는 커밋은 사전 등록 위반이다. 판정일에 임박한 규칙 변경은 등록의 의미를 소멸시킨다."
+    },
+    {
+      "id": "GATE-V2-2026-08-06",
+      "type": "gate_definition_change",
+      "registered_at": "2026-08-06T00:05:00Z",
+      "what": "adoption gate 페어링 재정의: v1(system fold alpha − always-buy fold alpha) → v2(의사결정별 매칭 페어: s_i·r_i − 같은 anchor·같은 sector ex-self 바스켓, 섹터 n<5는 유니버스 fallback, fold 평균 NW lag-4)",
+      "rationale": "v1의 NW 등가 sd 6.19pp로는 현실적 엣지(0.2~0.5pp/5d) 검출에 15~28년/개월 소요 — 분산 분해 논리(같은 날·같은 섹터 바스켓 차감으로 공통성분 제거)로 정밀도 개선 시도",
+      "definition_frozen_commit": "aff11ec6d",
+      "frozen_before_application": true,
+      "outcome_measured_after_freeze": {
+        "verdict": "FAIL 유지 (v1과 동일) — paired -0.94pp, NW p=0.337, 63 folds, 2046 pairs",
+        "nw_sd_pp": 7.77,
+        "mde_at_n61_pp": 1.95,
+        "detection_months": {"0.2pp": 276, "0.5pp": 44, "1.0pp": 11},
+        "vs_v1": "정밀도 개선 실패 — v1 sd 6.19pp 대비 오히려 악화 (MDE@61 1.55→1.95pp)",
+        "diagnosis": "long 페어만의 fold sd는 3.30pp로 가설대로 축소됐으나, short(SELL/REDUCE) 페어가 14.18pp — s=-1일 때 d=-(r_i+basket)이 되어 섹터·시장 공통성분이 상쇄가 아니라 2배로 진입하는 구조적 결함이 동결된 정의에 있었음 (대수적으로 사전에 잡을 수 있었던 오류). short 평균 -1.87pp/5d는 강세장에서 섹터 드리프트를 거스르는 비용과 일관"
+      },
+      "honest_notes": [
+        "sd가 줄어 유의해진 것도, 성능이 좋아진 것도 아니다: sd는 늘었고 판정은 양쪽 다 FAIL로 동일하다.",
+        "v2 점추정(-0.94pp)이 v1(-0.88pp)보다 나빠 보이는 것은 귀무가설이 더 엄격해졌기 때문(섹터 베타를 공으로 인정하지 않음)이지 성능 변화가 아니다.",
+        "정의 수정(예: short를 s·(r−basket)으로)은 v2 결과를 본 뒤의 선택이므로 이 항목에서 결정하지 않는다 — 채택하려면 새 항목(v3)으로 동결 절차를 다시 밟아야 하며, 선택 기준이 판정 방향이 아니라 정밀도(sd)임을 명시해야 한다.",
+        "CP-2026-11-01 판정 지표(live-sentiment forward alpha 점추정)는 게이트가 아니므로 이 변경의 영향을 받지 않는다."
+      ],
+      "operative_gate_note": "validation.json의 gate는 동결 커밋대로 v2, v1은 gate_v1_legacy로 병행 보고 중. 정밀도 악화가 측정되었으므로 운영 게이트를 v1로 되돌릴지는 별도 결정 사항 (판정 방향과 무관한 정밀도 근거의 선택이며, 양쪽 판정이 동일하므로 verdict-shopping이 아님)"
     }
   ]
 }
