@@ -364,6 +364,14 @@ jobs:
         run: |
           python scripts/archive_predictions.py || true
 
+      - name: Daily observation report
+        # 관찰(사실)만 — 예측 주장 없음. 숫자는 Python, Claude는 한 줄 요약만
+        # (날짜당 1회 호출; 키 부재 시 데이터-only). 아카이브 30일 롤링.
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python scripts/build_daily_report.py || true
+
       - name: Find hidden gems (4-Pillar synthesis)
         run: |
           python scripts/find_hidden_gems.py --top 30 || true
@@ -459,6 +467,7 @@ jobs:
           # per-path adds (STEP 4): one missing pathspec used to abort the
           # ENTIRE list-form `git add ... || true`, silently staging nothing
           for p in site/data/predictions_history/ site/data/reports/ \
+                   site/data/daily_report.json site/data/daily_reports/ \
                    site/data/trends.json site/data/ticker_sentiment.json \
                    site/data/trends_dow.json site/data/trends_weekly.json \
                    site/data/trends_monthly.json \
@@ -685,6 +694,7 @@ jobs:
               "site/data/hidden_gems.json": "generated_at",
               "site/data/domino.json": "generated_at",
               "site/data/ticker_sentiment.json": "generated",
+              "site/data/daily_report.json": "generated_at",
           }
 
           def git(*a):

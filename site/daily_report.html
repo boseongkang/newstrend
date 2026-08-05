@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Newstrend · Daily Observation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#070b10;--bg1:#0c1220;--bg2:#101828;
+  --b1:#1a2840;--b2:#223050;
+  --cyan:#00d4ff;--amber:#ffb300;--green:#00e676;--red:#ff4444;--purple:#b380ff;
+  --t1:#c8d8e8;--t2:#6a8aa8;--t3:#344a60;
+  --fm:'IBM Plex Mono',monospace;--fs:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t1);font-family:var(--fs);font-size:13px;
+     min-height:100dvh;padding-bottom:40px}
+.unified-header{height:48px;display:flex;align-items:center;gap:24px;padding:0 24px;
+  background:var(--bg1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:100}
+.brand{font-family:var(--fm);font-size:14px;font-weight:600;color:var(--cyan);letter-spacing:.06em}
+.brand em{color:var(--t3);font-style:normal;font-weight:300;margin-left:6px}
+nav{display:flex;gap:2px;flex-wrap:wrap}
+nav a{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--t2);text-decoration:none;padding:6px 12px;
+      border:1px solid transparent;transition:all .12s}
+nav a:hover,nav a.on{color:var(--cyan);border-color:var(--b2);background:var(--bg2)}
+.hdr-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+#unified-ts{font-family:var(--fm);font-size:10px;color:var(--t3)}
+
+main{max-width:1000px;margin:20px auto;padding:0 24px}
+h1{font-family:var(--fm);font-size:14px;font-weight:600;letter-spacing:.14em;
+   text-transform:uppercase;margin-bottom:6px}
+.subtitle{font-family:var(--fm);font-size:11px;color:var(--t3);margin-bottom:18px}
+
+.section{background:var(--bg1);border:1px solid var(--b1);margin-bottom:18px}
+.sec-hdr{padding:12px 18px;border-bottom:1px solid var(--b1);display:flex;
+  justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.sec-title{font-family:var(--fm);font-size:11px;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--cyan)}
+.sec-meta{font-family:var(--fm);font-size:10px;color:var(--t3)}
+.sec-body{padding:16px 18px}
+
+.summary-box{font-size:15px;line-height:1.85;color:var(--t1);
+  border-left:2px solid var(--cyan);padding:6px 16px}
+.summary-meta{font-family:var(--fm);font-size:10px;color:var(--t3);margin-top:10px}
+
+/* 매크로 스트립 */
+.macro-strip{display:flex;gap:1px;flex-wrap:wrap;background:var(--b1);
+  border:1px solid var(--b1);margin-bottom:16px}
+.macro-cell{flex:1 1 110px;background:var(--bg2);padding:10px 12px;text-align:center}
+.macro-label{font-family:var(--fm);font-size:9px;letter-spacing:.08em;color:var(--t3);
+  text-transform:uppercase}
+.macro-val{font-family:var(--fm);font-size:15px;font-weight:600;margin-top:4px;
+  font-feature-settings:"tnum"}
+
+/* 섹터 막대 */
+.sector-row{display:grid;grid-template-columns:190px 1fr 150px;gap:12px;
+  align-items:center;padding:7px 0;border-bottom:1px solid var(--b1)}
+.sector-row:last-child{border-bottom:none}
+.sector-row.lowconf{opacity:.5}
+.sector-name{font-size:12px}
+.sector-n{font-family:var(--fm);font-size:9px;color:var(--t3);margin-left:6px}
+.sector-n.warn{color:var(--amber)}
+.bar-wrap{position:relative;height:18px}
+.bar-axis{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--b2)}
+.bar{position:absolute;top:2px;bottom:2px;opacity:.85}
+.bar.pos{background:var(--green)}.bar.neg{background:var(--red)}
+.bar-val{position:absolute;top:0;font-family:var(--fm);font-size:11px;
+  font-weight:600;line-height:18px;font-feature-settings:"tnum"}
+.sector-extremes{font-family:var(--fm);font-size:10px;color:var(--t2);text-align:right}
+.rank-tag{display:inline-block;font-family:var(--fm);font-size:8px;letter-spacing:.08em;
+  padding:1px 5px;margin-right:6px;border:1px solid}
+.rank-tag.top{color:var(--green);border-color:var(--green)}
+.rank-tag.bot{color:var(--red);border-color:var(--red)}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-family:var(--fm);font-size:11px;padding:5px 10px;border:1px solid var(--b2);
+  background:var(--bg2)}
+.chip b{color:var(--cyan)}
+.chip .dim{color:var(--t3);font-size:9px}
+
+.lag-banner{border:1px solid var(--amber);background:rgba(255,179,0,.06);
+  padding:8px 12px;font-family:var(--fm);font-size:10px;line-height:1.6;
+  color:var(--t2);margin-bottom:14px}
+.lag-banner b{color:var(--amber)}
+
+table{width:100%;border-collapse:collapse;font-family:var(--fm);font-size:11px}
+th{padding:8px 12px;text-align:left;color:var(--t3);font-size:9px;letter-spacing:.1em;
+   text-transform:uppercase;background:var(--bg2);border-bottom:1px solid var(--b1)}
+td{padding:8px 12px;border-bottom:1px solid var(--b1);font-feature-settings:"tnum"}
+td.num,th.num{text-align:right}
+.pos{color:var(--green)}.neg{color:var(--red)}
+
+.regime-row{display:flex;gap:1px;flex-wrap:wrap;background:var(--b1);border:1px solid var(--b1)}
+.regime-cell{flex:1 1 150px;background:var(--bg2);padding:14px;text-align:center}
+
+details.signals summary{cursor:pointer;padding:12px 18px;font-family:var(--fm);
+  font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--t2);list-style:none}
+details.signals summary::before{content:'▸ ';color:var(--t3)}
+details.signals[open] summary::before{content:'▾ '}
+.warn-box{border:1px solid var(--red);background:rgba(255,68,68,.05);padding:10px 14px;
+  font-family:var(--fm);font-size:11px;line-height:1.7;color:var(--t2);margin-bottom:14px}
+.warn-box b{color:var(--red)}
+
+.empty{padding:26px;text-align:center;color:var(--t3);font-family:var(--fm);font-size:11px}
+select{background:var(--bg2);color:var(--t1);border:1px solid var(--b2);
+  font-family:var(--fm);font-size:11px;padding:5px 10px}
+@media(max-width:760px){.sector-row{grid-template-columns:130px 1fr}.sector-extremes{display:none}}
+</style>
+</head>
+<body>
+<header class="unified-header">
+  <div class="brand">NEWSTREND <em>// DAILY OBSERVATION</em></div>
+  <nav>
+    <a href="./index.html">DASHBOARD</a>
+    <a href="./daily_report.html" class="on">DAILY</a>
+    <a href="./weekly_report.html">WEEKLY_R</a>
+    <a href="./signals.html">SIGNALS</a>
+    <a href="./predict.html">PREDICT</a>
+    <a href="./hidden_gems.html">GEMS</a>
+    <a href="./insider_activity.html">INSIDER</a>
+    <a href="./paper_trading.html">PAPER</a>
+    <a href="./accuracy.html">ACCURACY</a>
+    <a href="./system_health.html">HEALTH</a>
+  </nav>
+  <div class="hdr-right">
+    <select id="date-select" title="아카이브 (최근 30일)"><option>최신</option></select>
+    <div id="unified-ts">—</div>
+  </div>
+</header>
+
+<main>
+  <h1 id="title">일간 관찰</h1>
+  <div class="subtitle">오늘 무슨 일이 있었나 — 예측이 아니라 관찰. 측정·검증은 <a href="./weekly_report.html" style="color:var(--cyan)">주간 검증 로그</a>에서.</div>
+
+  <!-- 1. 한 줄 요약 -->
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">1 · 오늘 한 줄</span>
+      <span class="sec-meta" id="summary-meta">—</span></div>
+    <div class="sec-body" id="summary"><div class="empty">로딩…</div></div>
+  </div>
+
+  <!-- 2. 섹터 흐름 -->
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">2 · 섹터 흐름</span>
+      <span class="sec-meta">일간 수익률 평균 · n = 섹터 내 종목 수 (n&lt;5는 평균이 노이즈 — 흐리게 표시)</span></div>
+    <div class="sec-body">
+      <div class="macro-strip" id="macro"></div>
+      <div id="sectors"><div class="empty">—</div></div>
+      <div style="margin-top:14px">
+        <div class="sec-meta" style="margin-bottom:8px">개별 종목 상하위</div>
+        <div class="chips" id="movers"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 뉴스 -->
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">3 · 뉴스에서 오늘 뜬 것</span>
+      <span class="sec-meta" id="news-meta">기사 급증 (z≥2, 오늘) · 섹터 sentiment (D-2)</span></div>
+    <div class="sec-body">
+      <div class="chips" id="surge" style="margin-bottom:16px"></div>
+      <div class="lag-banner" id="lag-note"></div>
+      <div style="overflow-x:auto"><table id="sentiment-table">
+        <thead><tr><th>섹터</th><th class="num">기사 수</th><th class="num">종목 수</th><th class="num">평균 score</th></tr></thead>
+        <tbody><tr><td colspan="4" class="empty">—</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- 4. 시장 레짐 -->
+  <div class="section">
+    <div class="sec-hdr"><span class="sec-title">4 · 시장 레짐</span>
+      <span class="sec-meta">시스템이 분류한 현재 국면 — 관찰값이지 판단 근거 아님</span></div>
+    <div class="sec-body"><div class="regime-row" id="regime"></div></div>
+  </div>
+
+  <!-- 5. 시스템 신호 (접힘) -->
+  <div class="section">
+    <details class="signals">
+      <summary>5 · 시스템 신호 (BUY/WATCH) — 펼쳐 보기</summary>
+      <div class="sec-body">
+        <div class="warn-box"><b>경고</b> — 이 시스템은 벤치마크를 이기지 못한다는 것이 세 번의 독립 검증에서 확인됨.
+          아래 신호는 검증 대상이지 추천이 아님.</div>
+        <div style="overflow-x:auto"><table id="signals-table">
+          <thead><tr><th>Ticker</th><th>Action</th><th class="num">Confidence</th></tr></thead>
+          <tbody><tr><td colspan="3" class="empty">—</td></tr></tbody>
+        </table></div>
+      </div>
+    </details>
+  </div>
+</main>
+
+<script>
+const fmt = (v, d=2) => v == null ? '—' : (Math.round(v*Math.pow(10,d))/Math.pow(10,d)).toFixed(d);
+const fmtSign = (v, d=2) => v == null ? '—' : (v >= 0 ? '+' : '') + fmt(v, d);
+const cls = v => v == null ? '' : v >= 0 ? 'pos' : 'neg';
+async function loadJSON(p){
+  const r = await fetch(`./data/${p}?v=${Date.now()}`, {cache:'no-store'});
+  if(!r.ok) throw new Error(`Failed ${p}: ${r.status}`);
+  return r.json();
+}
+
+function renderSummary(d){
+  const el = document.getElementById('summary');
+  const meta = document.getElementById('summary-meta');
+  const s = d.summary || {};
+  if(s.generated){
+    el.innerHTML = `<div class="summary-box">${s.text}</div>
+      <div class="summary-meta">${s.model} 생성 · 숫자는 파이프라인 계산값만 참조 · 예측/추천/전망 금지 제약 하에 작성${s.reused ? ' · 당일 첫 생성분 재사용' : ''}</div>`;
+  } else {
+    el.innerHTML = `<div class="empty">서술 미생성 (${s.reason || '—'}) — 아래 데이터는 정상</div>`;
+  }
+  meta.textContent = `${d.date} 장 기준`;
+}
+
+function renderSectors(d){
+  const rows = d.sectors || [];
+  const el = document.getElementById('sectors');
+  if(!rows.length){ el.innerHTML = '<div class="empty">—</div>'; return; }
+  const maxAbs = Math.max(0.5, ...rows.map(s => Math.abs(s.avg_ret_pct)));
+  const topN = new Set(rows.slice(0, 3).map(s => s.sector));
+  const botN = new Set(rows.slice(-3).map(s => s.sector));
+  el.innerHTML = rows.map(s => {
+    const w = Math.abs(s.avg_ret_pct) / maxAbs * 48;   // 절반 폭 기준 %
+    const posBar = s.avg_ret_pct >= 0;
+    const tag = topN.has(s.sector) && s.avg_ret_pct > 0 ? '<span class="rank-tag top">TOP</span>'
+              : botN.has(s.sector) && s.avg_ret_pct < 0 ? '<span class="rank-tag bot">BOT</span>' : '';
+    return `<div class="sector-row${s.low_confidence ? ' lowconf' : ''}">
+      <div class="sector-name">${tag}${s.sector}
+        <span class="sector-n${s.low_confidence ? ' warn' : ''}">n=${s.n}${s.low_confidence ? ' 저신뢰' : ''}</span></div>
+      <div class="bar-wrap"><div class="bar-axis"></div>
+        <div class="bar ${posBar ? 'pos' : 'neg'}" style="${posBar
+          ? `left:50%;width:${w}%` : `right:50%;width:${w}%`}"></div>
+        <div class="bar-val ${cls(s.avg_ret_pct)}" style="${posBar
+          ? `left:calc(50% + ${w}% + 8px)` : `right:calc(50% + ${w}% + 8px)`}">${fmtSign(s.avg_ret_pct)}%</div>
+      </div>
+      <div class="sector-extremes">${s.top.ticker} <span class="pos">${fmtSign(s.top.ret_pct,1)}</span>
+        · ${s.bottom.ticker} <span class="neg">${fmtSign(s.bottom.ret_pct,1)}</span></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('macro').innerHTML = (d.macro_etf || []).map(m => `
+    <div class="macro-cell"><div class="macro-label">${m.label}</div>
+      <div class="macro-val ${cls(m.ret_pct)}">${fmtSign(m.ret_pct)}%</div></div>`).join('');
+
+  const mv = d.movers || {up: [], down: []};
+  document.getElementById('movers').innerHTML =
+    mv.up.map(x => `<span class="chip"><b>${x.ticker}</b> <span class="pos">${fmtSign(x.ret_pct,1)}%</span> <span class="dim">${x.sector}</span></span>`).join('') +
+    mv.down.map(x => `<span class="chip"><b>${x.ticker}</b> <span class="neg">${fmtSign(x.ret_pct,1)}%</span> <span class="dim">${x.sector}</span></span>`).join('');
+}
+
+function renderNews(d){
+  const n = d.news || {};
+  document.getElementById('surge').innerHTML = (n.surge && n.surge.length)
+    ? n.surge.map(s => `<span class="chip"><b>${s.ticker}</b> z=${s.news_z} <span class="dim">${s.sector}</span></span>`).join('')
+    : '<span class="chip" style="color:var(--t3)">오늘 기사 급증 종목 없음 (z≥2)</span>';
+  document.getElementById('lag-note').innerHTML = `<b>D-2 지연</b> — ${n.lag_note || ''}`;
+  const tb = document.querySelector('#sentiment-table tbody');
+  const rows = n.sentiment_by_sector || [];
+  tb.innerHTML = rows.length ? rows.map(s => `
+    <tr><td>${s.sector}</td><td class="num">${s.total_articles}</td>
+      <td class="num">${s.n_tickers}</td>
+      <td class="num ${cls(s.avg_score)}">${fmtSign(s.avg_score, 3)}</td></tr>`).join('')
+    : '<tr><td colspan="4" class="empty">—</td></tr>';
+}
+
+function renderRegime(d){
+  const r = d.regime || {};
+  const cells = [
+    {label: 'Regime', val: r.regime || '—', sub: r.regime_note || ''},
+    {label: 'Fear & Greed', val: r.fear_greed ?? '—', sub: r.fear_greed_label || ''},
+    {label: 'Bull %', val: r.bull_pct == null ? '—' : Math.round(r.bull_pct*100) + '%', sub: '유니버스 내 강세 비중'},
+    {label: 'Avg RSI(14)', val: r.avg_rsi ?? '—', sub: ''},
+  ];
+  document.getElementById('regime').innerHTML = cells.map(c => `
+    <div class="regime-cell"><div class="macro-label">${c.label}</div>
+      <div class="macro-val">${c.val}</div>
+      <div style="font-family:var(--fm);font-size:9px;color:var(--t3);margin-top:4px">${c.sub}</div></div>`).join('');
+}
+
+function renderSignals(d){
+  const tb = document.querySelector('#signals-table tbody');
+  const items = (d.signals || {}).items || [];
+  tb.innerHTML = items.length ? items.map(s => `
+    <tr><td>${s.ticker}</td><td>${s.action}</td>
+      <td class="num">${fmt(s.confidence)}</td></tr>`).join('')
+    : '<tr><td colspan="3" class="empty">—</td></tr>';
+}
+
+function renderAll(d){
+  document.getElementById('title').textContent = `일간 관찰 · ${d.date || ''}`;
+  document.getElementById('unified-ts').textContent =
+    d.generated_at ? d.generated_at.slice(0,16).replace('T',' ') + 'Z' : '—';
+  renderSummary(d); renderSectors(d); renderNews(d); renderRegime(d); renderSignals(d);
+}
+
+async function boot(){
+  let index = null;
+  try { index = await loadJSON('daily_reports/index.json'); } catch(e) {}
+  const sel = document.getElementById('date-select');
+  if(index && index.dates && index.dates.length){
+    sel.innerHTML = index.dates.slice().reverse().map((dt,i) =>
+      `<option value="${dt}">${dt}${i===0 ? ' (최신)' : ''}</option>`).join('');
+    sel.onchange = async () => {
+      try { renderAll(await loadJSON(`daily_reports/${sel.value}.json`)); } catch(e) {}
+    };
+  }
+  try { renderAll(await loadJSON('daily_report.json')); }
+  catch(e){
+    document.getElementById('summary').innerHTML =
+      `<div class="empty">daily_report.json 없음 — 수동 실행: <code>python3 scripts/build_daily_report.py</code></div>`;
+  }
+}
+boot();
+</script>
+</body>
+</html>
