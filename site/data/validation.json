@@ -1,5 +1,15 @@
 {
-  "updated": "2026-08-05T03:49:03Z",
+  "updated": "2026-08-05T06:31:08Z",
+  "taint": {
+    "calibrator_live_window": [
+      "2026-05-16",
+      "2026-08-05"
+    ],
+    "cause": "pillar_weights.json mode=active fed in-sample EMA multipliers into predict.py daily (demoted to shadow 2026-08-05, commit 515e58178)",
+    "n_folds_affected": 74,
+    "n_records_affected": 2576,
+    "note": "folds with test_date in this window are not fixed-system forward results; measured behavioural drift was small (0 action flips, max conf delta 0.001 in same-day A/B)"
+  },
   "gate": {
     "pass": false,
     "criterion": "walk-forward OOS alpha vs SPY > always-buy alpha, p<0.05",
