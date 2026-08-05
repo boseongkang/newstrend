@@ -7,13 +7,25 @@
 - Pillar weights, confidence thresholds, drift offsets
 - Any parameter that affects prediction output
 
-### Why
-Walk-forward OOS evaluation (357 records, 14 folds) shows:
-- Accuracy 44.0% — significantly below 50% (p=0.023)
-- Alpha -1.96% vs SPY — significantly negative (p=0.0002)
-- Loses to always-buy, always-sell, and random baselines
+### Why (updated 2026-08-05 — original numbers superseded)
+The freeze was imposed 2026-05-25 on walk-forward stats (acc 44.0% p=0.023,
+alpha −1.96% p=0.0002) that STEP 3 later showed were **overstated**: duplicate
+weekend folds double-counted trades and iid t-tests ignored ρ1≈0.76 fold
+autocorrelation. After dedup + Newey-West the historical OOS record is
+*not significant in either direction* (acc p≈0.32, alpha p≈0.19 NW).
 
-4 hypotheses tested (momentum, anti-signal, regime-gate, conf-inversion) — none passed the adoption gate. The data is insufficient to distinguish signal from noise (single RISK-ON regime, effective n~160).
+The freeze nevertheless stands, on two grounds that survive the corrections:
+1. **ml_monitor forward falsification (2026-07-14)** — materially independent
+   of both the calibrator taint and the STEP 3 statistical issues: RF forward
+   alpha −0.39% (p=0.0095), GB −0.59% (p=0.0033) on frozen, hash-verified
+   models over post-2026-05-25 data only.
+2. **Adoption gate FAIL** under the corrected paired NW test: system − 
+   always-buy = −0.85pp (p=0.28) — no evidence the system beats the trivial
+   baseline, and the point estimate is negative.
+
+4 hypotheses tested (momentum, anti-signal, regime-gate, conf-inversion) —
+none passed the adoption gate. Single RISK-ON regime dominates the sample;
+the one RISK-OFF day (2026-04-17, n=23) is nowhere near a cycle.
 
 ### Rules
 1. **New hypotheses** must be tested via `walk_forward(records, system_fn=...)` first
@@ -61,10 +73,16 @@ historical predictions were NOT re-generated.** Every prediction snapshot
 from 2026-05-03 through 2026-08-04 was made with the sentiment pillar
 effectively dark (filtered_score null for ~all tickers) and stays that way
 in the record. Therefore:
-- **Forward data with a live sentiment pillar starts 2026-08-05.** Any
-  evaluation of "the system with sentiment" must use snapshots from that
-  date on. The ML forward falsification below is evidence against the
-  4-working-pillar system, not the 5-pillar design.
+- **Forward data with a live sentiment pillar starts 2026-08-06** (corrected
+  from 2026-08-05). The 08-05 daytime snapshots still had the pillar dark:
+  aggregate_ticker_sentiment exported the same-day partial file (4 tickers)
+  and predict.py's load_sentiment reads index −1, so filtered_score was null
+  for all 90 tickers. Fixed 2026-08-05 (commit 3388cca6c): the aggregator now
+  clamps to complete days (≤ D-2), so index −1 lands on a full day. Any
+  evaluation of "the system with sentiment" must use snapshots from the first
+  CI run after that commit — 2026-08-06 is the clean boundary. The ML forward
+  falsification below is evidence against the 4-working-pillar system, not
+  the 5-pillar design.
 - Sentiment now lags 2 days by design: the archive stores only complete
   days, and with SHIFT_MINUTES=1440 day D's warehouse file keeps growing
   through D+1 — so D-2 is the freshest complete day (a same-day snapshot
@@ -88,6 +106,17 @@ Baseline snapshot before these landed: `docs/validation_baseline_2026-08-05.md`.
   difference with a NW t-test instead of the system's own H0:alpha=0.
 - benchmark.py headline alpha nets the benchmark leg to average exposure
   (~85% invested vs 100%-invested SPY); raw alpha kept as alpha_raw_pct.
+
+### CI robustness (STEP 4, 2026-08-05)
+Silent-failure hardening (commits 3388cca6c, 033666d6b): freshness gate now
+also covers predictions/hidden_gems/domino/ticker_sentiment; inline stale-
+input gate for prices/TA before predict; predictions_history archiving moved
+to a dedicated stale-rejecting step (archive_predictions.py) right after
+predict; collect fails RED on 0 articles or missing NEWSAPI_KEY; warehouse
+artifact floor+shrink checks; calibration EMA gated to once/UTC-day; torch
+split to requirements-local.txt (CI pip fail-loud); per-path git adds;
+archive-daily find-path bug fixed (Releases were single-batch fallbacks) and
+now archives D-2. Full audit: docs/ci_softfail_audit_2026-08-05.md.
 
 ### ML Alpha Signal (2026-05-25) — ⚠️ FALSIFIED FORWARD, see below
 Walk-forward ML evaluation showed RF/GBM passing adoption gate with
