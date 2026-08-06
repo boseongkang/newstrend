@@ -38,6 +38,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          # Always build from the CURRENT tip of main, not the event-time
+          # snapshot SHA (2026-08-06, run 31091759391): a workflow_run
+          # trigger queued behind a running trend-site job used to check
+          # out a 25-min-stale SHA that was missing the predecessor's
+          # data pushes, making its commit steps diverge from origin on
+          # the very files it regenerates.
+          ref: main
 
       - uses: actions/setup-python@v6
         with:
@@ -462,48 +470,38 @@ jobs:
           git worktree prune
 
       - name: Commit predictions history to main
+        # Rewritten 2026-08-06 (run 31091759391): the old in-place
+        # stash → commit → pull --rebase -X ours → stash pop dance left
+        # unmerged index entries behind `|| true` when the pop conflicted,
+        # poisoning every later step. ci_commit_main.sh commits from a
+        # temp worktree (build tree never mutated) and resolves any
+        # divergence per file class: REGEN → this run wins, APPEND →
+        # remote history wins, unclassified conflict → RED.
+        env:
+          REGEN_PATHS: |
+            site/data/daily_report.json
+            site/data/trends.json
+            site/data/ticker_sentiment.json
+            site/data/trends_dow.json
+            site/data/trends_weekly.json
+            site/data/trends_monthly.json
+            site/data/hidden_gems.json
+            site/data/predictions.json
+            site/data/signal_corr.json
+            site/data/backtest.json
+            site/data/backtest_v2.json
+            site/data/ticker_weights.json
+            site/data/domino.json
+            site/data/fundamentals.json
+            site/data/reports/
+          APPEND_PATHS: |
+            site/data/predictions_history/
+            site/data/reports/history/
+            site/data/daily_reports/
+            site/data/verification/
+            site/data/domino_history.json
         run: |
-          git config --global user.name  "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          # 1) 변경사항 없으면 종료
-          # per-path adds (STEP 4): one missing pathspec used to abort the
-          # ENTIRE list-form `git add ... || true`, silently staging nothing
-          for p in site/data/predictions_history/ site/data/reports/ \
-                   site/data/daily_report.json site/data/daily_reports/ \
-                   site/data/trends.json site/data/ticker_sentiment.json \
-                   site/data/trends_dow.json site/data/trends_weekly.json \
-                   site/data/trends_monthly.json \
-                   site/data/hidden_gems.json site/data/predictions.json \
-                   site/data/signal_corr.json site/data/backtest.json \
-                   site/data/backtest_v2.json site/data/verification/ \
-                   site/data/ticker_weights.json \
-                   site/data/domino.json site/data/domino_history.json \
-                   site/data/fundamentals.json; do
-            git add "$p" 2>/dev/null || echo "::warning::git add skipped: $p"
-          done
-          if git diff --cached --quiet; then
-            echo "No history changes to commit"
-            exit 0
-          fi
-
-          # 2) 다른 unstaged 변경 모두 stash (rebase 가능하게)
-          git stash --include-untracked --keep-index 2>/dev/null || true
-
-          # 3) commit
-          git commit -m "data: archive predictions $(date -u +%Y-%m-%d)"
-
-          # 4) 재시도 로직: rebase + push, 충돌 시 최대 5회 재시도
-          for i in 1 2 3 4 5; do
-            git pull --rebase --strategy-option=ours origin main && \
-            git push origin HEAD:main && break
-            echo "Attempt $i failed, retrying..."
-            sleep $((RANDOM % 5 + 1))
-          done
-
-          # 5) stash 복구 (무시해도 됨)
-          git stash pop 2>/dev/null || true
-          echo "Done"
+          bash scripts/ci_commit_main.sh "data: archive predictions $(date -u +%Y-%m-%d)"
 
       - name: Build macro themes
         run: |
@@ -614,50 +612,35 @@ jobs:
           PY
 
       - name: Commit self-correcting outputs to main
+        # Same conflict-safe worktree commit as "Commit predictions
+        # history" above — see scripts/ci_commit_main.sh. State-carrying
+        # files (pillar_weights EMA, ml_monitor run log) are classified
+        # APPEND: on divergence remote history wins and this run's entry
+        # is regenerated next run — never clobber remote.
+        env:
+          REGEN_PATHS: |
+            site/data/prediction_accuracy.json
+            site/data/gap_analysis.json
+            site/data/ml_baseline.json
+            site/data/weekly_analysis.json
+            site/data/macro_themes.json
+            site/data/tickers.json
+            site/data/validation.json
+            site/data/ml_frozen_train.json
+            site/data/health.json
+            site/data/weekly_narrative.json
+          APPEND_PATHS: |
+            site/data/paper_trading_history.json
+            site/data/pillar_weights.json
+            site/data/calibration_history.json
+            site/data/gap_history.json
+            site/data/weekly_history.json
+            site/data/ml_monitor.json
+            site/data/ml_prediction_log.json
+            site/data/weekly_narratives/
+            experiments/results.json
         run: |
-          git config --global user.name  "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          # per-path adds (STEP 4): one missing pathspec used to abort the
-          # ENTIRE list-form `git add ... || true`, silently staging nothing
-          for p in site/data/paper_trading_history.json \
-                   site/data/prediction_accuracy.json \
-                   site/data/pillar_weights.json \
-                   site/data/calibration_history.json \
-                   site/data/gap_analysis.json \
-                   site/data/gap_history.json \
-                   site/data/ml_baseline.json \
-                   site/data/weekly_analysis.json \
-                   site/data/weekly_history.json \
-                   site/data/macro_themes.json \
-                   site/data/tickers.json \
-                   site/data/validation.json \
-                   site/data/ml_monitor.json \
-                   site/data/ml_prediction_log.json \
-                   site/data/ml_frozen_train.json \
-                   site/data/health.json \
-                   site/data/weekly_narrative.json \
-                   site/data/weekly_narratives/ \
-                   experiments/results.json; do
-            git add "$p" 2>/dev/null || echo "::warning::git add skipped: $p"
-          done
-          if git diff --cached --quiet; then
-            echo "No self-correcting changes to commit"
-            exit 0
-          fi
-
-          git stash --include-untracked --keep-index 2>/dev/null || true
-          git commit -m "data: self-correcting paper-trade + calibration $(date -u +%Y-%m-%d)"
-
-          for i in 1 2 3 4 5; do
-            git pull --rebase --strategy-option=ours origin main && \
-            git push origin HEAD:main && break
-            echo "Attempt $i failed, retrying..."
-            sleep $((RANDOM % 5 + 1))
-          done
-
-          git stash pop 2>/dev/null || true
-          echo "Done"
+          bash scripts/ci_commit_main.sh "data: self-correcting paper-trade + calibration $(date -u +%Y-%m-%d)"
 
       # Moved before the validation gate (STEP 4): when the gate goes RED
       # first, this step never ran and the root cause (local M3 launchd not
