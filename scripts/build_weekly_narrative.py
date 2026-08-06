@@ -161,7 +161,11 @@ def build_power(validation: dict) -> dict:
 def build_checkpoint(status: dict) -> dict | None:
     reg = _load(CHECKPOINT_FILE)
     regs = reg.get("registrations") or []
-    active = [r for r in regs if not r.get("superseded_by")]
+    # decision_date가 있는 등록만 판정 체크포인트다 — GATE-V2 계열처럼
+    # lesson/이력 기록용 항목(decision_date 없음)이 active[-1]로 잡히면
+    # 리포트 블록이 "None에 …"으로 깨진다 (2026-08-06 발견).
+    active = [r for r in regs
+              if not r.get("superseded_by") and r.get("decision_date")]
     if not active:
         return None
     r = active[-1]
