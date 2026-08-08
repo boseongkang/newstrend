@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-08T14:07:09+00:00",
+  "generated_at": "2026-08-08T14:59:46+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-08T14:06:02Z",
+    "signal_corr_updated": "2026-08-08T14:58:41Z",
     "n_pairs_total": 4078,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,13 +21,35 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "green": 2.107,
-    "takes": 1.503,
+    "security": 1.604,
+    "saturday": 1.6,
+    "life": 1.629,
+    "gets": 1.535,
+    "streaming": 1.567,
+    "green": 2.517,
+    "takes": 1.686,
     "finally": 1.641,
-    "community": 4.123,
-    "book": 2.247
+    "community": 5.048,
+    "book": 2.775
   },
   "stock_chains": [
+    {
+      "term": "life",
+      "is_active_today": true,
+      "today_z": 1.629,
+      "hop1": {
+        "ticker": "BMRN",
+        "sector": "03 Life Sciences",
+        "entity": "BIOMARIN PHARMACEUTICAL INC",
+        "corr": -0.3221,
+        "lag": -4,
+        "hit_rate": 0.667,
+        "direction": "bear",
+        "avg_ret_1d": 0.202,
+        "confidence": 0.379
+      },
+      "hop2": []
+    },
     {
       "term": "gold",
       "is_active_today": false,
@@ -6330,23 +6352,6 @@
       ]
     },
     {
-      "term": "life",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "BMRN",
-        "sector": "03 Life Sciences",
-        "entity": "BIOMARIN PHARMACEUTICAL INC",
-        "corr": -0.3221,
-        "lag": -4,
-        "hit_rate": 0.667,
-        "direction": "bear",
-        "avg_ret_1d": 0.202,
-        "confidence": 0.379
-      },
-      "hop2": []
-    },
-    {
       "term": "their",
       "is_active_today": false,
       "today_z": null,
@@ -10591,7 +10596,22 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "BMRN",
+      "sector": "03 Life Sciences",
+      "entity": "BIOMARIN PHARMACEUTICAL INC",
+      "fund_score": 0.617,
+      "inbound": [
+        {
+          "term": "life",
+          "direction": "bear",
+          "today_z": 1.629,
+          "hit_rate": 0.667
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 281,
