@@ -64,7 +64,31 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          RID=$(gh run list --workflow update-warehouse.yml --branch main --status success --json databaseId -q '.[0].databaseId')
+          # 2026-08-08: `gh run list` intermittently returns a stale list —
+          # .[0] resolved to a 4-day-old run (31234965503) and later a
+          # 40-day-old one (31238330329), starving news-preserve. Don't
+          # trust API ordering: sort by createdAt ourselves, require the
+          # pick to be <12h old (update-warehouse runs hourly), retry on
+          # a stale list, and fail loud instead of building on old data.
+          FLOOR=$(date -u -d "12 hours ago" +%Y-%m-%dT%H:%M:%SZ)
+          RID="" CREATED=""
+          for i in 1 2 3 4 5; do
+            read -r RID CREATED < <(gh run list --workflow update-warehouse.yml \
+              --branch main --status success --limit 20 \
+              --json databaseId,createdAt \
+              --jq 'sort_by(.createdAt) | last | "\(.databaseId) \(.createdAt)"') || true
+            if [ -n "${RID:-}" ] && [ "$CREATED" \> "$FLOOR" ]; then
+              break
+            fi
+            echo "attempt $i: stale/empty run list (RID=${RID:-none} created=${CREATED:-none}, floor=$FLOOR) — retrying"
+            RID="" CREATED=""
+            sleep 15
+          done
+          if [ -z "$RID" ]; then
+            echo "::error title=Stale run list::gh run list kept returning update-warehouse runs older than $FLOOR after 5 attempts"
+            exit 1
+          fi
+          echo "picked update-warehouse run $RID (created $CREATED)"
           echo "RUN_ID=$RID" >> $GITHUB_ENV
 
       - name: Download warehouse artifact
