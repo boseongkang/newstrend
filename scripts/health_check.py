@@ -13,10 +13,15 @@ import os
 import re
 import sys
 
-# 1 (STEP 4, 2026-08-05): the local launchd pushes a same-day partial file
-# every run, so gap>1 already means "no push for a full day". At 2 the four
-# stale-CRITICAL incidents were each detected ~a day late.
-STALE_DAYS = 1
+# 3 (2026-08-08): sentiment lags D-2 BY DESIGN since the 2026-08-05 clamp
+# (news_archive stores only complete days ≤ D-2; same-day partial files are
+# no longer produced). Healthy steady state is therefore gap=2, and gap=3 is
+# normal early in day D before that day's archive→local-score→push cycle
+# completes (local slots: 09/13/18/22 PT). gap>3 means the local runner
+# missed all 4 slots for over a day — the real incident case. The previous
+# value (1) assumed the pre-clamp same-day partial pushes and turned the
+# gate permanently RED from 2026-08-07 on.
+STALE_DAYS = 3
 SENTIMENT_DIR = "data/sentiment_per_day"
 PAT = re.compile(r"sentiment_(\d{4}-\d{2}-\d{2})\.json$")
 
@@ -46,8 +51,9 @@ def main() -> int:
     if gap > STALE_DAYS:
         print(
             f"::error title=Sentiment stale::sentiment_per_day latest={latest} "
-            f"is {gap}d behind today ({today}) — local FinBERT launchd has not "
-            f"pushed in >{STALE_DAYS}d. Check ~/Library/Logs/newstrend-finbert.log "
+            f"is {gap}d behind today ({today}); with the D-2 design anything "
+            f">{STALE_DAYS}d means the local FinBERT launchd has missed a full "
+            f"day. Check ~/Library/Logs/newstrend-finbert.log "
             f"or run: launchctl kickstart -k gui/$(id -u)/com.newstrend.finbert"
         )
         return 1

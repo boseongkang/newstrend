@@ -91,6 +91,21 @@ jobs:
           fi
           test -d data/warehouse/daily
           ls -lt data/warehouse/daily | head -n 8 || true
+          # Stale-artifact guard (2026-08-08, run 31234965503): the RID query
+          # transiently returned a 4-day-old update-warehouse run, so the
+          # restored warehouse topped out at D-4 and the news-preserve step
+          # silently archived nothing ("New files: 0") — starving the local
+          # FinBERT runner. The warehouse file for day D grows through D+1,
+          # so a fresh artifact always contains at least D-2. Fail loud here
+          # instead of poisoning every downstream step with stale data.
+          NEWEST=$(ls data/warehouse/daily/*.jsonl 2>/dev/null \
+            | sed -E 's#.*/([0-9]{4}-[0-9]{2}-[0-9]{2})\.jsonl#\1#' \
+            | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' | sort | tail -n1)
+          FLOOR=$(date -u -d "2 days ago" +%Y-%m-%d)
+          if [ -z "$NEWEST" ] || [ "$NEWEST" \< "$FLOOR" ]; then
+            echo "::error title=Stale warehouse artifact::newest daily file is '${NEWEST:-none}' but expected >= $FLOOR — RUN_ID=$RUN_ID resolved to a stale update-warehouse run. Re-run this workflow."
+            exit 1
+          fi
 
       - name: Preserve raw news to data-cache
         run: |
