@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-09T15:02:27+00:00",
+  "generated_at": "2026-08-09T15:57:20+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-09T15:01:23Z",
+    "signal_corr_updated": "2026-08-09T15:56:13Z",
     "n_pairs_total": 4032,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,13 +21,105 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
+    "peace": 1.655,
     "class": 2.535,
     "required": 2.217,
-    "something": 2.02,
-    "british": 1.607,
-    "investigating": 2.502
+    "things": 1.648,
+    "something": 2.555,
+    "british": 1.799
   },
   "stock_chains": [
+    {
+      "term": "peace",
+      "is_active_today": true,
+      "today_z": 1.655,
+      "hop1": {
+        "ticker": "PYPL",
+        "sector": "07 Trade & Services",
+        "entity": "PayPal Holdings, Inc.",
+        "corr": 0.3178,
+        "lag": -3,
+        "hit_rate": 0.8,
+        "direction": "bull",
+        "avg_ret_1d": 1.351,
+        "confidence": 0.51
+      },
+      "hop2": []
+    },
+    {
+      "term": "peace",
+      "is_active_today": true,
+      "today_z": 1.655,
+      "hop1": {
+        "ticker": "CRWD",
+        "sector": "06 Technology",
+        "entity": "CrowdStrike Holdings, Inc.",
+        "corr": -0.3472,
+        "lag": -2,
+        "hit_rate": 0.7,
+        "direction": "bear",
+        "avg_ret_1d": 0.057,
+        "confidence": 0.466
+      },
+      "hop2": []
+    },
+    {
+      "term": "peace",
+      "is_active_today": true,
+      "today_z": 1.655,
+      "hop1": {
+        "ticker": "DDOG",
+        "sector": "06 Technology",
+        "entity": "Datadog, Inc.",
+        "corr": -0.3219,
+        "lag": -2,
+        "hit_rate": 0.6,
+        "direction": "bear",
+        "avg_ret_1d": -0.008,
+        "confidence": 0.403
+      },
+      "hop2": [
+        {
+          "ticker": "PANW",
+          "ticker_corr": 0.524,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Palo Alto Networks Inc"
+        },
+        {
+          "ticker": "MDB",
+          "ticker_corr": 0.502,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "MongoDB, Inc."
+        }
+      ]
+    },
+    {
+      "term": "peace",
+      "is_active_today": true,
+      "today_z": 1.655,
+      "hop1": {
+        "ticker": "FTNT",
+        "sector": "06 Technology",
+        "entity": "Fortinet, Inc.",
+        "corr": -0.3175,
+        "lag": -2,
+        "hit_rate": 0.6,
+        "direction": "bear",
+        "avg_ret_1d": 0.625,
+        "confidence": 0.401
+      },
+      "hop2": [
+        {
+          "ticker": "PANW",
+          "ticker_corr": 0.619,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Palo Alto Networks Inc"
+        }
+      ]
+    },
     {
       "term": "gold",
       "is_active_today": false,
@@ -1092,23 +1184,6 @@
       "hop2": []
     },
     {
-      "term": "peace",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PYPL",
-        "sector": "07 Trade & Services",
-        "entity": "PayPal Holdings, Inc.",
-        "corr": 0.3178,
-        "lag": -3,
-        "hit_rate": 0.8,
-        "direction": "bull",
-        "avg_ret_1d": 1.351,
-        "confidence": 0.51
-      },
-      "hop2": []
-    },
-    {
       "term": "friday",
       "is_active_today": false,
       "today_z": null,
@@ -1737,23 +1812,6 @@
           "entity": "GOLDMAN SACHS GROUP INC"
         }
       ]
-    },
-    {
-      "term": "peace",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CRWD",
-        "sector": "06 Technology",
-        "entity": "CrowdStrike Holdings, Inc.",
-        "corr": -0.3472,
-        "lag": -2,
-        "hit_rate": 0.7,
-        "direction": "bear",
-        "avg_ret_1d": 0.057,
-        "confidence": 0.466
-      },
-      "hop2": []
     },
     {
       "term": "models",
@@ -4352,38 +4410,6 @@
       "hop2": []
     },
     {
-      "term": "peace",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "DDOG",
-        "sector": "06 Technology",
-        "entity": "Datadog, Inc.",
-        "corr": -0.3219,
-        "lag": -2,
-        "hit_rate": 0.6,
-        "direction": "bear",
-        "avg_ret_1d": -0.008,
-        "confidence": 0.403
-      },
-      "hop2": [
-        {
-          "ticker": "PANW",
-          "ticker_corr": 0.524,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Palo Alto Networks Inc"
-        },
-        {
-          "ticker": "MDB",
-          "ticker_corr": 0.502,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "MongoDB, Inc."
-        }
-      ]
-    },
-    {
       "term": "reported",
       "is_active_today": false,
       "today_z": null,
@@ -4492,31 +4518,6 @@
           "implied_dir": "bear",
           "sector": "03 Life Sciences",
           "entity": "AMGEN INC"
-        }
-      ]
-    },
-    {
-      "term": "peace",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "FTNT",
-        "sector": "06 Technology",
-        "entity": "Fortinet, Inc.",
-        "corr": -0.3175,
-        "lag": -2,
-        "hit_rate": 0.6,
-        "direction": "bear",
-        "avg_ret_1d": 0.625,
-        "confidence": 0.401
-      },
-      "hop2": [
-        {
-          "ticker": "PANW",
-          "ticker_corr": 0.619,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Palo Alto Networks Inc"
         }
       ]
     },
@@ -8739,7 +8740,101 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "PANW",
+      "sector": "06 Technology",
+      "entity": "Palo Alto Networks Inc",
+      "fund_score": 0.361,
+      "inbound": [
+        {
+          "term": "peace",
+          "via": "DDOG",
+          "direction": "bear",
+          "today_z": 1.655,
+          "indirect": true
+        },
+        {
+          "term": "peace",
+          "via": "FTNT",
+          "direction": "bear",
+          "today_z": 1.655,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "PYPL",
+      "sector": "07 Trade & Services",
+      "entity": "PayPal Holdings, Inc.",
+      "fund_score": 0.475,
+      "inbound": [
+        {
+          "term": "peace",
+          "direction": "bull",
+          "today_z": 1.655,
+          "hit_rate": 0.8
+        }
+      ]
+    },
+    {
+      "ticker": "CRWD",
+      "sector": "06 Technology",
+      "entity": "CrowdStrike Holdings, Inc.",
+      "fund_score": 0.26,
+      "inbound": [
+        {
+          "term": "peace",
+          "direction": "bear",
+          "today_z": 1.655,
+          "hit_rate": 0.7
+        }
+      ]
+    },
+    {
+      "ticker": "DDOG",
+      "sector": "06 Technology",
+      "entity": "Datadog, Inc.",
+      "fund_score": 0.44,
+      "inbound": [
+        {
+          "term": "peace",
+          "direction": "bear",
+          "today_z": 1.655,
+          "hit_rate": 0.6
+        }
+      ]
+    },
+    {
+      "ticker": "FTNT",
+      "sector": "06 Technology",
+      "entity": "Fortinet, Inc.",
+      "fund_score": 0.651,
+      "inbound": [
+        {
+          "term": "peace",
+          "direction": "bear",
+          "today_z": 1.655,
+          "hit_rate": 0.6
+        }
+      ]
+    },
+    {
+      "ticker": "MDB",
+      "sector": "06 Technology",
+      "entity": "MongoDB, Inc.",
+      "fund_score": 0.285,
+      "inbound": [
+        {
+          "term": "peace",
+          "via": "DDOG",
+          "direction": "bear",
+          "today_z": 1.655,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 235,
