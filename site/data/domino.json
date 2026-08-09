@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-09T17:58:27+00:00",
+  "generated_at": "2026-08-09T19:12:14+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-09T17:57:18Z",
+    "signal_corr_updated": "2026-08-09T19:11:06Z",
     "n_pairs_total": 4032,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,25 +21,27 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "sunday": 1.615,
-    "peace": 2.836,
-    "point": 1.845,
-    "board": 1.978,
-    "class": 4.292,
-    "gaza": 1.968,
+    "plan": 1.732,
+    "sunday": 1.818,
+    "peace": 3.19,
+    "point": 2.23,
+    "board": 2.218,
+    "class": 4.644,
+    "gaza": 2.481,
     "required": 2.217,
-    "things": 1.745,
-    "something": 2.341,
-    "david": 1.651,
-    "british": 2.892,
-    "upcoming": 1.584,
-    "investigating": 4.747
+    "things": 1.842,
+    "something": 2.448,
+    "david": 1.968,
+    "british": 3.277,
+    "regional": 1.622,
+    "upcoming": 1.97,
+    "investigating": 5.196
   },
   "stock_chains": [
     {
       "term": "peace",
       "is_active_today": true,
-      "today_z": 2.836,
+      "today_z": 3.19,
       "hop1": {
         "ticker": "PYPL",
         "sector": "07 Trade & Services",
@@ -56,7 +58,7 @@
     {
       "term": "peace",
       "is_active_today": true,
-      "today_z": 2.836,
+      "today_z": 3.19,
       "hop1": {
         "ticker": "CRWD",
         "sector": "06 Technology",
@@ -71,9 +73,55 @@
       "hop2": []
     },
     {
+      "term": "plan",
+      "is_active_today": true,
+      "today_z": 1.732,
+      "hop1": {
+        "ticker": "PAYX",
+        "sector": "07 Trade & Services",
+        "entity": "PAYCHEX INC",
+        "corr": -0.3071,
+        "lag": -2,
+        "hit_rate": 0.647,
+        "direction": "bear",
+        "avg_ret_1d": 0.246,
+        "confidence": 0.464
+      },
+      "hop2": [
+        {
+          "ticker": "ADP",
+          "ticker_corr": 0.856,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "AUTOMATIC DATA PROCESSING INC"
+        },
+        {
+          "ticker": "ADBE",
+          "ticker_corr": 0.571,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "ADOBE INC."
+        },
+        {
+          "ticker": "CRM",
+          "ticker_corr": 0.555,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Salesforce, Inc."
+        },
+        {
+          "ticker": "DOCU",
+          "ticker_corr": 0.511,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "DOCUSIGN, INC."
+        }
+      ]
+    },
+    {
       "term": "peace",
       "is_active_today": true,
-      "today_z": 2.836,
+      "today_z": 3.19,
       "hop1": {
         "ticker": "DDOG",
         "sector": "06 Technology",
@@ -105,7 +153,7 @@
     {
       "term": "peace",
       "is_active_today": true,
-      "today_z": 2.836,
+      "today_z": 3.19,
       "hop1": {
         "ticker": "FTNT",
         "sector": "06 Technology",
@@ -1923,52 +1971,6 @@
           "implied_dir": "bull",
           "sector": null,
           "entity": null
-        }
-      ]
-    },
-    {
-      "term": "plan",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PAYX",
-        "sector": "07 Trade & Services",
-        "entity": "PAYCHEX INC",
-        "corr": -0.3071,
-        "lag": -2,
-        "hit_rate": 0.647,
-        "direction": "bear",
-        "avg_ret_1d": 0.246,
-        "confidence": 0.464
-      },
-      "hop2": [
-        {
-          "ticker": "ADP",
-          "ticker_corr": 0.856,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "AUTOMATIC DATA PROCESSING INC"
-        },
-        {
-          "ticker": "ADBE",
-          "ticker_corr": 0.571,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "ADOBE INC."
-        },
-        {
-          "ticker": "CRM",
-          "ticker_corr": 0.555,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Salesforce, Inc."
-        },
-        {
-          "ticker": "DOCU",
-          "ticker_corr": 0.511,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "DOCUSIGN, INC."
         }
       ]
     },
@@ -8758,14 +8760,14 @@
           "term": "peace",
           "via": "DDOG",
           "direction": "bear",
-          "today_z": 2.836,
+          "today_z": 3.19,
           "indirect": true
         },
         {
           "term": "peace",
           "via": "FTNT",
           "direction": "bear",
-          "today_z": 2.836,
+          "today_z": 3.19,
           "indirect": true
         }
       ]
@@ -8779,7 +8781,7 @@
         {
           "term": "peace",
           "direction": "bull",
-          "today_z": 2.836,
+          "today_z": 3.19,
           "hit_rate": 0.8
         }
       ]
@@ -8793,8 +8795,22 @@
         {
           "term": "peace",
           "direction": "bear",
-          "today_z": 2.836,
+          "today_z": 3.19,
           "hit_rate": 0.7
+        }
+      ]
+    },
+    {
+      "ticker": "PAYX",
+      "sector": "07 Trade & Services",
+      "entity": "PAYCHEX INC",
+      "fund_score": 0.488,
+      "inbound": [
+        {
+          "term": "plan",
+          "direction": "bear",
+          "today_z": 1.732,
+          "hit_rate": 0.647
         }
       ]
     },
@@ -8807,7 +8823,7 @@
         {
           "term": "peace",
           "direction": "bear",
-          "today_z": 2.836,
+          "today_z": 3.19,
           "hit_rate": 0.6
         }
       ]
@@ -8821,8 +8837,68 @@
         {
           "term": "peace",
           "direction": "bear",
-          "today_z": 2.836,
+          "today_z": 3.19,
           "hit_rate": 0.6
+        }
+      ]
+    },
+    {
+      "ticker": "ADP",
+      "sector": "06 Technology",
+      "entity": "AUTOMATIC DATA PROCESSING INC",
+      "fund_score": 0.439,
+      "inbound": [
+        {
+          "term": "plan",
+          "via": "PAYX",
+          "direction": "bear",
+          "today_z": 1.732,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ADBE",
+      "sector": "06 Technology",
+      "entity": "ADOBE INC.",
+      "fund_score": 0.581,
+      "inbound": [
+        {
+          "term": "plan",
+          "via": "PAYX",
+          "direction": "bear",
+          "today_z": 1.732,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "CRM",
+      "sector": "06 Technology",
+      "entity": "Salesforce, Inc.",
+      "fund_score": 0.497,
+      "inbound": [
+        {
+          "term": "plan",
+          "via": "PAYX",
+          "direction": "bear",
+          "today_z": 1.732,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "DOCU",
+      "sector": "06 Technology",
+      "entity": "DOCUSIGN, INC.",
+      "fund_score": 0.271,
+      "inbound": [
+        {
+          "term": "plan",
+          "via": "PAYX",
+          "direction": "bear",
+          "today_z": 1.732,
+          "indirect": true
         }
       ]
     },
@@ -8836,7 +8912,7 @@
           "term": "peace",
           "via": "DDOG",
           "direction": "bear",
-          "today_z": 2.836,
+          "today_z": 3.19,
           "indirect": true
         }
       ]
