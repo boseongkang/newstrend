@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-12T15:30:22+00:00",
+  "generated_at": "2026-08-12T17:23:40+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-12T15:29:11Z",
+    "signal_corr_updated": "2026-08-12T17:22:24Z",
     "n_pairs_total": 4135,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,30 +21,56 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "europe": 1.713,
-    "rise": 1.675,
+    "support": 1.912,
+    "inflation": 1.902,
+    "europe": 2.003,
+    "rising": 1.548,
     "democrats": 2.419,
-    "hong": 4.033,
-    "february": 6.44,
-    "campaign": 2.026,
-    "democratic": 2.444,
-    "powered": 2.183,
-    "speed": 2.88,
-    "content": 2.068,
-    "john": 1.883,
-    "generated": 8.445,
-    "republican": 2.766,
-    "lost": 1.559,
-    "primary": 4.483,
-    "nato": 2.166,
-    "summit": 2.568,
-    "trillion": 2.519
+    "hong": 3.843,
+    "february": 7.269,
+    "campaign": 2.206,
+    "democratic": 2.369,
+    "powered": 2.663,
+    "announces": 1.56,
+    "mark": 1.589,
+    "speed": 3.188,
+    "content": 1.961,
+    "john": 1.964,
+    "generated": 7.391,
+    "lawsuit": 1.612,
+    "republican": 2.65,
+    "korea": 1.654,
+    "london": 1.569,
+    "lost": 1.837,
+    "outlook": 1.877,
+    "primary": 4.736,
+    "nato": 3.545,
+    "summit": 4.194,
+    "trillion": 2.667,
+    "spent": 2.127
   },
   "stock_chains": [
     {
+      "term": "inflation",
+      "is_active_today": true,
+      "today_z": 1.902,
+      "hop1": {
+        "ticker": "CRWD",
+        "sector": "06 Technology",
+        "entity": "CrowdStrike Holdings, Inc.",
+        "corr": 0.3064,
+        "lag": -4,
+        "hit_rate": 0.833,
+        "direction": "bull",
+        "avg_ret_1d": 1.45,
+        "confidence": 0.537
+      },
+      "hop2": []
+    },
+    {
       "term": "europe",
       "is_active_today": true,
-      "today_z": 1.713,
+      "today_z": 2.003,
       "hop1": {
         "ticker": "ON",
         "sector": "04 Manufacturing",
@@ -95,9 +121,62 @@
       ]
     },
     {
+      "term": "rising",
+      "is_active_today": true,
+      "today_z": 1.548,
+      "hop1": {
+        "ticker": "BAC",
+        "sector": "02 Finance",
+        "entity": "BANK OF AMERICA CORP /DE/",
+        "corr": -0.3663,
+        "lag": -5,
+        "hit_rate": 0.75,
+        "direction": "bear",
+        "avg_ret_1d": 0.103,
+        "confidence": 0.513
+      },
+      "hop2": [
+        {
+          "ticker": "JPM",
+          "ticker_corr": 0.798,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "JPMORGAN CHASE & CO"
+        },
+        {
+          "ticker": "MS",
+          "ticker_corr": 0.765,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "MORGAN STANLEY"
+        },
+        {
+          "ticker": "GS",
+          "ticker_corr": 0.689,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "GOLDMAN SACHS GROUP INC"
+        },
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.686,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "IWM",
+          "ticker_corr": 0.634,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        }
+      ]
+    },
+    {
       "term": "europe",
       "is_active_today": true,
-      "today_z": 1.713,
+      "today_z": 2.003,
       "hop1": {
         "ticker": "ARM",
         "sector": "04 Manufacturing",
@@ -148,6 +227,31 @@
       ]
     },
     {
+      "term": "rising",
+      "is_active_today": true,
+      "today_z": 1.548,
+      "hop1": {
+        "ticker": "SEDG",
+        "sector": "04 Manufacturing",
+        "entity": "SOLAREDGE TECHNOLOGIES, INC.",
+        "corr": 0.3353,
+        "lag": -5,
+        "hit_rate": 0.583,
+        "direction": "bull",
+        "avg_ret_1d": 1.837,
+        "confidence": 0.411
+      },
+      "hop2": [
+        {
+          "ticker": "ENPH",
+          "ticker_corr": 0.725,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "Enphase Energy, Inc."
+        }
+      ]
+    },
+    {
       "term": "democrats",
       "is_active_today": true,
       "today_z": 2.419,
@@ -165,9 +269,72 @@
       "hop2": []
     },
     {
+      "term": "inflation",
+      "is_active_today": true,
+      "today_z": 1.902,
+      "hop1": {
+        "ticker": "PAYX",
+        "sector": "07 Trade & Services",
+        "entity": "PAYCHEX INC",
+        "corr": 0.3019,
+        "lag": -4,
+        "hit_rate": 0.583,
+        "direction": "bull",
+        "avg_ret_1d": 0.23,
+        "confidence": 0.399
+      },
+      "hop2": [
+        {
+          "ticker": "ADP",
+          "ticker_corr": 0.856,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "AUTOMATIC DATA PROCESSING INC"
+        },
+        {
+          "ticker": "ADBE",
+          "ticker_corr": 0.572,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "ADOBE INC."
+        },
+        {
+          "ticker": "CRM",
+          "ticker_corr": 0.556,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "Salesforce, Inc."
+        },
+        {
+          "ticker": "DOCU",
+          "ticker_corr": 0.512,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "DOCUSIGN, INC."
+        }
+      ]
+    },
+    {
+      "term": "rising",
+      "is_active_today": true,
+      "today_z": 1.548,
+      "hop1": {
+        "ticker": "FSLR",
+        "sector": "04 Manufacturing",
+        "entity": "FIRST SOLAR, INC.",
+        "corr": 0.3693,
+        "lag": -5,
+        "hit_rate": 0.5,
+        "direction": "bull",
+        "avg_ret_1d": -0.132,
+        "confidence": 0.378
+      },
+      "hop2": []
+    },
+    {
       "term": "europe",
       "is_active_today": true,
-      "today_z": 1.713,
+      "today_z": 2.003,
       "hop1": {
         "ticker": "ADI",
         "sector": "04 Manufacturing",
@@ -220,7 +387,7 @@
     {
       "term": "europe",
       "is_active_today": true,
-      "today_z": 1.713,
+      "today_z": 2.003,
       "hop1": {
         "ticker": "CRWD",
         "sector": "06 Technology",
@@ -231,6 +398,23 @@
         "direction": "bear",
         "avg_ret_1d": -0.022,
         "confidence": 0.363
+      },
+      "hop2": []
+    },
+    {
+      "term": "rising",
+      "is_active_today": true,
+      "today_z": 1.548,
+      "hop1": {
+        "ticker": "PYPL",
+        "sector": "07 Trade & Services",
+        "entity": "PayPal Holdings, Inc.",
+        "corr": -0.3092,
+        "lag": -3,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": -0.06,
+        "confidence": 0.357
       },
       "hop2": []
     },
@@ -644,23 +828,6 @@
       "hop2": []
     },
     {
-      "term": "inflation",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CRWD",
-        "sector": "06 Technology",
-        "entity": "CrowdStrike Holdings, Inc.",
-        "corr": 0.3064,
-        "lag": -4,
-        "hit_rate": 0.833,
-        "direction": "bull",
-        "avg_ret_1d": 1.45,
-        "confidence": 0.537
-      },
-      "hop2": []
-    },
-    {
       "term": "trading",
       "is_active_today": false,
       "today_z": null,
@@ -952,59 +1119,6 @@
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "Salesforce, Inc."
-        }
-      ]
-    },
-    {
-      "term": "rising",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "BAC",
-        "sector": "02 Finance",
-        "entity": "BANK OF AMERICA CORP /DE/",
-        "corr": -0.3663,
-        "lag": -5,
-        "hit_rate": 0.75,
-        "direction": "bear",
-        "avg_ret_1d": 0.103,
-        "confidence": 0.513
-      },
-      "hop2": [
-        {
-          "ticker": "JPM",
-          "ticker_corr": 0.798,
-          "implied_dir": "bear",
-          "sector": "02 Finance",
-          "entity": "JPMORGAN CHASE & CO"
-        },
-        {
-          "ticker": "MS",
-          "ticker_corr": 0.765,
-          "implied_dir": "bear",
-          "sector": "02 Finance",
-          "entity": "MORGAN STANLEY"
-        },
-        {
-          "ticker": "GS",
-          "ticker_corr": 0.689,
-          "implied_dir": "bear",
-          "sector": "02 Finance",
-          "entity": "GOLDMAN SACHS GROUP INC"
-        },
-        {
-          "ticker": "DIA",
-          "ticker_corr": 0.686,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "IWM",
-          "ticker_corr": 0.634,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
         }
       ]
     },
@@ -3660,31 +3774,6 @@
       "hop2": []
     },
     {
-      "term": "rising",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "SEDG",
-        "sector": "04 Manufacturing",
-        "entity": "SOLAREDGE TECHNOLOGIES, INC.",
-        "corr": 0.3353,
-        "lag": -5,
-        "hit_rate": 0.583,
-        "direction": "bull",
-        "avg_ret_1d": 1.837,
-        "confidence": 0.411
-      },
-      "hop2": [
-        {
-          "ticker": "ENPH",
-          "ticker_corr": 0.725,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "Enphase Energy, Inc."
-        }
-      ]
-    },
-    {
       "term": "concerns",
       "is_active_today": false,
       "today_z": null,
@@ -4266,52 +4355,6 @@
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "Palo Alto Networks Inc"
-        }
-      ]
-    },
-    {
-      "term": "inflation",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PAYX",
-        "sector": "07 Trade & Services",
-        "entity": "PAYCHEX INC",
-        "corr": 0.3019,
-        "lag": -4,
-        "hit_rate": 0.583,
-        "direction": "bull",
-        "avg_ret_1d": 0.23,
-        "confidence": 0.399
-      },
-      "hop2": [
-        {
-          "ticker": "ADP",
-          "ticker_corr": 0.856,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "AUTOMATIC DATA PROCESSING INC"
-        },
-        {
-          "ticker": "ADBE",
-          "ticker_corr": 0.572,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "ADOBE INC."
-        },
-        {
-          "ticker": "CRM",
-          "ticker_corr": 0.556,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "Salesforce, Inc."
-        },
-        {
-          "ticker": "DOCU",
-          "ticker_corr": 0.512,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "DOCUSIGN, INC."
         }
       ]
     },
@@ -5019,23 +5062,6 @@
           "entity": "Enphase Energy, Inc."
         }
       ]
-    },
-    {
-      "term": "rising",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "FSLR",
-        "sector": "04 Manufacturing",
-        "entity": "FIRST SOLAR, INC.",
-        "corr": 0.3693,
-        "lag": -5,
-        "hit_rate": 0.5,
-        "direction": "bull",
-        "avg_ret_1d": -0.132,
-        "confidence": 0.378
-      },
-      "hop2": []
     },
     {
       "term": "april",
@@ -6263,23 +6289,6 @@
         "direction": "bull",
         "avg_ret_1d": -0.208,
         "confidence": 0.358
-      },
-      "hop2": []
-    },
-    {
-      "term": "rising",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PYPL",
-        "sector": "07 Trade & Services",
-        "entity": "PayPal Holdings, Inc.",
-        "corr": -0.3092,
-        "lag": -3,
-        "hit_rate": 0.5,
-        "direction": "bear",
-        "avg_ret_1d": -0.06,
-        "confidence": 0.357
       },
       "hop2": []
     },
@@ -8012,22 +8021,42 @@
           "term": "europe",
           "via": "ON",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "indirect": true
         },
         {
           "term": "europe",
           "via": "ARM",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "indirect": true
         },
         {
           "term": "europe",
           "via": "ADI",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "CRWD",
+      "sector": "06 Technology",
+      "entity": "CrowdStrike Holdings, Inc.",
+      "fund_score": 0.26,
+      "inbound": [
+        {
+          "term": "inflation",
+          "direction": "bull",
+          "today_z": 1.902,
+          "hit_rate": 0.833
+        },
+        {
+          "term": "europe",
+          "direction": "bear",
+          "today_z": 2.003,
+          "hit_rate": 0.571
         }
       ]
     },
@@ -8040,14 +8069,14 @@
         {
           "term": "europe",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "hit_rate": 0.857
         },
         {
           "term": "europe",
           "via": "ADI",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "indirect": true
         }
       ]
@@ -8061,14 +8090,14 @@
         {
           "term": "europe",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "hit_rate": 0.571
         },
         {
           "term": "europe",
           "via": "ON",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "indirect": true
         }
       ]
@@ -8083,14 +8112,14 @@
           "term": "europe",
           "via": "ON",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "indirect": true
         },
         {
           "term": "europe",
           "via": "ADI",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "indirect": true
         }
       ]
@@ -8105,14 +8134,14 @@
           "term": "europe",
           "via": "ON",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "indirect": true
         },
         {
           "term": "europe",
           "via": "ADI",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "indirect": true
         }
       ]
@@ -8127,15 +8156,29 @@
           "term": "europe",
           "via": "ON",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "indirect": true
         },
         {
           "term": "europe",
           "via": "ADI",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "BAC",
+      "sector": "02 Finance",
+      "entity": "BANK OF AMERICA CORP /DE/",
+      "fund_score": 0.349,
+      "inbound": [
+        {
+          "term": "rising",
+          "direction": "bear",
+          "today_z": 1.548,
+          "hit_rate": 0.75
         }
       ]
     },
@@ -8148,8 +8191,22 @@
         {
           "term": "europe",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "hit_rate": 0.714
+        }
+      ]
+    },
+    {
+      "ticker": "SEDG",
+      "sector": "04 Manufacturing",
+      "entity": "SOLAREDGE TECHNOLOGIES, INC.",
+      "fund_score": 0.168,
+      "inbound": [
+        {
+          "term": "rising",
+          "direction": "bull",
+          "today_z": 1.548,
+          "hit_rate": 0.583
         }
       ]
     },
@@ -8168,16 +8225,119 @@
       ]
     },
     {
-      "ticker": "CRWD",
-      "sector": "06 Technology",
-      "entity": "CrowdStrike Holdings, Inc.",
-      "fund_score": 0.26,
+      "ticker": "PAYX",
+      "sector": "07 Trade & Services",
+      "entity": "PAYCHEX INC",
+      "fund_score": 0.488,
       "inbound": [
         {
-          "term": "europe",
+          "term": "inflation",
+          "direction": "bull",
+          "today_z": 1.902,
+          "hit_rate": 0.583
+        }
+      ]
+    },
+    {
+      "ticker": "FSLR",
+      "sector": "04 Manufacturing",
+      "entity": "FIRST SOLAR, INC.",
+      "fund_score": 0.682,
+      "inbound": [
+        {
+          "term": "rising",
+          "direction": "bull",
+          "today_z": 1.548,
+          "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "PYPL",
+      "sector": "07 Trade & Services",
+      "entity": "PayPal Holdings, Inc.",
+      "fund_score": 0.475,
+      "inbound": [
+        {
+          "term": "rising",
           "direction": "bear",
-          "today_z": 1.713,
-          "hit_rate": 0.571
+          "today_z": 1.548,
+          "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "sector": "02 Finance",
+      "entity": "JPMORGAN CHASE & CO",
+      "fund_score": 0.475,
+      "inbound": [
+        {
+          "term": "rising",
+          "via": "BAC",
+          "direction": "bear",
+          "today_z": 1.548,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MS",
+      "sector": "02 Finance",
+      "entity": "MORGAN STANLEY",
+      "fund_score": 0.422,
+      "inbound": [
+        {
+          "term": "rising",
+          "via": "BAC",
+          "direction": "bear",
+          "today_z": 1.548,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "GS",
+      "sector": "02 Finance",
+      "entity": "GOLDMAN SACHS GROUP INC",
+      "fund_score": 0.438,
+      "inbound": [
+        {
+          "term": "rising",
+          "via": "BAC",
+          "direction": "bear",
+          "today_z": 1.548,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "DIA",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "rising",
+          "via": "BAC",
+          "direction": "bear",
+          "today_z": 1.548,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "IWM",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "rising",
+          "via": "BAC",
+          "direction": "bear",
+          "today_z": 1.548,
+          "indirect": true
         }
       ]
     },
@@ -8191,7 +8351,7 @@
           "term": "europe",
           "via": "ARM",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "indirect": true
         }
       ]
@@ -8206,7 +8366,7 @@
           "term": "europe",
           "via": "ARM",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "indirect": true
         }
       ]
@@ -8221,7 +8381,7 @@
           "term": "europe",
           "via": "ARM",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
           "indirect": true
         }
       ]
@@ -8236,7 +8396,82 @@
           "term": "europe",
           "via": "ARM",
           "direction": "bull",
-          "today_z": 1.713,
+          "today_z": 2.003,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ENPH",
+      "sector": "04 Manufacturing",
+      "entity": "Enphase Energy, Inc.",
+      "fund_score": 0.349,
+      "inbound": [
+        {
+          "term": "rising",
+          "via": "SEDG",
+          "direction": "bull",
+          "today_z": 1.548,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ADP",
+      "sector": "06 Technology",
+      "entity": "AUTOMATIC DATA PROCESSING INC",
+      "fund_score": 0.439,
+      "inbound": [
+        {
+          "term": "inflation",
+          "via": "PAYX",
+          "direction": "bull",
+          "today_z": 1.902,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ADBE",
+      "sector": "06 Technology",
+      "entity": "ADOBE INC.",
+      "fund_score": 0.581,
+      "inbound": [
+        {
+          "term": "inflation",
+          "via": "PAYX",
+          "direction": "bull",
+          "today_z": 1.902,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "CRM",
+      "sector": "06 Technology",
+      "entity": "Salesforce, Inc.",
+      "fund_score": 0.497,
+      "inbound": [
+        {
+          "term": "inflation",
+          "via": "PAYX",
+          "direction": "bull",
+          "today_z": 1.902,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "DOCU",
+      "sector": "06 Technology",
+      "entity": "DOCUSIGN, INC.",
+      "fund_score": 0.271,
+      "inbound": [
+        {
+          "term": "inflation",
+          "via": "PAYX",
+          "direction": "bull",
+          "today_z": 1.902,
           "indirect": true
         }
       ]
