@@ -42,3 +42,35 @@ forward 데이터 오염이다. unfreeze 조건 충족 또는 명시적 재설�
   URL/id 기반 dedup 추가 — 단 이는 카운트 시계열의 레벨을 바꾸므로
   또 다른 불연속을 만든다. 추가하려면 도입일을 기록하고 trends 신뢰
   구간에 반영할 것.
+
+---
+
+# CI 인프라 이슈 (frozen 아님 — 수정 가능)
+
+## CI-1: GitHub API가 낡은 run 목록/아티팩트를 반환 (2026-08-08 최초 관측)
+
+- 증상: `gh run list` 및 dawidd6/action-download-artifact의 "latest
+  successful run" 선택이 간헐적으로 낡은 런을 반환한다. 관측 사례:
+  - 2026-08-08: trend-site의 `.[0]` 픽이 2시간 내에 4일 전 런
+    (31234965503)과 40일 전 런(31238330329)으로 두 번 해석됨.
+  - 2026-08-11: trend-site RED — 12h 신선도 하한을 5회 재시도에도
+    통과 못 함 (강화 로직이 설계대로 낡은 데이터 사용을 차단).
+  - 2026-08-12: archive-daily가 받은 "latest" warehouse 아티팩트에
+    daily/2026-08-10.jsonl이 없었고, live 폴백(98건 전부 08-11자)이
+    0건을 만들어 snap-2026-08-10 Release가 영구 누락됨
+    (2026-08-15 warehouse에서 수동 복구).
+- 수정 이력:
+  - trend-site: a79200443 (2026-08-08) — 클라이언트측 createdAt 정렬
+    + <12h 하한 + 5회 재시도 + 실패 시 명시적 RED.
+  - archive-daily: 2026-08-15 — 같은 로직 이식 + live 폴백 제거(RED로
+    전환) + workflow_dispatch `date` 입력(warehouse에서 특정 날짜를
+    꺼내 Release 생성/갱신하는 수동 복구 경로).
+- 잔여 노출 (같은 패턴, 미강화 — `grep -rn "dawidd6\|gh run list"
+  .github/workflows/`로 감사):
+  - `update-warehouse.yml` dawidd6 3곳: previous warehouse(낡은 픽이면
+    최근 며칠이 조용히 빠질 수 있음 — floor 체크는 대규모 소실만 잡음),
+    live-jsonl, rss-jsonl(낡은 픽이면 해당 시간대 기사 누락, 다음
+    회전에서 대체로 자가 회복).
+  - `entities.yml` dawidd6 1곳: warehouse 다운로드.
+  - 강화 필요성 판단 기준: 출력이 회전마다 재생성되면 자가 회복(낮은
+    우선순위), 하루 1회·append-only면 영구 누락(높은 우선순위).

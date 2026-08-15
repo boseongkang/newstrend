@@ -3,7 +3,12 @@ name: archive-daily
 on:
   schedule:
     - cron: "8 0 * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Archive this UTC date (YYYY-MM-DD) from the warehouse instead of D-2 — manual recovery path for a missed day"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -22,31 +27,68 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
       - id: when
         # D-2, not yesterday: with SHIFT_MINUTES=1440 day D's warehouse file
         # keeps growing through D+1, so D-1 is still incomplete at 00:08 UTC.
         # D-2 is the freshest COMPLETE day (same rule as trend-site archiving).
+        # A workflow_dispatch `date` input overrides D-2: this run archives
+        # only once per day, so a RED day is a permanent gap unless it can be
+        # replayed from the warehouse (e.g. 2026-08-10, lost on 2026-08-12).
         shell: bash
         run: |
-          if date -u -d "2 days ago" +%F >/dev/null 2>&1; then
+          set -euo pipefail
+          REQ="${{ inputs.date }}"
+          if [ -n "$REQ" ]; then
+            if ! [[ "$REQ" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+              echo "::error title=Bad date input::'$REQ' is not YYYY-MM-DD"
+              exit 1
+            fi
+            echo "date=$REQ" >> "$GITHUB_OUTPUT"
+          elif date -u -d "2 days ago" +%F >/dev/null 2>&1; then
             echo "date=$(date -u -d '2 days ago' +%F)" >> "$GITHUB_OUTPUT"
           else
             echo "date=$(date -u -v-2d +%F)" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Download latest warehouse artifact
-        id: dlwh
-        uses: dawidd6/action-download-artifact@v17
-        with:
-          workflow: update-warehouse.yml
-          workflow_conclusion: success
-          branch: main
-          path: artifacts
-          if_no_artifact_found: warn
+      - name: Get latest warehouse run id
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Same hardening as trend-site (a79200443): `gh run list`
+          # intermittently returns a stale list — on 2026-08-12 the "latest"
+          # warehouse artifact predated 2026-08-10, the old live fallback
+          # produced 0 articles, and the day was permanently lost. Sort by
+          # createdAt ourselves, require the pick to be <12h old
+          # (update-warehouse runs hourly), retry, fail loud.
+          FLOOR=$(date -u -d "12 hours ago" +%Y-%m-%dT%H:%M:%SZ)
+          RID="" CREATED=""
+          for i in 1 2 3 4 5; do
+            read -r RID CREATED < <(gh run list --workflow update-warehouse.yml \
+              --branch main --status success --limit 20 \
+              --json databaseId,createdAt \
+              --jq 'sort_by(.createdAt) | last | "\(.databaseId) \(.createdAt)"') || true
+            if [ -n "${RID:-}" ] && [ "$CREATED" \> "$FLOOR" ]; then
+              break
+            fi
+            echo "attempt $i: stale/empty run list (RID=${RID:-none} created=${CREATED:-none}, floor=$FLOOR) — retrying"
+            RID="" CREATED=""
+            sleep 15
+          done
+          if [ -z "$RID" ]; then
+            echo "::error title=Stale run list::gh run list kept returning update-warehouse runs older than $FLOOR after 5 attempts"
+            exit 1
+          fi
+          echo "picked update-warehouse run $RID (created $CREATED)"
+          echo "RUN_ID=$RID" >> $GITHUB_ENV
+
+      - name: Download warehouse artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          gh run download "$RUN_ID" -n warehouse -D artifacts
 
       - id: find
         shell: bash
@@ -54,64 +96,19 @@ jobs:
           set -euo pipefail
           D="${{ steps.when.outputs.date }}"
           mkdir -p out
-          FOUND=""
-          if [ -d artifacts ]; then
-            # upload-artifact strips the common parent (data/warehouse), and
-            # dawidd6 nests by artifact name, so the real layout is
-            # artifacts/warehouse/daily/D.jsonl — the old pattern
-            # "*/data/warehouse/daily/…" never matched, silently sending every
-            # release through the single-batch live fallback.
-            FOUND=$(find artifacts -type f -path "*/daily/${D}.jsonl" -print -quit || true)
+          if ls artifacts/*.zip >/dev/null 2>&1; then unzip -o artifacts/*.zip -d artifacts >/dev/null; fi
+          if [ -f artifacts/artifact.tar ]; then tar -xf artifacts/artifact.tar -C artifacts; fi
+          FOUND=$(find artifacts -type f -path "*daily/${D}.jsonl" -print -quit || true)
+          # No live fallback: a fresh (<12h) warehouse artifact missing day D
+          # means the day is genuinely absent upstream — the single latest
+          # live batch can't reconstruct it (98 articles, all off-date, on
+          # 2026-08-12), so a quiet fallback just publishes an empty/wrong
+          # snapshot. Fail RED and recover via workflow_dispatch date=D later.
+          if [ -z "$FOUND" ]; then
+            echo "::error title=Day missing from warehouse::daily/${D}.jsonl not in warehouse artifact of run $RUN_ID"
+            exit 1
           fi
-          if [ -n "$FOUND" ]; then
-            cp -v "$FOUND" "out/news_${D}.jsonl"
-            echo "from=warehouse" >> "$GITHUB_OUTPUT"
-            echo "path=out/news_${D}.jsonl" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Download latest live artifact (fallback)
-        if: ${{ steps.find.outputs.from != 'warehouse' }}
-        uses: dawidd6/action-download-artifact@v17
-        with:
-          workflow: collect_continuous.yml
-          workflow_conclusion: success
-          branch: main
-          path: live_art
-          if_no_artifact_found: warn
-
-      - name: Build daily from live (fallback)
-        if: ${{ steps.find.outputs.from != 'warehouse' }}
-        shell: bash
-        env:
-          D: ${{ steps.when.outputs.date }}
-        run: |
-          set -euo pipefail
-          mkdir -p out
-          python - << 'PY'
-          import json, os, glob
-          D = os.environ["D"]
-          out = f"out/news_{D}.jsonl"
-          cnt = skipped = 0
-          with open(out, "w", encoding="utf-8") as w:
-            for p in sorted(glob.glob("live_art/**/*.jsonl", recursive=True)):
-              with open(p, "r", encoding="utf-8") as r:
-                for line in r:
-                  if not line.strip():
-                    continue
-                  # keep only articles actually published on D — the latest
-                  # live batch spans other days (SHIFT window), and an
-                  # unfiltered dump mislabels them as day D
-                  try:
-                    if not str(json.loads(line).get("publishedAt", "")).startswith(D):
-                      skipped += 1
-                      continue
-                  except Exception:
-                    skipped += 1
-                    continue
-                  w.write(line)
-                  cnt += 1
-          print(f"written {cnt} lines for {D} (skipped {skipped} off-date/bad)")
-          PY
+          cp -v "$FOUND" "out/news_${D}.jsonl"
 
       - id: verify
         shell: bash
