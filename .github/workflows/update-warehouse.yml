@@ -10,6 +10,10 @@ on:
         description: "DANGER: proceed even when no previous warehouse artifact was restored (fresh start / deliberate reset)"
         type: boolean
         default: false
+      allow_stale_base:
+        description: "Accept a previous warehouse older than the freshness floor (recovery after a >4h outage/failure streak — loses up to (age−6h) of live articles)"
+        type: boolean
+        default: false
   schedule:
     - cron: "23 * * * *"
 
@@ -32,13 +36,65 @@ jobs:
           python -m pip install -U pip
           pip install -r requirements.txt
 
+      - name: Get previous warehouse run id
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Same stale-run-list hardening as trend-site a79200443 /
+          # archive-daily a9c99d6e3 (docs/ISSUES.md CI-1), but this pick is
+          # the highest-stakes one: the warehouse is cumulative state, and a
+          # stale base silently drops the days in between — then becomes the
+          # next run's base, fixating the loss (the <1000-line floor only
+          # catches wholesale resets, not a few missing days).
+          # Floor = 4h, not 12h: collect_continuous covers a 6h window
+          # (RECENT_MINUTES=360), so any base <~5h old has its gap fully
+          # re-merged from live files — zero permanent loss. Hourly cron
+          # gives ~4 fresh candidates inside the floor.
+          # Self-chain deadlock escape: after a >4h failure streak the newest
+          # success is necessarily stale — allow_stale_base=true accepts it
+          # deliberately instead of REDing forever.
+          FLOOR=$(date -u -d "4 hours ago" +%Y-%m-%dT%H:%M:%SZ)
+          RID="" CREATED="" BEST_RID="" BEST_CREATED=""
+          for i in 1 2 3 4 5; do
+            read -r RID CREATED < <(gh run list --workflow update-warehouse.yml \
+              --branch main --status success --limit 20 \
+              --json databaseId,createdAt \
+              --jq 'sort_by(.createdAt) | last | "\(.databaseId) \(.createdAt)"') || true
+            if [ -n "${RID:-}" ] && [ "$CREATED" \> "${BEST_CREATED:-}" ]; then
+              BEST_RID="$RID"; BEST_CREATED="$CREATED"
+            fi
+            if [ -n "${RID:-}" ] && [ "$CREATED" \> "$FLOOR" ]; then
+              break
+            fi
+            echo "attempt $i: stale/empty run list (RID=${RID:-none} created=${CREATED:-none}, floor=$FLOOR) — retrying"
+            RID="" CREATED=""
+            sleep 15
+          done
+          if [ -z "$RID" ]; then
+            if [ "${{ github.event.inputs.allow_stale_base }}" = "true" ] && [ -n "$BEST_RID" ]; then
+              echo "::warning::allow_stale_base=true — using stale previous run $BEST_RID (created $BEST_CREATED, floor $FLOOR)"
+              RID="$BEST_RID"; CREATED="$BEST_CREATED"
+            elif [ "${{ github.event.inputs.allow_empty_start }}" = "true" ] && [ -z "$BEST_RID" ]; then
+              echo "no previous successful run found — fresh start (allow_empty_start=true)"
+            else
+              echo "::error title=Stale run list::newest successful update-warehouse run is ${BEST_CREATED:-none} (< floor $FLOOR) after 5 attempts. Building on it would fixate a gap in the warehouse. If this follows a real outage, re-run with allow_stale_base=true."
+              exit 1
+            fi
+          fi
+          if [ -n "$RID" ]; then
+            echo "picked previous update-warehouse run $RID (created $CREATED)"
+          fi
+          echo "PREV_RUN_ID=${RID}" >> "$GITHUB_ENV"
+
       - name: Download previous warehouse artifact
-        uses: dawidd6/action-download-artifact@v17
-        with:
-          workflow: update-warehouse.yml
-          name: warehouse
-          path: prev_warehouse
-          if_no_artifact_found: ignore
+        if: ${{ env.PREV_RUN_ID != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p prev_warehouse
+          gh run download "$PREV_RUN_ID" -n warehouse -D prev_warehouse
 
       - name: Restore previous warehouse
         run: |
@@ -63,6 +119,22 @@ jobs:
           echo "PREV_DAILY_FILES=${PREV_DAILY_FILES}"   >> "$GITHUB_ENV"
           if [ "${PREV_MASTER_LINES}" -lt 1000 ] && [ "${{ github.event.inputs.allow_empty_start }}" != "true" ]; then
             echo "::error::warehouse floor check FAILED — restored master.jsonl has ${PREV_MASTER_LINES} lines (<1000). Previous artifact missing/expired/corrupt. Refusing to overwrite history; re-run with allow_empty_start=true only for a deliberate reset."
+            exit 1
+          fi
+          # Date-coverage guard: a correct RID pick can still hand us stale
+          # CONTENT (e.g. 2026-08-12: archive-daily's "latest" artifact was
+          # missing 2026-08-10 entirely). Line counts can't see that — an old
+          # warehouse has plenty of lines, just not the recent days. The
+          # newest daily file must be >= D-2 (daily files are created every
+          # calendar day incl. weekends; even a just-started UTC day has
+          # yesterday's file, so a healthy base is never older than D-1).
+          LATEST_DAILY=$(ls data/warehouse/daily 2>/dev/null \
+            | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}\.jsonl$' | sort | tail -1 | cut -d. -f1 || true)
+          D2=$(date -u -d "2 days ago" +%F)
+          echo "restored warehouse: latest daily=${LATEST_DAILY:-none} (guard floor: $D2)"
+          if [ -n "$LATEST_DAILY" ] && [ "$LATEST_DAILY" \< "$D2" ] \
+             && [ "${{ github.event.inputs.allow_stale_base }}" != "true" ]; then
+            echo "::error::warehouse date-coverage check FAILED — newest daily file is ${LATEST_DAILY}, older than D-2 (${D2}). Merging onto this base would fixate a multi-day gap. Re-run with allow_stale_base=true only for deliberate recovery."
             exit 1
           fi
 

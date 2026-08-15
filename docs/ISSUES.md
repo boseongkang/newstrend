@@ -65,12 +65,22 @@ forward 데이터 오염이다. unfreeze 조건 충족 또는 명시적 재설�
   - archive-daily: 2026-08-15 — 같은 로직 이식 + live 폴백 제거(RED로
     전환) + workflow_dispatch `date` 입력(warehouse에서 특정 날짜를
     꺼내 Release 생성/갱신하는 수동 복구 경로).
-- 잔여 노출 (같은 패턴, 미강화 — `grep -rn "dawidd6\|gh run list"
-  .github/workflows/`로 감사):
-  - `update-warehouse.yml` dawidd6 3곳: previous warehouse(낡은 픽이면
-    최근 며칠이 조용히 빠질 수 있음 — floor 체크는 대규모 소실만 잡음),
-    live-jsonl, rss-jsonl(낡은 픽이면 해당 시간대 기사 누락, 다음
-    회전에서 대체로 자가 회복).
-  - `entities.yml` dawidd6 1곳: warehouse 다운로드.
-  - 강화 필요성 판단 기준: 출력이 회전마다 재생성되면 자가 회복(낮은
-    우선순위), 하루 1회·append-only면 영구 누락(높은 우선순위).
+  - update-warehouse previous-warehouse 픽: 2026-08-15 — 같은 RID 로직
+    + 신선도 하한 4h(12h 아님: live 창이 6h(RECENT_MINUTES=360)라 base가
+    ~5h 이내면 공백이 live 병합으로 전부 재충전 → 영구 손실 0; 하한을
+    넘는 base는 손실이 다음 회전의 base로 고착됨) + 날짜 커버리지 가드
+    (복원된 warehouse의 최신 daily가 D-2보다 오래되면 RED — 줄 수 floor는
+    "오래된 대형 warehouse"를 통과시키므로 별도 필요) + 자기-체인 데드락
+    탈출구 `allow_stale_base` dispatch 입력(>4h 장애 후 최초 성공 런은
+    반드시 stale base라 RED 교착 — 의식적 수동 수용 경로).
+- 잔여 노출 — **감사 종결, 강화 안 함** (`grep -rn "dawidd6\|gh run list"
+  .github/workflows/`):
+  - `update-warehouse.yml` live-jsonl / rss-jsonl: 낡은 픽이면 그 회전에
+    해당 시간대 기사가 빠지지만, 수집 창 6h × 매시간 회전이라 다음
+    정상 픽에서 같은 기사가 다시 병합됨 — 자가 회복, 상태 비누적.
+  - `entities.yml` warehouse 픽: 읽기 전용 소비자(분석 출력 재생성).
+    낡은 base여도 다음 회전에서 전체 재계산 — 자가 회복.
+  - 판단 기준(기록용): 출력이 회전마다 전체 재생성되면 자가 회복 →
+    강화 불필요. 출력이 누적 상태(warehouse)거나 하루 1회 append-only
+    (Release 스냅샷)면 낡은 픽 = 영구 손실 → 강화 필수. 해당 두 경로는
+    모두 강화 완료.
