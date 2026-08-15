@@ -15799,10 +15799,30 @@
       "hash_ok": true,
       "ood": false,
       "unfreeze_ready": false
+    },
+    {
+      "updated": "2026-08-15T02:00:17Z",
+      "n_pred_total": 13140,
+      "n_evaluated": 12060,
+      "models": {
+        "RandomForest": {
+          "alpha": -0.398,
+          "p": 0.0,
+          "n": 6030
+        },
+        "GradientBoosting": {
+          "alpha": -0.542,
+          "p": 0.0,
+          "n": 6030
+        }
+      },
+      "hash_ok": true,
+      "ood": false,
+      "unfreeze_ready": false
     }
   ],
   "latest": {
-    "updated": "2026-08-14T23:48:20Z",
+    "updated": "2026-08-15T02:00:17Z",
     "baseline_date": "2026-05-25",
     "model_hashes": {
       "RandomForest": "a2947618dfbb05bd",
@@ -15814,10 +15834,10 @@
       "n_dates": 25
     },
     "prediction_log": {
-      "total": 12960,
+      "total": 13140,
       "evaluated": 12060,
-      "pending": 900,
-      "new_today": 0,
+      "pending": 1080,
+      "new_today": 180,
       "newly_evaluated": 0
     },
     "forward": {
@@ -15889,12 +15909,12 @@
       "confidence_note": "In-distribution: RISK-ON was 98.3% of training data."
     },
     "bias_monitor": {
-      "n_total_predictions": 12960,
+      "n_total_predictions": 13140,
       "n_evaluated": 12060,
-      "long_ratio": 0.856,
+      "long_ratio": 0.855,
       "long_bias_warning": true,
       "top_sector": "Technology",
-      "top_sector_pct": 40.5,
+      "top_sector_pct": 40.6,
       "sector_concentration_warning": false,
       "calibration": {
         "accuracy": 0.5163,
@@ -15905,7 +15925,7 @@
     },
     "alerts": [
       "REGIME CHANGE: non-RISK-ON data detected in forward predictions",
-      "BIAS: long_ratio=85.6% \u2014 model may be systematically long"
+      "BIAS: long_ratio=85.5% \u2014 model may be systematically long"
     ],
     "unfreeze_check": {
       "forward_alpha_significant": false,
@@ -15914,5 +15934,5 @@
     },
     "label": "ADVISORY ONLY \u00b7 paper trading \u00b7 unverified \u00b7 single-regime baseline"
   },
-  "updated": "2026-08-14T23:48:20Z"
+  "updated": "2026-08-15T02:00:17Z"
 }
