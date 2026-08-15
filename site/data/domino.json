@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-15T19:46:28+00:00",
+  "generated_at": "2026-08-15T20:49:18+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-15T19:45:19Z",
+    "signal_corr_updated": "2026-08-15T20:48:09Z",
     "n_pairs_total": 3966,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,29 +21,84 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "check": 2.222,
-    "women": 2.582,
+    "lebanon": 1.508,
+    "saturday": 1.595,
+    "check": 2.443,
+    "found": 1.51,
+    "women": 2.643,
     "soon": 1.996,
-    "sports": 2.486,
-    "additional": 1.699,
+    "sports": 2.13,
+    "known": 1.569,
     "ground": 1.581,
-    "auto": 4.569,
-    "hits": 2.204,
-    "safety": 2.029,
+    "auto": 4.34,
+    "hits": 2.517,
+    "safety": 2.15,
     "really": 1.855,
-    "hezbollah": 2.203,
+    "hezbollah": 2.378,
     "offers": 1.657,
-    "prediction": 2.946,
-    "young": 1.529,
-    "mexico": 1.846,
+    "prediction": 2.535,
+    "mexico": 1.586,
     "hard": 2.624,
     "film": 3.938,
-    "island": 2.832,
-    "university": 5.281,
-    "popular": 1.959,
-    "dead": 3.567
+    "island": 3.011,
+    "university": 5.044,
+    "popular": 2.273,
+    "dead": 3.717
   },
   "stock_chains": [
+    {
+      "term": "lebanon",
+      "is_active_today": true,
+      "today_z": 1.508,
+      "hop1": {
+        "ticker": "AAPL",
+        "sector": "06 Technology",
+        "entity": "Apple Inc.",
+        "corr": -0.3224,
+        "lag": -3,
+        "hit_rate": 0.562,
+        "direction": "bear",
+        "avg_ret_1d": 0.34,
+        "confidence": 0.418
+      },
+      "hop2": [
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.668,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.604,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.598,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "HYG",
+          "ticker_corr": 0.537,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "IWM",
+          "ticker_corr": 0.529,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        }
+      ]
+    },
     {
       "term": "anthropic",
       "is_active_today": false,
@@ -3405,59 +3460,6 @@
           "ticker": "SPY",
           "ticker_corr": 0.734,
           "implied_dir": "bull",
-          "sector": null,
-          "entity": null
-        }
-      ]
-    },
-    {
-      "term": "lebanon",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "AAPL",
-        "sector": "06 Technology",
-        "entity": "Apple Inc.",
-        "corr": -0.3224,
-        "lag": -3,
-        "hit_rate": 0.562,
-        "direction": "bear",
-        "avg_ret_1d": 0.34,
-        "confidence": 0.418
-      },
-      "hop2": [
-        {
-          "ticker": "SPY",
-          "ticker_corr": 0.668,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "DIA",
-          "ticker_corr": 0.604,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.598,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "HYG",
-          "ticker_corr": 0.537,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "IWM",
-          "ticker_corr": 0.529,
-          "implied_dir": "bear",
           "sector": null,
           "entity": null
         }
@@ -8269,7 +8271,97 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "AAPL",
+      "sector": "06 Technology",
+      "entity": "Apple Inc.",
+      "fund_score": 0.42,
+      "inbound": [
+        {
+          "term": "lebanon",
+          "direction": "bear",
+          "today_z": 1.508,
+          "hit_rate": 0.562
+        }
+      ]
+    },
+    {
+      "ticker": "SPY",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "lebanon",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 1.508,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "DIA",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "lebanon",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 1.508,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "lebanon",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 1.508,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "HYG",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "lebanon",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 1.508,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "IWM",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "lebanon",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 1.508,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 231,
