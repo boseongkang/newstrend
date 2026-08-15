@@ -140,4 +140,7 @@ jobs:
           fail_on_unmatched_files: true
           append_body: false
           generate_release_notes: false
-          allowUpdates: true
+          # replaces same-name assets on re-run — keeps the dispatch
+          # recovery path idempotent (allowUpdates was a ncipollo-ism
+          # softprops never accepted)
+          overwrite_files: true
