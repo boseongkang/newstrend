@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-16T14:48:55+00:00",
+  "generated_at": "2026-08-16T15:46:48+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-16T14:47:57Z",
+    "signal_corr_updated": "2026-08-16T15:45:42Z",
     "n_pairs_total": 3894,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,17 +21,90 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "history": 1.546,
-    "follow": 1.633,
-    "australia": 2.559,
-    "agent": 2.209,
+    "health": 1.925,
+    "history": 1.841,
+    "follow": 1.96,
+    "australia": 2.714,
+    "agent": 2.565,
+    "care": 7.64,
     "auto": 1.57,
-    "care": 6.514,
-    "actually": 2.067,
-    "florida": 4.308,
-    "needs": 3.594
+    "different": 1.62,
+    "actually": 2.493,
+    "florida": 5.068,
+    "needs": 4.305
   },
   "stock_chains": [
+    {
+      "term": "health",
+      "is_active_today": true,
+      "today_z": 1.925,
+      "hop1": {
+        "ticker": "PANW",
+        "sector": "06 Technology",
+        "entity": "Palo Alto Networks Inc",
+        "corr": 0.3408,
+        "lag": -4,
+        "hit_rate": 0.571,
+        "direction": "bull",
+        "avg_ret_1d": 1.28,
+        "confidence": 0.372
+      },
+      "hop2": [
+        {
+          "ticker": "FTNT",
+          "ticker_corr": 0.617,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "Fortinet, Inc."
+        },
+        {
+          "ticker": "ZS",
+          "ticker_corr": 0.589,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "Zscaler, Inc."
+        },
+        {
+          "ticker": "OKTA",
+          "ticker_corr": 0.549,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "Okta, Inc."
+        },
+        {
+          "ticker": "DDOG",
+          "ticker_corr": 0.52,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "Datadog, Inc."
+        }
+      ]
+    },
+    {
+      "term": "health",
+      "is_active_today": true,
+      "today_z": 1.925,
+      "hop1": {
+        "ticker": "CDNS",
+        "sector": "06 Technology",
+        "entity": "CADENCE DESIGN SYSTEMS INC",
+        "corr": -0.3162,
+        "lag": -5,
+        "hit_rate": 0.571,
+        "direction": "bear",
+        "avg_ret_1d": 0.068,
+        "confidence": 0.363
+      },
+      "hop2": [
+        {
+          "ticker": "SNPS",
+          "ticker_corr": 0.698,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "SYNOPSYS INC"
+        }
+      ]
+    },
     {
       "term": "anthropic",
       "is_active_today": false,
@@ -5543,52 +5616,6 @@
       "hop2": []
     },
     {
-      "term": "health",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PANW",
-        "sector": "06 Technology",
-        "entity": "Palo Alto Networks Inc",
-        "corr": 0.3408,
-        "lag": -4,
-        "hit_rate": 0.571,
-        "direction": "bull",
-        "avg_ret_1d": 1.28,
-        "confidence": 0.372
-      },
-      "hop2": [
-        {
-          "ticker": "FTNT",
-          "ticker_corr": 0.617,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "Fortinet, Inc."
-        },
-        {
-          "ticker": "ZS",
-          "ticker_corr": 0.589,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "Zscaler, Inc."
-        },
-        {
-          "ticker": "OKTA",
-          "ticker_corr": 0.549,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "Okta, Inc."
-        },
-        {
-          "ticker": "DDOG",
-          "ticker_corr": 0.52,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "Datadog, Inc."
-        }
-      ]
-    },
-    {
       "term": "close",
       "is_active_today": false,
       "today_z": null,
@@ -6016,31 +6043,6 @@
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "CADENCE DESIGN SYSTEMS INC"
-        }
-      ]
-    },
-    {
-      "term": "health",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CDNS",
-        "sector": "06 Technology",
-        "entity": "CADENCE DESIGN SYSTEMS INC",
-        "corr": -0.3162,
-        "lag": -5,
-        "hit_rate": 0.571,
-        "direction": "bear",
-        "avg_ret_1d": 0.068,
-        "confidence": 0.363
-      },
-      "hop2": [
-        {
-          "ticker": "SNPS",
-          "ticker_corr": 0.698,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "SYNOPSYS INC"
         }
       ]
     },
@@ -7865,7 +7867,111 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "PANW",
+      "sector": "06 Technology",
+      "entity": "Palo Alto Networks Inc",
+      "fund_score": 0.361,
+      "inbound": [
+        {
+          "term": "health",
+          "direction": "bull",
+          "today_z": 1.925,
+          "hit_rate": 0.571
+        }
+      ]
+    },
+    {
+      "ticker": "CDNS",
+      "sector": "06 Technology",
+      "entity": "CADENCE DESIGN SYSTEMS INC",
+      "fund_score": 0.522,
+      "inbound": [
+        {
+          "term": "health",
+          "direction": "bear",
+          "today_z": 1.925,
+          "hit_rate": 0.571
+        }
+      ]
+    },
+    {
+      "ticker": "FTNT",
+      "sector": "06 Technology",
+      "entity": "Fortinet, Inc.",
+      "fund_score": 0.651,
+      "inbound": [
+        {
+          "term": "health",
+          "via": "PANW",
+          "direction": "bull",
+          "today_z": 1.925,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ZS",
+      "sector": "06 Technology",
+      "entity": "Zscaler, Inc.",
+      "fund_score": 0.268,
+      "inbound": [
+        {
+          "term": "health",
+          "via": "PANW",
+          "direction": "bull",
+          "today_z": 1.925,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "OKTA",
+      "sector": "06 Technology",
+      "entity": "Okta, Inc.",
+      "fund_score": 0.376,
+      "inbound": [
+        {
+          "term": "health",
+          "via": "PANW",
+          "direction": "bull",
+          "today_z": 1.925,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "DDOG",
+      "sector": "06 Technology",
+      "entity": "Datadog, Inc.",
+      "fund_score": 0.44,
+      "inbound": [
+        {
+          "term": "health",
+          "via": "PANW",
+          "direction": "bull",
+          "today_z": 1.925,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "SNPS",
+      "sector": "06 Technology",
+      "entity": "SYNOPSYS INC",
+      "fund_score": 0.491,
+      "inbound": [
+        {
+          "term": "health",
+          "via": "CDNS",
+          "direction": "bear",
+          "today_z": 1.925,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 211,
