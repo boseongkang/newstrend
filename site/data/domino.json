@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-16T21:44:29+00:00",
+  "generated_at": "2026-08-16T22:47:19+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-16T21:43:24Z",
+    "signal_corr_updated": "2026-08-16T22:46:11Z",
     "n_pairs_total": 3894,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,29 +21,47 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "health": 2.471,
-    "sunday": 4.008,
-    "peace": 1.918,
-    "general": 2.5,
+    "health": 2.631,
+    "whether": 1.581,
+    "sunday": 4.496,
+    "peace": 2.252,
+    "general": 3.115,
     "history": 2.136,
-    "gaza": 2.64,
-    "follow": 1.633,
+    "gaza": 2.977,
+    "board": 1.694,
     "australia": 2.559,
     "agent": 2.209,
-    "meet": 2.1,
-    "care": 7.569,
-    "knowledge": 2.394,
-    "different": 2.752,
-    "actually": 5.053,
+    "meet": 2.236,
+    "care": 7.64,
+    "knowledge": 2.536,
+    "different": 2.839,
+    "actually": 5.195,
     "florida": 8.87,
     "needs": 3.594,
-    "millions": 1.662
+    "millions": 1.752
   },
   "stock_chains": [
     {
+      "term": "whether",
+      "is_active_today": true,
+      "today_z": 1.581,
+      "hop1": {
+        "ticker": "PDD",
+        "sector": "07 Trade & Services",
+        "entity": "PDD Holdings Inc.",
+        "corr": -0.3665,
+        "lag": -2,
+        "hit_rate": 0.545,
+        "direction": "bear",
+        "avg_ret_1d": 0.207,
+        "confidence": 0.395
+      },
+      "hop2": []
+    },
+    {
       "term": "health",
       "is_active_today": true,
-      "today_z": 2.471,
+      "today_z": 2.631,
       "hop1": {
         "ticker": "PANW",
         "sector": "06 Technology",
@@ -89,7 +107,7 @@
     {
       "term": "health",
       "is_active_today": true,
-      "today_z": 2.471,
+      "today_z": 2.631,
       "hop1": {
         "ticker": "CDNS",
         "sector": "06 Technology",
@@ -4864,23 +4882,6 @@
       ]
     },
     {
-      "term": "whether",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PDD",
-        "sector": "07 Trade & Services",
-        "entity": "PDD Holdings Inc.",
-        "corr": -0.3665,
-        "lag": -2,
-        "hit_rate": 0.545,
-        "direction": "bear",
-        "avg_ret_1d": 0.207,
-        "confidence": 0.395
-      },
-      "hop2": []
-    },
-    {
       "term": "biggest",
       "is_active_today": false,
       "today_z": null,
@@ -7875,6 +7876,20 @@
   ],
   "ticker_pressure": [
     {
+      "ticker": "PDD",
+      "sector": "07 Trade & Services",
+      "entity": "PDD Holdings Inc.",
+      "fund_score": 0.844,
+      "inbound": [
+        {
+          "term": "whether",
+          "direction": "bear",
+          "today_z": 1.581,
+          "hit_rate": 0.545
+        }
+      ]
+    },
+    {
       "ticker": "PANW",
       "sector": "06 Technology",
       "entity": "Palo Alto Networks Inc",
@@ -7883,7 +7898,7 @@
         {
           "term": "health",
           "direction": "bull",
-          "today_z": 2.471,
+          "today_z": 2.631,
           "hit_rate": 0.571
         }
       ]
@@ -7897,7 +7912,7 @@
         {
           "term": "health",
           "direction": "bear",
-          "today_z": 2.471,
+          "today_z": 2.631,
           "hit_rate": 0.571
         }
       ]
@@ -7912,7 +7927,7 @@
           "term": "health",
           "via": "PANW",
           "direction": "bull",
-          "today_z": 2.471,
+          "today_z": 2.631,
           "indirect": true
         }
       ]
@@ -7927,7 +7942,7 @@
           "term": "health",
           "via": "PANW",
           "direction": "bull",
-          "today_z": 2.471,
+          "today_z": 2.631,
           "indirect": true
         }
       ]
@@ -7942,7 +7957,7 @@
           "term": "health",
           "via": "PANW",
           "direction": "bull",
-          "today_z": 2.471,
+          "today_z": 2.631,
           "indirect": true
         }
       ]
@@ -7957,7 +7972,7 @@
           "term": "health",
           "via": "PANW",
           "direction": "bull",
-          "today_z": 2.471,
+          "today_z": 2.631,
           "indirect": true
         }
       ]
@@ -7972,7 +7987,7 @@
           "term": "health",
           "via": "CDNS",
           "direction": "bear",
-          "today_z": 2.471,
+          "today_z": 2.631,
           "indirect": true
         }
       ]
