@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-17T11:51:47+00:00",
+  "generated_at": "2026-08-17T13:17:12+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-17T11:50:51Z",
+    "signal_corr_updated": "2026-08-17T13:16:08Z",
     "n_pairs_total": 3818,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,11 +21,40 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "korea": 3.345,
-    "special": 1.993,
-    "summit": 1.732
+    "china": 1.65,
+    "history": 1.753,
+    "california": 2.038,
+    "device": 2.459,
+    "korea": 5.285,
+    "special": 2.19,
+    "summit": 2.309
   },
   "stock_chains": [
+    {
+      "term": "china",
+      "is_active_today": true,
+      "today_z": 1.65,
+      "hop1": {
+        "ticker": "SEDG",
+        "sector": "04 Manufacturing",
+        "entity": "SOLAREDGE TECHNOLOGIES, INC.",
+        "corr": 0.3308,
+        "lag": -2,
+        "hit_rate": 0.5,
+        "direction": "bull",
+        "avg_ret_1d": 2.12,
+        "confidence": 0.376
+      },
+      "hop2": [
+        {
+          "ticker": "ENPH",
+          "ticker_corr": 0.725,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "Enphase Energy, Inc."
+        }
+      ]
+    },
     {
       "term": "anthropic",
       "is_active_today": false,
@@ -5553,31 +5582,6 @@
       ]
     },
     {
-      "term": "china",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "SEDG",
-        "sector": "04 Manufacturing",
-        "entity": "SOLAREDGE TECHNOLOGIES, INC.",
-        "corr": 0.3308,
-        "lag": -2,
-        "hit_rate": 0.5,
-        "direction": "bull",
-        "avg_ret_1d": 2.12,
-        "confidence": 0.376
-      },
-      "hop2": [
-        {
-          "ticker": "ENPH",
-          "ticker_corr": 0.725,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "Enphase Energy, Inc."
-        }
-      ]
-    },
-    {
       "term": "supreme",
       "is_active_today": false,
       "today_z": null,
@@ -8337,7 +8341,37 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "SEDG",
+      "sector": "04 Manufacturing",
+      "entity": "SOLAREDGE TECHNOLOGIES, INC.",
+      "fund_score": 0.168,
+      "inbound": [
+        {
+          "term": "china",
+          "direction": "bull",
+          "today_z": 1.65,
+          "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "ENPH",
+      "sector": "04 Manufacturing",
+      "entity": "Enphase Energy, Inc.",
+      "fund_score": 0.349,
+      "inbound": [
+        {
+          "term": "china",
+          "via": "SEDG",
+          "direction": "bull",
+          "today_z": 1.65,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 225,
