@@ -419,10 +419,20 @@ def main():
 
     tickers = [t.strip().upper() for t in args.tickers.split(",")]
 
+    # D-1 input watermark: same inputs for every ticker, computed once.
+    # The CI gate checks every file in out_dir — if the --tickers list ever
+    # shrinks, delete the dropped ticker's file or the gate will flag it.
+    from input_watermark import trends_watermark, prices_watermark
+    wm = {
+        "trends": trends_watermark(T, args.trends),
+        "prices": prices_watermark(P_data, args.prices),
+    }
+
     for ticker in tickers:
         print(f"\nAnalyzing {ticker}...")
         result = analyze(ticker, T, P_data,
                          args.min_events, args.z_thresh, args.lag_range)
+        result["input_watermark"] = wm
 
         out_path = out_dir / f"{ticker}.json"
         out_path.write_text(json.dumps(result, ensure_ascii=False, separators=(",",":")))

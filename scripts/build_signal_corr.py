@@ -386,6 +386,15 @@ def main():
     clusters = find_cooccurrence_clusters(T, min_corr=0.70)
     result["cooccurrence"] = clusters
 
+    # D-1 input watermark: record the data dates actually consumed, so the
+    # CI gate can detect a fresh-looking output built from stale inputs.
+    from input_watermark import trends_watermark, prices_watermark
+    P = json.loads(Path(args.prices).read_text())
+    result["input_watermark"] = {
+        "trends": trends_watermark(T, args.trends),
+        "prices": prices_watermark(P, args.prices),
+    }
+
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     Path(args.out).write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")
 

@@ -24,9 +24,11 @@ rsync/cp 레거시 복제, gzip. 실패해도 데이터 정합성에 영향 없�
   → TA 직후 "Gate — prices/TA regenerated this run" 신설: updated 나이 >2h면 RED.
 
 ## D. soft-fail 유지, 커버리지 없음 — 잔여 부채 (후속 후보)
-- build_signal_corr, build_fundamentals, analyze_ticker, ticker_weights:
-  실패 시 predict가 stale 판을 읽지만 종단 gate 미커버. 파일은 매 런 커밋됨
-  → 종단 gate TARGETS에 추가 가능 (다음 라운드).
+- ~~build_signal_corr, build_fundamentals, analyze_ticker, ticker_weights:
+  실패 시 predict가 stale 판을 읽지만 종단 gate 미커버.~~
+  **FIXED 2026-08-17 (ISSUES.md D-1)**: 4개 산출물에 input_watermark 내장 +
+  scripts/input_watermark_gate.py 신설 (소스별 허용 지연: trends 2d /
+  prices 4d / edgar 120d, 설계 근거 주석 포함).
 - backtest v1/v2, daily_verify, weekly_report, macro_themes, tickers.json,
   weekly_analyzer: 표시용/주간물 — 위험도 낮음.
 - paper_trade / prediction_tracker / gap_analyzer / feature_engineering /

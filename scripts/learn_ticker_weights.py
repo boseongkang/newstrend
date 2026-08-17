@@ -256,9 +256,17 @@ def main():
               f"NEWS {result['news_weight']:.0%} (hit {result['news_hit_rate']:.0%}, n={result['news_n']}) "
               f"→ {primary}-driven")
 
+    # D-1 input watermark: TA is derived from prices in the same run (its own
+    # freshness is covered by the inline prices/TA gate), so prices + trends
+    # are the binding upstream data dates here.
+    from input_watermark import trends_watermark, prices_watermark
     output = {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "hold_days": args.hold_days,
+        "input_watermark": {
+            "trends": trends_watermark(trends, args.trends),
+            "prices": prices_watermark(prices, args.prices),
+        },
         "weights": weights,
     }
     Path(args.out).write_text(json.dumps(output, ensure_ascii=False, separators=(",",":")))

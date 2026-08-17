@@ -45,6 +45,43 @@ forward 데이터 오염이다. unfreeze 조건 충족 또는 명시적 재설�
 
 ---
 
+# 잔여 부채 (2026-08-05 softfail 감사 §D 및 2026-08-17 전수 점검에서 정리)
+
+## D-1: 게이트가 입력 신선도를 못 봄 — **FIXED 2026-08-17**
+
+- 문제: freshness gate는 "출력이 다시 쓰였는가"만 검사. 입력이 낡아도
+  생성기는 출력을 신선하게 재도장하므로 통과 — sentiment 95일 사망이
+  정확히 이 구조로 안 잡혔다. signal_corr / fundamentals / analyze_ticker /
+  ticker_weights 4개는 종단 게이트 미포함이기도 했다.
+- 수정: 4개 산출물에 `input_watermark`(source / last_record_date /
+  record_count, 소스별) 내장 — scripts/input_watermark.py. 신규
+  scripts/input_watermark_gate.py가 소스별 허용 지연(trends 2d / prices 4d /
+  edgar 120d — 각 한계는 설계 근거 주석과 함께 상수로 정의, STALE_DAYS=1
+  vs D-2 클램프 사건 재발 방지)을 검사하고 벗어나면 RED.
+  trend-site.yml의 validation freshness gate 직후 신설 스텝으로 실행.
+- 검증: `--self-test` 7/7 (장주말 4d 가격 갭·51d된 분기 as_of는 통과 =
+  false RED 없음), 정상 트리 green, 인위적 stale 트리 4개 시나리오
+  (trends 5d / prices 6d / 워터마크 없는 잔존 파일 / edgar 139d) 전부 RED.
+- 남은 후속(범위 밖): paper_trade → validate.py 체인의 입력 워터마크
+  (validation.json의 records 신선도) — 아래 D-2와 함께 후속 라운드.
+
+## D-2: 통계 도구 잔여 결함 — OPEN
+
+- naive_baselines McNemar + 사전등록 미비, ml_monitor anchor collision +
+  CI/p 기저 불일치, benchmark regime 하드코딩 + 동어반복 self-test.
+
+## D-3: 영구 데이터 갭 — OPEN (복구 불가, 기록 유지)
+
+- 2025-11-15 → 2026-02-02 (80일): warehouse 일별 파일이 기사 대신 토큰
+  집계만 보유 — sentiment 영구 계산 불가. 해당 구간 평가 시 제외 필수.
+
+## D-4: 파킹된 회귀/정리 — OPEN
+
+- signal_corr 0-pairs 회귀 (tokenizer-fix-c3 브랜치 ead6c26a에 파킹).
+- ticker_to_cik의 ANSS 잔존 (무해하나 매 런 SEC 호출 낭비 + skip 로그).
+
+---
+
 # CI 인프라 이슈 (frozen 아님 — 수정 가능)
 
 ## CI-1: GitHub API가 낡은 run 목록/아티팩트를 반환 (2026-08-08 최초 관측)

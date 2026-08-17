@@ -253,11 +253,23 @@ def aggregate_index(per_ticker: dict[str, dict], skipped: dict[str, str]) -> dic
         elif payload["status"] == "metadata_only":
             meta_only_count += 1
 
+    # D-1 input watermark: newest fiscal-period end (as_of) across the
+    # universe = the freshest DATA EDGAR gave us, regardless of when this
+    # file was restamped. Quarterly cadence — the gate's allowed lag for
+    # this source is months, not days (see input_watermark_gate.py).
+    as_ofs = [str(p["as_of"]) for p in per_ticker.values() if p.get("as_of")]
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "universe_size":          len(per_ticker) + len(skipped),
         "fetched_ok":             ok_count,
         "fetched_metadata_only":  meta_only_count,
+        "input_watermark": {
+            "edgar": {
+                "source": "SEC EDGAR companyfacts",
+                "last_record_date": max(as_ofs) if as_ofs else None,
+                "record_count": ok_count,
+            },
+        },
         "skipped":                skipped,         # {ticker: reason}
         "tickers":                rows,
     }

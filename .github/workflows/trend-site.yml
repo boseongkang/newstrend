@@ -762,6 +762,18 @@ jobs:
           print("\nAll validation outputs are committed and fresh.")
           PY
 
+      - name: Input-watermark gate (D-1 — stale inputs behind fresh outputs)
+        # Complement to the gate above: that one checks "was the output
+        # rewritten this run", this one checks "was the DATA it consumed
+        # recent". A generator running happily on stale trends/prices
+        # restamps its output fresh and passes the output-side gate — the
+        # sentiment pillar died for 95 days exactly this way. Covers the
+        # four outputs the 2026-08-05 audit left ungated: signal_corr,
+        # ticker_analysis/*, ticker_weights, fundamentals. Per-source
+        # allowed lags live in scripts/input_watermark_gate.py as constants
+        # WITH design rationale — change them only with the design.
+        run: python scripts/input_watermark_gate.py
+
       - name: Copy daily files into site
         run: |
           set -euo pipefail
