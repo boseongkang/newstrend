@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-18T11:51:57+00:00",
+  "generated_at": "2026-08-18T13:20:04+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-18T11:50:55Z",
+    "signal_corr_updated": "2026-08-18T13:18:56Z",
     "n_pairs_total": 3824,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,22 +21,33 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "fuel": 2.056,
-    "tensions": 1.786,
-    "women": 3.317,
-    "bond": 2.342,
-    "boom": 1.653,
-    "iphone": 3.512,
-    "london": 1.861,
-    "cent": 1.693,
-    "highest": 1.879,
-    "bonds": 2.707
+    "fuel": 2.192,
+    "term": 1.918,
+    "kong": 1.595,
+    "tensions": 1.717,
+    "bond": 4.534,
+    "women": 3.157,
+    "exchange": 1.564,
+    "known": 1.94,
+    "boom": 1.595,
+    "finance": 1.916,
+    "multiple": 1.676,
+    "primary": 1.679,
+    "london": 1.722,
+    "cent": 1.545,
+    "florida": 11.434,
+    "revealed": 2.793,
+    "futures": 1.692,
+    "highest": 2.938,
+    "green": 1.8,
+    "bonds": 2.649,
+    "allies": 1.847
   },
   "stock_chains": [
     {
       "term": "tensions",
       "is_active_today": true,
-      "today_z": 1.786,
+      "today_z": 1.717,
       "hop1": {
         "ticker": "BAC",
         "sector": "02 Finance",
@@ -85,6 +96,40 @@
           "entity": null
         }
       ]
+    },
+    {
+      "term": "kong",
+      "is_active_today": true,
+      "today_z": 1.595,
+      "hop1": {
+        "ticker": "KLAC",
+        "sector": "08 Industrial Applications and Services",
+        "entity": "KLA CORP",
+        "corr": -0.3807,
+        "lag": -2,
+        "hit_rate": 0.529,
+        "direction": "bear",
+        "avg_ret_1d": 0.885,
+        "confidence": 0.425
+      },
+      "hop2": []
+    },
+    {
+      "term": "term",
+      "is_active_today": true,
+      "today_z": 1.918,
+      "hop1": {
+        "ticker": "SIRI",
+        "sector": "06 Technology",
+        "entity": "SIRIUS XM HOLDINGS INC.",
+        "corr": 0.3809,
+        "lag": -3,
+        "hit_rate": 0.545,
+        "direction": "bull",
+        "avg_ret_1d": 1.601,
+        "confidence": 0.4
+      },
+      "hop2": []
     },
     {
       "term": "anthropic",
@@ -3904,23 +3949,6 @@
       ]
     },
     {
-      "term": "kong",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "KLAC",
-        "sector": "08 Industrial Applications and Services",
-        "entity": "KLA CORP",
-        "corr": -0.3807,
-        "lag": -2,
-        "hit_rate": 0.529,
-        "direction": "bear",
-        "avg_ret_1d": 0.885,
-        "confidence": 0.425
-      },
-      "hop2": []
-    },
-    {
       "term": "defense",
       "is_active_today": false,
       "today_z": null,
@@ -5273,23 +5301,6 @@
           "entity": "Enphase Energy, Inc."
         }
       ]
-    },
-    {
-      "term": "term",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "SIRI",
-        "sector": "06 Technology",
-        "entity": "SIRIUS XM HOLDINGS INC.",
-        "corr": 0.3809,
-        "lag": -3,
-        "hit_rate": 0.545,
-        "direction": "bull",
-        "avg_ret_1d": 1.601,
-        "confidence": 0.4
-      },
-      "hop2": []
     },
     {
       "term": "revenue",
@@ -8622,8 +8633,36 @@
         {
           "term": "tensions",
           "direction": "bear",
-          "today_z": 1.786,
+          "today_z": 1.717,
           "hit_rate": 0.857
+        }
+      ]
+    },
+    {
+      "ticker": "KLAC",
+      "sector": "08 Industrial Applications and Services",
+      "entity": "KLA CORP",
+      "fund_score": 0.584,
+      "inbound": [
+        {
+          "term": "kong",
+          "direction": "bear",
+          "today_z": 1.595,
+          "hit_rate": 0.529
+        }
+      ]
+    },
+    {
+      "ticker": "SIRI",
+      "sector": "06 Technology",
+      "entity": "SIRIUS XM HOLDINGS INC.",
+      "fund_score": 0.192,
+      "inbound": [
+        {
+          "term": "term",
+          "direction": "bull",
+          "today_z": 1.918,
+          "hit_rate": 0.545
         }
       ]
     },
@@ -8637,7 +8676,7 @@
           "term": "tensions",
           "via": "BAC",
           "direction": "bear",
-          "today_z": 1.786,
+          "today_z": 1.717,
           "indirect": true
         }
       ]
@@ -8652,7 +8691,7 @@
           "term": "tensions",
           "via": "BAC",
           "direction": "bear",
-          "today_z": 1.786,
+          "today_z": 1.717,
           "indirect": true
         }
       ]
@@ -8667,7 +8706,7 @@
           "term": "tensions",
           "via": "BAC",
           "direction": "bear",
-          "today_z": 1.786,
+          "today_z": 1.717,
           "indirect": true
         }
       ]
@@ -8682,7 +8721,7 @@
           "term": "tensions",
           "via": "BAC",
           "direction": "bear",
-          "today_z": 1.786,
+          "today_z": 1.717,
           "indirect": true
         }
       ]
@@ -8697,7 +8736,7 @@
           "term": "tensions",
           "via": "BAC",
           "direction": "bear",
-          "today_z": 1.786,
+          "today_z": 1.717,
           "indirect": true
         }
       ]
