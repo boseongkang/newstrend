@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-18T10:57:20+00:00",
+  "generated_at": "2026-08-18T11:51:57+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-18T10:56:15Z",
+    "signal_corr_updated": "2026-08-18T11:50:55Z",
     "n_pairs_total": 3824,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,15 +21,71 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "fuel": 1.56,
-    "women": 2.73,
-    "bond": 1.999,
-    "iphone": 3.175,
-    "london": 1.722,
-    "cent": 1.545,
-    "bonds": 2.415
+    "fuel": 2.056,
+    "tensions": 1.786,
+    "women": 3.317,
+    "bond": 2.342,
+    "boom": 1.653,
+    "iphone": 3.512,
+    "london": 1.861,
+    "cent": 1.693,
+    "highest": 1.879,
+    "bonds": 2.707
   },
   "stock_chains": [
+    {
+      "term": "tensions",
+      "is_active_today": true,
+      "today_z": 1.786,
+      "hop1": {
+        "ticker": "BAC",
+        "sector": "02 Finance",
+        "entity": "BANK OF AMERICA CORP /DE/",
+        "corr": -0.3312,
+        "lag": -4,
+        "hit_rate": 0.857,
+        "direction": "bear",
+        "avg_ret_1d": 0.87,
+        "confidence": 0.524
+      },
+      "hop2": [
+        {
+          "ticker": "JPM",
+          "ticker_corr": 0.797,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "JPMORGAN CHASE & CO"
+        },
+        {
+          "ticker": "MS",
+          "ticker_corr": 0.765,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "MORGAN STANLEY"
+        },
+        {
+          "ticker": "GS",
+          "ticker_corr": 0.689,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "GOLDMAN SACHS GROUP INC"
+        },
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.684,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "IWM",
+          "ticker_corr": 0.634,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        }
+      ]
+    },
     {
       "term": "anthropic",
       "is_active_today": false,
@@ -821,59 +877,6 @@
           "implied_dir": "bull",
           "sector": "06 Technology",
           "entity": "LAM RESEARCH CORP"
-        }
-      ]
-    },
-    {
-      "term": "tensions",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "BAC",
-        "sector": "02 Finance",
-        "entity": "BANK OF AMERICA CORP /DE/",
-        "corr": -0.3312,
-        "lag": -4,
-        "hit_rate": 0.857,
-        "direction": "bear",
-        "avg_ret_1d": 0.87,
-        "confidence": 0.524
-      },
-      "hop2": [
-        {
-          "ticker": "JPM",
-          "ticker_corr": 0.797,
-          "implied_dir": "bear",
-          "sector": "02 Finance",
-          "entity": "JPMORGAN CHASE & CO"
-        },
-        {
-          "ticker": "MS",
-          "ticker_corr": 0.765,
-          "implied_dir": "bear",
-          "sector": "02 Finance",
-          "entity": "MORGAN STANLEY"
-        },
-        {
-          "ticker": "GS",
-          "ticker_corr": 0.689,
-          "implied_dir": "bear",
-          "sector": "02 Finance",
-          "entity": "GOLDMAN SACHS GROUP INC"
-        },
-        {
-          "ticker": "DIA",
-          "ticker_corr": 0.684,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "IWM",
-          "ticker_corr": 0.634,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
         }
       ]
     },
@@ -8609,7 +8612,97 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "BAC",
+      "sector": "02 Finance",
+      "entity": "BANK OF AMERICA CORP /DE/",
+      "fund_score": 0.349,
+      "inbound": [
+        {
+          "term": "tensions",
+          "direction": "bear",
+          "today_z": 1.786,
+          "hit_rate": 0.857
+        }
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "sector": "02 Finance",
+      "entity": "JPMORGAN CHASE & CO",
+      "fund_score": 0.475,
+      "inbound": [
+        {
+          "term": "tensions",
+          "via": "BAC",
+          "direction": "bear",
+          "today_z": 1.786,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MS",
+      "sector": "02 Finance",
+      "entity": "MORGAN STANLEY",
+      "fund_score": 0.422,
+      "inbound": [
+        {
+          "term": "tensions",
+          "via": "BAC",
+          "direction": "bear",
+          "today_z": 1.786,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "GS",
+      "sector": "02 Finance",
+      "entity": "GOLDMAN SACHS GROUP INC",
+      "fund_score": 0.438,
+      "inbound": [
+        {
+          "term": "tensions",
+          "via": "BAC",
+          "direction": "bear",
+          "today_z": 1.786,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "DIA",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "tensions",
+          "via": "BAC",
+          "direction": "bear",
+          "today_z": 1.786,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "IWM",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "tensions",
+          "via": "BAC",
+          "direction": "bear",
+          "today_z": 1.786,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 233,
