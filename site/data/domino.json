@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-19T08:25:34+00:00",
+  "generated_at": "2026-08-19T10:57:09+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-19T08:24:25Z",
+    "signal_corr_updated": "2026-08-19T10:56:02Z",
     "n_pairs_total": 3886,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,18 +21,36 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "canada": 4.377,
-    "exchange": 1.782,
+    "kong": 1.658,
+    "canada": 3.909,
     "february": 3.777,
-    "follow": 2.449,
-    "class": 1.507,
-    "additional": 1.862,
-    "tariffs": 2.295,
-    "auto": 3.232,
-    "florida": 3.829,
-    "spent": 1.868
+    "follow": 2.123,
+    "class": 2.05,
+    "additional": 1.568,
+    "tariffs": 1.93,
+    "auto": 2.678,
+    "florida": 3.6,
+    "plus": 1.592,
+    "spent": 1.79
   },
   "stock_chains": [
+    {
+      "term": "kong",
+      "is_active_today": true,
+      "today_z": 1.658,
+      "hop1": {
+        "ticker": "KLAC",
+        "sector": "08 Industrial Applications and Services",
+        "entity": "KLA CORP",
+        "corr": -0.3791,
+        "lag": -2,
+        "hit_rate": 0.529,
+        "direction": "bear",
+        "avg_ret_1d": 0.885,
+        "confidence": 0.425
+      },
+      "hop2": []
+    },
     {
       "term": "anthropic",
       "is_active_today": false,
@@ -3775,23 +3793,6 @@
           "entity": null
         }
       ]
-    },
-    {
-      "term": "kong",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "KLAC",
-        "sector": "08 Industrial Applications and Services",
-        "entity": "KLA CORP",
-        "corr": -0.3791,
-        "lag": -2,
-        "hit_rate": 0.529,
-        "direction": "bear",
-        "avg_ret_1d": 0.885,
-        "confidence": 0.425
-      },
-      "hop2": []
     },
     {
       "term": "openai",
@@ -8358,7 +8359,22 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "KLAC",
+      "sector": "08 Industrial Applications and Services",
+      "entity": "KLA CORP",
+      "fund_score": 0.584,
+      "inbound": [
+        {
+          "term": "kong",
+          "direction": "bear",
+          "today_z": 1.658,
+          "hit_rate": 0.529
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 237,
