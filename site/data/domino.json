@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-20T10:57:41+00:00",
+  "generated_at": "2026-08-20T11:54:15+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-20T10:56:48Z",
+    "signal_corr_updated": "2026-08-20T11:53:04Z",
     "n_pairs_total": 3824,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,16 +21,42 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "announces": 2.475,
-    "australia": 3.565,
-    "features": 4.426,
+    "life": 1.699,
+    "announces": 2.69,
+    "australia": 3.773,
+    "features": 4.811,
     "samsung": 2.484,
-    "founder": 2.139,
+    "founder": 2.539,
     "words": 1.828,
-    "assets": 1.804,
-    "smart": 1.694
+    "assets": 2.02,
+    "smart": 2.033
   },
   "stock_chains": [
+    {
+      "term": "life",
+      "is_active_today": true,
+      "today_z": 1.699,
+      "hop1": {
+        "ticker": "CDNS",
+        "sector": "06 Technology",
+        "entity": "CADENCE DESIGN SYSTEMS INC",
+        "corr": -0.379,
+        "lag": -4,
+        "hit_rate": 0.571,
+        "direction": "bear",
+        "avg_ret_1d": -0.338,
+        "confidence": 0.385
+      },
+      "hop2": [
+        {
+          "ticker": "SNPS",
+          "ticker_corr": 0.698,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "SYNOPSYS INC"
+        }
+      ]
+    },
     {
       "term": "gold",
       "is_active_today": false,
@@ -4197,31 +4223,6 @@
       ]
     },
     {
-      "term": "life",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CDNS",
-        "sector": "06 Technology",
-        "entity": "CADENCE DESIGN SYSTEMS INC",
-        "corr": -0.379,
-        "lag": -4,
-        "hit_rate": 0.571,
-        "direction": "bear",
-        "avg_ret_1d": -0.338,
-        "confidence": 0.385
-      },
-      "hop2": [
-        {
-          "ticker": "SNPS",
-          "ticker_corr": 0.698,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "SYNOPSYS INC"
-        }
-      ]
-    },
-    {
       "term": "russia",
       "is_active_today": false,
       "today_z": null,
@@ -6951,7 +6952,37 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "CDNS",
+      "sector": "06 Technology",
+      "entity": "CADENCE DESIGN SYSTEMS INC",
+      "fund_score": 0.522,
+      "inbound": [
+        {
+          "term": "life",
+          "direction": "bear",
+          "today_z": 1.699,
+          "hit_rate": 0.571
+        }
+      ]
+    },
+    {
+      "ticker": "SNPS",
+      "sector": "06 Technology",
+      "entity": "SYNOPSYS INC",
+      "fund_score": 0.491,
+      "inbound": [
+        {
+          "term": "life",
+          "via": "CDNS",
+          "direction": "bear",
+          "today_z": 1.699,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 207,
