@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-20T11:54:15+00:00",
+  "generated_at": "2026-08-20T13:22:27+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-20T11:53:04Z",
+    "signal_corr_updated": "2026-08-20T13:21:25Z",
     "n_pairs_total": 3824,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,21 +21,96 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "life": 1.699,
-    "announces": 2.69,
-    "australia": 3.773,
-    "features": 4.811,
+    "term": 1.61,
+    "life": 1.954,
+    "bitcoin": 1.518,
+    "massive": 1.815,
+    "announces": 2.475,
+    "australia": 3.842,
+    "features": 6.736,
+    "value": 1.832,
+    "treasury": 2.197,
     "samsung": 2.484,
-    "founder": 2.539,
-    "words": 1.828,
-    "assets": 2.02,
-    "smart": 2.033
+    "founder": 3.639,
+    "assets": 1.804,
+    "highest": 1.557,
+    "smart": 1.694
   },
   "stock_chains": [
     {
+      "term": "term",
+      "is_active_today": true,
+      "today_z": 1.61,
+      "hop1": {
+        "ticker": "ARM",
+        "sector": "04 Manufacturing",
+        "entity": "ARM HOLDINGS PLC /UK",
+        "corr": 0.3014,
+        "lag": -5,
+        "hit_rate": 0.636,
+        "direction": "bull",
+        "avg_ret_1d": 2.916,
+        "confidence": 0.422
+      },
+      "hop2": [
+        {
+          "ticker": "TSM",
+          "ticker_corr": 0.587,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.565,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "AMD",
+          "ticker_corr": 0.558,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "ADVANCED MICRO DEVICES INC"
+        },
+        {
+          "ticker": "LRCX",
+          "ticker_corr": 0.524,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "LAM RESEARCH CORP"
+        },
+        {
+          "ticker": "MRVL",
+          "ticker_corr": 0.52,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "Marvell Technology, Inc."
+        }
+      ]
+    },
+    {
+      "term": "term",
+      "is_active_today": true,
+      "today_z": 1.61,
+      "hop1": {
+        "ticker": "SIRI",
+        "sector": "06 Technology",
+        "entity": "SIRIUS XM HOLDINGS INC.",
+        "corr": 0.391,
+        "lag": -3,
+        "hit_rate": 0.545,
+        "direction": "bull",
+        "avg_ret_1d": 1.618,
+        "confidence": 0.404
+      },
+      "hop2": []
+    },
+    {
       "term": "life",
       "is_active_today": true,
-      "today_z": 1.699,
+      "today_z": 1.954,
       "hop1": {
         "ticker": "CDNS",
         "sector": "06 Technology",
@@ -3038,59 +3113,6 @@
       "hop2": []
     },
     {
-      "term": "term",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "ARM",
-        "sector": "04 Manufacturing",
-        "entity": "ARM HOLDINGS PLC /UK",
-        "corr": 0.3014,
-        "lag": -5,
-        "hit_rate": 0.636,
-        "direction": "bull",
-        "avg_ret_1d": 2.916,
-        "confidence": 0.422
-      },
-      "hop2": [
-        {
-          "ticker": "TSM",
-          "ticker_corr": 0.587,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.565,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "AMD",
-          "ticker_corr": 0.558,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "ADVANCED MICRO DEVICES INC"
-        },
-        {
-          "ticker": "LRCX",
-          "ticker_corr": 0.524,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "LAM RESEARCH CORP"
-        },
-        {
-          "ticker": "MRVL",
-          "ticker_corr": 0.52,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "Marvell Technology, Inc."
-        }
-      ]
-    },
-    {
       "term": "google",
       "is_active_today": false,
       "today_z": null,
@@ -3566,23 +3588,6 @@
         "direction": "bear",
         "avg_ret_1d": 0.171,
         "confidence": 0.405
-      },
-      "hop2": []
-    },
-    {
-      "term": "term",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "SIRI",
-        "sector": "06 Technology",
-        "entity": "SIRIUS XM HOLDINGS INC.",
-        "corr": 0.391,
-        "lag": -3,
-        "hit_rate": 0.545,
-        "direction": "bull",
-        "avg_ret_1d": 1.618,
-        "confidence": 0.404
       },
       "hop2": []
     },
@@ -6954,6 +6959,34 @@
   ],
   "ticker_pressure": [
     {
+      "ticker": "ARM",
+      "sector": "04 Manufacturing",
+      "entity": "ARM HOLDINGS PLC /UK",
+      "fund_score": 0.688,
+      "inbound": [
+        {
+          "term": "term",
+          "direction": "bull",
+          "today_z": 1.61,
+          "hit_rate": 0.636
+        }
+      ]
+    },
+    {
+      "ticker": "SIRI",
+      "sector": "06 Technology",
+      "entity": "SIRIUS XM HOLDINGS INC.",
+      "fund_score": 0.192,
+      "inbound": [
+        {
+          "term": "term",
+          "direction": "bull",
+          "today_z": 1.61,
+          "hit_rate": 0.545
+        }
+      ]
+    },
+    {
       "ticker": "CDNS",
       "sector": "06 Technology",
       "entity": "CADENCE DESIGN SYSTEMS INC",
@@ -6962,8 +6995,83 @@
         {
           "term": "life",
           "direction": "bear",
-          "today_z": 1.699,
+          "today_z": 1.954,
           "hit_rate": 0.571
+        }
+      ]
+    },
+    {
+      "ticker": "TSM",
+      "sector": "04 Manufacturing",
+      "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "term",
+          "via": "ARM",
+          "direction": "bull",
+          "today_z": 1.61,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "term",
+          "via": "ARM",
+          "direction": "bull",
+          "today_z": 1.61,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "AMD",
+      "sector": "04 Manufacturing",
+      "entity": "ADVANCED MICRO DEVICES INC",
+      "fund_score": 0.578,
+      "inbound": [
+        {
+          "term": "term",
+          "via": "ARM",
+          "direction": "bull",
+          "today_z": 1.61,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "LRCX",
+      "sector": "06 Technology",
+      "entity": "LAM RESEARCH CORP",
+      "fund_score": 0.751,
+      "inbound": [
+        {
+          "term": "term",
+          "via": "ARM",
+          "direction": "bull",
+          "today_z": 1.61,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MRVL",
+      "sector": "04 Manufacturing",
+      "entity": "Marvell Technology, Inc.",
+      "fund_score": 0.549,
+      "inbound": [
+        {
+          "term": "term",
+          "via": "ARM",
+          "direction": "bull",
+          "today_z": 1.61,
+          "indirect": true
         }
       ]
     },
@@ -6977,7 +7085,7 @@
           "term": "life",
           "via": "CDNS",
           "direction": "bear",
-          "today_z": 1.699,
+          "today_z": 1.954,
           "indirect": true
         }
       ]
