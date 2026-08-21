@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-21T11:53:06+00:00",
+  "generated_at": "2026-08-21T13:22:22+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-21T11:51:58Z",
+    "signal_corr_updated": "2026-08-21T13:21:13Z",
     "n_pairs_total": 3892,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,10 +21,70 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "australia": 1.748,
-    "known": 1.902
+    "economic": 1.889,
+    "final": 1.56,
+    "dollar": 2.41,
+    "debt": 1.946,
+    "leading": 1.605,
+    "nation": 1.535,
+    "australia": 2.198,
+    "known": 1.835,
+    "samsung": 4.629,
+    "sanctions": 1.641,
+    "budget": 1.704,
+    "trillion": 2.814,
+    "futures": 1.7
   },
   "stock_chains": [
+    {
+      "term": "economic",
+      "is_active_today": true,
+      "today_z": 1.889,
+      "hop1": {
+        "ticker": "BMRN",
+        "sector": "03 Life Sciences",
+        "entity": "BIOMARIN PHARMACEUTICAL INC",
+        "corr": 0.3093,
+        "lag": -1,
+        "hit_rate": 0.667,
+        "direction": "bull",
+        "avg_ret_1d": 1.152,
+        "confidence": 0.448
+      },
+      "hop2": []
+    },
+    {
+      "term": "economic",
+      "is_active_today": true,
+      "today_z": 1.889,
+      "hop1": {
+        "ticker": "AMGN",
+        "sector": "03 Life Sciences",
+        "entity": "AMGEN INC",
+        "corr": 0.3772,
+        "lag": -4,
+        "hit_rate": 0.583,
+        "direction": "bull",
+        "avg_ret_1d": 0.174,
+        "confidence": 0.426
+      },
+      "hop2": [
+        {
+          "ticker": "BIIB",
+          "ticker_corr": 0.531,
+          "implied_dir": "bull",
+          "sector": "03 Life Sciences",
+          "entity": "BIOGEN INC."
+        },
+        {
+          "ticker": "GILD",
+          "ticker_corr": 0.507,
+          "implied_dir": "bull",
+          "sector": "03 Life Sciences",
+          "entity": "GILEAD SCIENCES, INC."
+        }
+      ]
+    },
     {
       "term": "july",
       "is_active_today": false,
@@ -2084,23 +2144,6 @@
       ]
     },
     {
-      "term": "economic",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "BMRN",
-        "sector": "03 Life Sciences",
-        "entity": "BIOMARIN PHARMACEUTICAL INC",
-        "corr": 0.3093,
-        "lag": -1,
-        "hit_rate": 0.667,
-        "direction": "bull",
-        "avg_ret_1d": 1.152,
-        "confidence": 0.448
-      },
-      "hop2": []
-    },
-    {
       "term": "spacex",
       "is_active_today": false,
       "today_z": null,
@@ -3058,38 +3101,6 @@
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "Salesforce, Inc."
-        }
-      ]
-    },
-    {
-      "term": "economic",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "AMGN",
-        "sector": "03 Life Sciences",
-        "entity": "AMGEN INC",
-        "corr": 0.3772,
-        "lag": -4,
-        "hit_rate": 0.583,
-        "direction": "bull",
-        "avg_ret_1d": 0.174,
-        "confidence": 0.426
-      },
-      "hop2": [
-        {
-          "ticker": "BIIB",
-          "ticker_corr": 0.531,
-          "implied_dir": "bull",
-          "sector": "03 Life Sciences",
-          "entity": "BIOGEN INC."
-        },
-        {
-          "ticker": "GILD",
-          "ticker_corr": 0.507,
-          "implied_dir": "bull",
-          "sector": "03 Life Sciences",
-          "entity": "GILEAD SCIENCES, INC."
         }
       ]
     },
@@ -7064,7 +7075,66 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "BMRN",
+      "sector": "03 Life Sciences",
+      "entity": "BIOMARIN PHARMACEUTICAL INC",
+      "fund_score": 0.617,
+      "inbound": [
+        {
+          "term": "economic",
+          "direction": "bull",
+          "today_z": 1.889,
+          "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "AMGN",
+      "sector": "03 Life Sciences",
+      "entity": "AMGEN INC",
+      "fund_score": 0.534,
+      "inbound": [
+        {
+          "term": "economic",
+          "direction": "bull",
+          "today_z": 1.889,
+          "hit_rate": 0.583
+        }
+      ]
+    },
+    {
+      "ticker": "BIIB",
+      "sector": "03 Life Sciences",
+      "entity": "BIOGEN INC.",
+      "fund_score": 0.426,
+      "inbound": [
+        {
+          "term": "economic",
+          "via": "AMGN",
+          "direction": "bull",
+          "today_z": 1.889,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "GILD",
+      "sector": "03 Life Sciences",
+      "entity": "GILEAD SCIENCES, INC.",
+      "fund_score": 0.628,
+      "inbound": [
+        {
+          "term": "economic",
+          "via": "AMGN",
+          "direction": "bull",
+          "today_z": 1.889,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 204,
