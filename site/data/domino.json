@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-22T15:46:32+00:00",
+  "generated_at": "2026-08-22T16:50:33+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-22T15:45:22Z",
+    "signal_corr_updated": "2026-08-22T16:49:20Z",
     "n_pairs_total": 4006,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,14 +21,140 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "canada": 2.316,
-    "required": 1.903,
-    "speed": 1.801,
-    "tariffs": 3.181,
+    "trade": 1.774,
+    "talks": 2.732,
+    "canada": 3.431,
+    "speed": 1.912,
+    "tariffs": 4.114,
     "product": 1.645,
-    "allows": 2.202
+    "allows": 2.602,
+    "smart": 1.501,
+    "revealed": 1.919
   },
   "stock_chains": [
+    {
+      "term": "trade",
+      "is_active_today": true,
+      "today_z": 1.774,
+      "hop1": {
+        "ticker": "BLK",
+        "sector": "02 Finance",
+        "entity": "BlackRock, Inc.",
+        "corr": -0.306,
+        "lag": -4,
+        "hit_rate": 0.667,
+        "direction": "bear",
+        "avg_ret_1d": 0.276,
+        "confidence": 0.447
+      },
+      "hop2": [
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.709,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "IWM",
+          "ticker_corr": 0.687,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.686,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "MS",
+          "ticker_corr": 0.679,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "MORGAN STANLEY"
+        },
+        {
+          "ticker": "GS",
+          "ticker_corr": 0.66,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "GOLDMAN SACHS GROUP INC"
+        }
+      ]
+    },
+    {
+      "term": "talks",
+      "is_active_today": true,
+      "today_z": 2.732,
+      "hop1": {
+        "ticker": "AAPL",
+        "sector": "06 Technology",
+        "entity": "Apple Inc.",
+        "corr": -0.3222,
+        "lag": -3,
+        "hit_rate": 0.667,
+        "direction": "bear",
+        "avg_ret_1d": -0.163,
+        "confidence": 0.433
+      },
+      "hop2": [
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.663,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.6,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.59,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "HYG",
+          "ticker_corr": 0.533,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "IWM",
+          "ticker_corr": 0.524,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        }
+      ]
+    },
+    {
+      "term": "trade",
+      "is_active_today": true,
+      "today_z": 1.774,
+      "hop1": {
+        "ticker": "VRTX",
+        "sector": "03 Life Sciences",
+        "entity": "VERTEX PHARMACEUTICALS INC / MA",
+        "corr": 0.3164,
+        "lag": -2,
+        "hit_rate": 0.583,
+        "direction": "bull",
+        "avg_ret_1d": 0.053,
+        "confidence": 0.404
+      },
+      "hop2": []
+    },
     {
       "term": "july",
       "is_active_today": false,
@@ -2711,59 +2837,6 @@
       ]
     },
     {
-      "term": "trade",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "BLK",
-        "sector": "02 Finance",
-        "entity": "BlackRock, Inc.",
-        "corr": -0.306,
-        "lag": -4,
-        "hit_rate": 0.667,
-        "direction": "bear",
-        "avg_ret_1d": 0.276,
-        "confidence": 0.447
-      },
-      "hop2": [
-        {
-          "ticker": "DIA",
-          "ticker_corr": 0.709,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "IWM",
-          "ticker_corr": 0.687,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "SPY",
-          "ticker_corr": 0.686,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "MS",
-          "ticker_corr": 0.679,
-          "implied_dir": "bear",
-          "sector": "02 Finance",
-          "entity": "MORGAN STANLEY"
-        },
-        {
-          "ticker": "GS",
-          "ticker_corr": 0.66,
-          "implied_dir": "bear",
-          "sector": "02 Finance",
-          "entity": "GOLDMAN SACHS GROUP INC"
-        }
-      ]
-    },
-    {
       "term": "openai",
       "is_active_today": false,
       "today_z": null,
@@ -3345,59 +3418,6 @@
           "implied_dir": "bear",
           "sector": "06 Technology",
           "entity": "SYNOPSYS INC"
-        }
-      ]
-    },
-    {
-      "term": "talks",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "AAPL",
-        "sector": "06 Technology",
-        "entity": "Apple Inc.",
-        "corr": -0.3222,
-        "lag": -3,
-        "hit_rate": 0.667,
-        "direction": "bear",
-        "avg_ret_1d": -0.163,
-        "confidence": 0.433
-      },
-      "hop2": [
-        {
-          "ticker": "SPY",
-          "ticker_corr": 0.663,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "DIA",
-          "ticker_corr": 0.6,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.59,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "HYG",
-          "ticker_corr": 0.533,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "IWM",
-          "ticker_corr": 0.524,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
         }
       ]
     },
@@ -4445,23 +4465,6 @@
           "entity": "Palo Alto Networks Inc"
         }
       ]
-    },
-    {
-      "term": "trade",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "VRTX",
-        "sector": "03 Life Sciences",
-        "entity": "VERTEX PHARMACEUTICALS INC / MA",
-        "corr": 0.3164,
-        "lag": -2,
-        "hit_rate": 0.583,
-        "direction": "bull",
-        "avg_ret_1d": 0.053,
-        "confidence": 0.404
-      },
-      "hop2": []
     },
     {
       "term": "lebanon",
@@ -8258,7 +8261,176 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "DIA",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "trade",
+          "via": "BLK",
+          "direction": "bear",
+          "today_z": 1.774,
+          "indirect": true
+        },
+        {
+          "term": "talks",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 2.732,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "IWM",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "trade",
+          "via": "BLK",
+          "direction": "bear",
+          "today_z": 1.774,
+          "indirect": true
+        },
+        {
+          "term": "talks",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 2.732,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "SPY",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "trade",
+          "via": "BLK",
+          "direction": "bear",
+          "today_z": 1.774,
+          "indirect": true
+        },
+        {
+          "term": "talks",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 2.732,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "BLK",
+      "sector": "02 Finance",
+      "entity": "BlackRock, Inc.",
+      "fund_score": 0.591,
+      "inbound": [
+        {
+          "term": "trade",
+          "direction": "bear",
+          "today_z": 1.774,
+          "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "sector": "06 Technology",
+      "entity": "Apple Inc.",
+      "fund_score": 0.42,
+      "inbound": [
+        {
+          "term": "talks",
+          "direction": "bear",
+          "today_z": 2.732,
+          "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "VRTX",
+      "sector": "03 Life Sciences",
+      "entity": "VERTEX PHARMACEUTICALS INC / MA",
+      "fund_score": 0.653,
+      "inbound": [
+        {
+          "term": "trade",
+          "direction": "bull",
+          "today_z": 1.774,
+          "hit_rate": 0.583
+        }
+      ]
+    },
+    {
+      "ticker": "MS",
+      "sector": "02 Finance",
+      "entity": "MORGAN STANLEY",
+      "fund_score": 0.422,
+      "inbound": [
+        {
+          "term": "trade",
+          "via": "BLK",
+          "direction": "bear",
+          "today_z": 1.774,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "GS",
+      "sector": "02 Finance",
+      "entity": "GOLDMAN SACHS GROUP INC",
+      "fund_score": 0.438,
+      "inbound": [
+        {
+          "term": "trade",
+          "via": "BLK",
+          "direction": "bear",
+          "today_z": 1.774,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "talks",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 2.732,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "HYG",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "talks",
+          "via": "AAPL",
+          "direction": "bear",
+          "today_z": 2.732,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 228,
