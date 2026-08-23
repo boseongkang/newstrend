@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-23T17:45:51+00:00",
+  "generated_at": "2026-08-23T18:57:08+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-23T17:44:33Z",
+    "signal_corr_updated": "2026-08-23T18:56:02Z",
     "n_pairs_total": 3895,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,18 +21,72 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "canada": 1.908,
-    "warns": 2.047,
-    "david": 1.658,
-    "features": 1.525,
-    "host": 2.47,
-    "auto": 7.621,
-    "centers": 1.753,
-    "discuss": 1.614,
-    "enough": 1.542,
-    "chair": 2.086
+    "center": 1.659,
+    "countries": 1.726,
+    "canada": 2.147,
+    "warns": 2.404,
+    "david": 2.079,
+    "features": 1.643,
+    "questions": 1.763,
+    "host": 3.017,
+    "knowledge": 2.252,
+    "centers": 2.074,
+    "auto": 8.429,
+    "discuss": 1.998,
+    "enough": 1.814,
+    "chair": 2.372
   },
   "stock_chains": [
+    {
+      "term": "countries",
+      "is_active_today": true,
+      "today_z": 1.726,
+      "hop1": {
+        "ticker": "SNPS",
+        "sector": "06 Technology",
+        "entity": "SYNOPSYS INC",
+        "corr": -0.362,
+        "lag": -5,
+        "hit_rate": 0.667,
+        "direction": "bear",
+        "avg_ret_1d": 0.53,
+        "confidence": 0.447
+      },
+      "hop2": [
+        {
+          "ticker": "CDNS",
+          "ticker_corr": 0.698,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "CADENCE DESIGN SYSTEMS INC"
+        }
+      ]
+    },
+    {
+      "term": "countries",
+      "is_active_today": true,
+      "today_z": 1.726,
+      "hop1": {
+        "ticker": "CDNS",
+        "sector": "06 Technology",
+        "entity": "CADENCE DESIGN SYSTEMS INC",
+        "corr": -0.3448,
+        "lag": -5,
+        "hit_rate": 0.667,
+        "direction": "bear",
+        "avg_ret_1d": 0.936,
+        "confidence": 0.441
+      },
+      "hop2": [
+        {
+          "ticker": "SNPS",
+          "ticker_corr": 0.698,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "SYNOPSYS INC"
+        }
+      ]
+    },
     {
       "term": "july",
       "is_active_today": false,
@@ -3070,31 +3124,6 @@
       ]
     },
     {
-      "term": "countries",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "SNPS",
-        "sector": "06 Technology",
-        "entity": "SYNOPSYS INC",
-        "corr": -0.362,
-        "lag": -5,
-        "hit_rate": 0.667,
-        "direction": "bear",
-        "avg_ret_1d": 0.53,
-        "confidence": 0.447
-      },
-      "hop2": [
-        {
-          "ticker": "CDNS",
-          "ticker_corr": 0.698,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "CADENCE DESIGN SYSTEMS INC"
-        }
-      ]
-    },
-    {
       "term": "matters",
       "is_active_today": false,
       "today_z": null,
@@ -3309,31 +3338,6 @@
           "implied_dir": "bull",
           "sector": null,
           "entity": null
-        }
-      ]
-    },
-    {
-      "term": "countries",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CDNS",
-        "sector": "06 Technology",
-        "entity": "CADENCE DESIGN SYSTEMS INC",
-        "corr": -0.3448,
-        "lag": -5,
-        "hit_rate": 0.667,
-        "direction": "bear",
-        "avg_ret_1d": 0.936,
-        "confidence": 0.441
-      },
-      "hop2": [
-        {
-          "ticker": "SNPS",
-          "ticker_corr": 0.698,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "SYNOPSYS INC"
         }
       ]
     },
@@ -8509,7 +8513,50 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "SNPS",
+      "sector": "06 Technology",
+      "entity": "SYNOPSYS INC",
+      "fund_score": 0.491,
+      "inbound": [
+        {
+          "term": "countries",
+          "direction": "bear",
+          "today_z": 1.726,
+          "hit_rate": 0.667
+        },
+        {
+          "term": "countries",
+          "via": "CDNS",
+          "direction": "bear",
+          "today_z": 1.726,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "CDNS",
+      "sector": "06 Technology",
+      "entity": "CADENCE DESIGN SYSTEMS INC",
+      "fund_score": 0.522,
+      "inbound": [
+        {
+          "term": "countries",
+          "direction": "bear",
+          "today_z": 1.726,
+          "hit_rate": 0.667
+        },
+        {
+          "term": "countries",
+          "via": "SNPS",
+          "direction": "bear",
+          "today_z": 1.726,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 234,
