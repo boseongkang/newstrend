@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-24T16:04:41+00:00",
+  "generated_at": "2026-08-24T17:06:04+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-24T16:03:28Z",
+    "signal_corr_updated": "2026-08-24T17:04:58Z",
     "n_pairs_total": 3840,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,27 +21,39 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "monday": 1.83,
-    "sale": 1.575,
-    "hong": 1.735,
-    "tehran": 2.603,
-    "kong": 2.378,
-    "development": 2.464,
-    "partners": 1.769,
-    "funding": 2.032,
-    "review": 1.996,
-    "brand": 2.582,
-    "sanctions": 2.756,
-    "details": 1.878,
-    "available": 1.647,
-    "holdings": 1.686,
-    "began": 3.225
+    "economic": 1.878,
+    "monday": 2.145,
+    "sale": 2.217,
+    "nvidia": 1.663,
+    "hong": 1.715,
+    "tehran": 3.09,
+    "kong": 2.352,
+    "dollar": 1.802,
+    "services": 1.687,
+    "development": 2.421,
+    "partners": 1.692,
+    "treasury": 1.551,
+    "funding": 2.321,
+    "list": 1.571,
+    "review": 1.923,
+    "fast": 1.698,
+    "brand": 3.055,
+    "single": 1.71,
+    "auto": 3.216,
+    "sanctions": 3.177,
+    "details": 1.786,
+    "offers": 1.757,
+    "available": 2.306,
+    "holdings": 1.5,
+    "plus": 1.725,
+    "yields": 1.609,
+    "began": 3.326
   },
   "stock_chains": [
     {
       "term": "tehran",
       "is_active_today": true,
-      "today_z": 2.603,
+      "today_z": 3.09,
       "hop1": {
         "ticker": "LRCX",
         "sector": "06 Technology",
@@ -92,9 +104,41 @@
       ]
     },
     {
+      "term": "economic",
+      "is_active_today": true,
+      "today_z": 1.878,
+      "hop1": {
+        "ticker": "AMGN",
+        "sector": "03 Life Sciences",
+        "entity": "AMGEN INC",
+        "corr": 0.3224,
+        "lag": -4,
+        "hit_rate": 0.692,
+        "direction": "bull",
+        "avg_ret_1d": 0.282,
+        "confidence": 0.472
+      },
+      "hop2": [
+        {
+          "ticker": "BIIB",
+          "ticker_corr": 0.529,
+          "implied_dir": "bull",
+          "sector": "03 Life Sciences",
+          "entity": "BIOGEN INC."
+        },
+        {
+          "ticker": "GILD",
+          "ticker_corr": 0.506,
+          "implied_dir": "bull",
+          "sector": "03 Life Sciences",
+          "entity": "GILEAD SCIENCES, INC."
+        }
+      ]
+    },
+    {
       "term": "hong",
       "is_active_today": true,
-      "today_z": 1.735,
+      "today_z": 1.715,
       "hop1": {
         "ticker": "KLAC",
         "sector": "08 Industrial Applications and Services",
@@ -111,7 +155,7 @@
     {
       "term": "kong",
       "is_active_today": true,
-      "today_z": 2.378,
+      "today_z": 2.352,
       "hop1": {
         "ticker": "KLAC",
         "sector": "08 Industrial Applications and Services",
@@ -128,7 +172,7 @@
     {
       "term": "monday",
       "is_active_today": true,
-      "today_z": 1.83,
+      "today_z": 2.145,
       "hop1": {
         "ticker": "BLK",
         "sector": "02 Finance",
@@ -181,7 +225,7 @@
     {
       "term": "monday",
       "is_active_today": true,
-      "today_z": 1.83,
+      "today_z": 2.145,
       "hop1": {
         "ticker": "MRNA",
         "sector": "03 Life Sciences",
@@ -198,7 +242,7 @@
     {
       "term": "tehran",
       "is_active_today": true,
-      "today_z": 2.603,
+      "today_z": 3.09,
       "hop1": {
         "ticker": "AMAT",
         "sector": "04 Manufacturing",
@@ -1997,38 +2041,6 @@
         "confidence": 0.473
       },
       "hop2": []
-    },
-    {
-      "term": "economic",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "AMGN",
-        "sector": "03 Life Sciences",
-        "entity": "AMGEN INC",
-        "corr": 0.3224,
-        "lag": -4,
-        "hit_rate": 0.692,
-        "direction": "bull",
-        "avg_ret_1d": 0.282,
-        "confidence": 0.472
-      },
-      "hop2": [
-        {
-          "ticker": "BIIB",
-          "ticker_corr": 0.529,
-          "implied_dir": "bull",
-          "sector": "03 Life Sciences",
-          "entity": "BIOGEN INC."
-        },
-        {
-          "ticker": "GILD",
-          "ticker_corr": 0.506,
-          "implied_dir": "bull",
-          "sector": "03 Life Sciences",
-          "entity": "GILEAD SCIENCES, INC."
-        }
-      ]
     },
     {
       "term": "ceasefire",
@@ -8594,14 +8606,14 @@
         {
           "term": "tehran",
           "direction": "bull",
-          "today_z": 2.603,
+          "today_z": 3.09,
           "hit_rate": 0.778
         },
         {
           "term": "tehran",
           "via": "AMAT",
           "direction": "bull",
-          "today_z": 2.603,
+          "today_z": 3.09,
           "indirect": true
         }
       ]
@@ -8615,13 +8627,13 @@
         {
           "term": "hong",
           "direction": "bear",
-          "today_z": 1.735,
+          "today_z": 1.715,
           "hit_rate": 0.562
         },
         {
           "term": "kong",
           "direction": "bear",
-          "today_z": 2.378,
+          "today_z": 2.352,
           "hit_rate": 0.529
         }
       ]
@@ -8635,14 +8647,14 @@
         {
           "term": "tehran",
           "direction": "bull",
-          "today_z": 2.603,
+          "today_z": 3.09,
           "hit_rate": 0.556
         },
         {
           "term": "tehran",
           "via": "LRCX",
           "direction": "bull",
-          "today_z": 2.603,
+          "today_z": 3.09,
           "indirect": true
         }
       ]
@@ -8657,14 +8669,14 @@
           "term": "tehran",
           "via": "LRCX",
           "direction": "bull",
-          "today_z": 2.603,
+          "today_z": 3.09,
           "indirect": true
         },
         {
           "term": "tehran",
           "via": "AMAT",
           "direction": "bull",
-          "today_z": 2.603,
+          "today_z": 3.09,
           "indirect": true
         }
       ]
@@ -8679,14 +8691,14 @@
           "term": "tehran",
           "via": "LRCX",
           "direction": "bull",
-          "today_z": 2.603,
+          "today_z": 3.09,
           "indirect": true
         },
         {
           "term": "tehran",
           "via": "AMAT",
           "direction": "bull",
-          "today_z": 2.603,
+          "today_z": 3.09,
           "indirect": true
         }
       ]
@@ -8701,14 +8713,14 @@
           "term": "tehran",
           "via": "LRCX",
           "direction": "bull",
-          "today_z": 2.603,
+          "today_z": 3.09,
           "indirect": true
         },
         {
           "term": "tehran",
           "via": "AMAT",
           "direction": "bull",
-          "today_z": 2.603,
+          "today_z": 3.09,
           "indirect": true
         }
       ]
@@ -8723,15 +8735,29 @@
           "term": "tehran",
           "via": "LRCX",
           "direction": "bull",
-          "today_z": 2.603,
+          "today_z": 3.09,
           "indirect": true
         },
         {
           "term": "tehran",
           "via": "AMAT",
           "direction": "bull",
-          "today_z": 2.603,
+          "today_z": 3.09,
           "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "AMGN",
+      "sector": "03 Life Sciences",
+      "entity": "AMGEN INC",
+      "fund_score": 0.534,
+      "inbound": [
+        {
+          "term": "economic",
+          "direction": "bull",
+          "today_z": 1.878,
+          "hit_rate": 0.692
         }
       ]
     },
@@ -8744,7 +8770,7 @@
         {
           "term": "monday",
           "direction": "bear",
-          "today_z": 1.83,
+          "today_z": 2.145,
           "hit_rate": 0.5
         }
       ]
@@ -8758,8 +8784,38 @@
         {
           "term": "monday",
           "direction": "bull",
-          "today_z": 1.83,
+          "today_z": 2.145,
           "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "BIIB",
+      "sector": "03 Life Sciences",
+      "entity": "BIOGEN INC.",
+      "fund_score": 0.426,
+      "inbound": [
+        {
+          "term": "economic",
+          "via": "AMGN",
+          "direction": "bull",
+          "today_z": 1.878,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "GILD",
+      "sector": "03 Life Sciences",
+      "entity": "GILEAD SCIENCES, INC.",
+      "fund_score": 0.628,
+      "inbound": [
+        {
+          "term": "economic",
+          "via": "AMGN",
+          "direction": "bull",
+          "today_z": 1.878,
+          "indirect": true
         }
       ]
     },
@@ -8773,7 +8829,7 @@
           "term": "monday",
           "via": "BLK",
           "direction": "bear",
-          "today_z": 1.83,
+          "today_z": 2.145,
           "indirect": true
         }
       ]
@@ -8788,7 +8844,7 @@
           "term": "monday",
           "via": "BLK",
           "direction": "bear",
-          "today_z": 1.83,
+          "today_z": 2.145,
           "indirect": true
         }
       ]
@@ -8803,7 +8859,7 @@
           "term": "monday",
           "via": "BLK",
           "direction": "bear",
-          "today_z": 1.83,
+          "today_z": 2.145,
           "indirect": true
         }
       ]
@@ -8818,7 +8874,7 @@
           "term": "monday",
           "via": "BLK",
           "direction": "bear",
-          "today_z": 1.83,
+          "today_z": 2.145,
           "indirect": true
         }
       ]
@@ -8833,7 +8889,7 @@
           "term": "monday",
           "via": "BLK",
           "direction": "bear",
-          "today_z": 1.83,
+          "today_z": 2.145,
           "indirect": true
         }
       ]
