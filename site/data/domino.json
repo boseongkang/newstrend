@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-08-24T11:03:08+00:00",
+  "generated_at": "2026-08-24T11:54:27+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-24T11:02:02Z",
-    "n_pairs_total": 3818,
+    "signal_corr_updated": "2026-08-24T11:53:22Z",
+    "n_pairs_total": 3827,
     "n_dates": 180,
     "prices_tickers": 90,
     "trends_terms": 600
@@ -21,9 +21,11 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "funding": 2.032,
-    "brand": 2.582,
-    "transparency": 3.211
+    "funding": 2.177,
+    "brand": 2.819,
+    "sanctions": 1.702,
+    "transparency": 3.778,
+    "began": 1.611
   },
   "stock_chains": [
     {
@@ -1005,6 +1007,76 @@
           "entity": null
         }
       ]
+    },
+    {
+      "term": "spending",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "PAYX",
+        "sector": "07 Trade & Services",
+        "entity": "PAYCHEX INC",
+        "corr": 0.3327,
+        "lag": -2,
+        "hit_rate": 0.733,
+        "direction": "bull",
+        "avg_ret_1d": 0.359,
+        "confidence": 0.509
+      },
+      "hop2": [
+        {
+          "ticker": "ADP",
+          "ticker_corr": 0.857,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "AUTOMATIC DATA PROCESSING INC"
+        },
+        {
+          "ticker": "ADBE",
+          "ticker_corr": 0.577,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "ADOBE INC."
+        },
+        {
+          "ticker": "CRM",
+          "ticker_corr": 0.561,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "Salesforce, Inc."
+        },
+        {
+          "ticker": "DOCU",
+          "ticker_corr": 0.514,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "DOCUSIGN, INC."
+        },
+        {
+          "ticker": "INTU",
+          "ticker_corr": 0.508,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "INTUIT INC."
+        }
+      ]
+    },
+    {
+      "term": "spending",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "BMRN",
+        "sector": "03 Life Sciences",
+        "entity": "BIOMARIN PHARMACEUTICAL INC",
+        "corr": 0.3256,
+        "lag": -1,
+        "hit_rate": 0.733,
+        "direction": "bull",
+        "avg_ret_1d": 1.184,
+        "confidence": 0.507
+      },
+      "hop2": []
     },
     {
       "term": "investment",
@@ -7139,59 +7211,6 @@
       "hop2": []
     },
     {
-      "term": "network",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "AAPL",
-        "sector": "06 Technology",
-        "entity": "Apple Inc.",
-        "corr": -0.3093,
-        "lag": -1,
-        "hit_rate": 0.5,
-        "direction": "bear",
-        "avg_ret_1d": -0.007,
-        "confidence": 0.357
-      },
-      "hop2": [
-        {
-          "ticker": "SPY",
-          "ticker_corr": 0.663,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "DIA",
-          "ticker_corr": 0.6,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.59,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "HYG",
-          "ticker_corr": 0.533,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "IWM",
-          "ticker_corr": 0.524,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        }
-      ]
-    },
-    {
       "term": "military",
       "is_active_today": false,
       "today_z": null,
@@ -8527,7 +8546,7 @@
   "ticker_pressure": [],
   "quality": {
     "data_window_days": 180,
-    "stock_signals": 235,
+    "stock_signals": 236,
     "macro_signals": 11,
     "sector_diversity": 8,
     "grade": "A",
