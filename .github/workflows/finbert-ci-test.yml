@@ -1,0 +1,138 @@
+# finbert-ci-test — one-off benchmark: can ubuntu-latest score a full day of
+# FinBERT sentiment within CI limits? (evaluating a CI fallback for the local
+# M3 launchd path, which goes dark when the laptop lid is closed)
+#
+# DRY RUN by design:
+#   - workflow_dispatch only, contents: read — cannot push even by accident
+#   - sentiment_finbert_local.py runs WITHOUT --commit (no push path)
+#   - the target day's cached sentiment file is deleted runner-local only,
+#     to force exactly one day of scoring
+#
+# Reports to the run's step summary: model load time (cold/warm), article
+# count, scoring wall time, peak RSS, and margin vs the 6h job timeout.
+
+name: finbert-ci-test
+
+on:
+  workflow_dispatch:
+    inputs:
+      batch_size:
+        description: "FinBERT batch size (prod uses 32)"
+        default: "32"
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: finbert-ci-test
+  cancel-in-progress: false
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Cache HuggingFace model + pip wheels
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/huggingface
+            ~/.cache/pip
+          key: finbert-ci-test-v1
+
+      - name: Install sentiment stack (CPU torch)
+        run: |
+          python -m pip install --upgrade pip
+          # CPU-only wheel (~200MB vs ~900MB CUDA default); same pins as
+          # requirements-local.txt's sentiment stack.
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2.0"
+          pip install "transformers>=4.38.0" "tokenizers>=0.15.0"
+
+      - name: Set up data-cache worktree (shallow, read-only)
+        run: |
+          git fetch --depth=1 origin data-cache
+          mkdir -p "$HOME/.cache/newstrend"
+          git worktree add "$HOME/.cache/newstrend/cache" FETCH_HEAD
+
+      - name: Time model load (cold = download+load on cache miss, warm = HF cache)
+        run: |
+          python - <<'PY'
+          import time
+          t0 = time.time()
+          import torch
+          from transformers import AutoTokenizer, AutoModelForSequenceClassification
+          t_import = time.time() - t0
+          t0 = time.time()
+          AutoTokenizer.from_pretrained("ProsusAI/finbert")
+          AutoModelForSequenceClassification.from_pretrained("ProsusAI/finbert")
+          t_cold = time.time() - t0
+          t0 = time.time()
+          AutoTokenizer.from_pretrained("ProsusAI/finbert")
+          AutoModelForSequenceClassification.from_pretrained("ProsusAI/finbert")
+          t_warm = time.time() - t0
+          print(f"[load] import torch+transformers: {t_import:.1f}s")
+          print(f"[load] cold from_pretrained (incl. download on cache miss): {t_cold:.1f}s")
+          print(f"[load] warm from_pretrained: {t_warm:.1f}s")
+          print(f"[env] torch {torch.__version__}  threads={torch.get_num_threads()}")
+          with open("load_times.txt", "w") as f:
+              f.write(f"{t_import:.1f} {t_cold:.1f} {t_warm:.1f}")
+          PY
+
+      - name: Pick target day and clear its cached sentiment (runner-local only)
+        run: |
+          CACHE="$HOME/.cache/newstrend/cache"
+          TARGET=$(ls "$CACHE/data/news_archive" \
+                   | grep -oE '^[0-9]{4}-[0-9]{2}-[0-9]{2}' | sort -u | tail -1)
+          echo "TARGET=$TARGET" >> "$GITHUB_ENV"
+          IN=$(ls "$CACHE/data/news_archive/$TARGET".jsonl.gz \
+                  "$CACHE/data/news_archive/$TARGET".jsonl 2>/dev/null | head -1)
+          N=$( (zcat "$IN" 2>/dev/null || cat "$IN") | wc -l )
+          echo "N_RAW=$N" >> "$GITHUB_ENV"
+          echo "target day: $TARGET  raw lines: $N  ($IN)"
+          # force --window-days 1 to see this day as missing; nothing is
+          # pushed back (no --commit + read-only token), so this deletion
+          # lives and dies with the runner.
+          rm -f "$CACHE/data/sentiment_per_day/sentiment_$TARGET.json"
+
+      - name: Score one day (dry run, no --commit)
+        run: |
+          /usr/bin/time -v python scripts/sentiment_finbert_local.py \
+            --window-days 1 \
+            --batch-size "${{ github.event.inputs.batch_size || '32' }}" \
+            2> time_v.txt || { cat time_v.txt; exit 1; }
+          cat time_v.txt
+
+      - name: Report
+        if: always()
+        run: |
+          CACHE="$HOME/.cache/newstrend/cache"
+          OUT="$CACHE/data/sentiment_per_day/sentiment_$TARGET.json"
+          [ -f time_v.txt ] || touch time_v.txt
+          MAXRSS_KB=$(grep -oE 'Maximum resident set size[^0-9]*[0-9]+' time_v.txt | grep -oE '[0-9]+$' || echo 0)
+          read T_IMPORT T_COLD T_WARM < load_times.txt 2>/dev/null || true
+          python - "$OUT" "$MAXRSS_KB" "${T_IMPORT:-0}" "${T_COLD:-0}" "${T_WARM:-0}" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, os, sys
+          out, maxrss_kb, t_import, t_cold, t_warm = sys.argv[1:6]
+          rss_gb = int(maxrss_kb) / 1024 / 1024
+          print("## FinBERT CI benchmark\n")
+          print(f"- target day: `{os.environ.get('TARGET','?')}`  (raw lines: {os.environ.get('N_RAW','?')})")
+          print(f"- import torch+transformers: **{t_import}s**, model load cold: **{t_cold}s**, warm: **{t_warm}s**")
+          try:
+              d = json.load(open(out))
+          except Exception as e:
+              print(f"- **scoring output missing/unreadable** ({e}) — step failed or timed out")
+              sys.exit(0)
+          el = d["elapsed_seconds"]
+          print(f"- articles scored: **{d['n_articles_scored']}** (skipped empty: {d['n_skipped_empty']}, with tickers: {d['n_with_tickers']})")
+          print(f"- scoring wall time: **{el:.0f}s = {el/60:.1f}min**  throughput: **{d['throughput_per_min']}/min**  device: {d['device']}")
+          print(f"- peak RSS: **{rss_gb:.2f} GB** (7GB runner limit)" if rss_gb else "- peak RSS: n/a")
+          print(f"- 6h timeout margin: day took {el/3600*100:.1f}% of 6h → headroom ×{21600/el:.1f}")
+          PY
+          cat "$GITHUB_STEP_SUMMARY"
