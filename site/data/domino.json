@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-08-25T14:16:28+00:00",
+  "generated_at": "2026-08-25T15:15:04+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-25T14:15:15Z",
-    "n_pairs_total": 3834,
+    "signal_corr_updated": "2026-08-25T15:14:13Z",
+    "n_pairs_total": 3830,
     "n_dates": 180,
     "prices_tickers": 90,
     "trends_terms": 600
@@ -21,28 +21,35 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "plans": 1.697,
-    "tehran": 1.7,
-    "bitcoin": 2.232,
-    "gold": 2.605,
-    "site": 1.857,
-    "project": 1.809,
-    "warns": 2.022,
-    "built": 2.262,
-    "australia": 2.241,
-    "france": 1.883,
-    "sanctions": 1.919,
-    "banks": 2.932,
-    "centers": 1.881,
-    "single": 1.573,
-    "smart": 1.597,
-    "special": 1.729
+    "trade": 1.524,
+    "plans": 1.879,
+    "tehran": 1.927,
+    "bitcoin": 2.313,
+    "gold": 2.735,
+    "site": 2.264,
+    "project": 2.01,
+    "impact": 1.582,
+    "warns": 2.269,
+    "systems": 1.714,
+    "built": 2.442,
+    "australia": 2.381,
+    "france": 1.933,
+    "sanctions": 2.213,
+    "banks": 3.402,
+    "centers": 2.404,
+    "beijing": 1.573,
+    "single": 1.819,
+    "targets": 1.506,
+    "everything": 1.567,
+    "london": 1.505,
+    "smart": 1.997,
+    "special": 1.813
   },
   "stock_chains": [
     {
       "term": "gold",
       "is_active_today": true,
-      "today_z": 2.605,
+      "today_z": 2.735,
       "hop1": {
         "ticker": "XOM",
         "sector": "01 Energy & Transportation",
@@ -74,7 +81,7 @@
     {
       "term": "gold",
       "is_active_today": true,
-      "today_z": 2.605,
+      "today_z": 2.735,
       "hop1": {
         "ticker": "CVX",
         "sector": "01 Energy & Transportation",
@@ -106,7 +113,7 @@
     {
       "term": "tehran",
       "is_active_today": true,
-      "today_z": 1.7,
+      "today_z": 1.927,
       "hop1": {
         "ticker": "LRCX",
         "sector": "06 Technology",
@@ -157,9 +164,26 @@
       ]
     },
     {
+      "term": "trade",
+      "is_active_today": true,
+      "today_z": 1.524,
+      "hop1": {
+        "ticker": "MRNA",
+        "sector": "03 Life Sciences",
+        "entity": "Moderna, Inc.",
+        "corr": 0.3719,
+        "lag": -2,
+        "hit_rate": 0.643,
+        "direction": "bull",
+        "avg_ret_1d": 2.55,
+        "confidence": 0.468
+      },
+      "hop2": []
+    },
+    {
       "term": "gold",
       "is_active_today": true,
-      "today_z": 2.605,
+      "today_z": 2.735,
       "hop1": {
         "ticker": "COST",
         "sector": "07 Trade & Services",
@@ -176,7 +200,7 @@
     {
       "term": "tehran",
       "is_active_today": true,
-      "today_z": 1.7,
+      "today_z": 1.927,
       "hop1": {
         "ticker": "AMAT",
         "sector": "04 Manufacturing",
@@ -227,9 +251,41 @@
       ]
     },
     {
+      "term": "trade",
+      "is_active_today": true,
+      "today_z": 1.524,
+      "hop1": {
+        "ticker": "COIN",
+        "sector": "09 Crypto Assets",
+        "entity": "Coinbase Global, Inc.",
+        "corr": 0.3461,
+        "lag": -2,
+        "hit_rate": 0.571,
+        "direction": "bull",
+        "avg_ret_1d": 2.13,
+        "confidence": 0.42
+      },
+      "hop2": [
+        {
+          "ticker": "HOOD",
+          "ticker_corr": 0.706,
+          "implied_dir": "bull",
+          "sector": "09 Crypto Assets",
+          "entity": "Robinhood Markets, Inc."
+        },
+        {
+          "ticker": "SOFI",
+          "ticker_corr": 0.519,
+          "implied_dir": "bull",
+          "sector": "02 Finance",
+          "entity": "SoFi Technologies, Inc."
+        }
+      ]
+    },
+    {
       "term": "tehran",
       "is_active_today": true,
-      "today_z": 1.7,
+      "today_z": 1.927,
       "hop1": {
         "ticker": "KLAC",
         "sector": "08 Industrial Applications and Services",
@@ -246,7 +302,7 @@
     {
       "term": "plans",
       "is_active_today": true,
-      "today_z": 1.697,
+      "today_z": 1.879,
       "hop1": {
         "ticker": "BMRN",
         "sector": "03 Life Sciences",
@@ -2232,23 +2288,6 @@
       ]
     },
     {
-      "term": "trade",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "MRNA",
-        "sector": "03 Life Sciences",
-        "entity": "Moderna, Inc.",
-        "corr": 0.3719,
-        "lag": -2,
-        "hit_rate": 0.643,
-        "direction": "bull",
-        "avg_ret_1d": 2.55,
-        "confidence": 0.468
-      },
-      "hop2": []
-    },
-    {
       "term": "google",
       "is_active_today": false,
       "today_z": null,
@@ -4077,38 +4116,6 @@
           "implied_dir": "bull",
           "sector": null,
           "entity": null
-        }
-      ]
-    },
-    {
-      "term": "trade",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "COIN",
-        "sector": "09 Crypto Assets",
-        "entity": "Coinbase Global, Inc.",
-        "corr": 0.3461,
-        "lag": -2,
-        "hit_rate": 0.571,
-        "direction": "bull",
-        "avg_ret_1d": 2.13,
-        "confidence": 0.42
-      },
-      "hop2": [
-        {
-          "ticker": "HOOD",
-          "ticker_corr": 0.706,
-          "implied_dir": "bull",
-          "sector": "09 Crypto Assets",
-          "entity": "Robinhood Markets, Inc."
-        },
-        {
-          "ticker": "SOFI",
-          "ticker_corr": 0.519,
-          "implied_dir": "bull",
-          "sector": "02 Finance",
-          "entity": "SoFi Technologies, Inc."
         }
       ]
     },
@@ -8143,7 +8150,7 @@
       "lag": -4,
       "hit_rate": 0.5,
       "direction": "bull",
-      "is_active_today": false
+      "is_active_today": true
     },
     {
       "term": "amazon",
@@ -8192,14 +8199,14 @@
         {
           "term": "gold",
           "direction": "bull",
-          "today_z": 2.605,
+          "today_z": 2.735,
           "hit_rate": 0.909
         },
         {
           "term": "gold",
           "via": "CVX",
           "direction": "bull",
-          "today_z": 2.605,
+          "today_z": 2.735,
           "indirect": true
         }
       ]
@@ -8213,14 +8220,14 @@
         {
           "term": "gold",
           "direction": "bull",
-          "today_z": 2.605,
+          "today_z": 2.735,
           "hit_rate": 0.909
         },
         {
           "term": "gold",
           "via": "XOM",
           "direction": "bull",
-          "today_z": 2.605,
+          "today_z": 2.735,
           "indirect": true
         }
       ]
@@ -8234,14 +8241,14 @@
         {
           "term": "tehran",
           "direction": "bull",
-          "today_z": 1.7,
+          "today_z": 1.927,
           "hit_rate": 0.8
         },
         {
           "term": "tehran",
           "via": "AMAT",
           "direction": "bull",
-          "today_z": 1.7,
+          "today_z": 1.927,
           "indirect": true
         }
       ]
@@ -8255,14 +8262,14 @@
         {
           "term": "tehran",
           "direction": "bull",
-          "today_z": 1.7,
+          "today_z": 1.927,
           "hit_rate": 0.6
         },
         {
           "term": "tehran",
           "via": "LRCX",
           "direction": "bull",
-          "today_z": 1.7,
+          "today_z": 1.927,
           "indirect": true
         }
       ]
@@ -8277,14 +8284,14 @@
           "term": "gold",
           "via": "XOM",
           "direction": "bull",
-          "today_z": 2.605,
+          "today_z": 2.735,
           "indirect": true
         },
         {
           "term": "gold",
           "via": "CVX",
           "direction": "bull",
-          "today_z": 2.605,
+          "today_z": 2.735,
           "indirect": true
         }
       ]
@@ -8299,14 +8306,14 @@
           "term": "tehran",
           "via": "LRCX",
           "direction": "bull",
-          "today_z": 1.7,
+          "today_z": 1.927,
           "indirect": true
         },
         {
           "term": "tehran",
           "via": "AMAT",
           "direction": "bull",
-          "today_z": 1.7,
+          "today_z": 1.927,
           "indirect": true
         }
       ]
@@ -8321,14 +8328,14 @@
           "term": "tehran",
           "via": "LRCX",
           "direction": "bull",
-          "today_z": 1.7,
+          "today_z": 1.927,
           "indirect": true
         },
         {
           "term": "tehran",
           "via": "AMAT",
           "direction": "bull",
-          "today_z": 1.7,
+          "today_z": 1.927,
           "indirect": true
         }
       ]
@@ -8343,14 +8350,14 @@
           "term": "tehran",
           "via": "LRCX",
           "direction": "bull",
-          "today_z": 1.7,
+          "today_z": 1.927,
           "indirect": true
         },
         {
           "term": "tehran",
           "via": "AMAT",
           "direction": "bull",
-          "today_z": 1.7,
+          "today_z": 1.927,
           "indirect": true
         }
       ]
@@ -8365,15 +8372,29 @@
           "term": "tehran",
           "via": "LRCX",
           "direction": "bull",
-          "today_z": 1.7,
+          "today_z": 1.927,
           "indirect": true
         },
         {
           "term": "tehran",
           "via": "AMAT",
           "direction": "bull",
-          "today_z": 1.7,
+          "today_z": 1.927,
           "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MRNA",
+      "sector": "03 Life Sciences",
+      "entity": "Moderna, Inc.",
+      "fund_score": 0.134,
+      "inbound": [
+        {
+          "term": "trade",
+          "direction": "bull",
+          "today_z": 1.524,
+          "hit_rate": 0.643
         }
       ]
     },
@@ -8386,8 +8407,22 @@
         {
           "term": "gold",
           "direction": "bull",
-          "today_z": 2.605,
+          "today_z": 2.735,
           "hit_rate": 0.636
+        }
+      ]
+    },
+    {
+      "ticker": "COIN",
+      "sector": "09 Crypto Assets",
+      "entity": "Coinbase Global, Inc.",
+      "fund_score": 0.579,
+      "inbound": [
+        {
+          "term": "trade",
+          "direction": "bull",
+          "today_z": 1.524,
+          "hit_rate": 0.571
         }
       ]
     },
@@ -8400,7 +8435,7 @@
         {
           "term": "tehran",
           "direction": "bear",
-          "today_z": 1.7,
+          "today_z": 1.927,
           "hit_rate": 0.5
         }
       ]
@@ -8414,8 +8449,38 @@
         {
           "term": "plans",
           "direction": "bull",
-          "today_z": 1.697,
+          "today_z": 1.879,
           "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "HOOD",
+      "sector": "09 Crypto Assets",
+      "entity": "Robinhood Markets, Inc.",
+      "fund_score": 0.479,
+      "inbound": [
+        {
+          "term": "trade",
+          "via": "COIN",
+          "direction": "bull",
+          "today_z": 1.524,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "SOFI",
+      "sector": "02 Finance",
+      "entity": "SoFi Technologies, Inc.",
+      "fund_score": 0.328,
+      "inbound": [
+        {
+          "term": "trade",
+          "via": "COIN",
+          "direction": "bull",
+          "today_z": 1.524,
+          "indirect": true
         }
       ]
     }
