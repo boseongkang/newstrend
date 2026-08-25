@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-25T11:55:26+00:00",
+  "generated_at": "2026-08-25T13:23:06+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-25T11:54:18Z",
+    "signal_corr_updated": "2026-08-25T13:22:06Z",
     "n_pairs_total": 3834,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,20 +21,23 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
+    "plans": 1.515,
     "bitcoin": 2.151,
-    "gold": 2.116,
-    "built": 1.66,
-    "australia": 2.055,
-    "france": 1.883,
-    "insights": 2.026,
-    "special": 1.813,
-    "plus": 1.587
+    "gold": 2.474,
+    "project": 1.608,
+    "warns": 1.776,
+    "built": 2.081,
+    "australia": 2.102,
+    "france": 1.834,
+    "sanctions": 1.624,
+    "banks": 2.462,
+    "special": 1.645
   },
   "stock_chains": [
     {
       "term": "gold",
       "is_active_today": true,
-      "today_z": 2.116,
+      "today_z": 2.474,
       "hop1": {
         "ticker": "XOM",
         "sector": "01 Energy & Transportation",
@@ -66,7 +69,7 @@
     {
       "term": "gold",
       "is_active_today": true,
-      "today_z": 2.116,
+      "today_z": 2.474,
       "hop1": {
         "ticker": "CVX",
         "sector": "01 Energy & Transportation",
@@ -98,7 +101,7 @@
     {
       "term": "gold",
       "is_active_today": true,
-      "today_z": 2.116,
+      "today_z": 2.474,
       "hop1": {
         "ticker": "COST",
         "sector": "07 Trade & Services",
@@ -109,6 +112,23 @@
         "direction": "bull",
         "avg_ret_1d": 0.446,
         "confidence": 0.431
+      },
+      "hop2": []
+    },
+    {
+      "term": "plans",
+      "is_active_today": true,
+      "today_z": 1.515,
+      "hop1": {
+        "ticker": "BMRN",
+        "sector": "03 Life Sciences",
+        "entity": "BIOMARIN PHARMACEUTICAL INC",
+        "corr": 0.3065,
+        "lag": -3,
+        "hit_rate": 0.5,
+        "direction": "bull",
+        "avg_ret_1d": -0.223,
+        "confidence": 0.329
       },
       "hop2": []
     },
@@ -7519,23 +7539,6 @@
       ]
     },
     {
-      "term": "plans",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "BMRN",
-        "sector": "03 Life Sciences",
-        "entity": "BIOMARIN PHARMACEUTICAL INC",
-        "corr": 0.3065,
-        "lag": -3,
-        "hit_rate": 0.5,
-        "direction": "bull",
-        "avg_ret_1d": -0.223,
-        "confidence": 0.329
-      },
-      "hop2": []
-    },
-    {
       "term": "video",
       "is_active_today": false,
       "today_z": null,
@@ -8121,14 +8124,14 @@
         {
           "term": "gold",
           "direction": "bull",
-          "today_z": 2.116,
+          "today_z": 2.474,
           "hit_rate": 0.909
         },
         {
           "term": "gold",
           "via": "CVX",
           "direction": "bull",
-          "today_z": 2.116,
+          "today_z": 2.474,
           "indirect": true
         }
       ]
@@ -8142,14 +8145,14 @@
         {
           "term": "gold",
           "direction": "bull",
-          "today_z": 2.116,
+          "today_z": 2.474,
           "hit_rate": 0.909
         },
         {
           "term": "gold",
           "via": "XOM",
           "direction": "bull",
-          "today_z": 2.116,
+          "today_z": 2.474,
           "indirect": true
         }
       ]
@@ -8164,14 +8167,14 @@
           "term": "gold",
           "via": "XOM",
           "direction": "bull",
-          "today_z": 2.116,
+          "today_z": 2.474,
           "indirect": true
         },
         {
           "term": "gold",
           "via": "CVX",
           "direction": "bull",
-          "today_z": 2.116,
+          "today_z": 2.474,
           "indirect": true
         }
       ]
@@ -8185,8 +8188,22 @@
         {
           "term": "gold",
           "direction": "bull",
-          "today_z": 2.116,
+          "today_z": 2.474,
           "hit_rate": 0.636
+        }
+      ]
+    },
+    {
+      "ticker": "BMRN",
+      "sector": "03 Life Sciences",
+      "entity": "BIOMARIN PHARMACEUTICAL INC",
+      "fund_score": 0.617,
+      "inbound": [
+        {
+          "term": "plans",
+          "direction": "bull",
+          "today_z": 1.515,
+          "hit_rate": 0.5
         }
       ]
     }
