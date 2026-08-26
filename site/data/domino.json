@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-08-26T16:23:48+00:00",
+  "generated_at": "2026-08-26T18:13:48+00:00",
   "source": {
-    "signal_corr_updated": "2026-08-26T16:22:39Z",
-    "n_pairs_total": 3784,
+    "signal_corr_updated": "2026-08-26T18:12:28Z",
+    "n_pairs_total": 3789,
     "n_dates": 180,
     "prices_tickers": 90,
     "trends_terms": 600
@@ -21,17 +21,65 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "using": 1.634,
-    "asia": 1.81,
+    "court": 1.661,
+    "asia": 1.988,
+    "risks": 1.711,
+    "service": 1.502,
     "round": 2.372,
     "funding": 2.581,
-    "meet": 1.87,
-    "features": 1.73,
-    "natural": 1.862,
-    "cent": 1.647,
-    "plus": 2.0
+    "clear": 1.547,
+    "meet": 1.508,
+    "features": 3.127,
+    "natural": 3.644,
+    "lawsuit": 2.017,
+    "cent": 1.52,
+    "plus": 1.862,
+    "bets": 1.786,
+    "startup": 2.26
   },
   "stock_chains": [
+    {
+      "term": "court",
+      "is_active_today": true,
+      "today_z": 1.661,
+      "hop1": {
+        "ticker": "CRWD",
+        "sector": "06 Technology",
+        "entity": "CrowdStrike Holdings, Inc.",
+        "corr": -0.33,
+        "lag": -3,
+        "hit_rate": 0.636,
+        "direction": "bear",
+        "avg_ret_1d": -0.085,
+        "confidence": 0.432
+      },
+      "hop2": []
+    },
+    {
+      "term": "court",
+      "is_active_today": true,
+      "today_z": 1.661,
+      "hop1": {
+        "ticker": "GILD",
+        "sector": "03 Life Sciences",
+        "entity": "GILEAD SCIENCES, INC.",
+        "corr": 0.3069,
+        "lag": -4,
+        "hit_rate": 0.545,
+        "direction": "bull",
+        "avg_ret_1d": 0.027,
+        "confidence": 0.374
+      },
+      "hop2": [
+        {
+          "ticker": "AMGN",
+          "ticker_corr": 0.505,
+          "implied_dir": "bull",
+          "sector": "03 Life Sciences",
+          "entity": "AMGEN INC"
+        }
+      ]
+    },
     {
       "term": "july",
       "is_active_today": false,
@@ -905,6 +953,31 @@
       ]
     },
     {
+      "term": "gaza",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "FTNT",
+        "sector": "06 Technology",
+        "entity": "Fortinet, Inc.",
+        "corr": 0.3034,
+        "lag": -5,
+        "hit_rate": 0.818,
+        "direction": "bull",
+        "avg_ret_1d": 1.082,
+        "confidence": 0.522
+      },
+      "hop2": [
+        {
+          "ticker": "PANW",
+          "ticker_corr": 0.62,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "Palo Alto Networks Inc"
+        }
+      ]
+    },
+    {
       "term": "department",
       "is_active_today": false,
       "today_z": null,
@@ -1732,6 +1805,31 @@
         "confidence": 0.478
       },
       "hop2": []
+    },
+    {
+      "term": "gaza",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "DDOG",
+        "sector": "06 Technology",
+        "entity": "Datadog, Inc.",
+        "corr": 0.3148,
+        "lag": -5,
+        "hit_rate": 0.727,
+        "direction": "bull",
+        "avg_ret_1d": 1.293,
+        "confidence": 0.476
+      },
+      "hop2": [
+        {
+          "ticker": "PANW",
+          "ticker_corr": 0.522,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "Palo Alto Networks Inc"
+        }
+      ]
     },
     {
       "term": "democratic",
@@ -2659,6 +2757,59 @@
       "hop2": []
     },
     {
+      "term": "gaza",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "AMD",
+        "sector": "04 Manufacturing",
+        "entity": "ADVANCED MICRO DEVICES INC",
+        "corr": 0.3643,
+        "lag": -4,
+        "hit_rate": 0.636,
+        "direction": "bull",
+        "avg_ret_1d": 0.823,
+        "confidence": 0.444
+      },
+      "hop2": [
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.692,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "LRCX",
+          "ticker_corr": 0.616,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "LAM RESEARCH CORP"
+        },
+        {
+          "ticker": "ASML",
+          "ticker_corr": 0.605,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "ASML HOLDING NV"
+        },
+        {
+          "ticker": "TSM",
+          "ticker_corr": 0.601,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
+        },
+        {
+          "ticker": "MU",
+          "ticker_corr": 0.586,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "MICRON TECHNOLOGY INC"
+        }
+      ]
+    },
+    {
       "term": "financial",
       "is_active_today": false,
       "today_z": null,
@@ -3053,23 +3204,6 @@
         "hit_rate": 0.667,
         "direction": "bear",
         "avg_ret_1d": -0.282,
-        "confidence": 0.432
-      },
-      "hop2": []
-    },
-    {
-      "term": "court",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CRWD",
-        "sector": "06 Technology",
-        "entity": "CrowdStrike Holdings, Inc.",
-        "corr": -0.33,
-        "lag": -3,
-        "hit_rate": 0.636,
-        "direction": "bear",
-        "avg_ret_1d": -0.085,
         "confidence": 0.432
       },
       "hop2": []
@@ -4960,6 +5094,23 @@
       ]
     },
     {
+      "term": "gaza",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "KDP",
+        "sector": "04 Manufacturing",
+        "entity": "Keurig Dr Pepper Inc.",
+        "corr": 0.3648,
+        "lag": -3,
+        "hit_rate": 0.545,
+        "direction": "bull",
+        "avg_ret_1d": 0.056,
+        "confidence": 0.394
+      },
+      "hop2": []
+    },
+    {
       "term": "administration",
       "is_active_today": false,
       "today_z": null,
@@ -5699,31 +5850,6 @@
           "implied_dir": "bear",
           "sector": null,
           "entity": null
-        }
-      ]
-    },
-    {
-      "term": "court",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "GILD",
-        "sector": "03 Life Sciences",
-        "entity": "GILEAD SCIENCES, INC.",
-        "corr": 0.3069,
-        "lag": -4,
-        "hit_rate": 0.545,
-        "direction": "bull",
-        "avg_ret_1d": 0.027,
-        "confidence": 0.374
-      },
-      "hop2": [
-        {
-          "ticker": "AMGN",
-          "ticker_corr": 0.505,
-          "implied_dir": "bull",
-          "sector": "03 Life Sciences",
-          "entity": "AMGEN INC"
         }
       ]
     },
@@ -7843,10 +7969,54 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "CRWD",
+      "sector": "06 Technology",
+      "entity": "CrowdStrike Holdings, Inc.",
+      "fund_score": 0.26,
+      "inbound": [
+        {
+          "term": "court",
+          "direction": "bear",
+          "today_z": 1.661,
+          "hit_rate": 0.636
+        }
+      ]
+    },
+    {
+      "ticker": "GILD",
+      "sector": "03 Life Sciences",
+      "entity": "GILEAD SCIENCES, INC.",
+      "fund_score": 0.628,
+      "inbound": [
+        {
+          "term": "court",
+          "direction": "bull",
+          "today_z": 1.661,
+          "hit_rate": 0.545
+        }
+      ]
+    },
+    {
+      "ticker": "AMGN",
+      "sector": "03 Life Sciences",
+      "entity": "AMGEN INC",
+      "fund_score": 0.534,
+      "inbound": [
+        {
+          "term": "court",
+          "via": "GILD",
+          "direction": "bull",
+          "today_z": 1.661,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
-    "stock_signals": 227,
+    "stock_signals": 231,
     "macro_signals": 15,
     "sector_diversity": 8,
     "grade": "A",
