@@ -39,4 +39,6 @@ jobs:
           name: rss-jsonl
           path: data/live_newsapi/*.jsonl
           if-no-files-found: warn
-          retention-days: 2
+          # 7 (2026-09-04): 2-day retention made the 08-27→09-02 outage gap
+          # unrecoverable from artifacts; see collect_continuous.yml.
+          retention-days: 7

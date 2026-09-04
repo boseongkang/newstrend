@@ -2,7 +2,16 @@ name: collect-live
 on:
   schedule:
     - cron: "*/30 * * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      backfill_from:
+        description: "Backfill start date (YYYY-MM-DD UTC). Loops 6h windows through backfill_to and uploads them all as one live-jsonl artifact. Normal shifted collection is skipped."
+        required: false
+        default: ""
+      backfill_to:
+        description: "Backfill end date (YYYY-MM-DD UTC, inclusive). NewsAPI serves ~30 days back — older dates return nothing."
+        required: false
+        default: ""
 permissions:
   contents: write
 concurrency:
@@ -37,7 +46,7 @@ jobs:
           mkdir -p data/live_newsapi
       - name: Collect shifted window
         id: collect
-        if: env.NEWSAPI_KEY != ''
+        if: env.NEWSAPI_KEY != '' && github.event.inputs.backfill_from == ''
         shell: bash
         run: |
           set -euo pipefail
@@ -77,6 +86,53 @@ jobs:
             echo "::error::collect returned 0 articles for ${FROM} → ${TO}. NEWSAPI_KEY expired/rate-limited or API down."
             exit 1
           fi
+      - name: Backfill window range
+        id: backfill
+        if: env.NEWSAPI_KEY != '' && github.event.inputs.backfill_from != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          START="${{ github.event.inputs.backfill_from }}"
+          END="${{ github.event.inputs.backfill_to }}"
+          for D in "$START" "$END"; do
+            if ! [[ "$D" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+              echo "::error title=Bad date input::'$D' is not YYYY-MM-DD"
+              exit 1
+            fi
+          done
+          if [ "$(date -u -d "$START" +%s)" -gt "$(date -u -d "$END" +%s)" ]; then
+            echo "::error::backfill_from $START is after backfill_to $END"
+            exit 1
+          fi
+          OUTDIR="backfill_out"
+          mkdir -p "$OUTDIR"
+          export QUERY MAX_PAGES NEWSAPI_KEY
+          TOTAL_FILES=0
+          D="$START"
+          while [ "$(date -u -d "$D" +%s)" -le "$(date -u -d "$END" +%s)" ]; do
+            for H in 00 06 12 18; do
+              FROM="${D}T${H}:00:00Z"
+              TO=$(date -u -d "${D} ${H}:00:00 UTC + 6 hours" +%FT%TZ)
+              OUT="${OUTDIR}/${D}T${H}-00Z.jsonl"
+              TMP="${OUT}.tmp"
+              FROM_ISO="$FROM" TO_ISO="$TO" OUTFILE_TMP="$TMP" python scripts/collect_shifted.py
+              if [ -s "$TMP" ]; then
+                mv "$TMP" "$OUT"
+                TOTAL_FILES=$((TOTAL_FILES+1))
+                echo "collected $(wc -l < "$OUT") articles for ${FROM} → ${TO}"
+              else
+                rm -f "$TMP"
+                echo "::warning::0 articles for ${FROM} → ${TO} (outside NewsAPI lookback, or API error)"
+              fi
+              sleep 2
+            done
+            D=$(date -u -d "$D + 1 day" +%F)
+          done
+          echo "backfill files: $TOTAL_FILES"
+          if [ "$TOTAL_FILES" -eq 0 ]; then
+            echo "::error::backfill collected 0 files for $START → $END"
+            exit 1
+          fi
       - name: Fail when NEWSAPI_KEY secret is missing
         if: env.NEWSAPI_KEY == ''
         run: |
@@ -89,4 +145,15 @@ jobs:
           name: live-jsonl
           path: ${{ steps.collect.outputs.outfile }}
           if-no-files-found: warn
-          retention-days: 2
+          # 7 (2026-09-04): with 2-day retention the 2026-08-27→09-02 outage
+          # expired every raw slice before recovery — 7 days of articles
+          # unrecoverable from artifacts. A week survives a long weekend outage.
+          retention-days: 7
+      - name: Upload backfill artifact
+        if: ${{ steps.backfill.outcome == 'success' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: live-jsonl
+          path: backfill_out/*.jsonl
+          if-no-files-found: error
+          retention-days: 7

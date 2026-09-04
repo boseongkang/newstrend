@@ -14,6 +14,10 @@ on:
         description: "Accept a previous warehouse older than the freshness floor (recovery after a >4h outage/failure streak — loses up to (age−6h) of live articles)"
         type: boolean
         default: false
+      live_run_id:
+        description: "collect-live run id to take the live-jsonl artifact from (backfill recovery: pin the backfill run so a newer scheduled slice can't shadow it)"
+        required: false
+        default: ""
   schedule:
     - cron: "23 * * * *"
 
@@ -139,12 +143,23 @@ jobs:
           fi
 
       - name: Download latest live jsonl
+        if: ${{ github.event.inputs.live_run_id == '' }}
         uses: dawidd6/action-download-artifact@v17
         with:
           workflow: collect_continuous.yml
           name: live-jsonl
           path: live_artifacts
           if_no_artifact_found: ignore
+
+      - name: Download pinned live jsonl (backfill recovery)
+        if: ${{ github.event.inputs.live_run_id != '' }}
+        uses: dawidd6/action-download-artifact@v17
+        with:
+          workflow: collect_continuous.yml
+          run_id: ${{ github.event.inputs.live_run_id }}
+          name: live-jsonl
+          path: live_artifacts
+          if_no_artifact_found: fail
 
       - name: Download RSS jsonl
         uses: dawidd6/action-download-artifact@v17
