@@ -21339,10 +21339,30 @@
       "hash_ok": true,
       "ood": false,
       "unfreeze_ready": false
+    },
+    {
+      "updated": "2026-09-04T06:41:08Z",
+      "n_pred_total": 15480,
+      "n_evaluated": 15300,
+      "models": {
+        "RandomForest": {
+          "alpha": -0.407,
+          "p": 0.0,
+          "n": 7650
+        },
+        "GradientBoosting": {
+          "alpha": -0.517,
+          "p": 0.0,
+          "n": 7650
+        }
+      },
+      "hash_ok": true,
+      "ood": false,
+      "unfreeze_ready": false
     }
   ],
   "latest": {
-    "updated": "2026-08-27T01:05:06Z",
+    "updated": "2026-09-04T06:41:08Z",
     "baseline_date": "2026-05-25",
     "model_hashes": {
       "RandomForest": "a2947618dfbb05bd",
@@ -21354,69 +21374,69 @@
       "n_dates": 25
     },
     "prediction_log": {
-      "total": 15300,
-      "evaluated": 13860,
-      "pending": 1440,
+      "total": 15480,
+      "evaluated": 15300,
+      "pending": 180,
       "new_today": 180,
-      "newly_evaluated": 0
+      "newly_evaluated": 1440
     },
     "forward": {
       "RandomForest": {
         "status": "tracking",
-        "n": 6930,
-        "n_folds": 77,
-        "cumulative_alpha_pct": -0.446,
+        "n": 7650,
+        "n_folds": 85,
+        "cumulative_alpha_pct": -0.407,
         "alpha_ci_95": [
-          -0.648,
-          -0.243
+          -0.595,
+          -0.22
         ],
-        "alpha_t": -4.955,
+        "alpha_t": -4.767,
         "alpha_p": 0.0,
         "sig_status": "ok",
-        "cumulative_accuracy": 0.5088,
+        "cumulative_accuracy": 0.5076,
         "by_regime": {
           "RISK-ON": {
-            "n": 5490,
-            "n_folds": 61,
-            "accuracy": 0.484,
-            "alpha_mean_pct": -0.417,
+            "n": 6120,
+            "n_folds": 68,
+            "accuracy": 0.4868,
+            "alpha_mean_pct": -0.378,
             "provisional": false
           },
           "NEUTRAL": {
-            "n": 1440,
-            "n_folds": 16,
-            "accuracy": 0.6035,
-            "alpha_mean_pct": -0.554,
+            "n": 1530,
+            "n_folds": 17,
+            "accuracy": 0.5908,
+            "alpha_mean_pct": -0.527,
             "provisional": false
           }
         }
       },
       "GradientBoosting": {
         "status": "tracking",
-        "n": 6930,
-        "n_folds": 77,
-        "cumulative_alpha_pct": -0.57,
+        "n": 7650,
+        "n_folds": 85,
+        "cumulative_alpha_pct": -0.517,
         "alpha_ci_95": [
-          -0.775,
-          -0.366
+          -0.706,
+          -0.327
         ],
-        "alpha_t": -5.1,
+        "alpha_t": -4.801,
         "alpha_p": 0.0,
         "sig_status": "ok",
-        "cumulative_accuracy": 0.5042,
+        "cumulative_accuracy": 0.502,
         "by_regime": {
           "RISK-ON": {
-            "n": 5490,
-            "n_folds": 61,
-            "accuracy": 0.4821,
-            "alpha_mean_pct": -0.473,
+            "n": 6120,
+            "n_folds": 68,
+            "accuracy": 0.4832,
+            "alpha_mean_pct": -0.415,
             "provisional": false
           },
           "NEUTRAL": {
-            "n": 1440,
-            "n_folds": 16,
-            "accuracy": 0.5882,
-            "alpha_mean_pct": -0.94,
+            "n": 1530,
+            "n_folds": 17,
+            "accuracy": 0.5771,
+            "alpha_mean_pct": -0.922,
             "provisional": false
           }
         }
@@ -21429,23 +21449,23 @@
       "confidence_note": "In-distribution: RISK-ON was 98.3% of training data."
     },
     "bias_monitor": {
-      "n_total_predictions": 15300,
-      "n_evaluated": 13860,
-      "long_ratio": 0.853,
+      "n_total_predictions": 15480,
+      "n_evaluated": 15300,
+      "long_ratio": 0.851,
       "long_bias_warning": true,
       "top_sector": "Technology",
-      "top_sector_pct": 41.3,
+      "top_sector_pct": 41.4,
       "sector_concentration_warning": false,
       "calibration": {
-        "accuracy": 0.5065,
-        "mean_abs_predicted": 3.636,
-        "mean_abs_realized": 0.442,
-        "overconfidence_ratio": 8.229
+        "accuracy": 0.5048,
+        "mean_abs_predicted": 3.566,
+        "mean_abs_realized": 0.423,
+        "overconfidence_ratio": 8.432
       }
     },
     "alerts": [
       "REGIME CHANGE: non-RISK-ON data detected in forward predictions",
-      "BIAS: long_ratio=85.3% \u2014 model may be systematically long"
+      "BIAS: long_ratio=85.1% \u2014 model may be systematically long"
     ],
     "unfreeze_check": {
       "forward_alpha_significant": false,
@@ -21454,5 +21474,5 @@
     },
     "label": "ADVISORY ONLY \u00b7 paper trading \u00b7 unverified \u00b7 single-regime baseline"
   },
-  "updated": "2026-08-27T01:05:06Z"
+  "updated": "2026-09-04T06:41:08Z"
 }
