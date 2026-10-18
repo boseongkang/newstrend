@@ -62,26 +62,35 @@ jobs:
           # group keeps a single pending run), the newest success aged past
           # the floor, and every subsequent run REDed on "stale run list" for
           # 6 weeks — the guard could not tell a stale API list from its own
-          # failure streak. Now:
-          #   liveness oracle: if `gh run list` shows THIS run's id, the list
-          #   is live (SELF_SEEN=1); if it cannot even show the run that is
-          #   executing it, the list is genuinely stale (2026-08-08 glitch).
-          #   a) newest success inside the floor              → normal
-          #   b) newest success older than the floor, list live, and every
-          #      COMPLETED run since that success failed/cancelled/timed out
-          #      (zero runs since — plain cron drop — counts as true)
+          # failure streak. Now, per attempt, three gh calls:
+          #   (1) liveness oracle: if `gh run list` shows THIS run's id the
+          #       list is live (SELF_SEEN=1); if it cannot even show the run
+          #       executing it, the list is genuinely stale (2026-08-08 glitch)
+          #   (2) --status success: newest success even when >40 failures
+          #       have piled up on top of it
+          #   (3) unfiltered 40: cross-check for (2) and the since-run stats
+          #   RID/CREATED = the newer of (2) and (3).
+          #   a) newest success inside the floor                  → normal
+          #   b) newest success older than the floor AND list live
           #      → confirmed deadlock → AUTO_STALE: build on it, no retries
-          #   c) list not live                                → retry 5x, exit 1
+          #   c) list not live                                    → retry 5x, exit 1
           # allow_stale_base=true still forces the stale base manually.
           FLOOR=$(date -u -d "6 hours ago" +%Y-%m-%dT%H:%M:%SZ)
           export SELF="$GITHUB_RUN_ID"
-          RID="" CREATED="" NEWEST_ANY="" NSINCE=0 ALLFAIL=0 SELF_SEEN=0
+          RID="" CREATED="" SELF_SEEN=0 NSINCE=0 NEWEST_ANY=""
           BEST_RID="" BEST_CREATED="" AUTO_STALE=0
           for i in 1 2 3 4 5; do
+            RID="" CREATED="" RID_F="" CREATED_F="" RID_U="" CREATED_U="" NEWEST_ANY="" NSINCE=0 ALLFAIL=0
+            # (1) liveness oracle
             LIVE_IDS=$(gh run list --workflow update-warehouse.yml --branch main --limit 10 \
               --json databaseId --jq '.[].databaseId' || true)
             SELF_SEEN=0; echo "$LIVE_IDS" | grep -qx "$GITHUB_RUN_ID" && SELF_SEEN=1
-            read -r RID CREATED NEWEST_ANY NSINCE ALLFAIL < <(gh run list --workflow update-warehouse.yml \
+            # (2) success-only
+            read -r RID_F CREATED_F < <(gh run list --workflow update-warehouse.yml --branch main \
+              --status success --limit 20 --json databaseId,createdAt \
+              --jq 'sort_by(.createdAt) | last | "\(.databaseId) \(.createdAt)"') || true
+            # (3) unfiltered 40: success cross-check + since-run stats
+            read -r RID_U CREATED_U NEWEST_ANY NSINCE ALLFAIL < <(gh run list --workflow update-warehouse.yml \
               --branch main --limit 40 \
               --json databaseId,createdAt,conclusion,status --jq '
               map(select((.databaseId|tostring) != env.SELF))
@@ -95,28 +104,36 @@ jobs:
                   (if ($since|all(.conclusion=="failure" or .conclusion=="cancelled" or .conclusion=="timed_out"))
                    then "1" else "0" end) ]
               | join(" ")') || true
-            [ "${RID:-none}" = "none" ] && RID=""
-            [ "${CREATED:-none}" = "none" ] && CREATED=""
+            [ "${RID_F:-none}" = "none" ] || [ "${RID_F:-}" = "null" ] && { RID_F=""; CREATED_F=""; }
+            [ "${RID_U:-none}" = "none" ] && { RID_U=""; CREATED_U=""; }
             [ "${NEWEST_ANY:-none}" = "none" ] && NEWEST_ANY=""
             NSINCE="${NSINCE:-0}"; ALLFAIL="${ALLFAIL:-0}"
-            if [ -n "${RID:-}" ] && [ "$CREATED" \> "${BEST_CREATED:-}" ]; then
+            # newest of (2) and (3)
+            if [ -n "$RID_F" ] && [ "${CREATED_F}" \> "${CREATED_U:-}" ]; then
+              RID="$RID_F"; CREATED="$CREATED_F"
+            elif [ -n "$RID_U" ]; then
+              RID="$RID_U"; CREATED="$CREATED_U"
+            fi
+            if [ -n "$RID" ] && [ "$CREATED" \> "${BEST_CREATED:-}" ]; then
               BEST_RID="$RID"; BEST_CREATED="$CREATED"
             fi
-            if [ -n "${RID:-}" ] && [ "$CREATED" \> "$FLOOR" ]; then
+            if [ -n "$RID" ] && [ "$CREATED" \> "$FLOOR" ]; then
               break   # a) normal
             fi
-            if [ -n "${RID:-}" ] && [ "$SELF_SEEN" = "1" ] && [ "$ALLFAIL" = "1" ]; then
-              echo "self-chain deadlock confirmed: newest success $RID ($CREATED) <= floor $FLOOR; run list is live (self $GITHUB_RUN_ID visible, newest run ${NEWEST_ANY:-none}) and all $NSINCE completed runs since the success failed — auto-escaping"
+            if [ -n "$RID" ] && [ "$SELF_SEEN" = "1" ]; then
+              echo "self-chain deadlock confirmed: newest success $RID ($CREATED) <= floor $FLOOR and the run list is live (self $GITHUB_RUN_ID visible; newest run ${NEWEST_ANY:-none}, ${NSINCE} completed runs since the success, allfail=${ALLFAIL}) — auto-escaping"
               AUTO_STALE=1
               break   # b) deadlock
             fi
-            echo "attempt $i: stale/empty run list (RID=${RID:-none} created=${CREATED:-none} newest_any=${NEWEST_ANY:-none} self_seen=${SELF_SEEN} since=${NSINCE} allfail=${ALLFAIL}, floor=$FLOOR) — retrying"
+            echo "attempt $i: stale/empty run list (RID=${RID:-none} created=${CREATED:-none} [success-only=${RID_F:-none} unfiltered=${RID_U:-none}] newest_any=${NEWEST_ANY:-none} self_seen=${SELF_SEEN} since=${NSINCE}, floor=$FLOOR) — retrying"
             RID="" CREATED=""
             sleep 15
           done
           STALE_MODE=""
           if [ "$AUTO_STALE" = "1" ]; then
-            STALE_MODE="auto"
+            # an explicit allow_stale_base=true is the operator's decision —
+            # record it as manual even though the auto path would have fired
+            if [ "${{ github.event.inputs.allow_stale_base }}" = "true" ]; then STALE_MODE="manual"; else STALE_MODE="auto"; fi
           elif [ -z "$RID" ]; then
             if [ "${{ github.event.inputs.allow_stale_base }}" = "true" ] && [ -n "$BEST_RID" ]; then
               echo "allow_stale_base=true — using stale previous run $BEST_RID (created $BEST_CREATED, floor $FLOOR)"
