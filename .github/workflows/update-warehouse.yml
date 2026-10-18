@@ -27,7 +27,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
 
@@ -55,41 +55,91 @@ jobs:
           # (RECENT_MINUTES=360), so any base <~5h old has its gap fully
           # re-merged from live files — zero permanent loss. Hourly cron
           # gives ~4 fresh candidates inside the floor.
-          # Self-chain deadlock escape: after a >4h failure streak the newest
-          # success is necessarily stale — allow_stale_base=true accepts it
-          # deliberately instead of REDing forever.
+          #
+          # Self-chain deadlock auto-escape (2026-10-18): on 2026-09-04 four
+          # consecutive scheduled runs were dropped by GitHub (concurrency
+          # group keeps a single pending run), the newest success aged past
+          # the 4h floor, and every subsequent hourly run REDed on "stale run
+          # list" for 6 weeks — the guard could never recover on its own.
+          # The list is now read WITH conclusions so the two situations can
+          # be told apart:
+          #   a) newest success inside the floor            → normal path
+          #   b) list is fresh (newest run of ANY conclusion inside the
+          #      floor) but every run since the newest success failed
+          #      → confirmed self-chain deadlock → AUTO_STALE: build on the
+          #      newest success at once, no retries
+          #   c) the whole list is old (gh run list stale glitch, 2026-08-08)
+          #      → retry 5x, then exit 1 (unchanged)
+          # allow_stale_base=true still forces b) manually.
           FLOOR=$(date -u -d "4 hours ago" +%Y-%m-%dT%H:%M:%SZ)
-          RID="" CREATED="" BEST_RID="" BEST_CREATED=""
+          export SELF="$GITHUB_RUN_ID"
+          RID="" CREATED="" NEWEST_ANY="" NSINCE=0 ALLFAIL=0
+          BEST_RID="" BEST_CREATED="" AUTO_STALE=0
           for i in 1 2 3 4 5; do
-            read -r RID CREATED < <(gh run list --workflow update-warehouse.yml \
-              --branch main --status success --limit 20 \
-              --json databaseId,createdAt \
-              --jq 'sort_by(.createdAt) | last | "\(.databaseId) \(.createdAt)"') || true
+            read -r RID CREATED NEWEST_ANY NSINCE ALLFAIL < <(gh run list --workflow update-warehouse.yml \
+              --branch main --limit 40 \
+              --json databaseId,createdAt,conclusion,status --jq '
+              map(select((.databaseId|tostring) != env.SELF))
+              | sort_by(.createdAt) | reverse
+              | (map(select(.conclusion=="success")) | first) as $s
+              | (first) as $n
+              | ($s.createdAt // "none") as $sc
+              | (map(select(.createdAt > $sc))) as $since
+              | [ ($s.databaseId // "none" | tostring), $sc, ($n.createdAt // "none"),
+                  ($since|length|tostring),
+                  (if ($since|length)>0
+                      and ($since|all(.conclusion=="failure" or .conclusion=="cancelled" or .conclusion=="timed_out"))
+                   then "1" else "0" end) ]
+              | join(" ")') || true
+            [ "${RID:-none}" = "none" ] && RID=""
+            [ "${CREATED:-none}" = "none" ] && CREATED=""
+            [ "${NEWEST_ANY:-none}" = "none" ] && NEWEST_ANY=""
+            NSINCE="${NSINCE:-0}"; ALLFAIL="${ALLFAIL:-0}"
             if [ -n "${RID:-}" ] && [ "$CREATED" \> "${BEST_CREATED:-}" ]; then
               BEST_RID="$RID"; BEST_CREATED="$CREATED"
             fi
             if [ -n "${RID:-}" ] && [ "$CREATED" \> "$FLOOR" ]; then
-              break
+              break   # a) normal
             fi
-            echo "attempt $i: stale/empty run list (RID=${RID:-none} created=${CREATED:-none}, floor=$FLOOR) — retrying"
+            if [ -n "${RID:-}" ] && [ -n "${NEWEST_ANY:-}" ] && [ "$NEWEST_ANY" \> "$FLOOR" ] \
+               && [ "$NSINCE" -ge 1 ] && [ "$ALLFAIL" = "1" ]; then
+              echo "self-chain deadlock confirmed: newest success $RID ($CREATED) < floor $FLOOR, but the list is fresh (newest run $NEWEST_ANY) and all $NSINCE runs since the success failed — auto-escaping"
+              AUTO_STALE=1
+              break   # b) deadlock
+            fi
+            echo "attempt $i: stale/empty run list (RID=${RID:-none} created=${CREATED:-none} newest_any=${NEWEST_ANY:-none} since=${NSINCE} allfail=${ALLFAIL}, floor=$FLOOR) — retrying"
             RID="" CREATED=""
             sleep 15
           done
-          if [ -z "$RID" ]; then
+          STALE_MODE=""
+          if [ "$AUTO_STALE" = "1" ]; then
+            STALE_MODE="auto"
+          elif [ -z "$RID" ]; then
             if [ "${{ github.event.inputs.allow_stale_base }}" = "true" ] && [ -n "$BEST_RID" ]; then
-              echo "::warning::allow_stale_base=true — using stale previous run $BEST_RID (created $BEST_CREATED, floor $FLOOR)"
+              echo "allow_stale_base=true — using stale previous run $BEST_RID (created $BEST_CREATED, floor $FLOOR)"
               RID="$BEST_RID"; CREATED="$BEST_CREATED"
+              STALE_MODE="manual"
             elif [ "${{ github.event.inputs.allow_empty_start }}" = "true" ] && [ -z "$BEST_RID" ]; then
               echo "no previous successful run found — fresh start (allow_empty_start=true)"
             else
-              echo "::error title=Stale run list::newest successful update-warehouse run is ${BEST_CREATED:-none} (< floor $FLOOR) after 5 attempts. Building on it would fixate a gap in the warehouse. If this follows a real outage, re-run with allow_stale_base=true."
+              echo "::error title=Stale run list::newest successful update-warehouse run is ${BEST_CREATED:-none} (< floor $FLOOR) after 5 attempts and the run list itself is not fresh (API stale-list glitch). Building on it would fixate a gap in the warehouse. If this follows a real outage, re-run with allow_stale_base=true."
               exit 1
             fi
+          fi
+          if [ -n "$STALE_MODE" ]; then
+            AGE_H=$(( ( $(date -u +%s) - $(date -u -d "$CREATED" +%s) ) / 3600 ))
+            EST_LOSS_H=$(( AGE_H - 6 )); [ "$EST_LOSS_H" -lt 0 ] && EST_LOSS_H=0
+            echo "::warning title=Stale base accepted::mode=$STALE_MODE base_run=$RID created=$CREATED age_h=$AGE_H est_loss_h=$EST_LOSS_H (floor $FLOOR)"
+            echo "STALE_BASE_ACCEPTED=1"        >> "$GITHUB_ENV"
+            echo "STALE_BASE_MODE=$STALE_MODE"  >> "$GITHUB_ENV"
+            echo "STALE_BASE_AGE_H=$AGE_H"      >> "$GITHUB_ENV"
+            echo "STALE_BASE_EST_LOSS_H=$EST_LOSS_H" >> "$GITHUB_ENV"
           fi
           if [ -n "$RID" ]; then
             echo "picked previous update-warehouse run $RID (created $CREATED)"
           fi
           echo "PREV_RUN_ID=${RID}" >> "$GITHUB_ENV"
+          echo "PREV_RUN_CREATED=${CREATED}" >> "$GITHUB_ENV"
 
       - name: Download previous warehouse artifact
         if: ${{ env.PREV_RUN_ID != '' }}
@@ -107,6 +157,20 @@ jobs:
           SRC=prev_warehouse
           if [ -d prev_warehouse/warehouse ]; then SRC=prev_warehouse/warehouse; fi
           if [ -d "$SRC" ]; then rsync -a "$SRC"/ data/warehouse/; fi
+          # gaps.jsonl rides along in the artifact (see Upload) so the ledger
+          # of accepted stale bases is cumulative; make sure it always exists.
+          touch data/warehouse/gaps.jsonl
+
+      - name: Record stale-base gap
+        if: ${{ env.STALE_BASE_ACCEPTED == '1' }}
+        run: |
+          set -euo pipefail
+          LATEST_DAILY=$(ls data/warehouse/daily 2>/dev/null \
+            | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}\.jsonl$' | sort | tail -1 | cut -d. -f1 || true)
+          printf '{"ts":"%s","mode":"%s","base_run":%s,"base_created":"%s","latest_daily":"%s","est_loss_hours":%s}\n' \
+            "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$STALE_BASE_MODE" "$PREV_RUN_ID" "$PREV_RUN_CREATED" \
+            "${LATEST_DAILY:-none}" "$STALE_BASE_EST_LOSS_H" >> data/warehouse/gaps.jsonl
+          echo "gaps.jsonl now:"; tail -3 data/warehouse/gaps.jsonl
 
       - name: Floor check — refuse to run on an empty/vanished warehouse
         # The warehouse exists ONLY as a run-to-run artifact chain. If the
@@ -136,10 +200,13 @@ jobs:
             | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}\.jsonl$' | sort | tail -1 | cut -d. -f1 || true)
           D2=$(date -u -d "2 days ago" +%F)
           echo "restored warehouse: latest daily=${LATEST_DAILY:-none} (guard floor: $D2)"
-          if [ -n "$LATEST_DAILY" ] && [ "$LATEST_DAILY" \< "$D2" ] \
-             && [ "${{ github.event.inputs.allow_stale_base }}" != "true" ]; then
-            echo "::error::warehouse date-coverage check FAILED — newest daily file is ${LATEST_DAILY}, older than D-2 (${D2}). Merging onto this base would fixate a multi-day gap. Re-run with allow_stale_base=true only for deliberate recovery."
-            exit 1
+          if [ -n "$LATEST_DAILY" ] && [ "$LATEST_DAILY" \< "$D2" ]; then
+            if [ "${STALE_BASE_ACCEPTED:-0}" = "1" ]; then
+              echo "::warning title=Date-coverage guard relaxed::newest daily file is ${LATEST_DAILY}, older than D-2 (${D2}) — accepted because a stale base was deliberately taken (mode=${STALE_BASE_MODE:-?}); see data/warehouse/gaps.jsonl"
+            else
+              echo "::error::warehouse date-coverage check FAILED — newest daily file is ${LATEST_DAILY}, older than D-2 (${D2}). Merging onto this base would fixate a multi-day gap. Re-run with allow_stale_base=true only for deliberate recovery."
+              exit 1
+            fi
           fi
 
       - name: Download latest live jsonl
@@ -315,3 +382,4 @@ jobs:
           path: |
             data/warehouse/master.jsonl
             data/warehouse/daily
+            data/warehouse/gaps.jsonl
