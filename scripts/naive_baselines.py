@@ -159,19 +159,27 @@ def _self_test_perfect_beats_all(records: list[dict]) -> dict:
 
 
 def _self_test_p_value_not_significant(records: list[dict]) -> dict:
-    """Random system vs always-buy should not be significant."""
+    """A seeded random BUY/SELL system must not differ significantly from a
+    fair coin (accuracy 50%).
+
+    Rewritten 2026-10-18: the old version compared random against
+    always-buy, whose accuracy equals the market up-rate (52.9% on the
+    current 7,223 deduped records). That premise only holds when the
+    up-rate is ~50%: at n=7,223 a fixed 2.9pp gap is z≈−5, so the harness
+    went RED on healthy data as soon as the record grew (it had never run
+    in CI). Random-vs-coin has the property a harness test needs: the
+    seeded deviation and its SE both scale with 1/√n, so z stays O(1).
+    """
     rng_res = walk_forward(records, system_fn=_random_system(42))
-    buy_res = walk_forward(records, system_fn=_always_buy)
-    diff = rng_res["pooled_accuracy"] - buy_res["pooled_accuracy"]
+    acc = rng_res["pooled_accuracy"]
     n = rng_res["total_test_n"]
-    bl_acc = buy_res["pooled_accuracy"]
-    se = math.sqrt(bl_acc * (1 - bl_acc) / n) if n > 0 and 0 < bl_acc < 1 else 1
-    z = diff / se if se > 0 else 0
+    se = math.sqrt(0.25 / n) if n > 0 else 1
+    z = (acc - 0.5) / se if se > 0 else 0
     p = 2 * (1 - 0.5 * (1 + math.erf(abs(z) / math.sqrt(2))))
     ok = p > 0.05
-    return {"name": "random_vs_buy_not_significant",
-            "expect": "p>0.05",
-            "actual": f"diff={diff*100:+.1f}pp p={p:.3f}", "pass": ok}
+    return {"name": "random_vs_coin_not_significant",
+            "expect": "p>0.05 vs 50%",
+            "actual": f"acc={acc*100:.1f}% z={z:+.2f} p={p:.3f}", "pass": ok}
 
 
 def run_self_tests(records: list[dict]) -> list[dict]:
