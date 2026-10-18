@@ -92,6 +92,14 @@ in the record. Therefore:
   files for those 80 days contain token aggregates instead of articles;
   no article-level source exists, so sentiment can never be computed for
   that window.
+- **2026-10-18 ~ FinBERT catch-up 전 스냅샷: sentiment pillar 입력 =
+  2026-09-02 값 (stale, 평가 시 제외).** update-warehouse 6주 교착
+  (2026-09-04 → 10-18) 동안 news_archive/sentiment_per_day가 09-02에서
+  멈췄고, predict.py load_sentiment는 ticker_sentiment.json의 마지막
+  날짜(index −1)를 age 체크 없이 읽는다. trend-site의 "Commit predictions
+  history" 단계가 "Sentiment freshness health check"보다 앞이라, 게이트
+  RED여도 stale sentiment로 만든 스냅샷은 이미 main에 커밋된 상태다.
+  health check를 Generate predictions 앞으로 옮기는 구조 변경은 별도 PR.
 
 ### Statistical corrections (STEP 3, 2026-08-05)
 Baseline snapshot before these landed: `docs/validation_baseline_2026-08-05.md`.
