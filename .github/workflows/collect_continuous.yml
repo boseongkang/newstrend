@@ -37,7 +37,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          # 1, not 0 (2026-10-18): this workflow never commits; a full clone
+          # of the 1.35 GiB pack every 30 min was pure waste.
+          fetch-depth: 1
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"

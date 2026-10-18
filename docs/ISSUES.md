@@ -75,6 +75,8 @@ forward 데이터 오염이다. unfreeze 조건 충족 또는 명시적 재설�
 - 2025-11-15 → 2026-02-02 (80일): warehouse 일별 파일이 기사 대신 토큰
   집계만 보유 — sentiment 영구 계산 불가. 해당 구간 평가 시 제외 필수.
 
+- **2026-09-04 → 2026-09-17 뉴스 기사** (CI-2 교착; NewsAPI lookback 밖, warehouse·Release 모두 없음). 토큰 전용 구간은 2025-11-15 → **2026-02-04(82일)**로 재측정(기존 기록 02-02/80일).
+
 ## D-4: 파킹된 회귀/정리 — OPEN
 
 - signal_corr 0-pairs 회귀 (tokenizer-fix-c3 브랜치 ead6c26a에 파킹).
@@ -103,13 +105,16 @@ forward 데이터 오염이다. unfreeze 조건 충족 또는 명시적 재설�
     전환) + workflow_dispatch `date` 입력(warehouse에서 특정 날짜를
     꺼내 Release 생성/갱신하는 수동 복구 경로).
   - update-warehouse previous-warehouse 픽: 2026-08-15 — 같은 RID 로직
-    + 신선도 하한 4h(12h 아님: live 창이 6h(RECENT_MINUTES=360)라 base가
-    ~5h 이내면 공백이 live 병합으로 전부 재충전 → 영구 손실 0; 하한을
-    넘는 base는 손실이 다음 회전의 base로 고착됨) + 날짜 커버리지 가드
+    + 신선도 하한 4h → **6h (2026-10-18, PR #9)**: live 창이 6h
+    (RECENT_MINUTES=360)라 base가 6h 이내면 공백이 live 병합으로 전부
+    재충전 → 영구 손실 0; 하한을 넘는 base는 손실이 다음 회전의 base로
+    고착됨. 4h는 GitHub cron 실발화 간격(3.5~5h)에 걸려 상시 교착 위험
+    (→ CI-2) + 날짜 커버리지 가드
     (복원된 warehouse의 최신 daily가 D-2보다 오래되면 RED — 줄 수 floor는
     "오래된 대형 warehouse"를 통과시키므로 별도 필요) + 자기-체인 데드락
-    탈출구 `allow_stale_base` dispatch 입력(>4h 장애 후 최초 성공 런은
-    반드시 stale base라 RED 교착 — 의식적 수동 수용 경로).
+    탈출구 `allow_stale_base` dispatch 입력(>floor 장애 후 최초 성공 런은
+    반드시 stale base라 RED 교착 — 의식적 수동 수용 경로). 2026-10-18
+    PR #9부터는 자기연쇄 교착을 자동 탈출(CI-2 참조).
 - 잔여 노출 — **감사 종결, 강화 안 함** (`grep -rn "dawidd6\|gh run list"
   .github/workflows/`):
   - `update-warehouse.yml` live-jsonl / rss-jsonl: 낡은 픽이면 그 회전에
@@ -121,3 +126,51 @@ forward 데이터 오염이다. unfreeze 조건 충족 또는 명시적 재설�
     강화 불필요. 출력이 누적 상태(warehouse)거나 하루 1회 append-only
     (Release 스냅샷)면 낡은 픽 = 영구 손실 → 강화 필수. 해당 두 경로는
     모두 강화 완료.
+
+## CI-2: update-warehouse 자기연쇄 stale-base 교착 — 6주 정지 (2026-09-04 → 2026-10-18)
+
+- 사건: 2026-09-04 09:43Z 마지막 스케줄 성공(run 33859763034) 뒤
+  10:23~13:23 cron 4회가 GitHub에 의해 드롭(concurrency 그룹은 pending
+  1개만 유지). 14:25Z run은 "최신 성공이 4h 플로어보다 오래됨"으로 RED
+  (run 33883530214). 그 뒤 매 run이 같은 상태를 상속 — 성공이 생기지
+  않으니 플로어를 통과할 성공도 생기지 않음 — 2026-10-18 19:16Z
+  `allow_stale_base=true` 수동 dispatch(run 39158023789)까지 ~190회 RED,
+  실패 메일 ~100통.
+- 원인: CI-1 가드가 "API가 낡은 목록을 반환"과 "자기 실패 연쇄"를 구분할
+  수 없었음. 둘 다 "최신 성공 < 플로어"로 보임. 또 명목 매시간 cron은
+  실제 5~7회/일(간격 3.5~5h)이라 4h 플로어는 평시에도 걸림.
+- 피해: warehouse에 2026-09-04 → 10-17 기사 부재. NewsAPI 무료 플랜
+  lookback(~30일) 안인 09-18 이후는 backfill 입력으로 복구 중(청크
+  09-18~23 완료 10-18, 09-24~10-05 / 10-06~10-17 예정). **2026-09-04 →
+  09-17은 영구 공백** (D-3에 추가). snap-* Release 09-18~10-16은
+  archive-daily `date=` dispatch로 재생성 예정.
+- 수정 (PR #9, squash 2a2c2af7f, 2026-10-18): "Get previous warehouse run
+  id"가 매 시도마다 (1) liveness oracle(`gh run list --limit 10`에 자기
+  run id가 보이면 목록은 live), (2) `--status success --limit 20`,
+  (3) 무필터 40(교차 확인 + since-run 통계) 3개 호출. 판정 a) 최신 성공이
+  플로어 안 → 정상, b) 플로어 밖 + 목록 live → 교착 확정, AUTO_STALE로
+  즉시 그 성공 위에 빌드, c) 목록 not live → 5회 재시도 후 RED(CI-1
+  보호 유지). 플로어 4h→6h. stale base 수용 시(auto/manual)
+  `::warning title=Stale base accepted::` + `STALE_BASE_ACCEPTED=1` +
+  `data/warehouse/gaps.jsonl` 1줄(artifact에 포함) + 날짜 커버리지 가드
+  warning 강등. fixture 14건 + 브랜치 실물 run 39162216999로 검증.
+- 잔여: (a) oracle의 호출(1)과 성공 조회(2)(3)이 별개 응답이라 "(1) live,
+  (2) stale" 글리치는 auto-accept 가능 → 호출(3) raw 응답에서 SELF 확인
+  (PR B). (b) warehouse가 90일 artifact 체인 단일 사본 → 주간 Release
+  스냅샷 + `restore_from_release` (PR B). (c) 매 run 최신 live 슬라이스
+  1개만 병합 → 마지막 성공 이후 전부 병합 (PR B). (d) `timeout-minutes`
+  없음, `permissions` 기본 write-all (PR B).
+
+## D-5: news_archive 중복 행 ~60% — OPEN (PR B에서 수정)
+
+- 측정 (2026-10-18, data-cache `news_archive/*.jsonl.gz` 335일):
+  901,215행 / 고유 norm_url 362,327 → **중복 59.8%** (일별 평균 61.1%,
+  2026-08-20: 7,223행 중 고유 2,632).
+- 원인: update_corpus.py는 norm_url로 dedup하지만 update-warehouse의
+  "Merge Live to Daily JSONL" 단계가 같은 기사를 raw로 다시 append
+  (6h 윈도우 중첩 + 매시간 RSS 재다운로드). FinBERT는 dedup하지만 두
+  사본의 키가 다름(`newsapi:`+url vs url / RSS sha1 id) → 둘 다 채점 →
+  `n_articles_scored` ~2배(08-20: 5,163 vs 2,632). aggregate는 dedup 없음
+  → `MIN_ARTICLES=5`는 실제 고유 2~3건.
+- F-new-2(news_z 인플레이션)의 근본 원인과 동일 계열. frozen 코드가 아닌
+  워크플로/수집 측 결함이므로 수정 가능.
