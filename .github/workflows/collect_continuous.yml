@@ -106,7 +106,11 @@ jobs:
           fi
           OUTDIR="backfill_out"
           mkdir -p "$OUTDIR"
-          export QUERY MAX_PAGES NEWSAPI_KEY
+          # Free plan: page 2 is always HTTP 426 (maximumResultsReached), so
+          # a full 100-article window burned 2 requests for 1 page of data.
+          # One page per 6h window keeps a 12-day chunk at 48 requests.
+          export MAX_PAGES=1
+          export QUERY NEWSAPI_KEY
           TOTAL_FILES=0
           D="$START"
           while [ "$(date -u -d "$D" +%s)" -le "$(date -u -d "$END" +%s)" ]; do
