@@ -31,6 +31,8 @@ on_exit() {
 trap on_exit EXIT
 
 cd "$REPO"
-"$REPO/.venv/bin/python" scripts/sentiment_finbert_local.py \
+# caffeinate -i: hold an idle-sleep assertion for the whole scoring run, so a
+# pmset-scheduled wake (lid closed) doesn't doze off mid-backfill (~50min/day).
+/usr/bin/caffeinate -i "$REPO/.venv/bin/python" scripts/sentiment_finbert_local.py \
     --window-days "$WINDOW_DAYS" \
     --commit

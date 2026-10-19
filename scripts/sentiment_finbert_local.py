@@ -19,6 +19,7 @@ Daily use after backfill:
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import re
 import subprocess
@@ -132,16 +133,68 @@ def ensure_fresh_news(cache_dir: Path, news: list[tuple[str, Path]],
     return news
 
 
-def cached_dates(cache_dir: Path) -> set[str]:
+def count_lines(path: Path) -> int:
+    """Non-blank line count of a daily news file (.jsonl or .jsonl.gz)."""
+    opener = (gzip.open(path, "rt", encoding="utf-8", errors="ignore")
+              if path.suffix == ".gz" else path.open(encoding="utf-8", errors="ignore"))
+    with opener as f:
+        return sum(1 for line in f if line.strip())
+
+
+def cached_dates(cache_dir: Path) -> dict[str, int]:
+    """{date: recorded input size} for every non-empty per-day sentiment file.
+
+    The size is `n_input_lines` (written by sentiment_finbert.py since
+    2026-10-18); older files fall back to n_articles_scored + n_skipped_empty,
+    a lower bound of the raw line count. A day is only treated as cached when
+    the archive has not grown past this number — otherwise a day scored from a
+    partial file (e.g. 2026-09-24 scored on 100 articles before the backfill
+    chunk landed) would stay stale forever, because the old existence-only
+    check never looked at the input again.
+    """
     sent_dir = cache_dir / "data" / "sentiment_per_day"
     if not sent_dir.is_dir():
-        return set()
-    out: set[str] = set()
+        return {}
+    out: dict[str, int] = {}
     for p in sent_dir.glob("sentiment_*.json"):
         m = re.match(r"sentiment_(\d{4}-\d{2}-\d{2})\.json$", p.name)
-        if m and p.stat().st_size > 0:
-            out.add(m.group(1))
+        if not (m and p.stat().st_size > 0):
+            continue
+        try:
+            meta = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            out[m.group(1)] = 0           # unreadable → rescore
+            continue
+        recorded = meta.get("n_input_lines")
+        if recorded is None:
+            recorded = int(meta.get("n_articles_scored", 0)) + int(meta.get("n_skipped_empty", 0))
+        out[m.group(1)] = int(recorded)
     return out
+
+
+def needs_scoring(date: str, path: Path, cached: dict[str, int]) -> tuple[bool, str]:
+    """(score?, reason) — missing file, or archive grew since it was scored."""
+    if date not in cached:
+        return True, "missing"
+    n_now = count_lines(path)
+    if n_now > cached[date]:
+        return True, f"regrown {cached[date]}→{n_now}"
+    return False, "cached"
+
+
+def stamp_input_size(input_jsonl: Path, output_json: Path) -> None:
+    """Record the raw line count of the scored archive file as n_input_lines
+    in the per-day output, so a later run can tell whether the archive grew
+    (partial day backfilled) and needs rescoring. Kept out of
+    sentiment_finbert.py so the scorer's output contract is untouched."""
+    try:
+        meta = json.loads(output_json.read_text(encoding="utf-8"))
+        meta["n_input_lines"] = count_lines(input_jsonl)
+        output_json.write_text(json.dumps(meta, indent=2, ensure_ascii=False),
+                               encoding="utf-8")
+    except (OSError, ValueError) as e:
+        print(f"  [warn] could not stamp n_input_lines on {output_json.name}: {e}",
+              file=sys.stderr)
 
 
 def score_one_day(input_jsonl: Path, output_json: Path, batch_size: int) -> tuple[bool, float]:
@@ -162,6 +215,7 @@ def score_one_day(input_jsonl: Path, output_json: Path, batch_size: int) -> tupl
         if proc.stderr:
             print(f"  stderr: {proc.stderr[-400:]}", file=sys.stderr)
         return False, elapsed
+    stamp_input_size(input_jsonl, output_json)
     return True, elapsed
 
 
@@ -256,12 +310,20 @@ def main() -> None:
     fetch_ok = bool(news) and news[-1][0] >= expected_str
     target = news[-args.window_days:]                         # most recent N days
     cached = cached_dates(cache_dir)
-    missing = [(d, p) for d, p in target if d not in cached]
+    missing: list[tuple[str, Path]] = []
+    n_regrown = 0
+    for d, p in target:
+        do_score, why = needs_scoring(d, p, cached)
+        if do_score:
+            missing.append((d, p))
+            if why != "missing":
+                n_regrown += 1
+                print(f"[plan] rescore {d}: archive {why}")
     missing.sort(key=lambda x: x[0], reverse=True)            # newest first
 
     print(f"[plan] window={args.window_days}d  news_archive={len(news)}  "
-          f"target={len(target)}  cached={len(cached & {d for d,_ in target})}  "
-          f"missing={len(missing)}")
+          f"target={len(target)}  cached={len(target) - len(missing)}  "
+          f"missing={len(missing)} (regrown={n_regrown})")
     days_skipped = len(target) - len(missing)
     if not missing:
         print("[plan] all target days already cached — nothing to do")
