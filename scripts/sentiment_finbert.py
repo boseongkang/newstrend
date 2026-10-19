@@ -21,6 +21,10 @@ from pathlib import Path
 
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from update_corpus import norm_url  # canonical URL key shared with the warehouse dedup
 
 MODEL_NAME = "ProsusAI/finbert"
 ALIASES_PATH = Path("config/ticker_aliases.json")
@@ -73,12 +77,34 @@ def load_articles(path: Path, dedup: bool = True):
             except json.JSONDecodeError:
                 continue
             if dedup:
-                key = (obj.get("article_id") or obj.get("id") or obj.get("url")
-                       or (obj.get("title") or "").strip().lower())
+                key = _dedup_key(obj)
                 if not key or key in seen:
                     continue
                 seen.add(key)
             yield obj
+
+
+def _dedup_key(obj: dict) -> str:
+    """Canonical article key: the normalized URL.
+
+    2026-10-18 audit: the warehouse holds every article twice — once
+    cleaned by update_corpus (id = "newsapi:<url>", url normalized) and
+    once raw-appended by update-warehouse's merge step (id absent or RSS
+    sha1, url un-normalized). The old key (article_id → id → url → title)
+    saw two different keys for the same story, so n_articles_scored was
+    ~2× the unique count (2026-08-20: 5,163 scored vs 2,632 unique) and
+    aggregate_ticker_sentiment's MIN_ARTICLES=5 really meant 2–3 unique.
+    Keying on norm_url (same function update_corpus uses) collapses both
+    copies; id/title remain only as fallbacks for url-less rows.
+    """
+    url = obj.get("norm_url") or obj.get("url")
+    if url:
+        try:
+            return "u:" + norm_url(url)
+        except Exception:
+            return "u:" + url.strip().lower()
+    return (obj.get("article_id") or obj.get("id")
+            or "t:" + (obj.get("title") or "").strip().lower())
 
 
 def article_text(obj: dict) -> str:

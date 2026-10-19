@@ -228,14 +228,22 @@ def fold_metrics(test_records: list[dict], snap_date: str) -> dict | None:
     regime = regimes.pop() if len(regimes) == 1 else "MIXED"
 
     # ── Alpha: per-trade and portfolio-level vs SPY ──
+    # Per-trade alpha is the SIGNED excess return: (r − SPY) for a long
+    # (BUY/WATCH), −(r − SPY) for a short (SELL/REDUCE). Until 2026-10-18 a
+    # short scored (−r) − SPY, i.e. it was charged the market return twice —
+    # a short that merely tracked the market scored −2×SPY instead of 0.
+    # Same convention as ml_monitor._signed_excess_alpha. This is an
+    # evaluator definition, not a scoring change; the adoption gate's
+    # criterion is unchanged (its paired difference moves because the
+    # system's SELL/REDUCE folds are re-expressed — see PR C).
     spy_5d = _spy_cache.fwd_return_5d(snap_date)
     alpha_per_trade: list[float] = []
     if spy_5d is not None:
         for r in test_records:
-            trade_ret = r["fwd_5d_return"]
+            excess = r["fwd_5d_return"] - spy_5d
             if r["action"] in ("SELL", "REDUCE"):
-                trade_ret = -trade_ret
-            alpha_per_trade.append(trade_ret - spy_5d)
+                excess = -excess
+            alpha_per_trade.append(excess)
 
     alpha_mean = None
     alpha_portfolio = None

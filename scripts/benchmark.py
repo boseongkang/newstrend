@@ -25,6 +25,7 @@ PAPER_FILE = DATA / "paper_trading_history.json"
 PRICES_FILE = DATA / "prices.json"
 
 BENCHMARKS = ("SPY", "QQQ")
+COST_BPS_ONE_WAY = 5  # flat assumption for the cost line (2026-10-18)
 
 
 # ── price helpers ──────────────────────────────────────────────────────────
@@ -50,6 +51,37 @@ def _benchmark_return(prices: dict[str, dict[str, float]],
     if p0 is None or p1 is None or p0 <= 0:
         return None
     return p1 / p0 - 1
+
+
+def _close_on_or_before(ts: dict[str, float], dates_sorted: list[str], d: str) -> float | None:
+    import bisect
+    i = bisect.bisect_right(dates_sorted, d) - 1
+    return ts[dates_sorted[i]] if i >= 0 else None
+
+
+def _time_weighted_benchmark_leg(prices: dict[str, dict[str, float]],
+                                 ticker: str, value_history: list[dict]) -> float | None:
+    """Σ over consecutive value_history points of exposure_t × bm_ret(t→t+1).
+
+    exposure_t = 1 − cash/total at the START of the interval (what the
+    portfolio actually held while the benchmark moved). Simple sum, not
+    compounded — consistent with strat_ret being a simple period return
+    for the alpha subtraction at these magnitudes.
+    """
+    ts = prices.get(ticker, {})
+    if not ts or len(value_history) < 2:
+        return None
+    ds = sorted(ts.keys())
+    leg = 0.0
+    for a, b in zip(value_history, value_history[1:]):
+        if not a.get("total"):
+            continue
+        e = 1.0 - a["cash"] / a["total"]
+        pa = _close_on_or_before(ts, ds, a["date"])
+        pb = _close_on_or_before(ts, ds, b["date"])
+        if pa and pb and pa > 0:
+            leg += e * (pb / pa - 1)
+    return leg
 
 
 # ── strategy evaluation ───────────────────────────────────────────────────
@@ -79,16 +111,37 @@ def evaluate_strategies() -> dict:
         # period — larger than the alphas being reported). Headline alpha
         # nets the benchmark leg to the strategy's average exposure; the
         # unadjusted number is kept as alpha_raw_pct.
+        # Time-weighted netting (2026-10-18 audit): netting the benchmark to
+        # the *average* exposure (above) overstated alpha by ~2pp for the
+        # main strategy, because the portfolio was ~95% invested in the
+        # weeks SPY fell and ~50% invested in the weeks it rallied — the
+        # average-exposure leg charged it 73.8% of a 7.72% rally it mostly
+        # did not sit out. The headline now nets each value_history interval
+        # at the exposure actually held going into it:
+        #   bm_leg = Σ_t exposure_t × bm_ret(t → t+1)
+        # The average-exposure figure is kept as alpha_avg_exposure_pct and
+        # the 100%-invested comparison as alpha_raw_pct.
+        # Cost line: the paper trader books no fees (paper_trade.py); a flat
+        # 5 bp one-way assumption on booked trade value is shown next to the
+        # headline so the reader sees what a realistic haircut does.
         benchmarks = {}
         exposure = avg_invested / 100.0
+        turnover = sum(float(t.get("value") or 0) for t in st.get("trades", []))
+        cost_frac = turnover * COST_BPS_ONE_WAY / 10_000 / initial if initial > 0 else 0.0
         for bm in BENCHMARKS:
             bm_ret = _benchmark_return(prices, bm, start_date, end_date)
             if bm_ret is not None:
                 alpha_raw = strat_ret - bm_ret
-                alpha_adj = strat_ret - exposure * bm_ret
+                alpha_avg = strat_ret - exposure * bm_ret
+                bm_leg_tw = _time_weighted_benchmark_leg(prices, bm, vh)
+                alpha_tw = strat_ret - bm_leg_tw if bm_leg_tw is not None else None
                 benchmarks[bm] = {
                     "return_pct": round(bm_ret * 100, 2),
-                    "alpha_pct": round(alpha_adj * 100, 2),
+                    "alpha_pct": round(alpha_tw * 100, 2) if alpha_tw is not None else None,
+                    "alpha_def": "strategy_return − Σ exposure_t × benchmark_return_t (time-weighted)",
+                    "alpha_after_cost_pct": round((alpha_tw - cost_frac) * 100, 2) if alpha_tw is not None else None,
+                    "benchmark_leg_tw_pct": round(bm_leg_tw * 100, 2) if bm_leg_tw is not None else None,
+                    "alpha_avg_exposure_pct": round(alpha_avg * 100, 2),
                     "alpha_raw_pct": round(alpha_raw * 100, 2),
                     "exposure_used": round(exposure, 3),
                 }
@@ -102,6 +155,10 @@ def evaluate_strategies() -> dict:
             "initial": initial,
             "final": round(final, 2),
             "avg_invested_pct": avg_invested,
+            "cost_assumption": {"bps_one_way": COST_BPS_ONE_WAY,
+                                "turnover": round(turnover, 2),
+                                "cost_pct": round(cost_frac * 100, 2),
+                                "note": "paper_trade.py books no fees; applied here only"},
             "regime": regime_label,
             "benchmarks": benchmarks,
         }
@@ -143,8 +200,29 @@ def _self_test_positive_alpha() -> dict:
             "actual": f"alpha={alpha*100:+.2f}%", "pass": ok}
 
 
+def _self_test_tw_full_exposure() -> dict:
+    """At constant 100% exposure the time-weighted leg must equal the plain
+    benchmark return (telescoping product ≈ sum for small moves, so compare
+    against the summed daily returns, not the compounded one)."""
+    prices = _load_prices()
+    spy_ts = prices.get("SPY", {})
+    if not spy_ts:
+        return {"name": "tw_full_exposure", "expect": "leg == Σ daily ret",
+                "actual": "SPY prices not found", "pass": False}
+    ds = sorted(spy_ts.keys())[-30:]
+    vh = [{"date": d, "cash": 0.0, "total": 100.0} for d in ds]
+    leg = _time_weighted_benchmark_leg(prices, "SPY", vh)
+    expect = sum(spy_ts[b] / spy_ts[a] - 1 for a, b in zip(ds, ds[1:]))
+    ok = leg is not None and abs(leg - expect) < 1e-9
+    vh0 = [{"date": d, "cash": 100.0, "total": 100.0} for d in ds]
+    leg0 = _time_weighted_benchmark_leg(prices, "SPY", vh0)
+    ok = ok and leg0 is not None and abs(leg0) < 1e-12
+    return {"name": "tw_full_exposure", "expect": "100% → Σ daily ret; 0% → 0",
+            "actual": f"leg={leg:.6f} expect={expect:.6f} zero_leg={leg0}", "pass": ok}
+
+
 def run_self_tests() -> list[dict]:
-    return [_self_test_alpha_zero(), _self_test_positive_alpha()]
+    return [_self_test_alpha_zero(), _self_test_positive_alpha(), _self_test_tw_full_exposure()]
 
 
 # ── main ───────────────────────────────────────────────────────────────────
@@ -180,7 +258,7 @@ def run() -> int:
         print(f"  Return: {s['return_pct']:+.2f}%")
         for bm, info in s["benchmarks"].items():
             print(f"  vs {bm}: benchmark={info['return_pct']:+.2f}%  "
-                  f"alpha={info['alpha_pct']:+.2f}%")
+                  f"alpha={info['alpha_pct']:+.2f}% (after 5bp: {info['alpha_after_cost_pct']:+.2f}%, avg-exp: {info['alpha_avg_exposure_pct']:+.2f}%)")
         print()
 
     return 0

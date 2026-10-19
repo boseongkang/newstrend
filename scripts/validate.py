@@ -29,7 +29,7 @@ OUT_FILE = DATA / "validation.json"
 
 sys.path.insert(0, str(SCRIPTS))
 
-from walk_forward import load_records, walk_forward, nw_t_test, run_self_tests as wf_self_tests
+from walk_forward import ACCURACY_FILE, load_records, walk_forward, nw_t_test, run_self_tests as wf_self_tests
 from benchmark import evaluate_strategies, run_self_tests as bm_self_tests
 from naive_baselines import compare_vs_baselines, run_self_tests as nb_self_tests
 
@@ -122,6 +122,48 @@ def _load_previous_validation() -> dict | None:
 
 
 # ── full validation run ───────────────────────────────────────────────────
+
+def _long_vs_universe(_records: list[dict]) -> dict:
+    """Per-fold (anchor date) mean fwd_5d of long picks minus mean fwd_5d of
+    the whole fold universe, NW t-test.
+
+    The universe is every deduped record with a realized 5d return —
+    HOLDs included — read straight from prediction_accuracy.json, because
+    walk_forward.load_records() keeps only scored (actionable) rows and a
+    universe of actionable rows would compare the longs against the shorts
+    rather than against the equal-weighted ticker list."""
+    try:
+        acc = json.loads(ACCURACY_FILE.read_text())
+        universe = acc.get("records_deduped") or acc.get("records") or []
+    except Exception:
+        universe = _records
+    folds: dict[str, list[dict]] = {}
+    for r in universe:
+        if r.get("fwd_5d_return") is None:
+            continue
+        folds.setdefault(r.get("fwd_5d_anchor_date") or r.get("snap_date"), []).append(r)
+    out = {"criterion": "per-fold mean fwd_5d(long picks) − mean fwd_5d(all deduped records in fold, "
+                        "HOLD included), Newey-West t-test across folds; measurement only, not part of the gate"}
+    for label, long_set in (("buy_watch", ("BUY", "WATCH")), ("buy_only", ("BUY",))):
+        diffs, n_long, n_univ = [], 0, 0
+        for _, recs in sorted(folds.items()):
+            longs = [r["fwd_5d_return"] for r in recs if r.get("action") in long_set]
+            if not longs:
+                continue
+            univ = [r["fwd_5d_return"] for r in recs]
+            diffs.append((sum(longs) / len(longs) - sum(univ) / len(univ)) * 100)
+            n_long += len(longs)
+            n_univ += len(univ)
+        if len(diffs) >= 2:
+            m, t, p = nw_t_test(diffs)
+            out[label] = {"long_set": list(long_set), "mean_diff_pp": round(m, 3),
+                          "nw_t": round(t, 3), "nw_p": round(p, 4),
+                          "n_folds": len(diffs), "n_long": n_long, "n_universe": n_univ}
+        else:
+            out[label] = {"long_set": list(long_set), "mean_diff_pp": None, "nw_t": None,
+                          "nw_p": None, "n_folds": len(diffs), "n_long": n_long, "n_universe": n_univ}
+    return out
+
 
 def run_validation() -> dict:
     records = load_records()
@@ -239,6 +281,16 @@ def run_validation() -> dict:
     prev_n = prev.get("data_sufficiency", {}).get("total_test_n", 0) if prev else 0
     delta_n = wf["total_test_n"] - prev_n
 
+    # ── Long picks − universe (2026-10-18 audit; measurement, not a gate) ──
+    # The v1 gate runs always-buy through system_fn on the SAME records, so
+    # on BUY/WATCH records both sides are identical and the paired
+    # difference is carried by SELL/REDUCE records only — it cannot see
+    # whether the long picks were good picks. This line asks that question
+    # directly: per fold, mean 5d return of the long picks minus the
+    # equal-weighted mean of every record in the fold (HOLDs included),
+    # NW-tested across folds. Gate definition itself is unchanged.
+    long_vs_universe = _long_vs_universe(records)
+
     # Data sufficiency progress
     target_n = 1785  # 5x current baseline of 357
     target_min_regimes = 2
@@ -303,6 +355,7 @@ def run_validation() -> dict:
             "paired_p": diff_p,
             "paired_n_folds": len(diffs),
             "reason": gate_reason,
+            "long_vs_universe": long_vs_universe,
         },
         "gate_v2_failed": {
             "note": ("FAILED redesign (2026-08-06) — 정밀도 개선 실패로 원복. "
@@ -432,6 +485,12 @@ def print_summary(v: dict) -> None:
     status = "PASS" if gate.get("pass") else "FAIL"
     print(f"   [{status}] {gate.get('reason', 'n/a')}")
     print(f"   Criterion: {gate.get('criterion', 'n/a')}")
+    lvu = gate.get("long_vs_universe") or {}
+    for label in ("buy_watch", "buy_only"):
+        x = lvu.get(label)
+        if x and x.get("mean_diff_pp") is not None:
+            print(f"   Long picks ({'+'.join(x['long_set'])}) − universe: {x['mean_diff_pp']:+.2f}pp/5d "
+                  f"NW p={x['nw_p']:.3f} ({x['n_folds']} folds, n_long={x['n_long']}) [measurement, not gate]")
 
     # Data sufficiency
     ds = v.get("data_sufficiency", {})

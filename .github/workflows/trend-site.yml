@@ -676,6 +676,18 @@ jobs:
         run: |
           python scripts/weekly_analyzer.py || true
 
+      - name: Harness self-tests (validate + watermark gate) — RED on failure
+        # 2026-10-18 audit: 18 self-tests existed (walk_forward 6, benchmark
+        # 3, naive_baselines 3, input_watermark_gate 7) and NO workflow ran
+        # them, so a broken test went unnoticed for months (random_vs_buy
+        # had been failing on healthy data since the record outgrew its
+        # premise). Measurement code is the one place a silent regression
+        # is worst — fail loud here, before validation.json is written.
+        run: |
+          set -euo pipefail
+          python scripts/validate.py --self-test
+          python scripts/input_watermark_gate.py --self-test
+
       - name: Phase 0 — validation (measurement only)
         run: |
           python scripts/validate.py --ci || true

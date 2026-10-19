@@ -36,6 +36,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import sys as _sys
+_sys.path.insert(0, str(Path(__file__).resolve().parent))
+from walk_forward import nw_t_test  # Newey-West fold test shared with validate.py
+
 warnings.filterwarnings("ignore")
 
 from sklearn.base import clone
@@ -145,21 +149,23 @@ def _extract_row_from_prediction(p: dict, regime: str) -> dict | None:
 
 # ── SPY benchmark ──────────────────────────────────────────────────────────
 
-def _spy_5d(snap_date: str, cache: dict = {}) -> float | None:
+_SPY_CACHE: dict = {}
+
+
+def _spy_calendar(cache: dict = _SPY_CACHE) -> tuple[list[str], dict[str, float]]:
     if "closes" not in cache:
-        if not PRICES_FILE.exists():
-            return None
-        d = json.loads(PRICES_FILE.read_text())
-        spy = d.get("tickers", {}).get("SPY")
-        if spy:
-            cache["dates"] = spy["dates"]
-            cache["closes"] = dict(zip(spy["dates"], spy["closes"]))
-        else:
-            cache["closes"] = {}
-    dates = cache.get("dates", [])
-    closes = cache.get("closes", {})
-    if not dates:
-        return None
+        cache["dates"], cache["closes"] = [], {}
+        if PRICES_FILE.exists():
+            d = json.loads(PRICES_FILE.read_text())
+            spy = d.get("tickers", {}).get("SPY")
+            if spy:
+                cache["dates"] = spy["dates"]
+                cache["closes"] = dict(zip(spy["dates"], spy["closes"]))
+    return cache["dates"], cache["closes"]
+
+
+def _anchor_idx(snap_date: str, dates: list[str]) -> int:
+    """Index of the last trading day <= snap_date (-1 if none)."""
     lo, hi = 0, len(dates)
     while lo < hi:
         mid = (lo + hi) // 2
@@ -167,7 +173,22 @@ def _spy_5d(snap_date: str, cache: dict = {}) -> float | None:
             lo = mid + 1
         else:
             hi = mid
-    idx = lo - 1
+    return lo - 1
+
+
+def _anchor_date(snap_date: str) -> str | None:
+    """Trading-day anchor of a snapshot. Weekend/holiday snapshots share the
+    preceding Friday's anchor — they are the same trade, not new evidence."""
+    dates, _ = _spy_calendar()
+    i = _anchor_idx(snap_date, dates)
+    return dates[i] if i >= 0 else None
+
+
+def _spy_5d(snap_date: str) -> float | None:
+    dates, closes = _spy_calendar()
+    if not dates:
+        return None
+    idx = _anchor_idx(snap_date, dates)
     if idx < 0 or idx + 5 >= len(dates):
         return None
     p0 = closes.get(dates[idx])
@@ -175,6 +196,20 @@ def _spy_5d(snap_date: str, cache: dict = {}) -> float | None:
     if not p0 or not p5:
         return None
     return p5 / p0 - 1
+
+
+def _signed_excess_alpha(realized: float, spy: float, action: str) -> float:
+    """Per-trade alpha in % as the SIGNED excess return: (r − SPY) for a
+    BUY, −(r − SPY) for a SELL.
+
+    2026-10-18 audit: the previous definition was (−r) − SPY for a SELL,
+    which charges a short the market return twice (a short that merely
+    tracks the market scored −2×SPY instead of 0). It made SELL alpha look
+    like −3.0% against −0.13% for BUYs and pulled the headline down by
+    ~0.06–0.08pp. Same convention walk_forward.py still uses — flagged
+    there, not changed here (gate inputs)."""
+    ex = realized - spy
+    return round((ex if action == "BUY" else -ex) * 100, 3)
 
 
 # ── Model training + hash ─────────────────────────────────────────────────
@@ -318,14 +353,34 @@ def _evaluate_past_predictions(log: dict) -> int:
 
         actual = p5 / p0 - 1
         pred["realized_return"] = round(actual, 6)
-        trade_ret = actual if pred["predicted_action"] == "BUY" else -actual
-        pred["alpha"] = round((trade_ret - spy_ret) * 100, 3)
+        pred["alpha"] = _signed_excess_alpha(actual, spy_ret, pred["predicted_action"])
+        pred["alpha_def"] = "signed_excess"
+        pred["anchor_date"] = _anchor_date(pred["snap_date"])
         pred["correct"] = (pred["predicted_action"] == "BUY" and actual > 0) or \
                           (pred["predicted_action"] == "SELL" and actual < 0)
         pred["evaluated"] = True
         n_evaluated += 1
 
     return n_evaluated
+
+
+def _migrate_alpha_definition(log: dict) -> int:
+    """Idempotent: re-express every already-evaluated prediction's alpha as
+    signed excess return and stamp its anchor_date. Returns rows changed."""
+    changed = 0
+    for pred in log["predictions"]:
+        if not pred.get("evaluated") or pred.get("realized_return") is None:
+            continue
+        if pred.get("alpha_def") == "signed_excess" and pred.get("anchor_date"):
+            continue
+        spy_ret = _spy_5d(pred["snap_date"])
+        if spy_ret is None:
+            continue
+        pred["alpha"] = _signed_excess_alpha(pred["realized_return"], spy_ret, pred["predicted_action"])
+        pred["alpha_def"] = "signed_excess"
+        pred["anchor_date"] = _anchor_date(pred["snap_date"])
+        changed += 1
+    return changed
 
 
 # ── Bias monitor ───────────────────────────────────────────────────────────
@@ -453,6 +508,9 @@ def run_monitor() -> dict:
 
     # ── 2. Evaluate past predictions with realized returns ──
     n_newly_evaluated = _evaluate_past_predictions(log)
+    n_migrated = _migrate_alpha_definition(log)
+    if n_migrated:
+        print(f"  alpha definition migrated to signed_excess on {n_migrated} evaluated rows")
     _save_prediction_log(log)
 
     # ── 3. Model hash verification ──
@@ -478,9 +536,29 @@ def run_monitor() -> dict:
         if not model_preds:
             model_forward[name] = {"status": "no_evaluated_data", "n": 0}
             continue
+        # Fold = trading-day ANCHOR, one row per (ticker, anchor) — keep the
+        # earliest snapshot (2026-10-18 audit: 25 of 86 snap_date folds were
+        # weekend copies of Friday's trade, double-counting them; the same
+        # dedup walk_forward applies since STEP 3). Anchors inside the frozen
+        # training window (<= BASELINE_DATE) are not forward evidence and are
+        # dropped (the 05-24 fold's 5d outcome is in the training set).
+        n_raw = len(model_preds)
+        seen_keys: set[tuple[str, str]] = set()
+        n_excluded_train = 0
         by_date = {}
-        for p in model_preds:
-            by_date.setdefault(p["snap_date"], []).append(p)
+        for p in sorted(model_preds, key=lambda x: x["snap_date"]):
+            anc = p.get("anchor_date") or _anchor_date(p["snap_date"])
+            if anc is None:
+                continue
+            if anc <= BASELINE_DATE:
+                n_excluded_train += 1
+                continue
+            key = (p["ticker"], anc)
+            if key in seen_keys:
+                continue
+            seen_keys.add(key)
+            by_date.setdefault(anc, []).append(p)
+        model_preds = [p for preds in by_date.values() for p in preds]
         fold_alphas = []
         fold_accs = []
         by_regime = {}
@@ -512,14 +590,21 @@ def run_monitor() -> dict:
         # confidence (pseudo-replication). With <2 independent folds there is
         # no t-test: leave t/p as None so it can never read as "significant"
         # (the old 0.0 default looked like p<0.05 and was a unfreeze hazard).
+        # Newey-West (lag 4) across folds (2026-10-18): consecutive daily
+        # folds hold overlapping 5-day returns (rho1 ~ 0.7), so the iid fold
+        # SE understated uncertainty — the same correction STEP 3 applied to
+        # walk_forward. The iid figures are kept as *_iid for comparison.
         n_folds_eval = len(fold_alphas)
-        t_stat = p_val = None
+        t_stat = p_val = t_iid = p_iid = None
         if n_folds_eval >= 2:
             fm = float(np.mean(fold_alphas))
             fse = float(np.std(fold_alphas, ddof=1)) / math.sqrt(n_folds_eval)
             if fse > 0:
-                t_stat = fm / fse
-                p_val = 2 * (1 - _norm_cdf(abs(t_stat)))
+                t_iid = fm / fse
+                p_iid = 2 * (1 - _norm_cdf(abs(t_iid)))
+            _, t_nw, p_nw = nw_t_test(fold_alphas)
+            if t_nw != 0.0 or p_nw != 1.0:
+                t_stat, p_val = float(t_nw), float(p_nw)
 
         regime_summary = {}
         for rg, g in by_regime.items():
@@ -533,11 +618,19 @@ def run_monitor() -> dict:
         model_forward[name] = {
             "status": "tracking",
             "n": len(model_preds),
+            "n_raw": n_raw,
+            "n_excluded_train_overlap": n_excluded_train,
             "n_folds": len(fold_alphas),
+            "fold_unit": "trading-day anchor (weekend snapshots deduped to Friday)",
+            "alpha_def": "signed_excess: (r−SPY) for BUY, −(r−SPY) for SELL",
             "cumulative_alpha_pct": round(m, 3),
             "alpha_ci_95": [ci_lo, ci_hi],
+            "alpha_ci_note": "per-trade CI, pseudo-replicated within a day — use alpha_t/alpha_p",
             "alpha_t": round(t_stat, 3) if t_stat is not None else None,
             "alpha_p": round(p_val, 4) if p_val is not None else None,
+            "t_test": "newey_west_lag4_over_folds",
+            "alpha_t_iid": round(t_iid, 3) if t_iid is not None else None,
+            "alpha_p_iid": round(p_iid, 4) if p_iid is not None else None,
             "sig_status": "ok" if p_val is not None
                           else f"insufficient_folds (have {n_folds_eval}, need >=2)",
             "cumulative_accuracy": round(sum(fold_accs) / len(fold_accs), 4) if fold_accs else 0,
