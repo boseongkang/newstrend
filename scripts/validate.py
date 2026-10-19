@@ -34,6 +34,33 @@ from benchmark import evaluate_strategies, run_self_tests as bm_self_tests
 from naive_baselines import compare_vs_baselines, run_self_tests as nb_self_tests
 
 
+# Stale/dark-input taint windows (2026-10-18 audit). Dates are snapshot
+# (test_date) days, inclusive. end=None → open until closed by hand.
+TAINT_WINDOWS = [
+    {
+        "id": "calibrator_live",
+        "start": "2026-05-16", "end": "2026-08-05",
+        "cause": "pillar_weights.json mode=active fed in-sample EMA multipliers "
+                 "into predict.py daily (demoted to shadow 2026-08-05)",
+    },
+    {
+        "id": "sentiment_frozen_0816",
+        "start": "2026-08-19", "end": "2026-08-23",
+        "cause": "ticker_sentiment.json stuck at 2026-08-16 (local FinBERT "
+                 "stalled); predict.py reads index -1 with no age check",
+    },
+    {
+        "id": "warehouse_outage_catchup",
+        "start": "2026-10-18", "end": None,
+        "cause": "sentiment pillar dark (last date 2026-09-04 = partial day, "
+                 "filtered_score null 90/90), trends.json holes 09-05→09-17 and "
+                 "09-25→10-16 (news z-scores over a non-contiguous series), "
+                 "ticker_weights.json refit on that gappy history. Close this "
+                 "window after FinBERT catch-up + trends backfill are verified.",
+    },
+]
+
+
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
@@ -230,6 +257,16 @@ def run_validation() -> dict:
     TAINT_START, TAINT_END = "2026-05-16", "2026-08-05"
     tainted_folds = [f for f in wf.get("folds", [])
                      if TAINT_START <= f.get("test_date", "") <= TAINT_END]
+    # Additional stale/dark-input windows (2026-10-18 audit). An open-ended
+    # window (end=None) runs to the latest fold; close it by setting the end
+    # date once the input is confirmed fresh again (FinBERT catch-up).
+    folds_all = wf.get("folds", [])
+    windows = TAINT_WINDOWS
+    for w in windows:
+        end = w["end"] or "9999-12-31"
+        affected = [f for f in folds_all if w["start"] <= f.get("test_date", "") <= end]
+        w["n_folds_affected"] = len(affected)
+        w["n_records_affected"] = sum(f.get("n", 0) for f in affected)
     taint = {
         "calibrator_live_window": [TAINT_START, TAINT_END],
         "cause": "pillar_weights.json mode=active fed in-sample EMA multipliers "
@@ -240,6 +277,14 @@ def run_validation() -> dict:
         "note": "folds with test_date in this window are not fixed-system "
                 "forward results; measured behavioural drift was small "
                 "(0 action flips, max conf delta 0.001 in same-day A/B)",
+        "windows": windows,
+        "windows_note": "every window listed here (incl. the calibrator one) "
+                        "marks snapshots that are NOT fixed-system forward "
+                        "results; exclude them from any evaluation claim. "
+                        "ticker_weights.json / ticker_analysis / signal_corr "
+                        "are refit daily on realized outcomes for ALL "
+                        "snapshots since 2026-05-25 (see CLAUDE.md "
+                        "'Unrecorded drift channel').",
     }
 
     return {

@@ -15,17 +15,58 @@ autocorrelation. After dedup + Newey-West the historical OOS record is
 *not significant in either direction* (acc p≈0.32, alpha p≈0.19 NW).
 
 The freeze nevertheless stands, on two grounds that survive the corrections:
-1. **ml_monitor forward falsification (2026-07-14)** — materially independent
-   of both the calibrator taint and the STEP 3 statistical issues: RF forward
-   alpha −0.39% (p=0.0095), GB −0.59% (p=0.0033) on frozen, hash-verified
-   models over post-2026-05-25 data only.
-2. **Adoption gate FAIL** under the corrected paired NW test: system − 
-   always-buy = −0.85pp (p=0.28) — no evidence the system beats the trivial
-   baseline, and the point estimate is negative.
+1. **ml_monitor forward falsification (2026-07-14, numbers as of
+   2026-10-18)** — materially independent of both the calibrator taint and
+   the STEP 3 statistical issues: RF forward alpha −0.397% (95% CI −0.583 to
+   −0.211, t=−4.66), GB −0.500% (CI −0.688 to −0.312, t=−4.64), n=7740 /
+   86 folds, frozen hash-verified models, post-2026-05-25 data only
+   (`site/data/ml_monitor.json` latest, updated 2026-10-18T21:00:01Z, CI
+   run 39165500880). ⚠️ These t/p values are **iid fold t-tests with
+   weekend folds included** (ml_monitor.py) — the same two flaws STEP 3
+   fixed in walk_forward. An independent recomputation (2026-10-18 audit:
+   weekdays only, NW lag 4) still gives RF −0.43% p=0.0015, GB −0.51%
+   p=0.0066, so the falsification survives; ml_monitor itself is fixed in
+   PR C. The "p=0.0095 / p=0.0033" figures quoted in older notes came from
+   the 2026-07-14 run and no longer appear in any output.
+2. **Adoption gate FAIL** under the corrected paired NW test: system −
+   always-buy = −0.98pp (NW p=0.092; system −0.57%, always-buy +0.41%,
+   85 folds, `validation.json` updated 2026-10-18T20:59:59Z) — no evidence
+   the system beats the trivial baseline, and the point estimate is
+   negative. Caveat (2026-10-18 audit): always-buy is evaluated on the same
+   records through `system_fn`, so on BUY/WATCH records both sides are
+   identical and the paired difference is carried by SELL records only —
+   the gate does not see long-side selection. PR C adds a "long picks −
+   universe" line next to it (gate definition itself unchanged).
 
 4 hypotheses tested (momentum, anti-signal, regime-gate, conf-inversion) —
 none passed the adoption gate. Single RISK-ON regime dominates the sample;
 the one RISK-OFF day (2026-04-17, n=23) is nowhere near a cycle.
+
+### Unrecorded drift channel (found 2026-10-18)
+predict.py has not changed since 2026-05-25, but **its inputs are refit
+daily on realized outcomes**, so the "frozen" system still drifts:
+- `learn_ticker_weights.py` runs before every predict (trend-site.yml
+  "Learn ticker weights") and refits per-ticker TA/news hit rates over the
+  **entire price history** (in-sample, `range(30, len(dates) − hold_days)`),
+  writing `site/data/ticker_weights.json`. predict.py reads
+  `news_weight`; when `news_weight ≥ 0.5` and the ticker's news score
+  clears `3.0 / news_weight`, a HOLD/WATCH is **forced to BUY with
+  conf +0.15** (and symmetrically to SELL/REDUCE with conf +0.10). The set
+  of tickers in that branch moves day to day (7–24 tickers; 14 on
+  2026-10-18, 20 on 2026-08-25). This applies to **every snapshot since
+  2026-05-25**, not just the calibrator window.
+- `analyze_ticker.py` (per-ticker word lists / hit rates →
+  `ticker_analysis/*.json`) and `build_signal_corr.py` (`signal_corr.json`)
+  are likewise refit every run and feed the news bonus.
+- Effect on the ML forward test: RF/GB read these only through the
+  `confidence` feature (RF 6.3% / GB 9.5% importance), so the forward
+  falsification is indirectly exposed but not driven by it.
+Consequence: historical walk-forward folds measure a system whose
+news-override set changed daily. Any future fixed-system test must pin
+`ticker_weights.json`, `ticker_analysis/` and `signal_corr.json` snapshots
+alongside predictions (the `input_manifest.json` written since 2026-10-18
+records their sha256 for exactly this purpose). Fixing the refit itself is
+a scoring change and stays frozen.
 
 ### Rules
 1. **New hypotheses** must be tested via `walk_forward(records, system_fn=...)` first
@@ -62,8 +103,19 @@ the window accordingly. **ml_monitor (RF/GB forward) is materially
 independent of this taint**: it evaluates its own frozen models
 (hash-verified), and the only calibrator-downstream input is the
 `confidence` feature (importance: RF 6.3% rank 6/34, GB 9.5% rank 4/34)
-whose drift was ≤0.001 — the forward falsification (RF −0.39% p=0.0095,
-GB −0.59% p=0.0033) is unaffected.
+whose drift was ≤0.001 — the forward falsification (RF −0.397% / GB
+−0.500% as of 2026-10-18, see "Why" above) is unaffected.
+
+**Additional taint windows (recorded 2026-10-18, `validation.json`
+`taint.windows`):**
+- `2026-08-19 → 2026-08-23` — sentiment input frozen at 2026-08-16 (local
+  FinBERT stalled; index −1 read with no age check).
+- `2026-10-18 → FinBERT catch-up` — sentiment pillar dark (09-04 partial
+  day, filtered_score null for 90/90), `trends.json` has holes
+  (09-05→09-17, 09-25→10-16) so news z-scores run over a non-contiguous
+  series, and `ticker_weights.json` was refit on that gappy news history.
+  Snapshots in this window are not fixed-system forward results and must
+  be excluded from any evaluation.
 
 ### Sentiment revival boundary (2026-08-05)
 The news archive truncation (2026-05-03 → 2026-08-04, ~97% of articles
@@ -142,9 +194,17 @@ evaluates only on NEW data after that date. This is the real test.
 The forward-only tracker (installed 2026-05-25) **falsified** the historical
 ML alpha after ~50 days of out-of-sample data. The +1.7~2.0% was a
 false positive:
-- RF forward alpha: **−0.39%** (p=0.0095) — significantly NEGATIVE
-- GB forward alpha: **−0.59%** (p=0.0033) — significantly NEGATIVE
-- predict.py OOS alpha: **−0.73%** (p=0.034) → gate FAIL vs always-buy (+0.38%)
+- RF forward alpha (2026-07-14 run): −0.39% — significantly NEGATIVE;
+  **as of 2026-10-18: −0.397%**, CI [−0.583, −0.211], t=−4.66, n=7740
+- GB forward alpha (2026-07-14 run): −0.59%; **as of 2026-10-18: −0.500%**,
+  CI [−0.688, −0.312], t=−4.64
+  (source: `site/data/ml_monitor.json` latest, CI run 39165500880; the
+  July p-values 0.0095/0.0033 are not reproducible from current output —
+  ml_monitor reports iid `alpha_p=0.0`; NW/weekday recomputation in the
+  2026-10-18 audit: RF p=0.0015, GB p=0.0066)
+- predict.py OOS alpha (2026-07-14): −0.73% (p=0.034) → gate FAIL vs
+  always-buy (+0.38%); **as of 2026-10-18: −0.57% (NW p=0.18), paired
+  diff −0.98pp (NW p=0.092), always-buy +0.41%**
 - Directional accuracy: 48–51% (coin flip)
 - Data target MET: 2009/1785 test records (112.5%)
 - RISK-OFF cycle: observed=true

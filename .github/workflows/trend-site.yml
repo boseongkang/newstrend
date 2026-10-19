@@ -397,6 +397,98 @@ jobs:
             --out          site/data/ticker_weights.json \
             --hold-days    5 || true
 
+      - name: Write input manifest
+        # Record the exact state of every file predict.py is about to read
+        # (2026-10-18 audit): predict.py has no age checks (sentiment index
+        # -1, fundamentals/*.json, insider.json) and ticker_weights.json is
+        # refit daily, so without this record a snapshot cannot be tied to
+        # its inputs after the fact. archive_predictions.py stores it next to
+        # the snapshot as predictions_history/<day>.manifest.json.
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, hashlib, glob, os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          def load(p):
+              try:
+                  return json.loads(Path(p).read_text())
+              except Exception:
+                  return None
+
+          def sha(p):
+              try:
+                  return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+              except Exception:
+                  return None
+
+          def latest_bar(d):
+              # prices.json / technical_analysis.json: {"updated", "tickers": {T: {"dates"/"date": [...]}}}
+              best = None
+              if not isinstance(d, dict):
+                  return None
+              for v in (d.get("tickers") or {}).values():
+                  if isinstance(v, dict):
+                      for key in ("dates", "date"):
+                          x = v.get(key)
+                          if isinstance(x, list) and x:
+                              best = max(best or "", str(x[-1]))
+                          elif isinstance(x, str):
+                              best = max(best or "", x)
+                      if isinstance(v.get("latest"), dict) and v["latest"].get("date"):
+                          best = max(best or "", str(v["latest"]["date"]))
+              return best
+
+          sent = load("site/data/ticker_sentiment.json") or {}
+          dates = sent.get("dates") or []
+          nonnull = 0
+          if dates:
+              for tk, td in (sent.get("tickers") or {}).items():
+                  fs = td.get("filtered_score") if isinstance(td, dict) else None
+                  if isinstance(fs, list) and fs and fs[-1] is not None:
+                      nonnull += 1
+          fund = load("site/data/fundamentals.json") or {}
+          ins  = load("site/data/insider.json") or {}
+          prices = load("site/data/prices.json") or {}
+          ta = load("site/data/technical_analysis.json") or {}
+          trends = load("site/data/trends.json") or {}
+          tdates = trends.get("dates") or []
+          fund_dir = sorted(glob.glob("site/data/fundamentals/*.json"))
+          fund_as_of = sorted({(load(f) or {}).get("as_of") or "" for f in fund_dir} - {""})
+
+          man = {
+              "snap_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+              "written_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+              "ci_run_id": os.environ.get("GITHUB_RUN_ID"),
+              "sentiment_latest_date": dates[-1] if dates else None,
+              "sentiment_n_dates": len(dates),
+              "sentiment_tickers_total": len(sent.get("tickers") or {}),
+              "sentiment_tickers_nonnull": nonnull,
+              "sentiment_generated": sent.get("generated"),
+              "fundamentals_generated": fund.get("generated_at"),
+              "fundamentals_dir_files": len(fund_dir),
+              "fundamentals_dir_as_of_range": [fund_as_of[0], fund_as_of[-1]] if fund_as_of else None,
+              "insider_generated": ins.get("generated_at"),
+              "prices_updated": prices.get("updated"),
+              "prices_latest": latest_bar(prices),
+              "ta_updated": ta.get("updated"),
+              "ta_latest": latest_bar(ta),
+              "trends_latest_date": tdates[-1] if tdates else None,
+              "trends_n_dates": len(tdates),
+              "ticker_weights_sha256": sha("site/data/ticker_weights.json"),
+              "ticker_weights_updated": (load("site/data/ticker_weights.json") or {}).get("updated"),
+              "signal_corr_sha256": sha("site/data/signal_corr.json"),
+              "ticker_analysis_sha256": hashlib.sha256(b"".join(
+                  Path(f).read_bytes() for f in sorted(glob.glob("site/data/ticker_analysis/*.json")))).hexdigest(),
+              "pillar_weights_mode": (load("site/data/pillar_weights.json") or {}).get("mode"),
+          }
+          Path("site/data/input_manifest.json").write_text(json.dumps(man, indent=1, sort_keys=True))
+          print(json.dumps(man, indent=1, sort_keys=True))
+          if man["sentiment_tickers_nonnull"] == 0:
+              print(f"::warning title=Sentiment pillar dark::ticker_sentiment latest={man['sentiment_latest_date']} has 0 non-null filtered_score — this snapshot's sentiment pillar is dark (recorded in the manifest; see CLAUDE.md taint windows)")
+          PY
+
       - name: Generate predictions
         run: |
           python scripts/predict.py \
@@ -411,8 +503,11 @@ jobs:
         # Moved out of weekly_report.py (STEP 4): archive right after predict
         # so daily_verify sees today's snapshot, and refuse stale input instead
         # of stamping the previous run's file with today's date.
+        # No `|| true` (2026-10-18): this step exists to refuse a stale
+        # snapshot; swallowing its exit code defeated that. A refusal now
+        # fails the job before "Commit predictions history".
         run: |
-          python scripts/archive_predictions.py || true
+          python scripts/archive_predictions.py --manifest site/data/input_manifest.json
 
       - name: Daily observation report
         # 관찰(사실)만 — 예측 주장 없음. 숫자는 Python, Claude는 한 줄 요약만
@@ -530,6 +625,7 @@ jobs:
             site/data/backtest.json
             site/data/backtest_v2.json
             site/data/ticker_weights.json
+            site/data/input_manifest.json
             site/data/domino.json
             site/data/fundamentals.json
             site/data/reports/
