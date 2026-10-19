@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-19T04:18:06Z",
+  "updated": "2026-10-19T05:52:14Z",
   "taint": {
     "calibrator_live_window": [
       "2026-05-16",
@@ -8,20 +8,73 @@
     "cause": "pillar_weights.json mode=active fed in-sample EMA multipliers into predict.py daily (demoted to shadow 2026-08-05, commit 515e58178)",
     "n_folds_affected": 56,
     "n_records_affected": 2017,
-    "note": "folds with test_date in this window are not fixed-system forward results; measured behavioural drift was small (0 action flips, max conf delta 0.001 in same-day A/B)"
+    "note": "folds with test_date in this window are not fixed-system forward results; measured behavioural drift was small (0 action flips, max conf delta 0.001 in same-day A/B)",
+    "windows": [
+      {
+        "id": "calibrator_live",
+        "start": "2026-05-16",
+        "end": "2026-08-05",
+        "cause": "pillar_weights.json mode=active fed in-sample EMA multipliers into predict.py daily (demoted to shadow 2026-08-05)",
+        "n_folds_affected": 56,
+        "n_records_affected": 2017
+      },
+      {
+        "id": "sentiment_frozen_0816",
+        "start": "2026-08-19",
+        "end": "2026-08-23",
+        "cause": "ticker_sentiment.json stuck at 2026-08-16 (local FinBERT stalled); predict.py reads index -1 with no age check",
+        "n_folds_affected": 3,
+        "n_records_affected": 102
+      },
+      {
+        "id": "warehouse_outage_catchup",
+        "start": "2026-10-18",
+        "end": null,
+        "cause": "sentiment pillar dark (last date 2026-09-04 = partial day, filtered_score null 90/90), trends.json holes 09-05\u219209-17 and 09-25\u219210-16 (news z-scores over a non-contiguous series), ticker_weights.json refit on that gappy history. Close this window after FinBERT catch-up + trends backfill are verified.",
+        "n_folds_affected": 0,
+        "n_records_affected": 0
+      }
+    ],
+    "windows_note": "every window listed here (incl. the calibrator one) marks snapshots that are NOT fixed-system forward results; exclude them from any evaluation claim. ticker_weights.json / ticker_analysis / signal_corr are refit daily on realized outcomes for ALL snapshots since 2026-05-25 (see CLAUDE.md 'Unrecorded drift channel')."
   },
   "gate": {
     "version": "v1",
     "pass": false,
     "criterion": "paired per-fold (system \u2212 always-buy) alpha > 0 with Newey-West p<0.05, and system alpha > 0",
-    "system_alpha_pct": -0.5681,
+    "system_alpha_pct": -0.4063,
     "always_buy_alpha_pct": 0.4136,
-    "system_alpha_p": 0.1839,
-    "paired_diff_pp": -0.9817,
-    "paired_t": -1.6833,
-    "paired_p": 0.0923,
+    "system_alpha_p": 0.1728,
+    "paired_diff_pp": -0.8198,
+    "paired_t": -1.8642,
+    "paired_p": 0.0623,
     "paired_n_folds": 85,
-    "reason": "FAIL: paired (system \u2212 always-buy) alpha -0.98pp, NW p=0.0923 (system -0.57%, buy +0.41%)"
+    "reason": "FAIL: paired (system \u2212 always-buy) alpha -0.82pp, NW p=0.0623 (system -0.41%, buy +0.41%)",
+    "long_vs_universe": {
+      "criterion": "per-fold mean fwd_5d(long picks) \u2212 mean fwd_5d(all deduped records in fold, HOLD included), Newey-West t-test across folds; measurement only, not part of the gate",
+      "buy_watch": {
+        "long_set": [
+          "BUY",
+          "WATCH"
+        ],
+        "mean_diff_pp": -0.499,
+        "nw_t": -1.361,
+        "nw_p": 0.1736,
+        "n_folds": 85,
+        "n_long": 1991,
+        "n_universe": 7223
+      },
+      "buy_only": {
+        "long_set": [
+          "BUY"
+        ],
+        "mean_diff_pp": 0.096,
+        "nw_t": 0.166,
+        "nw_p": 0.8685,
+        "n_folds": 79,
+        "n_long": 377,
+        "n_universe": 6927
+      }
+    }
   },
   "gate_v2_failed": {
     "note": "FAILED redesign (2026-08-06) \u2014 \uc815\ubc00\ub3c4 \uac1c\uc120 \uc2e4\ud328\ub85c \uc6d0\ubcf5. docs/gate_v2_definition.md \uacb0\uacfc \uc808 + checkpoint_registration.json GATE-V2 \ud56d\ubaa9 \ucc38\uc870. \ud310\uc815\uc740 v1\uacfc \ub3d9\uc77c(FAIL)\uc774\ubbc0\ub85c \uc6d0\ubcf5\uc740 \uc815\ubc00\ub3c4 \uadfc\uac70.",
@@ -55,11 +108,11 @@
       "nw_lag": 4
     },
     "alpha": {
-      "per_trade_mean_pct": -0.5681,
-      "per_trade_t": -1.3287,
-      "per_trade_p": 0.1839,
-      "per_trade_t_iid": -2.181,
-      "per_trade_p_iid": 0.0292,
+      "per_trade_mean_pct": -0.4063,
+      "per_trade_t": -1.3632,
+      "per_trade_p": 0.1728,
+      "per_trade_t_iid": -2.0572,
+      "per_trade_p_iid": 0.0397,
       "nw_lag": 4,
       "portfolio_mean_pct": -0.5681,
       "portfolio_t": -1.3287,
@@ -77,9 +130,9 @@
         ],
         "z_vs_coin": 2.3346,
         "p_vs_coin": 0.0196,
-        "alpha_per_trade_mean_pct": -0.8654,
-        "alpha_t_stat": -3.5741,
-        "alpha_p_value": 0.0004,
+        "alpha_per_trade_mean_pct": -0.0481,
+        "alpha_t_stat": -0.0857,
+        "alpha_p_value": 0.9317,
         "provisional": false
       },
       "RISK-OFF": {
@@ -92,7 +145,7 @@
         ],
         "z_vs_coin": -0.2085,
         "p_vs_coin": 0.8348,
-        "alpha_per_trade_mean_pct": -0.348,
+        "alpha_per_trade_mean_pct": -0.254,
         "alpha_t_stat": 0.0,
         "alpha_p_value": 1.0,
         "provisional": true
@@ -107,9 +160,9 @@
         ],
         "z_vs_coin": -4.0415,
         "p_vs_coin": 0.0001,
-        "alpha_per_trade_mean_pct": -0.5168,
-        "alpha_t_stat": -1.0338,
-        "alpha_p_value": 0.3012,
+        "alpha_per_trade_mean_pct": -0.474,
+        "alpha_t_stat": -1.4681,
+        "alpha_p_value": 0.1421,
         "provisional": false
       }
     },
@@ -132,7 +185,7 @@
         "p_vs_coin": 0.8348,
         "regime": "RISK-OFF",
         "spy_5d_pct": 0.271,
-        "alpha_per_trade_pct": -0.348,
+        "alpha_per_trade_pct": -0.254,
         "alpha_portfolio_pct": -0.348,
         "test_date": "2026-04-17",
         "train_dates": 0
@@ -155,7 +208,7 @@
         "p_vs_coin": 0.5271,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.744,
-        "alpha_per_trade_pct": -3.202,
+        "alpha_per_trade_pct": -2.012,
         "alpha_portfolio_pct": -3.202,
         "test_date": "2026-04-27",
         "train_dates": 1
@@ -178,7 +231,7 @@
         "p_vs_coin": 0.763,
         "regime": "RISK-ON",
         "spy_5d_pct": 2.294,
-        "alpha_per_trade_pct": -3.962,
+        "alpha_per_trade_pct": -1.46,
         "alpha_portfolio_pct": -3.962,
         "test_date": "2026-05-03",
         "train_dates": 2
@@ -201,7 +254,7 @@
         "p_vs_coin": 0.7389,
         "regime": "RISK-ON",
         "spy_5d_pct": 2.985,
-        "alpha_per_trade_pct": -7.933,
+        "alpha_per_trade_pct": -4.617,
         "alpha_portfolio_pct": -7.933,
         "test_date": "2026-05-04",
         "train_dates": 3
@@ -224,7 +277,7 @@
         "p_vs_coin": 0.7389,
         "regime": "RISK-ON",
         "spy_5d_pct": 1.356,
-        "alpha_per_trade_pct": -2.985,
+        "alpha_per_trade_pct": -1.177,
         "alpha_portfolio_pct": -2.985,
         "test_date": "2026-05-05",
         "train_dates": 4
@@ -247,7 +300,7 @@
         "p_vs_coin": 0.7055,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.66,
-        "alpha_per_trade_pct": -1.157,
+        "alpha_per_trade_pct": -0.403,
         "alpha_portfolio_pct": -1.157,
         "test_date": "2026-05-06",
         "train_dates": 5
@@ -270,7 +323,7 @@
         "p_vs_coin": 0.6547,
         "regime": "RISK-ON",
         "spy_5d_pct": 1.774,
-        "alpha_per_trade_pct": -0.533,
+        "alpha_per_trade_pct": 0.886,
         "alpha_portfolio_pct": -0.533,
         "test_date": "2026-05-07",
         "train_dates": 6
@@ -293,7 +346,7 @@
         "p_vs_coin": 0.0482,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.612,
-        "alpha_per_trade_pct": -2.392,
+        "alpha_per_trade_pct": -1.8,
         "alpha_portfolio_pct": -2.392,
         "test_date": "2026-05-10",
         "train_dates": 7
@@ -316,7 +369,7 @@
         "p_vs_coin": 0.3841,
         "regime": "RISK-ON",
         "spy_5d_pct": -0.604,
-        "alpha_per_trade_pct": -0.353,
+        "alpha_per_trade_pct": -0.975,
         "alpha_portfolio_pct": -0.353,
         "test_date": "2026-05-11",
         "train_dates": 8
@@ -339,7 +392,7 @@
         "p_vs_coin": 0.1573,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.018,
-        "alpha_per_trade_pct": -2.148,
+        "alpha_per_trade_pct": -2.131,
         "alpha_portfolio_pct": -2.148,
         "test_date": "2026-05-12",
         "train_dates": 9
@@ -362,7 +415,7 @@
         "p_vs_coin": 0.4927,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.501,
-        "alpha_per_trade_pct": -1.39,
+        "alpha_per_trade_pct": -0.948,
         "alpha_portfolio_pct": -1.39,
         "test_date": "2026-05-13",
         "train_dates": 10
@@ -385,7 +438,7 @@
         "p_vs_coin": 0.2087,
         "regime": "RISK-ON",
         "spy_5d_pct": -1.439,
-        "alpha_per_trade_pct": 0.189,
+        "alpha_per_trade_pct": -1.389,
         "alpha_portfolio_pct": 0.189,
         "test_date": "2026-05-14",
         "train_dates": 11
@@ -408,7 +461,7 @@
         "p_vs_coin": 0.7316,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.756,
-        "alpha_per_trade_pct": -1.304,
+        "alpha_per_trade_pct": -0.681,
         "alpha_portfolio_pct": -1.304,
         "test_date": "2026-05-17",
         "train_dates": 12
@@ -431,7 +484,7 @@
         "p_vs_coin": 0.7518,
         "regime": "RISK-ON",
         "spy_5d_pct": 1.842,
-        "alpha_per_trade_pct": -1.338,
+        "alpha_per_trade_pct": 0.044,
         "alpha_portfolio_pct": -1.338,
         "test_date": "2026-05-18",
         "train_dates": 13
@@ -454,7 +507,7 @@
         "p_vs_coin": 0.7576,
         "regime": "RISK-ON",
         "spy_5d_pct": 2.449,
-        "alpha_per_trade_pct": -1.539,
+        "alpha_per_trade_pct": 0.559,
         "alpha_portfolio_pct": -1.539,
         "test_date": "2026-05-19",
         "train_dates": 14
@@ -477,7 +530,7 @@
         "p_vs_coin": 0.3173,
         "regime": "RISK-ON",
         "spy_5d_pct": 1.902,
-        "alpha_per_trade_pct": -3.77,
+        "alpha_per_trade_pct": -1.973,
         "alpha_portfolio_pct": -3.77,
         "test_date": "2026-05-20",
         "train_dates": 15
@@ -500,7 +553,7 @@
         "p_vs_coin": 0.6121,
         "regime": "RISK-ON",
         "spy_5d_pct": 2.562,
-        "alpha_per_trade_pct": -4.186,
+        "alpha_per_trade_pct": -2.429,
         "alpha_portfolio_pct": -4.186,
         "test_date": "2026-05-21",
         "train_dates": 16
@@ -523,7 +576,7 @@
         "p_vs_coin": 0.1266,
         "regime": "RISK-ON",
         "spy_5d_pct": 1.163,
-        "alpha_per_trade_pct": -6.472,
+        "alpha_per_trade_pct": -5.032,
         "alpha_portfolio_pct": -6.472,
         "test_date": "2026-05-25",
         "train_dates": 17
@@ -546,7 +599,7 @@
         "p_vs_coin": 0.0863,
         "regime": "RISK-ON",
         "spy_5d_pct": 1.436,
-        "alpha_per_trade_pct": -4.596,
+        "alpha_per_trade_pct": -3.414,
         "alpha_portfolio_pct": -4.596,
         "test_date": "2026-05-26",
         "train_dates": 18
@@ -569,7 +622,7 @@
         "p_vs_coin": 0.006,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.499,
-        "alpha_per_trade_pct": -4.858,
+        "alpha_per_trade_pct": -4.358,
         "alpha_portfolio_pct": -4.858,
         "test_date": "2026-05-27",
         "train_dates": 19
@@ -592,7 +645,7 @@
         "p_vs_coin": 0.0106,
         "regime": "RISK-ON",
         "spy_5d_pct": -0.135,
-        "alpha_per_trade_pct": -3.421,
+        "alpha_per_trade_pct": -3.538,
         "alpha_portfolio_pct": -3.421,
         "test_date": "2026-05-28",
         "train_dates": 20
@@ -615,7 +668,7 @@
         "p_vs_coin": 0.5637,
         "regime": "RISK-ON",
         "spy_5d_pct": -0.999,
-        "alpha_per_trade_pct": 0.245,
+        "alpha_per_trade_pct": -0.717,
         "alpha_portfolio_pct": 0.245,
         "test_date": "2026-05-31",
         "train_dates": 21
@@ -638,7 +691,7 @@
         "p_vs_coin": 0.1167,
         "regime": "RISK-ON",
         "spy_5d_pct": -1.829,
-        "alpha_per_trade_pct": 5.259,
+        "alpha_per_trade_pct": 3.008,
         "alpha_portfolio_pct": 5.259,
         "test_date": "2026-06-01",
         "train_dates": 22
@@ -661,7 +714,7 @@
         "p_vs_coin": 0.2393,
         "regime": "RISK-ON",
         "spy_5d_pct": -3.82,
-        "alpha_per_trade_pct": 7.064,
+        "alpha_per_trade_pct": 3.832,
         "alpha_portfolio_pct": 7.064,
         "test_date": "2026-06-02",
         "train_dates": 23
@@ -684,7 +737,7 @@
         "p_vs_coin": 1.0,
         "regime": "RISK-ON",
         "spy_5d_pct": -2.288,
-        "alpha_per_trade_pct": 3.932,
+        "alpha_per_trade_pct": 2.268,
         "alpha_portfolio_pct": 3.932,
         "test_date": "2026-06-03",
         "train_dates": 24
@@ -707,7 +760,7 @@
         "p_vs_coin": 0.0411,
         "regime": "RISK-ON",
         "spy_5d_pct": -3.187,
-        "alpha_per_trade_pct": 7.013,
+        "alpha_per_trade_pct": 3.935,
         "alpha_portfolio_pct": 7.013,
         "test_date": "2026-06-04",
         "train_dates": 25
@@ -730,7 +783,7 @@
         "p_vs_coin": 0.5637,
         "regime": "RISK-ON",
         "spy_5d_pct": -1.149,
-        "alpha_per_trade_pct": 2.061,
+        "alpha_per_trade_pct": 1.21,
         "alpha_portfolio_pct": 2.061,
         "test_date": "2026-06-07",
         "train_dates": 26
@@ -753,7 +806,7 @@
         "p_vs_coin": 0.6015,
         "regime": "RISK-ON",
         "spy_5d_pct": 1.326,
-        "alpha_per_trade_pct": -0.697,
+        "alpha_per_trade_pct": -0.054,
         "alpha_portfolio_pct": -0.697,
         "test_date": "2026-06-08",
         "train_dates": 27
@@ -776,7 +829,7 @@
         "p_vs_coin": 0.0956,
         "regime": "NEUTRAL",
         "spy_5d_pct": 2.895,
-        "alpha_per_trade_pct": -1.54,
+        "alpha_per_trade_pct": 0.069,
         "alpha_portfolio_pct": -1.54,
         "test_date": "2026-06-09",
         "train_dates": 28
@@ -799,7 +852,7 @@
         "p_vs_coin": 0.2888,
         "regime": "RISK-ON",
         "spy_5d_pct": 1.728,
-        "alpha_per_trade_pct": -1.811,
+        "alpha_per_trade_pct": -1.055,
         "alpha_portfolio_pct": -1.811,
         "test_date": "2026-06-10",
         "train_dates": 29
@@ -822,7 +875,7 @@
         "p_vs_coin": 0.8618,
         "regime": "NEUTRAL",
         "spy_5d_pct": 2.08,
-        "alpha_per_trade_pct": -1.375,
+        "alpha_per_trade_pct": -0.744,
         "alpha_portfolio_pct": -1.375,
         "test_date": "2026-06-11",
         "train_dates": 30
@@ -845,7 +898,7 @@
         "p_vs_coin": 0.5637,
         "regime": "RISK-ON",
         "spy_5d_pct": 1.158,
-        "alpha_per_trade_pct": -1.218,
+        "alpha_per_trade_pct": -0.789,
         "alpha_portfolio_pct": -1.218,
         "test_date": "2026-06-14",
         "train_dates": 31
@@ -868,7 +921,7 @@
         "p_vs_coin": 0.1172,
         "regime": "RISK-ON",
         "spy_5d_pct": -2.238,
-        "alpha_per_trade_pct": 0.468,
+        "alpha_per_trade_pct": -0.617,
         "alpha_portfolio_pct": 0.468,
         "test_date": "2026-06-15",
         "train_dates": 32
@@ -891,7 +944,7 @@
         "p_vs_coin": 0.0482,
         "regime": "RISK-ON",
         "spy_5d_pct": -1.695,
-        "alpha_per_trade_pct": 0.303,
+        "alpha_per_trade_pct": -0.244,
         "alpha_portfolio_pct": 0.303,
         "test_date": "2026-06-16",
         "train_dates": 33
@@ -914,7 +967,7 @@
         "p_vs_coin": 0.0009,
         "regime": "RISK-ON",
         "spy_5d_pct": -2.159,
-        "alpha_per_trade_pct": -0.085,
+        "alpha_per_trade_pct": -0.87,
         "alpha_portfolio_pct": -0.085,
         "test_date": "2026-06-17",
         "train_dates": 34
@@ -937,7 +990,7 @@
         "p_vs_coin": 0.1701,
         "regime": "RISK-ON",
         "spy_5d_pct": -2.185,
-        "alpha_per_trade_pct": 0.368,
+        "alpha_per_trade_pct": -0.018,
         "alpha_portfolio_pct": 0.368,
         "test_date": "2026-06-21",
         "train_dates": 35
@@ -960,7 +1013,7 @@
         "p_vs_coin": 0.4497,
         "regime": "RISK-ON",
         "spy_5d_pct": -1.583,
-        "alpha_per_trade_pct": 1.914,
+        "alpha_per_trade_pct": 1.123,
         "alpha_portfolio_pct": 1.914,
         "test_date": "2026-06-22",
         "train_dates": 36
@@ -983,7 +1036,7 @@
         "p_vs_coin": 1.0,
         "regime": "RISK-ON",
         "spy_5d_pct": 1.221,
-        "alpha_per_trade_pct": 0.15,
+        "alpha_per_trade_pct": 0.499,
         "alpha_portfolio_pct": 0.15,
         "test_date": "2026-06-23",
         "train_dates": 37
@@ -1006,7 +1059,7 @@
         "p_vs_coin": 0.0396,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.609,
-        "alpha_per_trade_pct": 1.894,
+        "alpha_per_trade_pct": 2.073,
         "alpha_portfolio_pct": 1.894,
         "test_date": "2026-06-24",
         "train_dates": 38
@@ -1029,7 +1082,7 @@
         "p_vs_coin": 0.0956,
         "regime": "RISK-ON",
         "spy_5d_pct": 2.0,
-        "alpha_per_trade_pct": 0.605,
+        "alpha_per_trade_pct": 1.05,
         "alpha_portfolio_pct": 0.605,
         "test_date": "2026-06-25",
         "train_dates": 39
@@ -1052,7 +1105,7 @@
         "p_vs_coin": 0.0771,
         "regime": "RISK-ON",
         "spy_5d_pct": 2.893,
-        "alpha_per_trade_pct": 0.878,
+        "alpha_per_trade_pct": 1.42,
         "alpha_portfolio_pct": 0.878,
         "test_date": "2026-06-28",
         "train_dates": 40
@@ -1075,7 +1128,7 @@
         "p_vs_coin": 0.2059,
         "regime": "RISK-ON",
         "spy_5d_pct": 1.139,
-        "alpha_per_trade_pct": -0.657,
+        "alpha_per_trade_pct": -0.258,
         "alpha_portfolio_pct": -0.657,
         "test_date": "2026-06-29",
         "train_dates": 41
@@ -1098,7 +1151,7 @@
         "p_vs_coin": 0.1824,
         "regime": "RISK-ON",
         "spy_5d_pct": -0.359,
-        "alpha_per_trade_pct": 0.472,
+        "alpha_per_trade_pct": 0.332,
         "alpha_portfolio_pct": 0.472,
         "test_date": "2026-06-30",
         "train_dates": 42
@@ -1121,7 +1174,7 @@
         "p_vs_coin": 0.1495,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.862,
-        "alpha_per_trade_pct": -0.212,
+        "alpha_per_trade_pct": 0.053,
         "alpha_portfolio_pct": -0.212,
         "test_date": "2026-07-01",
         "train_dates": 43
@@ -1144,7 +1197,7 @@
         "p_vs_coin": 0.8728,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.434,
-        "alpha_per_trade_pct": -0.385,
+        "alpha_per_trade_pct": -0.141,
         "alpha_portfolio_pct": -0.385,
         "test_date": "2026-07-05",
         "train_dates": 44
@@ -1167,7 +1220,7 @@
         "p_vs_coin": 0.4795,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.359,
-        "alpha_per_trade_pct": -0.326,
+        "alpha_per_trade_pct": -0.192,
         "alpha_portfolio_pct": -0.326,
         "test_date": "2026-07-06",
         "train_dates": 45
@@ -1190,7 +1243,7 @@
         "p_vs_coin": 0.0374,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.951,
-        "alpha_per_trade_pct": 1.231,
+        "alpha_per_trade_pct": 1.718,
         "alpha_portfolio_pct": 1.231,
         "test_date": "2026-07-07",
         "train_dates": 46
@@ -1213,7 +1266,7 @@
         "p_vs_coin": 0.1282,
         "regime": "NEUTRAL",
         "spy_5d_pct": 1.786,
-        "alpha_per_trade_pct": -0.283,
+        "alpha_per_trade_pct": 0.738,
         "alpha_portfolio_pct": -0.283,
         "test_date": "2026-07-08",
         "train_dates": 47
@@ -1236,7 +1289,7 @@
         "p_vs_coin": 0.139,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.543,
-        "alpha_per_trade_pct": -2.879,
+        "alpha_per_trade_pct": -2.557,
         "alpha_portfolio_pct": -2.879,
         "test_date": "2026-07-09",
         "train_dates": 48
@@ -1259,7 +1312,7 @@
         "p_vs_coin": 0.0231,
         "regime": "RISK-ON",
         "spy_5d_pct": -0.733,
-        "alpha_per_trade_pct": -2.827,
+        "alpha_per_trade_pct": -3.174,
         "alpha_portfolio_pct": -2.827,
         "test_date": "2026-07-12",
         "train_dates": 49
@@ -1282,7 +1335,7 @@
         "p_vs_coin": 0.0009,
         "regime": "RISK-ON",
         "spy_5d_pct": -0.9,
-        "alpha_per_trade_pct": -2.569,
+        "alpha_per_trade_pct": -3.06,
         "alpha_portfolio_pct": -2.569,
         "test_date": "2026-07-13",
         "train_dates": 50
@@ -1305,7 +1358,7 @@
         "p_vs_coin": 0.0705,
         "regime": "RISK-ON",
         "spy_5d_pct": -0.794,
-        "alpha_per_trade_pct": -1.478,
+        "alpha_per_trade_pct": -1.907,
         "alpha_portfolio_pct": -1.478,
         "test_date": "2026-07-14",
         "train_dates": 51
@@ -1328,7 +1381,7 @@
         "p_vs_coin": 0.5371,
         "regime": "RISK-ON",
         "spy_5d_pct": -0.996,
-        "alpha_per_trade_pct": 0.235,
+        "alpha_per_trade_pct": -0.381,
         "alpha_portfolio_pct": 0.235,
         "test_date": "2026-07-15",
         "train_dates": 52
@@ -1351,7 +1404,7 @@
         "p_vs_coin": 0.3428,
         "regime": "RISK-ON",
         "spy_5d_pct": -2.014,
-        "alpha_per_trade_pct": 3.73,
+        "alpha_per_trade_pct": 2.219,
         "alpha_portfolio_pct": 3.73,
         "test_date": "2026-07-16",
         "train_dates": 53
@@ -1374,7 +1427,7 @@
         "p_vs_coin": 0.0137,
         "regime": "RISK-ON",
         "spy_5d_pct": -1.056,
-        "alpha_per_trade_pct": 2.377,
+        "alpha_per_trade_pct": 1.749,
         "alpha_portfolio_pct": 2.377,
         "test_date": "2026-07-19",
         "train_dates": 54
@@ -1397,7 +1450,7 @@
         "p_vs_coin": 0.59,
         "regime": "NEUTRAL",
         "spy_5d_pct": -1.054,
-        "alpha_per_trade_pct": 0.448,
+        "alpha_per_trade_pct": -0.096,
         "alpha_portfolio_pct": 0.448,
         "test_date": "2026-07-20",
         "train_dates": 55
@@ -1420,7 +1473,7 @@
         "p_vs_coin": 0.1404,
         "regime": "NEUTRAL",
         "spy_5d_pct": -1.013,
-        "alpha_per_trade_pct": -2.331,
+        "alpha_per_trade_pct": -3.036,
         "alpha_portfolio_pct": -2.331,
         "test_date": "2026-07-21",
         "train_dates": 56
@@ -1443,7 +1496,7 @@
         "p_vs_coin": 0.0001,
         "regime": "RISK-ON",
         "spy_5d_pct": -1.688,
-        "alpha_per_trade_pct": -3.915,
+        "alpha_per_trade_pct": -4.625,
         "alpha_portfolio_pct": -3.915,
         "test_date": "2026-07-22",
         "train_dates": 57
@@ -1466,7 +1519,7 @@
         "p_vs_coin": 0.0152,
         "regime": "NEUTRAL",
         "spy_5d_pct": -0.06,
-        "alpha_per_trade_pct": -2.373,
+        "alpha_per_trade_pct": -2.398,
         "alpha_portfolio_pct": -2.373,
         "test_date": "2026-07-23",
         "train_dates": 58
@@ -1489,7 +1542,7 @@
         "p_vs_coin": 0.2382,
         "regime": "NEUTRAL",
         "spy_5d_pct": 0.524,
-        "alpha_per_trade_pct": -1.387,
+        "alpha_per_trade_pct": -1.205,
         "alpha_portfolio_pct": -1.387,
         "test_date": "2026-07-26",
         "train_dates": 59
@@ -1512,7 +1565,7 @@
         "p_vs_coin": 0.5371,
         "regime": "NEUTRAL",
         "spy_5d_pct": 2.423,
-        "alpha_per_trade_pct": -1.739,
+        "alpha_per_trade_pct": -0.931,
         "alpha_portfolio_pct": -1.739,
         "test_date": "2026-07-27",
         "train_dates": 60
@@ -1535,7 +1588,7 @@
         "p_vs_coin": 0.0833,
         "regime": "NEUTRAL",
         "spy_5d_pct": 3.933,
-        "alpha_per_trade_pct": 0.975,
+        "alpha_per_trade_pct": 3.105,
         "alpha_portfolio_pct": 0.975,
         "test_date": "2026-07-28",
         "train_dates": 61
@@ -1558,7 +1611,7 @@
         "p_vs_coin": 0.0023,
         "regime": "NEUTRAL",
         "spy_5d_pct": 5.078,
-        "alpha_per_trade_pct": -0.266,
+        "alpha_per_trade_pct": 2.407,
         "alpha_portfolio_pct": -0.266,
         "test_date": "2026-07-29",
         "train_dates": 62
@@ -1581,7 +1634,7 @@
         "p_vs_coin": 0.0067,
         "regime": "NEUTRAL",
         "spy_5d_pct": 4.235,
-        "alpha_per_trade_pct": -0.444,
+        "alpha_per_trade_pct": 0.326,
         "alpha_portfolio_pct": -0.444,
         "test_date": "2026-07-30",
         "train_dates": 63
@@ -1604,7 +1657,7 @@
         "p_vs_coin": 0.0066,
         "regime": "NEUTRAL",
         "spy_5d_pct": 3.941,
-        "alpha_per_trade_pct": -1.003,
+        "alpha_per_trade_pct": 0.606,
         "alpha_portfolio_pct": -1.003,
         "test_date": "2026-08-02",
         "train_dates": 64
@@ -1627,7 +1680,7 @@
         "p_vs_coin": 0.0633,
         "regime": "RISK-ON",
         "spy_5d_pct": 2.348,
-        "alpha_per_trade_pct": -0.682,
+        "alpha_per_trade_pct": 0.66,
         "alpha_portfolio_pct": -0.682,
         "test_date": "2026-08-03",
         "train_dates": 65
@@ -1650,7 +1703,7 @@
         "p_vs_coin": 0.7055,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.577,
-        "alpha_per_trade_pct": -0.79,
+        "alpha_per_trade_pct": -0.419,
         "alpha_portfolio_pct": -0.79,
         "test_date": "2026-08-04",
         "train_dates": 66
@@ -1673,7 +1726,7 @@
         "p_vs_coin": 1.0,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.034,
-        "alpha_per_trade_pct": 0.831,
+        "alpha_per_trade_pct": 0.847,
         "alpha_portfolio_pct": 0.831,
         "test_date": "2026-08-05",
         "train_dates": 67
@@ -1696,7 +1749,7 @@
         "p_vs_coin": 0.4349,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.956,
-        "alpha_per_trade_pct": 0.145,
+        "alpha_per_trade_pct": 0.751,
         "alpha_portfolio_pct": 0.145,
         "test_date": "2026-08-06",
         "train_dates": 68
@@ -1719,7 +1772,7 @@
         "p_vs_coin": 0.3545,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.906,
-        "alpha_per_trade_pct": -0.845,
+        "alpha_per_trade_pct": -0.198,
         "alpha_portfolio_pct": -0.845,
         "test_date": "2026-08-09",
         "train_dates": 69
@@ -1742,7 +1795,7 @@
         "p_vs_coin": 0.1699,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.273,
-        "alpha_per_trade_pct": 0.533,
+        "alpha_per_trade_pct": 0.724,
         "alpha_portfolio_pct": 0.533,
         "test_date": "2026-08-10",
         "train_dates": 70
@@ -1765,7 +1818,7 @@
         "p_vs_coin": 0.5553,
         "regime": "RISK-ON",
         "spy_5d_pct": -0.542,
-        "alpha_per_trade_pct": 0.318,
+        "alpha_per_trade_pct": -0.153,
         "alpha_portfolio_pct": 0.318,
         "test_date": "2026-08-11",
         "train_dates": 71
@@ -1788,7 +1841,7 @@
         "p_vs_coin": 0.0163,
         "regime": "RISK-ON",
         "spy_5d_pct": -0.248,
-        "alpha_per_trade_pct": 1.348,
+        "alpha_per_trade_pct": 1.145,
         "alpha_portfolio_pct": 1.348,
         "test_date": "2026-08-12",
         "train_dates": 72
@@ -1811,7 +1864,7 @@
         "p_vs_coin": 0.0077,
         "regime": "RISK-ON",
         "spy_5d_pct": -1.441,
-        "alpha_per_trade_pct": -0.659,
+        "alpha_per_trade_pct": -1.94,
         "alpha_portfolio_pct": -0.659,
         "test_date": "2026-08-13",
         "train_dates": 73
@@ -1834,7 +1887,7 @@
         "p_vs_coin": 0.4349,
         "regime": "RISK-ON",
         "spy_5d_pct": -1.68,
-        "alpha_per_trade_pct": 1.337,
+        "alpha_per_trade_pct": -0.056,
         "alpha_portfolio_pct": 1.337,
         "test_date": "2026-08-16",
         "train_dates": 74
@@ -1857,7 +1910,7 @@
         "p_vs_coin": 0.6219,
         "regime": "RISK-ON",
         "spy_5d_pct": -1.583,
-        "alpha_per_trade_pct": 1.167,
+        "alpha_per_trade_pct": -0.202,
         "alpha_portfolio_pct": 1.167,
         "test_date": "2026-08-17",
         "train_dates": 75
@@ -1880,7 +1933,7 @@
         "p_vs_coin": 0.0066,
         "regime": "RISK-ON",
         "spy_5d_pct": -0.461,
-        "alpha_per_trade_pct": 0.202,
+        "alpha_per_trade_pct": -0.23,
         "alpha_portfolio_pct": 0.202,
         "test_date": "2026-08-18",
         "train_dates": 76
@@ -1903,7 +1956,7 @@
         "p_vs_coin": 0.2367,
         "regime": "RISK-ON",
         "spy_5d_pct": -0.646,
-        "alpha_per_trade_pct": 0.726,
+        "alpha_per_trade_pct": 0.172,
         "alpha_portfolio_pct": 0.726,
         "test_date": "2026-08-19",
         "train_dates": 77
@@ -1926,7 +1979,7 @@
         "p_vs_coin": 0.1944,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.654,
-        "alpha_per_trade_pct": -0.836,
+        "alpha_per_trade_pct": -0.285,
         "alpha_portfolio_pct": -0.836,
         "test_date": "2026-08-20",
         "train_dates": 78
@@ -1949,7 +2002,7 @@
         "p_vs_coin": 0.5775,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.512,
-        "alpha_per_trade_pct": 0.396,
+        "alpha_per_trade_pct": 0.891,
         "alpha_portfolio_pct": 0.396,
         "test_date": "2026-08-23",
         "train_dates": 79
@@ -1972,7 +2025,7 @@
         "p_vs_coin": 0.631,
         "regime": "NEUTRAL",
         "spy_5d_pct": 0.534,
-        "alpha_per_trade_pct": 0.068,
+        "alpha_per_trade_pct": 0.534,
         "alpha_portfolio_pct": 0.068,
         "test_date": "2026-08-24",
         "train_dates": 80
@@ -1995,7 +2048,7 @@
         "p_vs_coin": 0.4349,
         "regime": "RISK-ON",
         "spy_5d_pct": -0.442,
-        "alpha_per_trade_pct": 0.7,
+        "alpha_per_trade_pct": 0.333,
         "alpha_portfolio_pct": 0.7,
         "test_date": "2026-08-25",
         "train_dates": 81
@@ -2018,7 +2071,7 @@
         "p_vs_coin": 0.1228,
         "regime": "RISK-ON",
         "spy_5d_pct": -0.014,
-        "alpha_per_trade_pct": -0.914,
+        "alpha_per_trade_pct": -0.925,
         "alpha_portfolio_pct": -0.914,
         "test_date": "2026-08-26",
         "train_dates": 82
@@ -2041,7 +2094,7 @@
         "p_vs_coin": 0.002,
         "regime": "RISK-ON",
         "spy_5d_pct": 0.268,
-        "alpha_per_trade_pct": -2.48,
+        "alpha_per_trade_pct": -2.262,
         "alpha_portfolio_pct": -2.48,
         "test_date": "2026-08-27",
         "train_dates": 83
@@ -2064,7 +2117,7 @@
         "p_vs_coin": 0.0516,
         "regime": "RISK-ON",
         "spy_5d_pct": -1.209,
-        "alpha_per_trade_pct": -0.979,
+        "alpha_per_trade_pct": -1.488,
         "alpha_portfolio_pct": -0.979,
         "test_date": "2026-09-04",
         "train_dates": 84
@@ -2082,17 +2135,31 @@
         "initial": 10000.0,
         "final": 10815.26,
         "avg_invested_pct": 73.8,
+        "cost_assumption": {
+          "bps_one_way": 5,
+          "turnover": 126815.23,
+          "cost_pct": 0.63,
+          "note": "paper_trade.py books no fees; applied here only"
+        },
         "regime": "RISK-ON",
         "benchmarks": {
           "SPY": {
             "return_pct": 7.72,
-            "alpha_pct": 2.45,
+            "alpha_pct": 0.37,
+            "alpha_def": "strategy_return \u2212 \u03a3 exposure_t \u00d7 benchmark_return_t (time-weighted)",
+            "alpha_after_cost_pct": -0.26,
+            "benchmark_leg_tw_pct": 7.78,
+            "alpha_avg_exposure_pct": 2.45,
             "alpha_raw_pct": 0.43,
             "exposure_used": 0.738
           },
           "QQQ": {
             "return_pct": 9.76,
-            "alpha_pct": 0.95,
+            "alpha_pct": -3.7,
+            "alpha_def": "strategy_return \u2212 \u03a3 exposure_t \u00d7 benchmark_return_t (time-weighted)",
+            "alpha_after_cost_pct": -4.33,
+            "benchmark_leg_tw_pct": 11.85,
+            "alpha_avg_exposure_pct": 0.95,
             "alpha_raw_pct": -1.6,
             "exposure_used": 0.738
           }
@@ -2107,17 +2174,31 @@
         "initial": 10000.0,
         "final": 10717.79,
         "avg_invested_pct": 68.1,
+        "cost_assumption": {
+          "bps_one_way": 5,
+          "turnover": 122717.77,
+          "cost_pct": 0.61,
+          "note": "paper_trade.py books no fees; applied here only"
+        },
         "regime": "RISK-ON",
         "benchmarks": {
           "SPY": {
             "return_pct": 7.72,
-            "alpha_pct": 1.92,
+            "alpha_pct": 1.18,
+            "alpha_def": "strategy_return \u2212 \u03a3 exposure_t \u00d7 benchmark_return_t (time-weighted)",
+            "alpha_after_cost_pct": 0.56,
+            "benchmark_leg_tw_pct": 6.0,
+            "alpha_avg_exposure_pct": 1.92,
             "alpha_raw_pct": -0.54,
             "exposure_used": 0.681
           },
           "QQQ": {
             "return_pct": 9.76,
-            "alpha_pct": 0.53,
+            "alpha_pct": -1.65,
+            "alpha_def": "strategy_return \u2212 \u03a3 exposure_t \u00d7 benchmark_return_t (time-weighted)",
+            "alpha_after_cost_pct": -2.26,
+            "benchmark_leg_tw_pct": 8.82,
+            "alpha_avg_exposure_pct": 0.53,
             "alpha_raw_pct": -2.58,
             "exposure_used": 0.681
           }
@@ -2132,17 +2213,31 @@
         "initial": 10000.0,
         "final": 10968.51,
         "avg_invested_pct": 77.1,
+        "cost_assumption": {
+          "bps_one_way": 5,
+          "turnover": 132968.5,
+          "cost_pct": 0.66,
+          "note": "paper_trade.py books no fees; applied here only"
+        },
         "regime": "RISK-ON",
         "benchmarks": {
           "SPY": {
             "return_pct": 7.72,
-            "alpha_pct": 3.73,
+            "alpha_pct": 1.36,
+            "alpha_def": "strategy_return \u2212 \u03a3 exposure_t \u00d7 benchmark_return_t (time-weighted)",
+            "alpha_after_cost_pct": 0.69,
+            "benchmark_leg_tw_pct": 8.33,
+            "alpha_avg_exposure_pct": 3.73,
             "alpha_raw_pct": 1.96,
             "exposure_used": 0.771
           },
           "QQQ": {
             "return_pct": 9.76,
-            "alpha_pct": 2.16,
+            "alpha_pct": -3.15,
+            "alpha_def": "strategy_return \u2212 \u03a3 exposure_t \u00d7 benchmark_return_t (time-weighted)",
+            "alpha_after_cost_pct": -3.81,
+            "benchmark_leg_tw_pct": 12.83,
+            "alpha_avg_exposure_pct": 2.16,
             "alpha_raw_pct": -0.07,
             "exposure_used": 0.771
           }
@@ -2157,7 +2252,7 @@
         0.4577,
         0.4939
       ],
-      "alpha_per_trade_pct": -0.5681,
+      "alpha_per_trade_pct": -0.4063,
       "total_test_n": 2930,
       "n_folds": 85
     },
@@ -2168,15 +2263,15 @@
       },
       "always_sell": {
         "pooled_accuracy": 0.471,
-        "alpha_per_trade_pct": -1.0902
+        "alpha_per_trade_pct": -0.4136
       },
       "random_42": {
         "pooled_accuracy": 0.4956,
-        "alpha_per_trade_pct": -0.1294
+        "alpha_per_trade_pct": 0.2073
       },
       "random_99": {
         "pooled_accuracy": 0.5106,
-        "alpha_per_trade_pct": -0.2233
+        "alpha_per_trade_pct": 0.0824
       }
     },
     "edge": {
@@ -2215,9 +2310,9 @@
   },
   "verdict": [
     "Accuracy 47.6% not significantly different from 50% (p=0.2300)",
-    "Alpha -0.57% not significant (p=0.1839)",
+    "Alpha -0.41% not significant (p=0.1728)",
     "Edge vs always_buy: -5.3pp (p=0.0000)",
-    "Gate: FAIL: paired (system \u2212 always-buy) alpha -0.98pp, NW p=0.0923 (system -0.57%, buy +0.41%)",
+    "Gate: FAIL: paired (system \u2212 always-buy) alpha -0.82pp, NW p=0.0623 (system -0.41%, buy +0.41%)",
     "Gate v2 (failed redesign, reference): FAIL: sector-matched paired alpha -1.00pp, NW p=0.1719 (2930 pairs, 85 folds)"
   ],
   "alerts": [],
