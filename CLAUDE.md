@@ -103,6 +103,16 @@ in the record. Therefore:
   history" 단계가 "Sentiment freshness health check"보다 앞이라, 게이트
   RED여도 stale sentiment로 만든 스냅샷은 이미 main에 커밋된 상태다.
   health check를 Generate predictions 앞으로 옮기는 구조 변경은 별도 PR.
+  **종료 경계: 2026-10-19T04:38Z (trend-site run 39198304278).** 로컬
+  launchd FinBERT가 10-19 02:08Z에 09-18~09-24 + 10-17을 스코어링해
+  health check GREEN(latest 10-17, gap 2d). 이후 스냅샷은 sentiment live
+  이지만 아카이브 자체에 구멍이 있다: 09-04→09-17 **영구 공백**(NewsAPI
+  30일 한도), 09-25→10-16은 backfill 청크 2/3 전까지 비어 있고, 09-24
+  (100건 stub)·10-17(590/691행)은 부분일로 스코어링됨 — PR #12
+  (sentiment_finbert_local n_input_lines 재스코어) 머지 후 다음 launchd
+  슬롯에서 자동 재스코어. load_sentiment index −1이 10-17을 읽으므로
+  predict.py 입장에서는 "최신일"만 보이고 그 뒤 3주 공백은 보이지 않는다
+  (sentiment 시계열을 쓰는 평가는 10-19 이후 구간에서 해당 공백을 명시할 것).
 
 ### Statistical corrections (STEP 3, 2026-08-05)
 Baseline snapshot before these landed: `docs/validation_baseline_2026-08-05.md`.
