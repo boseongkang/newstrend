@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-20T06:12:57+00:00",
+  "generated_at": "2026-10-20T11:56:40+00:00",
   "source": {
-    "signal_corr_updated": "2026-10-20T06:12:11Z",
-    "n_pairs_total": 3751,
+    "signal_corr_updated": "2026-10-20T11:55:32Z",
+    "n_pairs_total": 3760,
     "n_dates": 180,
     "prices_tickers": 90,
     "trends_terms": 600
@@ -21,18 +21,21 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "march": 2.277,
-    "peace": 2.372,
-    "files": 3.607,
-    "elon": 1.552,
-    "nato": 1.925,
-    "vance": 2.322
+    "march": 2.915,
+    "israeli": 1.804,
+    "peace": 3.057,
+    "musk": 1.837,
+    "files": 4.623,
+    "step": 1.601,
+    "elon": 2.085,
+    "nato": 2.486,
+    "vance": 2.966
   },
   "stock_chains": [
     {
       "term": "march",
       "is_active_today": true,
-      "today_z": 2.277,
+      "today_z": 2.915,
       "hop1": {
         "ticker": "AMZN",
         "sector": "07 Trade & Services",
@@ -60,6 +63,23 @@
           "entity": "INVESCO QQQ TRUST, SERIES 1"
         }
       ]
+    },
+    {
+      "term": "israeli",
+      "is_active_today": true,
+      "today_z": 1.804,
+      "hop1": {
+        "ticker": "KLAC",
+        "sector": "08 Industrial Applications and Services",
+        "entity": "KLA CORP",
+        "corr": -0.3363,
+        "lag": -4,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": -0.668,
+        "confidence": 0.304
+      },
+      "hop2": []
     },
     {
       "term": "nasdaq",
@@ -9145,23 +9165,6 @@
       ]
     },
     {
-      "term": "israeli",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "KLAC",
-        "sector": "08 Industrial Applications and Services",
-        "entity": "KLA CORP",
-        "corr": -0.3363,
-        "lag": -4,
-        "hit_rate": 0.5,
-        "direction": "bear",
-        "avg_ret_1d": -0.668,
-        "confidence": 0.304
-      },
-      "hop2": []
-    },
-    {
       "term": "strait",
       "is_active_today": false,
       "today_z": null,
@@ -9468,7 +9471,7 @@
       "lag": -2,
       "hit_rate": 0.5,
       "direction": "bear",
-      "is_active_today": false
+      "is_active_today": true
     }
   ],
   "ticker_pressure": [
@@ -9481,8 +9484,22 @@
         {
           "term": "march",
           "direction": "bear",
-          "today_z": 2.277,
+          "today_z": 2.915,
           "hit_rate": 0.667
+        }
+      ]
+    },
+    {
+      "ticker": "KLAC",
+      "sector": "08 Industrial Applications and Services",
+      "entity": "KLA CORP",
+      "fund_score": 0.584,
+      "inbound": [
+        {
+          "term": "israeli",
+          "direction": "bear",
+          "today_z": 1.804,
+          "hit_rate": 0.5
         }
       ]
     },
@@ -9496,7 +9513,7 @@
           "term": "march",
           "via": "AMZN",
           "direction": "bear",
-          "today_z": 2.277,
+          "today_z": 2.915,
           "indirect": true
         }
       ]
@@ -9511,7 +9528,7 @@
           "term": "march",
           "via": "AMZN",
           "direction": "bear",
-          "today_z": 2.277,
+          "today_z": 2.915,
           "indirect": true
         }
       ]
