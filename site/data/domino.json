@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-21T15:28:12+00:00",
+  "generated_at": "2026-10-21T19:29:33+00:00",
   "source": {
-    "signal_corr_updated": "2026-10-21T15:27:01Z",
-    "n_pairs_total": 3942,
+    "signal_corr_updated": "2026-10-21T19:28:42Z",
+    "n_pairs_total": 3950,
     "n_dates": 180,
     "prices_tickers": 90,
     "trends_terms": 600
@@ -21,30 +21,44 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "infrastructure": 1.575,
-    "openai": 3.361,
-    "spacex": 3.831,
-    "models": 9.442,
-    "anthropic": 3.328,
-    "campaign": 1.835,
-    "systems": 2.302,
-    "climate": 1.564,
-    "musk": 2.418,
-    "axios": 2.134,
-    "doesn": 4.192,
-    "cloud": 4.404,
-    "workers": 1.687,
-    "tesla": 2.573,
-    "files": 9.698,
-    "matters": 2.349,
-    "trying": 2.173,
-    "elon": 3.427
+    "attacks": 1.829,
+    "infrastructure": 2.038,
+    "costs": 1.679,
+    "russian": 1.68,
+    "attack": 1.835,
+    "openai": 4.156,
+    "europe": 1.523,
+    "spacex": 4.781,
+    "models": 11.435,
+    "peace": 1.633,
+    "crisis": 1.883,
+    "senate": 1.89,
+    "anthropic": 4.179,
+    "point": 1.971,
+    "campaign": 1.934,
+    "systems": 2.825,
+    "agreement": 2.015,
+    "available": 1.587,
+    "climate": 1.799,
+    "musk": 2.933,
+    "driving": 1.714,
+    "axios": 2.537,
+    "doesn": 5.374,
+    "traders": 1.566,
+    "cloud": 5.588,
+    "workers": 2.279,
+    "tesla": 3.168,
+    "files": 11.729,
+    "matters": 2.943,
+    "trying": 2.666,
+    "elon": 4.153,
+    "british": 1.861
   },
   "stock_chains": [
     {
       "term": "openai",
       "is_active_today": true,
-      "today_z": 3.361,
+      "today_z": 4.156,
       "hop1": {
         "ticker": "PYPL",
         "sector": "07 Trade & Services",
@@ -59,9 +73,125 @@
       "hop2": []
     },
     {
+      "term": "europe",
+      "is_active_today": true,
+      "today_z": 1.523,
+      "hop1": {
+        "ticker": "CRWD",
+        "sector": "06 Technology",
+        "entity": "CrowdStrike Holdings, Inc.",
+        "corr": -0.4065,
+        "lag": -4,
+        "hit_rate": 0.7,
+        "direction": "bear",
+        "avg_ret_1d": 1.357,
+        "confidence": 0.487
+      },
+      "hop2": []
+    },
+    {
+      "term": "attacks",
+      "is_active_today": true,
+      "today_z": 1.829,
+      "hop1": {
+        "ticker": "ASML",
+        "sector": "06 Technology",
+        "entity": "ASML HOLDING NV",
+        "corr": 0.3292,
+        "lag": -1,
+        "hit_rate": 0.8,
+        "direction": "bull",
+        "avg_ret_1d": 3.598,
+        "confidence": 0.475
+      },
+      "hop2": [
+        {
+          "ticker": "LRCX",
+          "ticker_corr": 0.82,
+          "implied_dir": "bull",
+          "sector": "06 Technology",
+          "entity": "LAM RESEARCH CORP"
+        },
+        {
+          "ticker": "AMAT",
+          "ticker_corr": 0.796,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "APPLIED MATERIALS INC /DE"
+        },
+        {
+          "ticker": "TSM",
+          "ticker_corr": 0.696,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.648,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        },
+        {
+          "ticker": "MU",
+          "ticker_corr": 0.576,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "MICRON TECHNOLOGY INC"
+        }
+      ]
+    },
+    {
+      "term": "costs",
+      "is_active_today": true,
+      "today_z": 1.679,
+      "hop1": {
+        "ticker": "JPM",
+        "sector": "02 Finance",
+        "entity": "JPMORGAN CHASE & CO",
+        "corr": -0.3156,
+        "lag": -1,
+        "hit_rate": 0.6,
+        "direction": "bear",
+        "avg_ret_1d": -0.088,
+        "confidence": 0.401
+      },
+      "hop2": [
+        {
+          "ticker": "BAC",
+          "ticker_corr": 0.739,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "BANK OF AMERICA CORP /DE/"
+        },
+        {
+          "ticker": "GS",
+          "ticker_corr": 0.673,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "GOLDMAN SACHS GROUP INC"
+        },
+        {
+          "ticker": "MS",
+          "ticker_corr": 0.67,
+          "implied_dir": "bear",
+          "sector": "02 Finance",
+          "entity": "MORGAN STANLEY"
+        },
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.651,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        }
+      ]
+    },
+    {
       "term": "infrastructure",
       "is_active_today": true,
-      "today_z": 1.575,
+      "today_z": 2.038,
       "hop1": {
         "ticker": "CRWD",
         "sector": "06 Technology",
@@ -74,6 +204,48 @@
         "confidence": 0.398
       },
       "hop2": []
+    },
+    {
+      "term": "costs",
+      "is_active_today": true,
+      "today_z": 1.679,
+      "hop1": {
+        "ticker": "COST",
+        "sector": "07 Trade & Services",
+        "entity": "COSTCO WHOLESALE CORP /NEW",
+        "corr": 0.3035,
+        "lag": -5,
+        "hit_rate": 0.6,
+        "direction": "bull",
+        "avg_ret_1d": -0.027,
+        "confidence": 0.396
+      },
+      "hop2": []
+    },
+    {
+      "term": "europe",
+      "is_active_today": true,
+      "today_z": 1.523,
+      "hop1": {
+        "ticker": "MAR",
+        "sector": "05 Real Estate & Construction",
+        "entity": "MARRIOTT INTERNATIONAL INC /MD/",
+        "corr": -0.3294,
+        "lag": -2,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": -0.21,
+        "confidence": 0.351
+      },
+      "hop2": [
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.53,
+          "implied_dir": "bear",
+          "sector": null,
+          "entity": null
+        }
+      ]
     },
     {
       "term": "support",
@@ -1134,23 +1306,6 @@
       ]
     },
     {
-      "term": "europe",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CRWD",
-        "sector": "06 Technology",
-        "entity": "CrowdStrike Holdings, Inc.",
-        "corr": -0.4065,
-        "lag": -4,
-        "hit_rate": 0.7,
-        "direction": "bear",
-        "avg_ret_1d": 1.357,
-        "confidence": 0.487
-      },
-      "hop2": []
-    },
-    {
       "term": "july",
       "is_active_today": false,
       "today_z": null,
@@ -1267,59 +1422,6 @@
           "implied_dir": "bull",
           "sector": null,
           "entity": null
-        }
-      ]
-    },
-    {
-      "term": "attacks",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "ASML",
-        "sector": "06 Technology",
-        "entity": "ASML HOLDING NV",
-        "corr": 0.3292,
-        "lag": -1,
-        "hit_rate": 0.8,
-        "direction": "bull",
-        "avg_ret_1d": 3.598,
-        "confidence": 0.475
-      },
-      "hop2": [
-        {
-          "ticker": "LRCX",
-          "ticker_corr": 0.82,
-          "implied_dir": "bull",
-          "sector": "06 Technology",
-          "entity": "LAM RESEARCH CORP"
-        },
-        {
-          "ticker": "AMAT",
-          "ticker_corr": 0.796,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "APPLIED MATERIALS INC /DE"
-        },
-        {
-          "ticker": "TSM",
-          "ticker_corr": 0.696,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.648,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "MU",
-          "ticker_corr": 0.576,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "MICRON TECHNOLOGY INC"
         }
       ]
     },
@@ -4508,52 +4610,6 @@
       ]
     },
     {
-      "term": "costs",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "JPM",
-        "sector": "02 Finance",
-        "entity": "JPMORGAN CHASE & CO",
-        "corr": -0.3156,
-        "lag": -1,
-        "hit_rate": 0.6,
-        "direction": "bear",
-        "avg_ret_1d": -0.088,
-        "confidence": 0.401
-      },
-      "hop2": [
-        {
-          "ticker": "BAC",
-          "ticker_corr": 0.739,
-          "implied_dir": "bear",
-          "sector": "02 Finance",
-          "entity": "BANK OF AMERICA CORP /DE/"
-        },
-        {
-          "ticker": "GS",
-          "ticker_corr": 0.673,
-          "implied_dir": "bear",
-          "sector": "02 Finance",
-          "entity": "GOLDMAN SACHS GROUP INC"
-        },
-        {
-          "ticker": "MS",
-          "ticker_corr": 0.67,
-          "implied_dir": "bear",
-          "sector": "02 Finance",
-          "entity": "MORGAN STANLEY"
-        },
-        {
-          "ticker": "DIA",
-          "ticker_corr": 0.651,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        }
-      ]
-    },
-    {
       "term": "post",
       "is_active_today": false,
       "today_z": null,
@@ -4833,23 +4889,6 @@
           "entity": "INVESCO QQQ TRUST, SERIES 1"
         }
       ]
-    },
-    {
-      "term": "costs",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "COST",
-        "sector": "07 Trade & Services",
-        "entity": "COSTCO WHOLESALE CORP /NEW",
-        "corr": 0.3035,
-        "lag": -5,
-        "hit_rate": 0.6,
-        "direction": "bull",
-        "avg_ret_1d": -0.027,
-        "confidence": 0.396
-      },
-      "hop2": []
     },
     {
       "term": "tuesday",
@@ -7424,31 +7463,6 @@
       ]
     },
     {
-      "term": "europe",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "MAR",
-        "sector": "05 Real Estate & Construction",
-        "entity": "MARRIOTT INTERNATIONAL INC /MD/",
-        "corr": -0.3294,
-        "lag": -2,
-        "hit_rate": 0.5,
-        "direction": "bear",
-        "avg_ret_1d": -0.21,
-        "confidence": 0.351
-      },
-      "hop2": [
-        {
-          "ticker": "DIA",
-          "ticker_corr": 0.53,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": null
-        }
-      ]
-    },
-    {
       "term": "life",
       "is_active_today": false,
       "today_z": null,
@@ -9262,15 +9276,6 @@
       "is_active_today": false
     },
     {
-      "term": "european",
-      "ticker": "TLT",
-      "corr": -0.3044,
-      "lag": -5,
-      "hit_rate": 0.571,
-      "direction": "bear",
-      "is_active_today": false
-    },
-    {
       "term": "ceasefire",
       "ticker": "DIA",
       "corr": 0.3007,
@@ -9286,7 +9291,7 @@
       "lag": -1,
       "hit_rate": 0.5,
       "direction": "bear",
-      "is_active_today": false
+      "is_active_today": true
     },
     {
       "term": "next",
@@ -9363,6 +9368,48 @@
   ],
   "ticker_pressure": [
     {
+      "ticker": "CRWD",
+      "sector": "06 Technology",
+      "entity": "CrowdStrike Holdings, Inc.",
+      "fund_score": 0.264,
+      "inbound": [
+        {
+          "term": "europe",
+          "direction": "bear",
+          "today_z": 1.523,
+          "hit_rate": 0.7
+        },
+        {
+          "term": "infrastructure",
+          "direction": "bear",
+          "today_z": 2.038,
+          "hit_rate": 0.556
+        }
+      ]
+    },
+    {
+      "ticker": "DIA",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "costs",
+          "via": "JPM",
+          "direction": "bear",
+          "today_z": 1.679,
+          "indirect": true
+        },
+        {
+          "term": "europe",
+          "via": "MAR",
+          "direction": "bear",
+          "today_z": 1.523,
+          "indirect": true
+        }
+      ]
+    },
+    {
       "ticker": "PYPL",
       "sector": "07 Trade & Services",
       "entity": "PayPal Holdings, Inc.",
@@ -9371,22 +9418,184 @@
         {
           "term": "openai",
           "direction": "bull",
-          "today_z": 3.361,
+          "today_z": 4.156,
           "hit_rate": 0.909
         }
       ]
     },
     {
-      "ticker": "CRWD",
+      "ticker": "ASML",
       "sector": "06 Technology",
-      "entity": "CrowdStrike Holdings, Inc.",
-      "fund_score": 0.264,
+      "entity": "ASML HOLDING NV",
+      "fund_score": 0.684,
       "inbound": [
         {
-          "term": "infrastructure",
+          "term": "attacks",
+          "direction": "bull",
+          "today_z": 1.829,
+          "hit_rate": 0.8
+        }
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "sector": "02 Finance",
+      "entity": "JPMORGAN CHASE & CO",
+      "fund_score": 0.475,
+      "inbound": [
+        {
+          "term": "costs",
           "direction": "bear",
-          "today_z": 1.575,
-          "hit_rate": 0.556
+          "today_z": 1.679,
+          "hit_rate": 0.6
+        }
+      ]
+    },
+    {
+      "ticker": "COST",
+      "sector": "07 Trade & Services",
+      "entity": "COSTCO WHOLESALE CORP /NEW",
+      "fund_score": 0.354,
+      "inbound": [
+        {
+          "term": "costs",
+          "direction": "bull",
+          "today_z": 1.679,
+          "hit_rate": 0.6
+        }
+      ]
+    },
+    {
+      "ticker": "MAR",
+      "sector": "05 Real Estate & Construction",
+      "entity": "MARRIOTT INTERNATIONAL INC /MD/",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "europe",
+          "direction": "bear",
+          "today_z": 1.523,
+          "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "LRCX",
+      "sector": "06 Technology",
+      "entity": "LAM RESEARCH CORP",
+      "fund_score": 0.751,
+      "inbound": [
+        {
+          "term": "attacks",
+          "via": "ASML",
+          "direction": "bull",
+          "today_z": 1.829,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "AMAT",
+      "sector": "04 Manufacturing",
+      "entity": "APPLIED MATERIALS INC /DE",
+      "fund_score": 0.559,
+      "inbound": [
+        {
+          "term": "attacks",
+          "via": "ASML",
+          "direction": "bull",
+          "today_z": 1.829,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "TSM",
+      "sector": "04 Manufacturing",
+      "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "attacks",
+          "via": "ASML",
+          "direction": "bull",
+          "today_z": 1.829,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "attacks",
+          "via": "ASML",
+          "direction": "bull",
+          "today_z": 1.829,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MU",
+      "sector": "04 Manufacturing",
+      "entity": "MICRON TECHNOLOGY INC",
+      "fund_score": 0.804,
+      "inbound": [
+        {
+          "term": "attacks",
+          "via": "ASML",
+          "direction": "bull",
+          "today_z": 1.829,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "BAC",
+      "sector": "02 Finance",
+      "entity": "BANK OF AMERICA CORP /DE/",
+      "fund_score": 0.349,
+      "inbound": [
+        {
+          "term": "costs",
+          "via": "JPM",
+          "direction": "bear",
+          "today_z": 1.679,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "GS",
+      "sector": "02 Finance",
+      "entity": "GOLDMAN SACHS GROUP INC",
+      "fund_score": 0.438,
+      "inbound": [
+        {
+          "term": "costs",
+          "via": "JPM",
+          "direction": "bear",
+          "today_z": 1.679,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MS",
+      "sector": "02 Finance",
+      "entity": "MORGAN STANLEY",
+      "fund_score": 0.422,
+      "inbound": [
+        {
+          "term": "costs",
+          "via": "JPM",
+          "direction": "bear",
+          "today_z": 1.679,
+          "indirect": true
         }
       ]
     }
@@ -9394,7 +9603,7 @@
   "quality": {
     "data_window_days": 180,
     "stock_signals": 269,
-    "macro_signals": 32,
+    "macro_signals": 31,
     "sector_diversity": 9,
     "grade": "A",
     "next_grade": null,
