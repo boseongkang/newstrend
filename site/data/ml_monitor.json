@@ -22239,10 +22239,30 @@
       "hash_ok": true,
       "ood": true,
       "unfreeze_ready": false
+    },
+    {
+      "updated": "2026-10-23T13:42:33Z",
+      "n_pred_total": 16560,
+      "n_evaluated": 15660,
+      "models": {
+        "RandomForest": {
+          "alpha": -0.35,
+          "p": 0.0152,
+          "n": 5400
+        },
+        "GradientBoosting": {
+          "alpha": -0.424,
+          "p": 0.0129,
+          "n": 5400
+        }
+      },
+      "hash_ok": true,
+      "ood": true,
+      "unfreeze_ready": false
     }
   ],
   "latest": {
-    "updated": "2026-10-23T12:46:45Z",
+    "updated": "2026-10-23T13:42:33Z",
     "baseline_date": "2026-05-25",
     "model_hashes": {
       "RandomForest": "a2947618dfbb05bd",
@@ -22255,33 +22275,33 @@
     },
     "prediction_log": {
       "total": 16560,
-      "evaluated": 15480,
-      "pending": 1080,
+      "evaluated": 15660,
+      "pending": 900,
       "new_today": 0,
-      "newly_evaluated": 0
+      "newly_evaluated": 180
     },
     "forward": {
       "RandomForest": {
         "status": "tracking",
-        "n": 5310,
-        "n_raw": 7740,
+        "n": 5400,
+        "n_raw": 7830,
         "n_excluded_train_overlap": 90,
-        "n_folds": 59,
+        "n_folds": 60,
         "fold_unit": "trading-day anchor (weekend snapshots deduped to Friday)",
         "alpha_def": "signed_excess: (r\u2212SPY) for BUY, \u2212(r\u2212SPY) for SELL",
-        "cumulative_alpha_pct": -0.369,
+        "cumulative_alpha_pct": -0.35,
         "alpha_ci_95": [
-          -0.594,
-          -0.145
+          -0.572,
+          -0.129
         ],
         "alpha_ci_note": "per-trade CI, pseudo-replicated within a day \u2014 use alpha_t/alpha_p",
-        "alpha_t": -2.537,
-        "alpha_p": 0.0112,
+        "alpha_t": -2.427,
+        "alpha_p": 0.0152,
         "t_test": "newey_west_lag4_over_folds",
-        "alpha_t_iid": -3.402,
-        "alpha_p_iid": 0.0007,
+        "alpha_t_iid": -3.234,
+        "alpha_p_iid": 0.0012,
         "sig_status": "ok",
-        "cumulative_accuracy": 0.5043,
+        "cumulative_accuracy": 0.5054,
         "by_regime": {
           "RISK-ON": {
             "n": 4140,
@@ -22291,35 +22311,35 @@
             "provisional": false
           },
           "NEUTRAL": {
-            "n": 1170,
-            "n_folds": 13,
-            "accuracy": 0.5709,
-            "alpha_mean_pct": -0.297,
+            "n": 1260,
+            "n_folds": 14,
+            "accuracy": 0.5706,
+            "alpha_mean_pct": -0.222,
             "provisional": false
           }
         }
       },
       "GradientBoosting": {
         "status": "tracking",
-        "n": 5310,
-        "n_raw": 7740,
+        "n": 5400,
+        "n_raw": 7830,
         "n_excluded_train_overlap": 90,
-        "n_folds": 59,
+        "n_folds": 60,
         "fold_unit": "trading-day anchor (weekend snapshots deduped to Friday)",
         "alpha_def": "signed_excess: (r\u2212SPY) for BUY, \u2212(r\u2212SPY) for SELL",
-        "cumulative_alpha_pct": -0.444,
+        "cumulative_alpha_pct": -0.424,
         "alpha_ci_95": [
-          -0.668,
-          -0.219
+          -0.645,
+          -0.202
         ],
         "alpha_ci_note": "per-trade CI, pseudo-replicated within a day \u2014 use alpha_t/alpha_p",
-        "alpha_t": -2.563,
-        "alpha_p": 0.0104,
+        "alpha_t": -2.488,
+        "alpha_p": 0.0129,
         "t_test": "newey_west_lag4_over_folds",
-        "alpha_t_iid": -3.342,
-        "alpha_p_iid": 0.0008,
+        "alpha_t_iid": -3.206,
+        "alpha_p_iid": 0.0013,
         "sig_status": "ok",
-        "cumulative_accuracy": 0.4998,
+        "cumulative_accuracy": 0.5015,
         "by_regime": {
           "RISK-ON": {
             "n": 4140,
@@ -22329,10 +22349,10 @@
             "provisional": false
           },
           "NEUTRAL": {
-            "n": 1170,
-            "n_folds": 13,
-            "accuracy": 0.565,
-            "alpha_mean_pct": -0.309,
+            "n": 1260,
+            "n_folds": 14,
+            "accuracy": 0.5675,
+            "alpha_mean_pct": -0.232,
             "provisional": false
           }
         }
@@ -22346,17 +22366,17 @@
     },
     "bias_monitor": {
       "n_total_predictions": 16560,
-      "n_evaluated": 15480,
+      "n_evaluated": 15660,
       "long_ratio": 0.846,
       "long_bias_warning": true,
       "top_sector": "Technology",
       "top_sector_pct": 41.6,
       "sector_concentration_warning": false,
       "calibration": {
-        "accuracy": 0.5037,
-        "mean_abs_predicted": 3.549,
-        "mean_abs_realized": 0.405,
-        "overconfidence_ratio": 8.758
+        "accuracy": 0.5046,
+        "mean_abs_predicted": 3.536,
+        "mean_abs_realized": 0.404,
+        "overconfidence_ratio": 8.751
       }
     },
     "alerts": [
@@ -22371,5 +22391,5 @@
     },
     "label": "ADVISORY ONLY \u00b7 paper trading \u00b7 unverified \u00b7 single-regime baseline"
   },
-  "updated": "2026-10-23T12:46:45Z"
+  "updated": "2026-10-23T13:42:33Z"
 }
