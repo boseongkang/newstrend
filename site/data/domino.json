@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-10-23T13:41:29+00:00",
+  "generated_at": "2026-10-23T18:36:33+00:00",
   "source": {
-    "signal_corr_updated": "2026-10-23T13:40:21Z",
+    "signal_corr_updated": "2026-10-23T18:35:14Z",
     "n_pairs_total": 3727,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,22 +21,35 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "access": 1.937,
-    "march": 1.735,
-    "driven": 1.889,
-    "production": 1.695,
-    "agents": 2.279,
-    "generation": 3.976,
-    "saudi": 1.901,
-    "banks": 3.717,
-    "response": 2.253,
-    "customers": 1.861
+    "access": 2.46,
+    "higher": 1.588,
+    "march": 2.241,
+    "whether": 1.865,
+    "driven": 2.463,
+    "peace": 1.645,
+    "crisis": 1.716,
+    "production": 2.02,
+    "risks": 1.892,
+    "democrats": 1.915,
+    "seen": 1.706,
+    "agents": 2.905,
+    "senior": 1.89,
+    "cash": 1.886,
+    "electric": 1.634,
+    "generation": 5.066,
+    "saudi": 2.559,
+    "drop": 1.5,
+    "banks": 4.601,
+    "response": 3.086,
+    "matter": 1.617,
+    "drones": 1.541,
+    "customers": 2.469
   },
   "stock_chains": [
     {
       "term": "march",
       "is_active_today": true,
-      "today_z": 1.735,
+      "today_z": 2.241,
       "hop1": {
         "ticker": "BKNG",
         "sector": "01 Energy & Transportation",
@@ -59,9 +72,34 @@
       ]
     },
     {
+      "term": "higher",
+      "is_active_today": true,
+      "today_z": 1.588,
+      "hop1": {
+        "ticker": "AMGN",
+        "sector": "03 Life Sciences",
+        "entity": "AMGEN INC",
+        "corr": 0.3302,
+        "lag": -4,
+        "hit_rate": 0.636,
+        "direction": "bull",
+        "avg_ret_1d": 0.542,
+        "confidence": 0.432
+      },
+      "hop2": [
+        {
+          "ticker": "BIIB",
+          "ticker_corr": 0.524,
+          "implied_dir": "bull",
+          "sector": "03 Life Sciences",
+          "entity": "BIOGEN INC."
+        }
+      ]
+    },
+    {
       "term": "march",
       "is_active_today": true,
-      "today_z": 1.735,
+      "today_z": 2.241,
       "hop1": {
         "ticker": "AMZN",
         "sector": "07 Trade & Services",
@@ -1651,31 +1689,6 @@
         "confidence": 0.434
       },
       "hop2": []
-    },
-    {
-      "term": "higher",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "AMGN",
-        "sector": "03 Life Sciences",
-        "entity": "AMGEN INC",
-        "corr": 0.3302,
-        "lag": -4,
-        "hit_rate": 0.636,
-        "direction": "bull",
-        "avg_ret_1d": 0.542,
-        "confidence": 0.432
-      },
-      "hop2": [
-        {
-          "ticker": "BIIB",
-          "ticker_corr": 0.524,
-          "implied_dir": "bull",
-          "sector": "03 Life Sciences",
-          "entity": "BIOGEN INC."
-        }
-      ]
     },
     {
       "term": "reported",
@@ -6503,8 +6516,22 @@
         {
           "term": "march",
           "direction": "bull",
-          "today_z": 1.735,
+          "today_z": 2.241,
           "hit_rate": 1.0
+        }
+      ]
+    },
+    {
+      "ticker": "AMGN",
+      "sector": "03 Life Sciences",
+      "entity": "AMGEN INC",
+      "fund_score": 0.534,
+      "inbound": [
+        {
+          "term": "higher",
+          "direction": "bull",
+          "today_z": 1.588,
+          "hit_rate": 0.636
         }
       ]
     },
@@ -6517,7 +6544,7 @@
         {
           "term": "march",
           "direction": "bear",
-          "today_z": 1.735,
+          "today_z": 2.241,
           "hit_rate": 0.5
         }
       ]
@@ -6532,7 +6559,22 @@
           "term": "march",
           "via": "BKNG",
           "direction": "bull",
-          "today_z": 1.735,
+          "today_z": 2.241,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "BIIB",
+      "sector": "03 Life Sciences",
+      "entity": "BIOGEN INC.",
+      "fund_score": 0.426,
+      "inbound": [
+        {
+          "term": "higher",
+          "via": "AMGN",
+          "direction": "bull",
+          "today_z": 1.588,
           "indirect": true
         }
       ]
@@ -6547,7 +6589,7 @@
           "term": "march",
           "via": "AMZN",
           "direction": "bear",
-          "today_z": 1.735,
+          "today_z": 2.241,
           "indirect": true
         }
       ]
