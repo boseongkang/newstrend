@@ -3819,7 +3819,198 @@
         "improvement_pct": 9.45
       },
       "calibration_runs_total": 926
+    },
+    {
+      "updated": "2026-10-26T14:33:30Z",
+      "week": "2026-W43",
+      "week_summary": {
+        "week": "2026-W43",
+        "n": 90,
+        "avg_abs_gap_pct": 4.686,
+        "avg_signed_gap_pct": -0.279,
+        "directional_acc": 0.289
+      },
+      "trade_summary": {
+        "strategies": {
+          "main_system": {
+            "total_return_pct": 6.375,
+            "win_rate": 0.523,
+            "n_trades_total": 140,
+            "n_open": 10,
+            "n_completed": 65,
+            "current_value": 10637.47
+          },
+          "conservative": {
+            "total_return_pct": 5.4,
+            "win_rate": 0.492,
+            "n_trades_total": 136,
+            "n_open": 10,
+            "n_completed": 63,
+            "current_value": 10540.0
+          },
+          "aggressive": {
+            "total_return_pct": 7.907,
+            "win_rate": 0.544,
+            "n_trades_total": 146,
+            "n_open": 10,
+            "n_completed": 68,
+            "current_value": 10790.72
+          }
+        }
+      },
+      "accuracy_summary": {
+        "n_actionable": 3004,
+        "by_action": {
+          "BUY": {
+            "n": 393,
+            "n_correct": 208,
+            "accuracy": 0.529,
+            "avg_return_pct": 0.72
+          },
+          "REDUCE": {
+            "n": 732,
+            "n_correct": 297,
+            "accuracy": 0.406,
+            "avg_return_pct": 1.348
+          },
+          "SELL": {
+            "n": 216,
+            "n_correct": 98,
+            "accuracy": 0.454,
+            "avg_return_pct": 1.455
+          },
+          "WATCH": {
+            "n": 1663,
+            "n_correct": 823,
+            "accuracy": 0.495,
+            "avg_return_pct": 0.441
+          }
+        }
+      },
+      "gap_summary": {
+        "avg_abs_gap_pct": 5.287,
+        "avg_signed_gap_pct": -0.365,
+        "directional_acc": 0.299
+      },
+      "top_issues": [
+        {
+          "dimension": "by_action",
+          "bucket": "HOLD",
+          "n": 6290,
+          "avg_abs_gap_pct": 5.444,
+          "avg_signed_gap_pct": -0.658,
+          "directional_acc": 0.179,
+          "severity": 11.864,
+          "reason": "|gap|=5.44% \u00b7 dir_acc=18%"
+        },
+        {
+          "dimension": "by_sector",
+          "bucket": "Technology",
+          "n": 4785,
+          "avg_abs_gap_pct": 6.751,
+          "avg_signed_gap_pct": -0.455,
+          "directional_acc": 0.254,
+          "severity": 11.671,
+          "reason": "|gap|=6.75% \u00b7 dir_acc=25%"
+        },
+        {
+          "dimension": "by_volatility",
+          "bucket": "high",
+          "n": 6580,
+          "avg_abs_gap_pct": 6.582,
+          "avg_signed_gap_pct": -0.559,
+          "directional_acc": 0.267,
+          "severity": 11.242,
+          "reason": "|gap|=6.58% \u00b7 dir_acc=27%"
+        },
+        {
+          "dimension": "by_confidence",
+          "bucket": "[0.5, 0.7)",
+          "n": 3075,
+          "avg_abs_gap_pct": 5.649,
+          "avg_signed_gap_pct": -0.237,
+          "directional_acc": 0.244,
+          "severity": 10.769,
+          "reason": "|gap|=5.65% \u00b7 dir_acc=24%"
+        },
+        {
+          "dimension": "by_confidence",
+          "bucket": "[0.0, 0.5)",
+          "n": 5241,
+          "avg_abs_gap_pct": 5.34,
+          "avg_signed_gap_pct": -1.045,
+          "directional_acc": 0.245,
+          "severity": 10.44,
+          "reason": "|gap|=5.34% \u00b7 dir_acc=24%"
+        }
+      ],
+      "improvement_plan": [
+        {
+          "id": "action_HOLD",
+          "target": "HOLD action calibration",
+          "issue": "|gap|=5.44% (n=6290); system predicts lower than reality.",
+          "suggestion": "Re-check HOLD action mapping to predicted_return heuristic.",
+          "severity": 11.864
+        },
+        {
+          "id": "sector_Technology",
+          "target": "sector Technology",
+          "issue": "|gap|=6.75% across this sector (n=4785).",
+          "suggestion": "Audit the pillar that's largest contributor to Technology-sector calls; defer untested signals.",
+          "severity": 11.671
+        },
+        {
+          "id": "vol_high",
+          "target": "volatility tier high",
+          "issue": "|gap|=6.58% at this vol level (n=6580).",
+          "suggestion": "Tighten stop-loss / shrink position when HV20 is in 'high' tier.",
+          "severity": 11.242
+        },
+        {
+          "id": "conf_[0.5, 0.7)",
+          "target": "confidence band [0.5, 0.7)",
+          "issue": "|gap|=5.65% in this band (n=3075).",
+          "suggestion": "Add confidence-conditional position sizing \u2014 smaller bets in this band.",
+          "severity": 10.769
+        },
+        {
+          "id": "conf_[0.0, 0.5)",
+          "target": "confidence band [0.0, 0.5)",
+          "issue": "|gap|=5.34% in this band (n=5241).",
+          "suggestion": "Add confidence-conditional position sizing \u2014 smaller bets in this band.",
+          "severity": 10.44
+        },
+        {
+          "id": "pillar_grad_health_score",
+          "target": "pillar weight: health_score",
+          "issue": "Gap gradient suggests \u0394weight=-0.046.",
+          "suggestion": "Calibrator will absorb this signal automatically; verify after next run that health_score EMA weight has moved in the suggested direction.",
+          "severity": 0.23199999999999998
+        }
+      ],
+      "last_week_validation": {
+        "available": true,
+        "this_week": {
+          "week": "2026-W43",
+          "n": 90,
+          "avg_abs_gap_pct": 4.686,
+          "avg_signed_gap_pct": -0.279,
+          "directional_acc": 0.289
+        },
+        "last_week": {
+          "week": "2026-W42",
+          "n": 90,
+          "avg_abs_gap_pct": 3.998,
+          "avg_signed_gap_pct": 0.443,
+          "directional_acc": 0.289
+        },
+        "delta_abs_gap_pct": 0.688,
+        "delta_signed_gap_pct": -0.722,
+        "direction": "worsened",
+        "improvement_pct": -17.21
+      },
+      "calibration_runs_total": 926
     }
   ],
-  "updated": "2026-10-26T06:34:11Z"
+  "updated": "2026-10-26T14:33:30Z"
 }
