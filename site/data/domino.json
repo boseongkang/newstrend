@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-10-27T01:06:57+00:00",
+  "generated_at": "2026-10-27T06:32:04+00:00",
   "source": {
-    "signal_corr_updated": "2026-10-27T01:05:57Z",
+    "signal_corr_updated": "2026-10-27T06:30:45Z",
     "n_pairs_total": 3751,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -20,8 +20,86 @@
     },
     "active_z_threshold": 1.5
   },
-  "active_terms": {},
+  "active_terms": {
+    "ceasefire": 2.686,
+    "announces": 3.253,
+    "place": 1.799,
+    "samsung": 1.537,
+    "clear": 1.648,
+    "matter": 1.755,
+    "outlook": 1.921
+  },
   "stock_chains": [
+    {
+      "term": "ceasefire",
+      "is_active_today": true,
+      "today_z": 2.686,
+      "hop1": {
+        "ticker": "PYPL",
+        "sector": "07 Trade & Services",
+        "entity": "PayPal Holdings, Inc.",
+        "corr": 0.3546,
+        "lag": -5,
+        "hit_rate": 0.8,
+        "direction": "bull",
+        "avg_ret_1d": 0.68,
+        "confidence": 0.484
+      },
+      "hop2": []
+    },
+    {
+      "term": "ceasefire",
+      "is_active_today": true,
+      "today_z": 2.686,
+      "hop1": {
+        "ticker": "BLK",
+        "sector": "02 Finance",
+        "entity": "BlackRock, Inc.",
+        "corr": 0.3517,
+        "lag": -4,
+        "hit_rate": 0.6,
+        "direction": "bull",
+        "avg_ret_1d": 1.353,
+        "confidence": 0.374
+      },
+      "hop2": [
+        {
+          "ticker": "DIA",
+          "ticker_corr": 0.608,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "IWM",
+          "ticker_corr": 0.559,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "MS",
+          "ticker_corr": 0.557,
+          "implied_dir": "bull",
+          "sector": "02 Finance",
+          "entity": "MORGAN STANLEY"
+        },
+        {
+          "ticker": "GS",
+          "ticker_corr": 0.548,
+          "implied_dir": "bull",
+          "sector": "02 Finance",
+          "entity": "GOLDMAN SACHS GROUP INC"
+        },
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.543,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": null
+        }
+      ]
+    },
     {
       "term": "support",
       "is_active_today": false,
@@ -1206,23 +1284,6 @@
           "entity": "AUTOMATIC DATA PROCESSING INC"
         }
       ]
-    },
-    {
-      "term": "ceasefire",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PYPL",
-        "sector": "07 Trade & Services",
-        "entity": "PayPal Holdings, Inc.",
-        "corr": 0.3546,
-        "lag": -5,
-        "hit_rate": 0.8,
-        "direction": "bull",
-        "avg_ret_1d": 0.68,
-        "confidence": 0.484
-      },
-      "hop2": []
     },
     {
       "term": "performance",
@@ -5128,59 +5189,6 @@
       "hop2": []
     },
     {
-      "term": "ceasefire",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "BLK",
-        "sector": "02 Finance",
-        "entity": "BlackRock, Inc.",
-        "corr": 0.3517,
-        "lag": -4,
-        "hit_rate": 0.6,
-        "direction": "bull",
-        "avg_ret_1d": 1.353,
-        "confidence": 0.374
-      },
-      "hop2": [
-        {
-          "ticker": "DIA",
-          "ticker_corr": 0.608,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "IWM",
-          "ticker_corr": 0.559,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "MS",
-          "ticker_corr": 0.557,
-          "implied_dir": "bull",
-          "sector": "02 Finance",
-          "entity": "MORGAN STANLEY"
-        },
-        {
-          "ticker": "GS",
-          "ticker_corr": 0.548,
-          "implied_dir": "bull",
-          "sector": "02 Finance",
-          "entity": "GOLDMAN SACHS GROUP INC"
-        },
-        {
-          "ticker": "SPY",
-          "ticker_corr": 0.543,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": null
-        }
-      ]
-    },
-    {
       "term": "times",
       "is_active_today": false,
       "today_z": null,
@@ -8542,7 +8550,111 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "PYPL",
+      "sector": "07 Trade & Services",
+      "entity": "PayPal Holdings, Inc.",
+      "fund_score": 0.475,
+      "inbound": [
+        {
+          "term": "ceasefire",
+          "direction": "bull",
+          "today_z": 2.686,
+          "hit_rate": 0.8
+        }
+      ]
+    },
+    {
+      "ticker": "BLK",
+      "sector": "02 Finance",
+      "entity": "BlackRock, Inc.",
+      "fund_score": 0.591,
+      "inbound": [
+        {
+          "term": "ceasefire",
+          "direction": "bull",
+          "today_z": 2.686,
+          "hit_rate": 0.6
+        }
+      ]
+    },
+    {
+      "ticker": "DIA",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "ceasefire",
+          "via": "BLK",
+          "direction": "bull",
+          "today_z": 2.686,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "IWM",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "ceasefire",
+          "via": "BLK",
+          "direction": "bull",
+          "today_z": 2.686,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MS",
+      "sector": "02 Finance",
+      "entity": "MORGAN STANLEY",
+      "fund_score": 0.422,
+      "inbound": [
+        {
+          "term": "ceasefire",
+          "via": "BLK",
+          "direction": "bull",
+          "today_z": 2.686,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "GS",
+      "sector": "02 Finance",
+      "entity": "GOLDMAN SACHS GROUP INC",
+      "fund_score": 0.438,
+      "inbound": [
+        {
+          "term": "ceasefire",
+          "via": "BLK",
+          "direction": "bull",
+          "today_z": 2.686,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "SPY",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "ceasefire",
+          "via": "BLK",
+          "direction": "bull",
+          "today_z": 2.686,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 256,
