@@ -1,0 +1,163 @@
+{
+ "week": "2026-W45",
+ "generated_at": "2026-11-07T01:28:00Z",
+ "status": {
+  "forward_alpha_pct": -0.4514,
+  "forward_alpha_ci95": [
+   -0.993,
+   0.09
+  ],
+  "forward_alpha_p_nw": 0.1012,
+  "live_sentiment": {
+   "since": "2026-08-06",
+   "n_folds": 28,
+   "alpha_pct": -0.171
+  },
+  "gate": {
+   "pass": false,
+   "reason": "FAIL: paired (system − always-buy) alpha -0.73pp, NW p=0.0652 (system -0.45%, buy +0.27%)",
+   "paired_diff_pp": -0.7255,
+   "paired_p": 0.0652
+  },
+  "n_folds_total": 96
+ },
+ "week_activity": {
+  "n": 630,
+  "directional_acc": 0.224
+ },
+ "power": {
+  "n_folds": 96,
+  "fold_sd_pct": 2.307,
+  "rho1": 0.694,
+  "nw_sd_pct": 4.026,
+  "rows": [
+   {
+    "effect_pct": 0.2,
+    "annualized": "~10%/yr",
+    "folds_needed": 1557,
+    "months_needed": 74.1
+   },
+   {
+    "effect_pct": 0.5,
+    "annualized": "~28%/yr",
+    "folds_needed": 249,
+    "months_needed": 11.9
+   },
+   {
+    "effect_pct": 1.0,
+    "annualized": "~65%/yr",
+    "folds_needed": 62,
+    "months_needed": 3.0
+   }
+  ],
+  "note": "이 표가 이 리포트의 존재 이유다: 현실적 크기의 엣지(연 10~30%)는 이 설계·표본에서 유의성으로 판정할 수 없다. 그래서 사전 등록 체크포인트는 유의성이 아니라 점추정 부호와 기대 가치를 기준으로 한다. 검정력 부족은 '엣지가 없다'의 증거가 아니라 '이 방법으로는 알 수 없다'의 증거다."
+ },
+ "checkpoint": {
+  "id": "CP-2026-11-01",
+  "registered_at": "2026-08-05T22:10:00Z",
+  "decision_date": "2026-11-01",
+  "elapsed_folds": 28,
+  "expected_folds": 61,
+  "mde_pct": 1.26,
+  "rule_summary": "2026-11-01에 live-sentiment forward alpha 점추정이 양수가 아니면 → 탐색 중단. 근거: 이 표본으로는 현실적 크기의 엣지 유무를 판정할 수 없고, 무기한 대기의 기대 가치가 음수이므로 중단한다. 이는 '엣지가 없음이 증명됐다'가 아니라 '이 설계로는 알 수 없다'이다."
+ },
+ "raw_signals": {
+  "warning": "벤치마크를 이기지 못하는 것으로 확인된 시스템의 출력. 검증 대상이지 추천이 아님.",
+  "items": [
+   {
+    "ticker": "SBUX",
+    "action": "REDUCE",
+    "confidence": 0.289,
+    "count": 6
+   },
+   {
+    "ticker": "TLT",
+    "action": "REDUCE",
+    "confidence": 0.289,
+    "count": 6
+   },
+   {
+    "ticker": "INTC",
+    "action": "SELL",
+    "confidence": 0.859,
+    "count": 5
+   },
+   {
+    "ticker": "COST",
+    "action": "REDUCE",
+    "confidence": 0.267,
+    "count": 5
+   },
+   {
+    "ticker": "NVDA",
+    "action": "BUY",
+    "confidence": 0.951,
+    "count": 4
+   },
+   {
+    "ticker": "QQQ",
+    "action": "BUY",
+    "confidence": 0.921,
+    "count": 4
+   },
+   {
+    "ticker": "FTNT",
+    "action": "BUY",
+    "confidence": 0.883,
+    "count": 4
+   },
+   {
+    "ticker": "NXPI",
+    "action": "REDUCE",
+    "confidence": 0.282,
+    "count": 4
+   },
+   {
+    "ticker": "META",
+    "action": "BUY",
+    "confidence": 0.935,
+    "count": 3
+   },
+   {
+    "ticker": "USO",
+    "action": "BUY",
+    "confidence": 0.897,
+    "count": 3
+   },
+   {
+    "ticker": "ASML",
+    "action": "BUY",
+    "confidence": 0.892,
+    "count": 3
+   },
+   {
+    "ticker": "XOM",
+    "action": "BUY",
+    "confidence": 0.862,
+    "count": 3
+   },
+   {
+    "ticker": "SPY",
+    "action": "BUY",
+    "confidence": 0.841,
+    "count": 3
+   },
+   {
+    "ticker": "MS",
+    "action": "SELL",
+    "confidence": 0.765,
+    "count": 3
+   },
+   {
+    "ticker": "TSLA",
+    "action": "REDUCE",
+    "confidence": 0.392,
+    "count": 3
+   }
+  ]
+ },
+ "narrative": {
+  "generated": false,
+  "reason": "ANTHROPIC_API_KEY 없음"
+ }
+}
