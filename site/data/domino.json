@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-11-12T04:01:23+00:00",
+  "generated_at": "2026-11-12T13:01:39+00:00",
   "source": {
-    "signal_corr_updated": "2026-11-12T04:00:04Z",
-    "n_pairs_total": 3241,
+    "signal_corr_updated": "2026-11-12T13:00:41Z",
+    "n_pairs_total": 3239,
     "n_dates": 180,
     "prices_tickers": 90,
     "trends_terms": 600
@@ -21,18 +21,115 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "nvidia": 1.612,
-    "required": 2.65,
-    "board": 1.9,
-    "lebanon": 2.77,
-    "signed": 1.846,
-    "files": 2.921
+    "nvidia": 5.365,
+    "reported": 1.624,
+    "health": 2.514,
+    "chinese": 2.255,
+    "capital": 1.861,
+    "future": 3.105,
+    "gold": 2.475,
+    "private": 3.538,
+    "building": 1.582,
+    "reportedly": 2.1,
+    "fellow": 3.025,
+    "board": 5.239,
+    "strategic": 1.774,
+    "chip": 2.782,
+    "orders": 1.52,
+    "care": 3.332,
+    "gulf": 1.552,
+    "memory": 8.429,
+    "files": 2.092,
+    "chain": 1.803,
+    "analyst": 5.196,
+    "expansion": 2.387,
+    "light": 5.354,
+    "designed": 1.692,
+    "domestic": 2.037
   },
   "stock_chains": [
     {
+      "term": "gold",
+      "is_active_today": true,
+      "today_z": 2.475,
+      "hop1": {
+        "ticker": "CVX",
+        "sector": "01 Energy & Transportation",
+        "entity": "CHEVRON CORP",
+        "corr": 0.3062,
+        "lag": -1,
+        "hit_rate": 0.8,
+        "direction": "bull",
+        "avg_ret_1d": 0.674,
+        "confidence": 0.506
+      },
+      "hop2": [
+        {
+          "ticker": "XOM",
+          "ticker_corr": 0.858,
+          "implied_dir": "bull",
+          "sector": "01 Energy & Transportation",
+          "entity": "EXXON MOBIL CORP"
+        },
+        {
+          "ticker": "USO",
+          "ticker_corr": 0.592,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": null
+        }
+      ]
+    },
+    {
+      "term": "future",
+      "is_active_today": true,
+      "today_z": 3.105,
+      "hop1": {
+        "ticker": "TXN",
+        "sector": "04 Manufacturing",
+        "entity": "TEXAS INSTRUMENTS INC",
+        "corr": 0.3105,
+        "lag": -5,
+        "hit_rate": 0.7,
+        "direction": "bull",
+        "avg_ret_1d": 1.13,
+        "confidence": 0.453
+      },
+      "hop2": [
+        {
+          "ticker": "MCHP",
+          "ticker_corr": 0.764,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "MICROCHIP TECHNOLOGY INC"
+        },
+        {
+          "ticker": "ADI",
+          "ticker_corr": 0.749,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "ANALOG DEVICES INC"
+        },
+        {
+          "ticker": "ON",
+          "ticker_corr": 0.686,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "ON SEMICONDUCTOR CORP"
+        },
+        {
+          "ticker": "NXPI",
+          "ticker_corr": 0.632,
+          "implied_dir": "bull",
+          "sector": "04 Manufacturing",
+          "entity": "NXP Semiconductors N.V."
+        }
+      ]
+    },
+    {
       "term": "nvidia",
       "is_active_today": true,
-      "today_z": 1.612,
+      "today_z": 5.365,
       "hop1": {
         "ticker": "ORCL",
         "sector": "06 Technology",
@@ -49,7 +146,7 @@
     {
       "term": "nvidia",
       "is_active_today": true,
-      "today_z": 1.612,
+      "today_z": 5.365,
       "hop1": {
         "ticker": "OKTA",
         "sector": "06 Technology",
@@ -98,6 +195,23 @@
           "entity": "Datadog, Inc."
         }
       ]
+    },
+    {
+      "term": "future",
+      "is_active_today": true,
+      "today_z": 3.105,
+      "hop1": {
+        "ticker": "NFLX",
+        "sector": "07 Trade & Services",
+        "entity": "NETFLIX INC",
+        "corr": -0.3585,
+        "lag": -2,
+        "hit_rate": 0.5,
+        "direction": "bear",
+        "avg_ret_1d": -0.651,
+        "confidence": 0.361
+      },
+      "hop2": []
     },
     {
       "term": "china",
@@ -796,23 +910,6 @@
       "hop2": []
     },
     {
-      "term": "rise",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "MRNA",
-        "sector": "03 Life Sciences",
-        "entity": "Moderna, Inc.",
-        "corr": 0.3804,
-        "lag": -5,
-        "hit_rate": 0.778,
-        "direction": "bull",
-        "avg_ret_1d": 3.011,
-        "confidence": 0.514
-      },
-      "hop2": []
-    },
-    {
       "term": "users",
       "is_active_today": false,
       "today_z": null,
@@ -891,38 +988,6 @@
         "confidence": 0.507
       },
       "hop2": []
-    },
-    {
-      "term": "gold",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CVX",
-        "sector": "01 Energy & Transportation",
-        "entity": "CHEVRON CORP",
-        "corr": 0.3062,
-        "lag": -1,
-        "hit_rate": 0.8,
-        "direction": "bull",
-        "avg_ret_1d": 0.674,
-        "confidence": 0.506
-      },
-      "hop2": [
-        {
-          "ticker": "XOM",
-          "ticker_corr": 0.858,
-          "implied_dir": "bull",
-          "sector": "01 Energy & Transportation",
-          "entity": "EXXON MOBIL CORP"
-        },
-        {
-          "ticker": "USO",
-          "ticker_corr": 0.592,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": null
-        }
-      ]
     },
     {
       "term": "investment",
@@ -1970,52 +2035,6 @@
       "hop2": []
     },
     {
-      "term": "future",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "TXN",
-        "sector": "04 Manufacturing",
-        "entity": "TEXAS INSTRUMENTS INC",
-        "corr": 0.3105,
-        "lag": -5,
-        "hit_rate": 0.7,
-        "direction": "bull",
-        "avg_ret_1d": 1.13,
-        "confidence": 0.453
-      },
-      "hop2": [
-        {
-          "ticker": "MCHP",
-          "ticker_corr": 0.764,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "MICROCHIP TECHNOLOGY INC"
-        },
-        {
-          "ticker": "ADI",
-          "ticker_corr": 0.749,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "ANALOG DEVICES INC"
-        },
-        {
-          "ticker": "ON",
-          "ticker_corr": 0.686,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "ON SEMICONDUCTOR CORP"
-        },
-        {
-          "ticker": "NXPI",
-          "ticker_corr": 0.632,
-          "implied_dir": "bull",
-          "sector": "04 Manufacturing",
-          "entity": "NXP Semiconductors N.V."
-        }
-      ]
-    },
-    {
       "term": "bond",
       "is_active_today": false,
       "today_z": null,
@@ -2183,6 +2202,23 @@
         "hit_rate": 0.643,
         "direction": "bull",
         "avg_ret_1d": 0.959,
+        "confidence": 0.447
+      },
+      "hop2": []
+    },
+    {
+      "term": "democratic",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "MRNA",
+        "sector": "03 Life Sciences",
+        "entity": "Moderna, Inc.",
+        "corr": 0.3118,
+        "lag": -5,
+        "hit_rate": 0.643,
+        "direction": "bull",
+        "avg_ret_1d": 0.972,
         "confidence": 0.447
       },
       "hop2": []
@@ -4939,23 +4975,6 @@
       "hop2": []
     },
     {
-      "term": "future",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "NFLX",
-        "sector": "07 Trade & Services",
-        "entity": "NETFLIX INC",
-        "corr": -0.3585,
-        "lag": -2,
-        "hit_rate": 0.5,
-        "direction": "bear",
-        "avg_ret_1d": -0.651,
-        "confidence": 0.361
-      },
-      "hop2": []
-    },
-    {
       "term": "california",
       "is_active_today": false,
       "today_z": null,
@@ -6399,7 +6418,7 @@
       "lag": -5,
       "hit_rate": 0.692,
       "direction": "bull",
-      "is_active_today": false
+      "is_active_today": true
     },
     {
       "term": "department",
@@ -6503,6 +6522,34 @@
   ],
   "ticker_pressure": [
     {
+      "ticker": "CVX",
+      "sector": "01 Energy & Transportation",
+      "entity": "CHEVRON CORP",
+      "fund_score": 0.265,
+      "inbound": [
+        {
+          "term": "gold",
+          "direction": "bull",
+          "today_z": 2.475,
+          "hit_rate": 0.8
+        }
+      ]
+    },
+    {
+      "ticker": "TXN",
+      "sector": "04 Manufacturing",
+      "entity": "TEXAS INSTRUMENTS INC",
+      "fund_score": 0.539,
+      "inbound": [
+        {
+          "term": "future",
+          "direction": "bull",
+          "today_z": 3.105,
+          "hit_rate": 0.7
+        }
+      ]
+    },
+    {
       "ticker": "ORCL",
       "sector": "06 Technology",
       "entity": "ORACLE CORP",
@@ -6511,7 +6558,7 @@
         {
           "term": "nvidia",
           "direction": "bull",
-          "today_z": 1.612,
+          "today_z": 5.365,
           "hit_rate": 0.615
         }
       ]
@@ -6525,8 +6572,112 @@
         {
           "term": "nvidia",
           "direction": "bull",
-          "today_z": 1.612,
+          "today_z": 5.365,
           "hit_rate": 0.538
+        }
+      ]
+    },
+    {
+      "ticker": "NFLX",
+      "sector": "07 Trade & Services",
+      "entity": "NETFLIX INC",
+      "fund_score": 0.696,
+      "inbound": [
+        {
+          "term": "future",
+          "direction": "bear",
+          "today_z": 3.105,
+          "hit_rate": 0.5
+        }
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "sector": "01 Energy & Transportation",
+      "entity": "EXXON MOBIL CORP",
+      "fund_score": 0.264,
+      "inbound": [
+        {
+          "term": "gold",
+          "via": "CVX",
+          "direction": "bull",
+          "today_z": 2.475,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "USO",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "gold",
+          "via": "CVX",
+          "direction": "bull",
+          "today_z": 2.475,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "MCHP",
+      "sector": "04 Manufacturing",
+      "entity": "MICROCHIP TECHNOLOGY INC",
+      "fund_score": 0.284,
+      "inbound": [
+        {
+          "term": "future",
+          "via": "TXN",
+          "direction": "bull",
+          "today_z": 3.105,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ADI",
+      "sector": "04 Manufacturing",
+      "entity": "ANALOG DEVICES INC",
+      "fund_score": 0.327,
+      "inbound": [
+        {
+          "term": "future",
+          "via": "TXN",
+          "direction": "bull",
+          "today_z": 3.105,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "ON",
+      "sector": "04 Manufacturing",
+      "entity": "ON SEMICONDUCTOR CORP",
+      "fund_score": 0.275,
+      "inbound": [
+        {
+          "term": "future",
+          "via": "TXN",
+          "direction": "bull",
+          "today_z": 3.105,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "NXPI",
+      "sector": "04 Manufacturing",
+      "entity": "NXP Semiconductors N.V.",
+      "fund_score": 0.423,
+      "inbound": [
+        {
+          "term": "future",
+          "via": "TXN",
+          "direction": "bull",
+          "today_z": 3.105,
+          "indirect": true
         }
       ]
     },
@@ -6540,7 +6691,7 @@
           "term": "nvidia",
           "via": "OKTA",
           "direction": "bull",
-          "today_z": 1.612,
+          "today_z": 5.365,
           "indirect": true
         }
       ]
@@ -6555,7 +6706,7 @@
           "term": "nvidia",
           "via": "OKTA",
           "direction": "bull",
-          "today_z": 1.612,
+          "today_z": 5.365,
           "indirect": true
         }
       ]
@@ -6570,7 +6721,7 @@
           "term": "nvidia",
           "via": "OKTA",
           "direction": "bull",
-          "today_z": 1.612,
+          "today_z": 5.365,
           "indirect": true
         }
       ]
@@ -6585,7 +6736,7 @@
           "term": "nvidia",
           "via": "OKTA",
           "direction": "bull",
-          "today_z": 1.612,
+          "today_z": 5.365,
           "indirect": true
         }
       ]
@@ -6600,7 +6751,7 @@
           "term": "nvidia",
           "via": "OKTA",
           "direction": "bull",
-          "today_z": 1.612,
+          "today_z": 5.365,
           "indirect": true
         }
       ]
