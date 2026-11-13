@@ -11549,10 +11549,20 @@
         "after_fdr": 54,
         "after_holdout": 54
       }
+    },
+    {
+      "updated": "2026-11-13T16:04:14Z",
+      "n_experiments": 60,
+      "n_candidates": 52,
+      "funnel": {
+        "raw_significant": 57,
+        "after_fdr": 52,
+        "after_holdout": 52
+      }
     }
   ],
   "latest": {
-    "updated": "2026-11-13T10:18:24Z",
+    "updated": "2026-11-13T16:04:14Z",
     "n_experiments": 60,
     "n_valid": 60,
     "n_errors": 0,
@@ -11668,11 +11678,11 @@
       "2026-08-17",
       "2026-08-18",
       "2026-08-19",
-      "2026-08-20"
+      "2026-08-20",
+      "2026-08-21",
+      "2026-08-22"
     ],
     "holdout_dates": [
-      "2026-08-21",
-      "2026-08-22",
       "2026-08-23",
       "2026-08-24",
       "2026-08-25",
@@ -11697,18 +11707,21 @@
       "2026-11-02",
       "2026-11-03",
       "2026-11-04",
-      "2026-11-05"
+      "2026-11-05",
+      "2026-11-06",
+      "2026-11-07",
+      "2026-11-08"
     ],
     "data_quality": {
-      "n_rows": 12080,
+      "n_rows": 12347,
       "missing_rates": {
         "ta_rsi14": 0.0,
         "ta_hv20": 0.0,
         "confidence": 0.0,
-        "news_best_conf": 0.042,
-        "news_z": 0.045,
-        "sentiment_score": 0.056,
-        "sentiment_total": 0.056,
+        "news_best_conf": 0.041,
+        "news_z": 0.044,
+        "sentiment_score": 0.055,
+        "sentiment_total": 0.055,
         "fundamental_score": 0.169,
         "quality_score": 0.169,
         "growth_score": 0.169,
@@ -11717,7 +11730,7 @@
       },
       "outlier_counts": {
         "ta_hv20": 61,
-        "sentiment_score": 276,
+        "sentiment_score": 282,
         "sentiment_total": 83,
         "insider_score": 140
       },
@@ -11726,9 +11739,9 @@
       "pass": true
     },
     "defense_funnel": {
-      "raw_significant": 56,
-      "after_fdr": 54,
-      "after_holdout": 54
+      "raw_significant": 57,
+      "after_fdr": 52,
+      "after_holdout": 52
     },
     "candidates": [
       {
@@ -11740,9 +11753,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.437,
-        "explore_p": 0.024076,
-        "holdout_alpha": 1.7491,
+        "explore_alpha": 0.4365,
+        "explore_p": 0.022421,
+        "holdout_alpha": 1.566,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11754,23 +11767,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.7451,
-        "explore_p": 0.01268,
-        "holdout_alpha": 2.747,
-        "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
-      },
-      {
-        "id": "Ridge_ta_only_low_vol_5d",
-        "config": {
-          "id": "Ridge_ta_only_low_vol_5d",
-          "model": "Ridge",
-          "features": "ta_only",
-          "universe": "low_vol",
-          "horizon": 5
-        },
-        "explore_alpha": 0.3954,
-        "explore_p": 0.044907,
-        "holdout_alpha": 1.13,
+        "explore_alpha": 0.7458,
+        "explore_p": 0.01147,
+        "holdout_alpha": 2.7121,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11782,9 +11781,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.4806,
-        "explore_p": 0.013837,
-        "holdout_alpha": 1.736,
+        "explore_alpha": 0.4697,
+        "explore_p": 0.014937,
+        "holdout_alpha": 1.4555,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11796,9 +11795,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.3898,
-        "explore_p": 0.036441,
-        "holdout_alpha": 0.7318,
+        "explore_alpha": 0.3756,
+        "explore_p": 0.041685,
+        "holdout_alpha": 0.6319,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11810,9 +11809,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.9558,
+        "explore_alpha": 0.9457,
         "explore_p": 0.0,
-        "holdout_alpha": 2.2746,
+        "holdout_alpha": 2.0683,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11824,9 +11823,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 1.4498,
+        "explore_alpha": 1.4346,
         "explore_p": 1e-06,
-        "holdout_alpha": 3.2796,
+        "holdout_alpha": 3.3065,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11838,9 +11837,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.5881,
-        "explore_p": 0.002648,
-        "holdout_alpha": 1.3765,
+        "explore_alpha": 0.5725,
+        "explore_p": 0.003124,
+        "holdout_alpha": 1.2704,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11852,9 +11851,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.8396,
+        "explore_alpha": 0.8304,
         "explore_p": 5e-06,
-        "holdout_alpha": 2.0457,
+        "holdout_alpha": 2.0098,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11866,9 +11865,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 1.2509,
-        "explore_p": 4.1e-05,
-        "holdout_alpha": 3.0485,
+        "explore_alpha": 1.2336,
+        "explore_p": 4.3e-05,
+        "holdout_alpha": 2.5013,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11880,9 +11879,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.4595,
-        "explore_p": 0.017103,
-        "holdout_alpha": 1.6444,
+        "explore_alpha": 0.4481,
+        "explore_p": 0.01868,
+        "holdout_alpha": 1.308,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11894,9 +11893,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.4416,
-        "explore_p": 0.025345,
-        "holdout_alpha": 1.8402,
+        "explore_alpha": 0.4396,
+        "explore_p": 0.024115,
+        "holdout_alpha": 1.6299,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11908,9 +11907,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.6465,
-        "explore_p": 0.027561,
-        "holdout_alpha": 2.5828,
+        "explore_alpha": 0.6469,
+        "explore_p": 0.025469,
+        "holdout_alpha": 2.5787,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11922,9 +11921,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.4867,
-        "explore_p": 0.008155,
-        "holdout_alpha": 1.8339,
+        "explore_alpha": 0.4759,
+        "explore_p": 0.008881,
+        "holdout_alpha": 1.3679,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11936,9 +11935,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.9226,
+        "explore_alpha": 0.9121,
         "explore_p": 0.0,
-        "holdout_alpha": 2.2073,
+        "holdout_alpha": 2.1106,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11950,9 +11949,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 1.3858,
-        "explore_p": 5e-06,
-        "holdout_alpha": 3.5733,
+        "explore_alpha": 1.3737,
+        "explore_p": 4e-06,
+        "holdout_alpha": 3.2212,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11964,9 +11963,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.7438,
-        "explore_p": 8e-05,
-        "holdout_alpha": 1.4915,
+        "explore_alpha": 0.7273,
+        "explore_p": 9.9e-05,
+        "holdout_alpha": 1.2508,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11978,9 +11977,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.8061,
-        "explore_p": 3.1e-05,
-        "holdout_alpha": 2.2343,
+        "explore_alpha": 0.8015,
+        "explore_p": 2.7e-05,
+        "holdout_alpha": 2.1135,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -11992,9 +11991,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 1.1979,
-        "explore_p": 0.000164,
-        "holdout_alpha": 2.9609,
+        "explore_alpha": 1.1783,
+        "explore_p": 0.000177,
+        "holdout_alpha": 3.1619,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12006,9 +12005,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.4573,
-        "explore_p": 0.022099,
-        "holdout_alpha": 1.8068,
+        "explore_alpha": 0.4531,
+        "explore_p": 0.021601,
+        "holdout_alpha": 1.2771,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12020,9 +12019,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.514,
-        "explore_p": 0.008489,
-        "holdout_alpha": 1.7137,
+        "explore_alpha": 0.5184,
+        "explore_p": 0.007172,
+        "holdout_alpha": 1.7141,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12034,9 +12033,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.8193,
-        "explore_p": 0.007573,
-        "holdout_alpha": 2.6135,
+        "explore_alpha": 0.8136,
+        "explore_p": 0.007217,
+        "holdout_alpha": 2.3365,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12048,9 +12047,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.451,
-        "explore_p": 0.02268,
-        "holdout_alpha": 1.0831,
+        "explore_alpha": 0.4429,
+        "explore_p": 0.023477,
+        "holdout_alpha": 0.9337,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12062,9 +12061,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.4494,
-        "explore_p": 0.023315,
-        "holdout_alpha": 1.551,
+        "explore_alpha": 0.4409,
+        "explore_p": 0.024294,
+        "holdout_alpha": 1.2894,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12076,9 +12075,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.6293,
-        "explore_p": 0.036588,
-        "holdout_alpha": 2.464,
+        "explore_alpha": 0.626,
+        "explore_p": 0.035162,
+        "holdout_alpha": 2.539,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12090,9 +12089,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.4407,
-        "explore_p": 0.01442,
-        "holdout_alpha": 1.0064,
+        "explore_alpha": 0.4258,
+        "explore_p": 0.016969,
+        "holdout_alpha": 0.8828,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12104,9 +12103,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 1.2306,
+        "explore_alpha": 1.2177,
         "explore_p": 0.0,
-        "holdout_alpha": 2.4738,
+        "holdout_alpha": 2.5327,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12118,9 +12117,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 1.8853,
+        "explore_alpha": 1.864,
         "explore_p": 0.0,
-        "holdout_alpha": 3.5425,
+        "holdout_alpha": 3.9423,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12132,9 +12131,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.8362,
+        "explore_alpha": 0.8231,
         "explore_p": 4e-06,
-        "holdout_alpha": 1.8918,
+        "holdout_alpha": 1.7913,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12146,9 +12145,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 1.345,
+        "explore_alpha": 1.3349,
         "explore_p": 0.0,
-        "holdout_alpha": 2.7665,
+        "holdout_alpha": 2.6455,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12160,9 +12159,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 2.0699,
+        "explore_alpha": 2.0484,
         "explore_p": 0.0,
-        "holdout_alpha": 4.1308,
+        "holdout_alpha": 4.2902,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12174,9 +12173,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.8135,
-        "explore_p": 5.9e-05,
-        "holdout_alpha": 2.2433,
+        "explore_alpha": 0.8001,
+        "explore_p": 6.5e-05,
+        "holdout_alpha": 1.903,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12188,9 +12187,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.4501,
-        "explore_p": 0.022469,
-        "holdout_alpha": 1.8386,
+        "explore_alpha": 0.4473,
+        "explore_p": 0.021575,
+        "holdout_alpha": 1.5488,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12202,23 +12201,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.7642,
-        "explore_p": 0.010639,
-        "holdout_alpha": 2.8423,
-        "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
-      },
-      {
-        "id": "Ridge_ta_sentiment_low_vol_5d",
-        "config": {
-          "id": "Ridge_ta_sentiment_low_vol_5d",
-          "model": "Ridge",
-          "features": "ta_sentiment",
-          "universe": "low_vol",
-          "horizon": 5
-        },
-        "explore_alpha": 0.3989,
-        "explore_p": 0.044094,
-        "holdout_alpha": 1.1237,
+        "explore_alpha": 0.7614,
+        "explore_p": 0.009915,
+        "holdout_alpha": 2.7883,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12230,9 +12215,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.49,
-        "explore_p": 0.012226,
-        "holdout_alpha": 1.7533,
+        "explore_alpha": 0.4787,
+        "explore_p": 0.013291,
+        "holdout_alpha": 1.4728,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12244,9 +12229,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.3934,
-        "explore_p": 0.03362,
-        "holdout_alpha": 0.872,
+        "explore_alpha": 0.3792,
+        "explore_p": 0.038567,
+        "holdout_alpha": 0.7137,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12258,9 +12243,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.9524,
+        "explore_alpha": 0.9423,
         "explore_p": 0.0,
-        "holdout_alpha": 2.2834,
+        "holdout_alpha": 2.1517,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12272,9 +12257,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 1.4565,
+        "explore_alpha": 1.4412,
         "explore_p": 1e-06,
-        "holdout_alpha": 3.4298,
+        "holdout_alpha": 3.5011,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12286,9 +12271,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.6093,
-        "explore_p": 0.00171,
-        "holdout_alpha": 1.6487,
+        "explore_alpha": 0.5944,
+        "explore_p": 0.001996,
+        "holdout_alpha": 1.369,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12300,9 +12285,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.8279,
-        "explore_p": 5e-06,
-        "holdout_alpha": 2.2578,
+        "explore_alpha": 0.8219,
+        "explore_p": 4e-06,
+        "holdout_alpha": 2.0321,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12314,9 +12299,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 1.1683,
-        "explore_p": 0.000142,
-        "holdout_alpha": 3.1723,
+        "explore_alpha": 1.1524,
+        "explore_p": 0.000146,
+        "holdout_alpha": 2.9932,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12328,9 +12313,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.478,
-        "explore_p": 0.015557,
-        "holdout_alpha": 1.75,
+        "explore_alpha": 0.4647,
+        "explore_p": 0.01743,
+        "holdout_alpha": 1.4781,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12342,9 +12327,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.4925,
-        "explore_p": 0.011944,
-        "holdout_alpha": 1.8592,
+        "explore_alpha": 0.4907,
+        "explore_p": 0.011155,
+        "holdout_alpha": 1.7456,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12356,9 +12341,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.6407,
-        "explore_p": 0.033197,
-        "holdout_alpha": 2.4722,
+        "explore_alpha": 0.6396,
+        "explore_p": 0.03123,
+        "holdout_alpha": 2.6301,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12370,9 +12355,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.5185,
-        "explore_p": 0.008372,
-        "holdout_alpha": 0.9833,
+        "explore_alpha": 0.5108,
+        "explore_p": 0.008539,
+        "holdout_alpha": 0.7792,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12384,9 +12369,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 0.4488,
-        "explore_p": 0.016979,
-        "holdout_alpha": 1.585,
+        "explore_alpha": 0.4388,
+        "explore_p": 0.018191,
+        "holdout_alpha": 1.4039,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12398,9 +12383,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.4485,
-        "explore_p": 0.012531,
-        "holdout_alpha": 1.026,
+        "explore_alpha": 0.4336,
+        "explore_p": 0.014805,
+        "holdout_alpha": 0.9545,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12412,9 +12397,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 1.1344,
+        "explore_alpha": 1.1227,
         "explore_p": 0.0,
-        "holdout_alpha": 2.3595,
+        "holdout_alpha": 2.4053,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12426,9 +12411,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 1.5638,
+        "explore_alpha": 1.5596,
         "explore_p": 1e-06,
-        "holdout_alpha": 3.7466,
+        "holdout_alpha": 4.1301,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12440,9 +12425,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.9017,
+        "explore_alpha": 0.8882,
         "explore_p": 0.0,
-        "holdout_alpha": 1.841,
+        "holdout_alpha": 1.7581,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12454,9 +12439,9 @@
           "universe": "all",
           "horizon": 5
         },
-        "explore_alpha": 1.1695,
+        "explore_alpha": 1.1535,
         "explore_p": 0.0,
-        "holdout_alpha": 2.8458,
+        "holdout_alpha": 2.6073,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12468,9 +12453,9 @@
           "universe": "high_vol",
           "horizon": 5
         },
-        "explore_alpha": 1.767,
+        "explore_alpha": 1.7467,
         "explore_p": 0.0,
-        "holdout_alpha": 4.5173,
+        "holdout_alpha": 4.5938,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       },
       {
@@ -12482,9 +12467,9 @@
           "universe": "low_vol",
           "horizon": 5
         },
-        "explore_alpha": 0.8508,
-        "explore_p": 9e-06,
-        "holdout_alpha": 2.0847,
+        "explore_alpha": 0.8495,
+        "explore_p": 7e-06,
+        "holdout_alpha": 1.8778,
         "status": "CANDIDATE \u2014 awaiting out-of-time confirmation"
       }
     ],
@@ -12492,484 +12477,484 @@
       {
         "id": "Ridge_ta_only_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.437,
-        "p": 0.024076,
-        "acc": 0.532,
-        "n_folds": 76
+        "alpha": 0.4365,
+        "p": 0.022421,
+        "acc": 0.5327,
+        "n_folds": 77
       },
       {
         "id": "Ridge_ta_only_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.7451,
-        "p": 0.01268,
-        "acc": 0.527,
-        "n_folds": 76
+        "alpha": 0.7458,
+        "p": 0.01147,
+        "acc": 0.5282,
+        "n_folds": 77
       },
       {
         "id": "Ridge_ta_only_low_vol_5d",
-        "status": "CANDIDATE",
-        "alpha": 0.3954,
-        "p": 0.044907,
-        "acc": 0.5654,
-        "n_folds": 76
+        "status": "raw_sig_fdr_fail",
+        "alpha": 0.3881,
+        "p": 0.046216,
+        "acc": 0.567,
+        "n_folds": 77
       },
       {
         "id": "Lasso_ta_only_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.4806,
-        "p": 0.013837,
-        "acc": 0.5319,
-        "n_folds": 76
+        "alpha": 0.4697,
+        "p": 0.014937,
+        "acc": 0.5313,
+        "n_folds": 77
       },
       {
         "id": "Lasso_ta_only_high_vol_5d",
-        "status": "rejected",
-        "alpha": 0.5797,
-        "p": 0.051803,
-        "acc": 0.523,
-        "n_folds": 76
+        "status": "raw_sig_fdr_fail",
+        "alpha": 0.5771,
+        "p": 0.049818,
+        "acc": 0.5232,
+        "n_folds": 77
       },
       {
         "id": "Lasso_ta_only_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.3898,
-        "p": 0.036441,
-        "acc": 0.5582,
-        "n_folds": 76
+        "alpha": 0.3756,
+        "p": 0.041685,
+        "acc": 0.5586,
+        "n_folds": 77
       },
       {
         "id": "RandomForest_ta_only_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.9558,
+        "alpha": 0.9457,
         "p": 0.0,
-        "acc": 0.5636,
-        "n_folds": 76
+        "acc": 0.5635,
+        "n_folds": 77
       },
       {
         "id": "RandomForest_ta_only_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 1.4498,
+        "alpha": 1.4346,
         "p": 1e-06,
-        "acc": 0.5573,
-        "n_folds": 76
+        "acc": 0.5571,
+        "n_folds": 77
       },
       {
         "id": "RandomForest_ta_only_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.5881,
-        "p": 0.002648,
-        "acc": 0.5895,
-        "n_folds": 76
+        "alpha": 0.5725,
+        "p": 0.003124,
+        "acc": 0.5885,
+        "n_folds": 77
       },
       {
         "id": "GradientBoosting_ta_only_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.8396,
+        "alpha": 0.8304,
         "p": 5e-06,
-        "acc": 0.5594,
-        "n_folds": 76
+        "acc": 0.5595,
+        "n_folds": 77
       },
       {
         "id": "GradientBoosting_ta_only_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 1.2509,
-        "p": 4.1e-05,
-        "acc": 0.554,
-        "n_folds": 76
+        "alpha": 1.2336,
+        "p": 4.3e-05,
+        "acc": 0.5534,
+        "n_folds": 77
       },
       {
         "id": "GradientBoosting_ta_only_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.4595,
-        "p": 0.017103,
-        "acc": 0.5763,
-        "n_folds": 76
+        "alpha": 0.4481,
+        "p": 0.01868,
+        "acc": 0.5764,
+        "n_folds": 77
       },
       {
         "id": "Ridge_ta_news_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.4416,
-        "p": 0.025345,
+        "alpha": 0.4396,
+        "p": 0.024115,
         "acc": 0.5339,
-        "n_folds": 76
+        "n_folds": 77
       },
       {
         "id": "Ridge_ta_news_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.6465,
-        "p": 0.027561,
-        "acc": 0.524,
-        "n_folds": 76
+        "alpha": 0.6469,
+        "p": 0.025469,
+        "acc": 0.5251,
+        "n_folds": 77
       },
       {
         "id": "Ridge_ta_news_low_vol_5d",
         "status": "raw_sig_fdr_fail",
-        "alpha": 0.3925,
-        "p": 0.047027,
-        "acc": 0.5682,
-        "n_folds": 76
+        "alpha": 0.3855,
+        "p": 0.048221,
+        "acc": 0.5702,
+        "n_folds": 77
       },
       {
         "id": "Lasso_ta_news_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.4867,
-        "p": 0.008155,
-        "acc": 0.532,
-        "n_folds": 76
+        "alpha": 0.4759,
+        "p": 0.008881,
+        "acc": 0.5315,
+        "n_folds": 77
       },
       {
         "id": "Lasso_ta_news_high_vol_5d",
         "status": "rejected",
-        "alpha": 0.5554,
-        "p": 0.060193,
-        "acc": 0.5197,
-        "n_folds": 76
+        "alpha": 0.5513,
+        "p": 0.058757,
+        "acc": 0.5195,
+        "n_folds": 77
       },
       {
         "id": "Lasso_ta_news_low_vol_5d",
-        "status": "raw_sig_fdr_fail",
-        "alpha": 0.3479,
-        "p": 0.046681,
-        "acc": 0.5568,
-        "n_folds": 76
+        "status": "rejected",
+        "alpha": 0.3343,
+        "p": 0.053525,
+        "acc": 0.5572,
+        "n_folds": 77
       },
       {
         "id": "RandomForest_ta_news_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.9226,
+        "alpha": 0.9121,
         "p": 0.0,
-        "acc": 0.5595,
-        "n_folds": 76
+        "acc": 0.5592,
+        "n_folds": 77
       },
       {
         "id": "RandomForest_ta_news_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 1.3858,
-        "p": 5e-06,
-        "acc": 0.5476,
-        "n_folds": 76
+        "alpha": 1.3737,
+        "p": 4e-06,
+        "acc": 0.5471,
+        "n_folds": 77
       },
       {
         "id": "RandomForest_ta_news_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.7438,
-        "p": 8e-05,
-        "acc": 0.603,
-        "n_folds": 76
+        "alpha": 0.7273,
+        "p": 9.9e-05,
+        "acc": 0.6028,
+        "n_folds": 77
       },
       {
         "id": "GradientBoosting_ta_news_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.8061,
-        "p": 3.1e-05,
-        "acc": 0.5519,
-        "n_folds": 76
+        "alpha": 0.8015,
+        "p": 2.7e-05,
+        "acc": 0.5523,
+        "n_folds": 77
       },
       {
         "id": "GradientBoosting_ta_news_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 1.1979,
-        "p": 0.000164,
-        "acc": 0.5411,
-        "n_folds": 76
+        "alpha": 1.1783,
+        "p": 0.000177,
+        "acc": 0.54,
+        "n_folds": 77
       },
       {
         "id": "GradientBoosting_ta_news_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.4573,
-        "p": 0.022099,
-        "acc": 0.5737,
-        "n_folds": 76
+        "alpha": 0.4531,
+        "p": 0.021601,
+        "acc": 0.5757,
+        "n_folds": 77
       },
       {
         "id": "Ridge_ta_fundamental_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.514,
-        "p": 0.008489,
-        "acc": 0.5356,
-        "n_folds": 76
+        "alpha": 0.5184,
+        "p": 0.007172,
+        "acc": 0.536,
+        "n_folds": 77
       },
       {
         "id": "Ridge_ta_fundamental_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.8193,
-        "p": 0.007573,
-        "acc": 0.5356,
-        "n_folds": 76
+        "alpha": 0.8136,
+        "p": 0.007217,
+        "acc": 0.5359,
+        "n_folds": 77
       },
       {
         "id": "Ridge_ta_fundamental_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.451,
-        "p": 0.02268,
-        "acc": 0.5643,
-        "n_folds": 76
+        "alpha": 0.4429,
+        "p": 0.023477,
+        "acc": 0.566,
+        "n_folds": 77
       },
       {
         "id": "Lasso_ta_fundamental_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.4494,
-        "p": 0.023315,
-        "acc": 0.5321,
-        "n_folds": 76
+        "alpha": 0.4409,
+        "p": 0.024294,
+        "acc": 0.5317,
+        "n_folds": 77
       },
       {
         "id": "Lasso_ta_fundamental_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.6293,
-        "p": 0.036588,
-        "acc": 0.5261,
-        "n_folds": 76
+        "alpha": 0.626,
+        "p": 0.035162,
+        "acc": 0.526,
+        "n_folds": 77
       },
       {
         "id": "Lasso_ta_fundamental_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.4407,
-        "p": 0.01442,
-        "acc": 0.5592,
-        "n_folds": 76
+        "alpha": 0.4258,
+        "p": 0.016969,
+        "acc": 0.5595,
+        "n_folds": 77
       },
       {
         "id": "RandomForest_ta_fundamental_all_5d",
         "status": "CANDIDATE",
-        "alpha": 1.2306,
+        "alpha": 1.2177,
         "p": 0.0,
-        "acc": 0.5791,
-        "n_folds": 76
+        "acc": 0.5787,
+        "n_folds": 77
       },
       {
         "id": "RandomForest_ta_fundamental_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 1.8853,
+        "alpha": 1.864,
         "p": 0.0,
-        "acc": 0.5764,
-        "n_folds": 76
+        "acc": 0.5759,
+        "n_folds": 77
       },
       {
         "id": "RandomForest_ta_fundamental_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.8362,
+        "alpha": 0.8231,
         "p": 4e-06,
-        "acc": 0.6127,
-        "n_folds": 76
+        "acc": 0.6128,
+        "n_folds": 77
       },
       {
         "id": "GradientBoosting_ta_fundamental_all_5d",
         "status": "CANDIDATE",
-        "alpha": 1.345,
+        "alpha": 1.3349,
         "p": 0.0,
         "acc": 0.5819,
-        "n_folds": 76
+        "n_folds": 77
       },
       {
         "id": "GradientBoosting_ta_fundamental_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 2.0699,
+        "alpha": 2.0484,
         "p": 0.0,
-        "acc": 0.5924,
-        "n_folds": 76
+        "acc": 0.592,
+        "n_folds": 77
       },
       {
         "id": "GradientBoosting_ta_fundamental_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.8135,
-        "p": 5.9e-05,
-        "acc": 0.606,
-        "n_folds": 76
+        "alpha": 0.8001,
+        "p": 6.5e-05,
+        "acc": 0.6057,
+        "n_folds": 77
       },
       {
         "id": "Ridge_ta_sentiment_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.4501,
-        "p": 0.022469,
+        "alpha": 0.4473,
+        "p": 0.021575,
         "acc": 0.5327,
-        "n_folds": 76
+        "n_folds": 77
       },
       {
         "id": "Ridge_ta_sentiment_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.7642,
-        "p": 0.010639,
-        "acc": 0.5282,
-        "n_folds": 76
+        "alpha": 0.7614,
+        "p": 0.009915,
+        "acc": 0.5293,
+        "n_folds": 77
       },
       {
         "id": "Ridge_ta_sentiment_low_vol_5d",
-        "status": "CANDIDATE",
-        "alpha": 0.3989,
-        "p": 0.044094,
-        "acc": 0.5664,
-        "n_folds": 76
+        "status": "raw_sig_fdr_fail",
+        "alpha": 0.391,
+        "p": 0.04572,
+        "acc": 0.5676,
+        "n_folds": 77
       },
       {
         "id": "Lasso_ta_sentiment_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.49,
-        "p": 0.012226,
-        "acc": 0.5326,
-        "n_folds": 76
+        "alpha": 0.4787,
+        "p": 0.013291,
+        "acc": 0.5319,
+        "n_folds": 77
       },
       {
         "id": "Lasso_ta_sentiment_high_vol_5d",
-        "status": "rejected",
-        "alpha": 0.5811,
-        "p": 0.051155,
-        "acc": 0.5228,
-        "n_folds": 76
+        "status": "raw_sig_fdr_fail",
+        "alpha": 0.578,
+        "p": 0.049408,
+        "acc": 0.5231,
+        "n_folds": 77
       },
       {
         "id": "Lasso_ta_sentiment_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.3934,
-        "p": 0.03362,
-        "acc": 0.5591,
-        "n_folds": 76
+        "alpha": 0.3792,
+        "p": 0.038567,
+        "acc": 0.5594,
+        "n_folds": 77
       },
       {
         "id": "RandomForest_ta_sentiment_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.9524,
+        "alpha": 0.9423,
         "p": 0.0,
-        "acc": 0.5629,
-        "n_folds": 76
+        "acc": 0.5628,
+        "n_folds": 77
       },
       {
         "id": "RandomForest_ta_sentiment_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 1.4565,
+        "alpha": 1.4412,
         "p": 1e-06,
-        "acc": 0.5568,
-        "n_folds": 76
+        "acc": 0.5566,
+        "n_folds": 77
       },
       {
         "id": "RandomForest_ta_sentiment_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.6093,
-        "p": 0.00171,
-        "acc": 0.5928,
-        "n_folds": 76
+        "alpha": 0.5944,
+        "p": 0.001996,
+        "acc": 0.5923,
+        "n_folds": 77
       },
       {
         "id": "GradientBoosting_ta_sentiment_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.8279,
-        "p": 5e-06,
-        "acc": 0.5584,
-        "n_folds": 76
+        "alpha": 0.8219,
+        "p": 4e-06,
+        "acc": 0.5589,
+        "n_folds": 77
       },
       {
         "id": "GradientBoosting_ta_sentiment_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 1.1683,
-        "p": 0.000142,
-        "acc": 0.5564,
-        "n_folds": 76
+        "alpha": 1.1524,
+        "p": 0.000146,
+        "acc": 0.556,
+        "n_folds": 77
       },
       {
         "id": "GradientBoosting_ta_sentiment_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.478,
-        "p": 0.015557,
-        "acc": 0.5726,
-        "n_folds": 76
+        "alpha": 0.4647,
+        "p": 0.01743,
+        "acc": 0.5714,
+        "n_folds": 77
       },
       {
         "id": "Ridge_all_features_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.4925,
-        "p": 0.011944,
-        "acc": 0.5369,
-        "n_folds": 76
+        "alpha": 0.4907,
+        "p": 0.011155,
+        "acc": 0.5366,
+        "n_folds": 77
       },
       {
         "id": "Ridge_all_features_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.6407,
-        "p": 0.033197,
-        "acc": 0.5256,
-        "n_folds": 76
+        "alpha": 0.6396,
+        "p": 0.03123,
+        "acc": 0.5258,
+        "n_folds": 77
       },
       {
         "id": "Ridge_all_features_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.5185,
-        "p": 0.008372,
-        "acc": 0.5764,
-        "n_folds": 76
+        "alpha": 0.5108,
+        "p": 0.008539,
+        "acc": 0.5787,
+        "n_folds": 77
       },
       {
         "id": "Lasso_all_features_all_5d",
         "status": "CANDIDATE",
-        "alpha": 0.4488,
-        "p": 0.016979,
-        "acc": 0.529,
-        "n_folds": 76
+        "alpha": 0.4388,
+        "p": 0.018191,
+        "acc": 0.5284,
+        "n_folds": 77
       },
       {
         "id": "Lasso_all_features_high_vol_5d",
         "status": "rejected",
-        "alpha": 0.5189,
-        "p": 0.084653,
-        "acc": 0.5162,
-        "n_folds": 76
+        "alpha": 0.5152,
+        "p": 0.082866,
+        "acc": 0.5159,
+        "n_folds": 77
       },
       {
         "id": "Lasso_all_features_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.4485,
-        "p": 0.012531,
-        "acc": 0.5561,
-        "n_folds": 76
+        "alpha": 0.4336,
+        "p": 0.014805,
+        "acc": 0.5565,
+        "n_folds": 77
       },
       {
         "id": "RandomForest_all_features_all_5d",
         "status": "CANDIDATE",
-        "alpha": 1.1344,
+        "alpha": 1.1227,
         "p": 0.0,
-        "acc": 0.5698,
-        "n_folds": 76
+        "acc": 0.5694,
+        "n_folds": 77
       },
       {
         "id": "RandomForest_all_features_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 1.5638,
+        "alpha": 1.5596,
         "p": 1e-06,
-        "acc": 0.5572,
-        "n_folds": 76
+        "acc": 0.5579,
+        "n_folds": 77
       },
       {
         "id": "RandomForest_all_features_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.9017,
+        "alpha": 0.8882,
         "p": 0.0,
-        "acc": 0.6185,
-        "n_folds": 76
+        "acc": 0.619,
+        "n_folds": 77
       },
       {
         "id": "GradientBoosting_all_features_all_5d",
         "status": "CANDIDATE",
-        "alpha": 1.1695,
+        "alpha": 1.1535,
         "p": 0.0,
-        "acc": 0.5712,
-        "n_folds": 76
+        "acc": 0.5715,
+        "n_folds": 77
       },
       {
         "id": "GradientBoosting_all_features_high_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 1.767,
+        "alpha": 1.7467,
         "p": 0.0,
-        "acc": 0.5706,
-        "n_folds": 76
+        "acc": 0.5704,
+        "n_folds": 77
       },
       {
         "id": "GradientBoosting_all_features_low_vol_5d",
         "status": "CANDIDATE",
-        "alpha": 0.8508,
-        "p": 9e-06,
-        "acc": 0.6093,
-        "n_folds": 76
+        "alpha": 0.8495,
+        "p": 7e-06,
+        "acc": 0.6103,
+        "n_folds": 77
       }
     ]
   },
-  "updated": "2026-11-13T10:18:24Z"
+  "updated": "2026-11-13T16:04:14Z"
 }
