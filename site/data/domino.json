@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-11-14T14:55:59+00:00",
+  "generated_at": "2026-11-14T19:21:16+00:00",
   "source": {
-    "signal_corr_updated": "2026-11-14T14:55:10Z",
+    "signal_corr_updated": "2026-11-14T19:20:07Z",
     "n_pairs_total": 3484,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,10 +21,75 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "highlights": 1.789,
-    "ground": 4.629
+    "space": 2.312,
+    "highlights": 3.339,
+    "significant": 2.857,
+    "shoppers": 1.767,
+    "brand": 3.313,
+    "owner": 3.013,
+    "launches": 2.655,
+    "operations": 1.537,
+    "memory": 1.695,
+    "ground": 8.612,
+    "david": 4.42,
+    "updates": 1.962,
+    "analyst": 3.909,
+    "conference": 1.722,
+    "storage": 1.989,
+    "experts": 1.506
   },
   "stock_chains": [
+    {
+      "term": "space",
+      "is_active_today": true,
+      "today_z": 2.312,
+      "hop1": {
+        "ticker": "PYPL",
+        "sector": "07 Trade & Services",
+        "entity": "PayPal Holdings, Inc.",
+        "corr": 0.3083,
+        "lag": -3,
+        "hit_rate": 0.714,
+        "direction": "bull",
+        "avg_ret_1d": 0.778,
+        "confidence": 0.438
+      },
+      "hop2": []
+    },
+    {
+      "term": "space",
+      "is_active_today": true,
+      "today_z": 2.312,
+      "hop1": {
+        "ticker": "MRNA",
+        "sector": "03 Life Sciences",
+        "entity": "Moderna, Inc.",
+        "corr": 0.33,
+        "lag": -3,
+        "hit_rate": 0.571,
+        "direction": "bull",
+        "avg_ret_1d": -1.74,
+        "confidence": 0.368
+      },
+      "hop2": []
+    },
+    {
+      "term": "space",
+      "is_active_today": true,
+      "today_z": 2.312,
+      "hop1": {
+        "ticker": "CHTR",
+        "sector": "06 Technology",
+        "entity": "CHARTER COMMUNICATIONS, INC. /MO/",
+        "corr": -0.3046,
+        "lag": -5,
+        "hit_rate": 0.571,
+        "direction": "bear",
+        "avg_ret_1d": 0.298,
+        "confidence": 0.359
+      },
+      "hop2": []
+    },
     {
       "term": "china",
       "is_active_today": false,
@@ -2116,23 +2181,6 @@
           "entity": "INVESCO QQQ TRUST, SERIES 1"
         }
       ]
-    },
-    {
-      "term": "space",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "PYPL",
-        "sector": "07 Trade & Services",
-        "entity": "PayPal Holdings, Inc.",
-        "corr": 0.3083,
-        "lag": -3,
-        "hit_rate": 0.714,
-        "direction": "bull",
-        "avg_ret_1d": 0.778,
-        "confidence": 0.438
-      },
-      "hop2": []
     },
     {
       "term": "leader",
@@ -5246,23 +5294,6 @@
       "hop2": []
     },
     {
-      "term": "space",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "MRNA",
-        "sector": "03 Life Sciences",
-        "entity": "Moderna, Inc.",
-        "corr": 0.33,
-        "lag": -3,
-        "hit_rate": 0.571,
-        "direction": "bull",
-        "avg_ret_1d": -1.74,
-        "confidence": 0.368
-      },
-      "hop2": []
-    },
-    {
       "term": "strait",
       "is_active_today": false,
       "today_z": null,
@@ -5757,23 +5788,6 @@
           "entity": "INVESCO QQQ TRUST, SERIES 1"
         }
       ]
-    },
-    {
-      "term": "space",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CHTR",
-        "sector": "06 Technology",
-        "entity": "CHARTER COMMUNICATIONS, INC. /MO/",
-        "corr": -0.3046,
-        "lag": -5,
-        "hit_rate": 0.571,
-        "direction": "bear",
-        "avg_ret_1d": 0.298,
-        "confidence": 0.359
-      },
-      "hop2": []
     },
     {
       "term": "costs",
@@ -7409,7 +7423,50 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "PYPL",
+      "sector": "07 Trade & Services",
+      "entity": "PayPal Holdings, Inc.",
+      "fund_score": 0.478,
+      "inbound": [
+        {
+          "term": "space",
+          "direction": "bull",
+          "today_z": 2.312,
+          "hit_rate": 0.714
+        }
+      ]
+    },
+    {
+      "ticker": "MRNA",
+      "sector": "03 Life Sciences",
+      "entity": "Moderna, Inc.",
+      "fund_score": 0.126,
+      "inbound": [
+        {
+          "term": "space",
+          "direction": "bull",
+          "today_z": 2.312,
+          "hit_rate": 0.571
+        }
+      ]
+    },
+    {
+      "ticker": "CHTR",
+      "sector": "06 Technology",
+      "entity": "CHARTER COMMUNICATIONS, INC. /MO/",
+      "fund_score": 0.299,
+      "inbound": [
+        {
+          "term": "space",
+          "direction": "bear",
+          "today_z": 2.312,
+          "hit_rate": 0.571
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 243,
