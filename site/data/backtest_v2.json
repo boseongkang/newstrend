@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-14",
+  "updated": "2026-11-15",
   "rules": {
     "stop_pct": -3,
     "take_pct": 5,
@@ -9,6 +9,7 @@
       "ARM",
       "ASML",
       "BAC",
+      "BKNG",
       "BMRN",
       "COIN",
       "COST",
@@ -17,15 +18,12 @@
       "DDOG",
       "DIA",
       "ETSY",
-      "FSLR",
       "GOOGL",
       "HOOD",
-      "ILMN",
       "INTC",
       "INTU",
       "IWM",
       "JPM",
-      "LCID",
       "LRCX",
       "MAR",
       "MCHP",
@@ -36,41 +34,43 @@
       "MU",
       "NFLX",
       "NVDA",
+      "NXPI",
       "ON",
       "PANW",
       "PAYX",
+      "PDD",
       "PEP",
+      "PYPL",
       "QQQ",
       "SEDG",
       "SIRI",
-      "SOFI",
       "TSM",
-      "TXN",
       "USO",
+      "VRTX",
       "ZS"
     ],
     "min_score": 1.5,
     "max_market_rsi": 60
   },
   "summary": {
-    "total_trades": 236,
-    "win_rate": 53.0,
-    "avg_ret": 1.08,
-    "cum_ret": 9.7,
-    "mdd": 14.29,
+    "total_trades": 222,
+    "win_rate": 50.5,
+    "avg_ret": 0.72,
+    "cum_ret": 3.81,
+    "mdd": 17.98,
     "stop_count": 90,
-    "take_count": 61,
-    "timeout_count": 85
+    "take_count": 53,
+    "timeout_count": 79
   },
   "by_ticker": {
     "AAPL": {
       "ticker": "AAPL",
-      "trades": 2,
+      "trades": 1,
       "win_rate": 100.0,
-      "avg_ret": 4.55,
-      "avg_win": 4.55,
+      "avg_ret": 4.18,
+      "avg_win": 4.18,
       "avg_loss": 0,
-      "total_ret": 9.32,
+      "total_ret": 4.18,
       "mdd": 0.0,
       "sharpe": null,
       "stop_count": 0,
@@ -78,25 +78,25 @@
     },
     "ABNB": {
       "ticker": "ABNB",
-      "trades": 11,
-      "win_rate": 63.6,
-      "avg_ret": 2.48,
-      "avg_win": 6.11,
-      "avg_loss": -3.87,
-      "total_ret": 28.88,
+      "trades": 8,
+      "win_rate": 62.5,
+      "avg_ret": 2.31,
+      "avg_win": 6.05,
+      "avg_loss": -3.92,
+      "total_ret": 18.67,
       "mdd": 10.63,
-      "sharpe": 3.08,
-      "stop_count": 3,
-      "take_count": 3
+      "sharpe": null,
+      "stop_count": 2,
+      "take_count": 1
     },
     "ADI": {
       "ticker": "ADI",
-      "trades": 6,
-      "win_rate": 50.0,
-      "avg_ret": 0.94,
+      "trades": 7,
+      "win_rate": 42.9,
+      "avg_ret": 0.43,
       "avg_win": 4.78,
-      "avg_loss": -2.91,
-      "total_ret": 5.14,
+      "avg_loss": -2.83,
+      "total_ret": 2.42,
       "mdd": 7.92,
       "sharpe": null,
       "stop_count": 2,
@@ -117,16 +117,16 @@
     },
     "AMD": {
       "ticker": "AMD",
-      "trades": 15,
-      "win_rate": 40.0,
-      "avg_ret": -1.67,
-      "avg_win": 9.84,
-      "avg_loss": -9.34,
-      "total_ret": -29.02,
-      "mdd": 53.18,
-      "sharpe": -1.04,
-      "stop_count": 9,
-      "take_count": 4
+      "trades": 19,
+      "win_rate": 42.1,
+      "avg_ret": -1.51,
+      "avg_win": 7.97,
+      "avg_loss": -8.4,
+      "total_ret": -31.68,
+      "mdd": 55.82,
+      "sharpe": -1.05,
+      "stop_count": 11,
+      "take_count": 5
     },
     "AMGN": {
       "ticker": "AMGN",
@@ -143,15 +143,15 @@
     },
     "AMZN": {
       "ticker": "AMZN",
-      "trades": 4,
-      "win_rate": 50.0,
-      "avg_ret": -0.47,
-      "avg_win": 2.52,
-      "avg_loss": -3.46,
-      "total_ret": -2.09,
-      "mdd": 6.0,
+      "trades": 3,
+      "win_rate": 33.3,
+      "avg_ret": -2.03,
+      "avg_win": 4.16,
+      "avg_loss": -5.13,
+      "total_ret": -6.26,
+      "mdd": 10.0,
       "sharpe": null,
-      "stop_count": 1,
+      "stop_count": 2,
       "take_count": 1
     },
     "AVGO": {
@@ -180,19 +180,6 @@
       "stop_count": 0,
       "take_count": 0
     },
-    "BKNG": {
-      "ticker": "BKNG",
-      "trades": 13,
-      "win_rate": 38.5,
-      "avg_ret": -0.18,
-      "avg_win": 7.4,
-      "avg_loss": -4.92,
-      "total_ret": -4.96,
-      "mdd": 20.5,
-      "sharpe": -0.19,
-      "stop_count": 8,
-      "take_count": 2
-    },
     "BLK": {
       "ticker": "BLK",
       "trades": 1,
@@ -219,53 +206,40 @@
       "stop_count": 2,
       "take_count": 3
     },
-    "CHTR": {
-      "ticker": "CHTR",
-      "trades": 4,
-      "win_rate": 25.0,
-      "avg_ret": -1.66,
-      "avg_win": 4.47,
-      "avg_loss": -3.7,
-      "total_ret": -6.71,
-      "mdd": 10.7,
-      "sharpe": null,
-      "stop_count": 3,
-      "take_count": 1
-    },
     "CRWD": {
       "ticker": "CRWD",
       "trades": 16,
-      "win_rate": 37.5,
-      "avg_ret": -0.83,
-      "avg_win": 9.91,
-      "avg_loss": -7.28,
-      "total_ret": -18.69,
-      "mdd": 48.78,
-      "sharpe": -0.6,
-      "stop_count": 9,
-      "take_count": 5
+      "win_rate": 43.8,
+      "avg_ret": -0.43,
+      "avg_win": 8.78,
+      "avg_loss": -7.59,
+      "total_ret": -13.2,
+      "mdd": 46.38,
+      "sharpe": -0.31,
+      "stop_count": 8,
+      "take_count": 6
     },
     "CVX": {
       "ticker": "CVX",
-      "trades": 3,
-      "win_rate": 100.0,
-      "avg_ret": 3.32,
+      "trades": 4,
+      "win_rate": 75.0,
+      "avg_ret": 1.58,
       "avg_win": 3.32,
-      "avg_loss": 0,
-      "total_ret": 10.28,
-      "mdd": 0.0,
+      "avg_loss": -3.65,
+      "total_ret": 6.26,
+      "mdd": 3.65,
       "sharpe": null,
-      "stop_count": 0,
+      "stop_count": 1,
       "take_count": 0
     },
     "DOCU": {
       "ticker": "DOCU",
-      "trades": 2,
+      "trades": 3,
       "win_rate": 100.0,
-      "avg_ret": 2.95,
-      "avg_win": 2.95,
+      "avg_ret": 3.36,
+      "avg_win": 3.36,
       "avg_loss": 0,
-      "total_ret": 5.98,
+      "total_ret": 10.41,
       "mdd": 0.0,
       "sharpe": null,
       "stop_count": 0,
@@ -284,43 +258,56 @@
       "stop_count": 0,
       "take_count": 0
     },
-    "ENPH": {
-      "ticker": "ENPH",
-      "trades": 7,
-      "win_rate": 71.4,
-      "avg_ret": 4.86,
-      "avg_win": 8.81,
-      "avg_loss": -5.0,
-      "total_ret": 37.18,
-      "mdd": 9.74,
-      "sharpe": null,
-      "stop_count": 2,
-      "take_count": 5
-    },
     "FTNT": {
       "ticker": "FTNT",
-      "trades": 12,
-      "win_rate": 50.0,
-      "avg_ret": -0.97,
+      "trades": 15,
+      "win_rate": 40.0,
+      "avg_ret": -2.66,
       "avg_win": 5.84,
-      "avg_loss": -7.77,
-      "total_ret": -15.5,
-      "mdd": 39.7,
-      "sharpe": -0.75,
-      "stop_count": 6,
+      "avg_loss": -8.33,
+      "total_ret": -37.99,
+      "mdd": 54.5,
+      "sharpe": -1.97,
+      "stop_count": 8,
       "take_count": 5
     },
     "GLD": {
       "ticker": "GLD",
-      "trades": 2,
-      "win_rate": 100.0,
-      "avg_ret": 3.79,
+      "trades": 3,
+      "win_rate": 66.7,
+      "avg_ret": 0.6,
       "avg_win": 3.79,
-      "avg_loss": 0,
-      "total_ret": 7.72,
-      "mdd": 0.0,
+      "avg_loss": -5.78,
+      "total_ret": 1.49,
+      "mdd": 5.78,
       "sharpe": null,
-      "stop_count": 0,
+      "stop_count": 1,
+      "take_count": 0
+    },
+    "GS": {
+      "ticker": "GS",
+      "trades": 2,
+      "win_rate": 0.0,
+      "avg_ret": -3.91,
+      "avg_win": 0,
+      "avg_loss": -3.91,
+      "total_ret": -7.66,
+      "mdd": 7.66,
+      "sharpe": null,
+      "stop_count": 2,
+      "take_count": 0
+    },
+    "ILMN": {
+      "ticker": "ILMN",
+      "trades": 2,
+      "win_rate": 0.0,
+      "avg_ret": -4.52,
+      "avg_win": 0,
+      "avg_loss": -4.52,
+      "total_ret": -8.84,
+      "mdd": 8.84,
+      "sharpe": null,
+      "stop_count": 2,
       "take_count": 0
     },
     "KDP": {
@@ -338,16 +325,16 @@
     },
     "KLAC": {
       "ticker": "KLAC",
-      "trades": 12,
-      "win_rate": 66.7,
-      "avg_ret": 3.06,
-      "avg_win": 7.9,
-      "avg_loss": -6.63,
-      "total_ret": 39.22,
+      "trades": 14,
+      "win_rate": 64.3,
+      "avg_ret": 2.55,
+      "avg_win": 7.29,
+      "avg_loss": -5.97,
+      "total_ret": 37.79,
       "mdd": 19.73,
-      "sharpe": 2.87,
-      "stop_count": 4,
-      "take_count": 6
+      "sharpe": 2.53,
+      "stop_count": 5,
+      "take_count": 7
     },
     "LYFT": {
       "ticker": "LYFT",
@@ -377,15 +364,15 @@
     },
     "MRNA": {
       "ticker": "MRNA",
-      "trades": 7,
-      "win_rate": 85.7,
-      "avg_ret": 6.29,
+      "trades": 8,
+      "win_rate": 75.0,
+      "avg_ret": 5.06,
       "avg_win": 8.46,
-      "avg_loss": -6.67,
-      "total_ret": 51.31,
-      "mdd": 6.67,
+      "avg_loss": -5.13,
+      "total_ret": 45.88,
+      "mdd": 10.02,
       "sharpe": null,
-      "stop_count": 1,
+      "stop_count": 2,
       "take_count": 3
     },
     "MSFT": {
@@ -401,31 +388,18 @@
       "stop_count": 2,
       "take_count": 3
     },
-    "NXPI": {
-      "ticker": "NXPI",
-      "trades": 2,
-      "win_rate": 50.0,
-      "avg_ret": 0.66,
-      "avg_win": 1.51,
-      "avg_loss": -0.19,
-      "total_ret": 1.32,
-      "mdd": 0.19,
-      "sharpe": null,
-      "stop_count": 0,
-      "take_count": 0
-    },
     "OKTA": {
       "ticker": "OKTA",
-      "trades": 14,
-      "win_rate": 42.9,
-      "avg_ret": 3.37,
-      "avg_win": 14.13,
-      "avg_loss": -4.7,
-      "total_ret": 46.01,
-      "mdd": 28.04,
-      "sharpe": 1.93,
-      "stop_count": 7,
-      "take_count": 5
+      "trades": 11,
+      "win_rate": 45.5,
+      "avg_ret": 4.85,
+      "avg_win": 16.52,
+      "avg_loss": -4.88,
+      "total_ret": 55.42,
+      "mdd": 21.65,
+      "sharpe": 2.51,
+      "stop_count": 5,
+      "take_count": 4
     },
     "ORCL": {
       "ticker": "ORCL",
@@ -439,32 +413,6 @@
       "sharpe": null,
       "stop_count": 2,
       "take_count": 1
-    },
-    "PDD": {
-      "ticker": "PDD",
-      "trades": 1,
-      "win_rate": 0.0,
-      "avg_ret": -1.17,
-      "avg_win": 0,
-      "avg_loss": -1.17,
-      "total_ret": -1.17,
-      "mdd": 1.17,
-      "sharpe": null,
-      "stop_count": 0,
-      "take_count": 0
-    },
-    "PYPL": {
-      "ticker": "PYPL",
-      "trades": 4,
-      "win_rate": 50.0,
-      "avg_ret": 0.65,
-      "avg_win": 6.0,
-      "avg_loss": -4.71,
-      "total_ret": 2.02,
-      "mdd": 9.21,
-      "sharpe": null,
-      "stop_count": 2,
-      "take_count": 2
     },
     "QCOM": {
       "ticker": "QCOM",
@@ -481,25 +429,25 @@
     },
     "RIVN": {
       "ticker": "RIVN",
-      "trades": 13,
-      "win_rate": 53.8,
-      "avg_ret": 3.61,
+      "trades": 12,
+      "win_rate": 58.3,
+      "avg_ret": 4.41,
       "avg_win": 11.51,
-      "avg_loss": -5.61,
-      "total_ret": 49.9,
-      "mdd": 18.55,
-      "sharpe": 2.54,
-      "stop_count": 6,
+      "avg_loss": -5.53,
+      "total_ret": 59.53,
+      "mdd": 13.32,
+      "sharpe": 3.1,
+      "stop_count": 5,
       "take_count": 2
     },
     "SBUX": {
       "ticker": "SBUX",
-      "trades": 7,
-      "win_rate": 57.1,
-      "avg_ret": 0.14,
-      "avg_win": 0.46,
-      "avg_loss": -0.29,
-      "total_ret": 0.98,
+      "trades": 5,
+      "win_rate": 60.0,
+      "avg_ret": 0.19,
+      "avg_win": 0.53,
+      "avg_loss": -0.33,
+      "total_ret": 0.94,
       "mdd": 0.34,
       "sharpe": null,
       "stop_count": 0,
@@ -507,26 +455,39 @@
     },
     "SNPS": {
       "ticker": "SNPS",
-      "trades": 2,
-      "win_rate": 100.0,
-      "avg_ret": 5.71,
+      "trades": 4,
+      "win_rate": 50.0,
+      "avg_ret": 0.68,
       "avg_win": 5.71,
-      "avg_loss": 0,
-      "total_ret": 11.72,
-      "mdd": 0.0,
+      "avg_loss": -4.34,
+      "total_ret": 2.23,
+      "mdd": 8.5,
       "sharpe": null,
-      "stop_count": 0,
+      "stop_count": 2,
       "take_count": 1
+    },
+    "SOFI": {
+      "ticker": "SOFI",
+      "trades": 8,
+      "win_rate": 25.0,
+      "avg_ret": -0.08,
+      "avg_win": 14.54,
+      "avg_loss": -4.95,
+      "total_ret": -3.3,
+      "mdd": 16.95,
+      "sharpe": null,
+      "stop_count": 6,
+      "take_count": 2
     },
     "SPY": {
       "ticker": "SPY",
       "trades": 3,
       "win_rate": 0.0,
-      "avg_ret": -1.36,
+      "avg_ret": -1.12,
       "avg_win": 0,
-      "avg_loss": -1.36,
-      "total_ret": -4.03,
-      "mdd": 4.03,
+      "avg_loss": -1.12,
+      "total_ret": -3.33,
+      "mdd": 3.33,
       "sharpe": null,
       "stop_count": 0,
       "take_count": 0
@@ -544,17 +505,17 @@
       "stop_count": 1,
       "take_count": 0
     },
-    "VRTX": {
-      "ticker": "VRTX",
+    "TXN": {
+      "ticker": "TXN",
       "trades": 4,
       "win_rate": 50.0,
-      "avg_ret": -0.42,
-      "avg_win": 2.65,
-      "avg_loss": -3.5,
-      "total_ret": -1.87,
-      "mdd": 6.87,
+      "avg_ret": -0.41,
+      "avg_win": 1.51,
+      "avg_loss": -2.33,
+      "total_ret": -1.7,
+      "mdd": 4.61,
       "sharpe": null,
-      "stop_count": 1,
+      "stop_count": 0,
       "take_count": 0
     },
     "XOM": {
@@ -573,23 +534,6 @@
   },
   "all_trades": [
     {
-      "date": "2026-08-25",
-      "entry": 309.32,
-      "exit": 324.96,
-      "ret": 4.93,
-      "exit_reason": "TIME_OUT",
-      "hold_days": 5,
-      "action": "STRONG_NEWS",
-      "rsi": 51.0,
-      "score": 2.87,
-      "words": [
-        "nvidia",
-        "court",
-        "service"
-      ],
-      "ticker": "AAPL"
-    },
-    {
       "date": "2026-08-26",
       "entry": 314.58,
       "exit": 328.21,
@@ -598,11 +542,11 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 46.1,
-      "score": 3.61,
+      "score": 2.81,
       "words": [
-        "nvidia",
         "bitcoin",
-        "monday"
+        "monday",
+        "rising"
       ],
       "ticker": "AAPL"
     },
@@ -672,22 +616,6 @@
       "ticker": "ABNB"
     },
     {
-      "date": "2026-10-28",
-      "entry": 167.79,
-      "exit": 170.08,
-      "ret": 3.1,
-      "exit_reason": "TRAILING",
-      "hold_days": 5,
-      "action": "STRONG_NEWS",
-      "rsi": 58.1,
-      "score": 3.28,
-      "words": [
-        "life",
-        "ever"
-      ],
-      "ticker": "ABNB"
-    },
-    {
       "date": "2026-10-29",
       "entry": 164.96,
       "exit": 170.08,
@@ -696,11 +624,11 @@
       "hold_days": 4,
       "action": "STRONG_NEWS",
       "rsi": 53.6,
-      "score": 7.0,
+      "score": 3.38,
       "words": [
-        "washington",
         "wednesday",
-        "money"
+        "fuel",
+        "shows"
       ],
       "ticker": "ABNB"
     },
@@ -713,44 +641,11 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 52.7,
-      "score": 7.45,
+      "score": 4.14,
       "words": [
-        "down",
-        "life",
-        "money"
-      ],
-      "ticker": "ABNB"
-    },
-    {
-      "date": "2026-11-03",
-      "entry": 176.39,
-      "exit": 170.08,
-      "ret": -3.73,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 1,
-      "action": "STRONG_NEWS",
-      "rsi": 53.8,
-      "score": 3.25,
-      "words": [
-        "washington",
-        "money"
-      ],
-      "ticker": "ABNB"
-    },
-    {
-      "date": "2026-11-04",
-      "entry": 170.08,
-      "exit": 187.23,
-      "ret": 9.42,
-      "exit_reason": "TRAILING",
-      "hold_days": 3,
-      "action": "STRONG_NEWS",
-      "rsi": 53.3,
-      "score": 4.8,
-      "words": [
-        "their",
-        "hormuz",
-        "washington"
+        "fuel",
+        "shows",
+        "concerns"
       ],
       "ticker": "ABNB"
     },
@@ -763,10 +658,10 @@
       "hold_days": 5,
       "action": "MEDIUM_NEWS",
       "rsi": 45.2,
-      "score": 2.22,
+      "score": 2.23,
       "words": [
-        "their",
-        "wednesday"
+        "wednesday",
+        "fuel"
       ],
       "ticker": "ABNB"
     },
@@ -779,7 +674,7 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 40.8,
-      "score": 2.84,
+      "score": 2.97,
       "words": [
         "iran",
         "europe"
@@ -795,7 +690,7 @@
       "hold_days": 2,
       "action": "MEDIUM_NEWS",
       "rsi": 44.3,
-      "score": 2.04,
+      "score": 2.07,
       "words": [
         "iran"
       ],
@@ -849,7 +744,22 @@
       "hold_days": 5,
       "action": "MEDIUM_NEWS",
       "rsi": 44.4,
-      "score": 2.04,
+      "score": 2.07,
+      "words": [
+        "iran"
+      ],
+      "ticker": "ADI"
+    },
+    {
+      "date": "2026-11-10",
+      "entry": 403.51,
+      "exit": 393.69,
+      "ret": -2.58,
+      "exit_reason": "TIME_OUT",
+      "hold_days": 5,
+      "action": "MEDIUM_NEWS",
+      "rsi": 45.3,
+      "score": 2.07,
       "words": [
         "iran"
       ],
@@ -877,7 +787,7 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 59.7,
-      "score": 3.35,
+      "score": 2.99,
       "words": [
         "their",
         "energy",
@@ -894,7 +804,7 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 59.1,
-      "score": 4.43,
+      "score": 4.28,
       "words": [
         "trump",
         "first",
@@ -909,10 +819,12 @@
       "ret": -3.23,
       "exit_reason": "STOP_LOSS",
       "hold_days": 5,
-      "action": "MEDIUM_NEWS",
+      "action": "STRONG_NEWS",
       "rsi": 31.2,
-      "score": 2.33,
+      "score": 9.23,
       "words": [
+        "iran",
+        "states",
         "final"
       ],
       "ticker": "AMD"
@@ -924,11 +836,42 @@
       "ret": -3.5,
       "exit_reason": "STOP_LOSS",
       "hold_days": 2,
-      "action": "MEDIUM_NEWS",
+      "action": "STRONG_NEWS",
       "rsi": 45.3,
-      "score": 1.59,
+      "score": 5.08,
       "words": [
+        "iran",
         "monday"
+      ],
+      "ticker": "AMD"
+    },
+    {
+      "date": "2026-08-26",
+      "entry": 476.67,
+      "exit": 459.61,
+      "ret": -3.73,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 3,
+      "action": "STRONG_NEWS",
+      "rsi": 48.9,
+      "score": 2.67,
+      "words": [
+        "nvidia"
+      ],
+      "ticker": "AMD"
+    },
+    {
+      "date": "2026-08-27",
+      "entry": 465.58,
+      "exit": 477.57,
+      "ret": 2.43,
+      "exit_reason": "TIME_OUT",
+      "hold_days": 5,
+      "action": "STRONG_NEWS",
+      "rsi": 46.4,
+      "score": 2.67,
+      "words": [
+        "nvidia"
       ],
       "ticker": "AMD"
     },
@@ -971,7 +914,7 @@
       "hold_days": 5,
       "action": "OVERSOLD",
       "rsi": 23.6,
-      "score": 0,
+      "score": 1.5,
       "words": [],
       "ticker": "AMD"
     },
@@ -984,7 +927,7 @@
       "hold_days": 4,
       "action": "OVERSOLD",
       "rsi": 24.7,
-      "score": 0,
+      "score": 1.5,
       "words": [],
       "ticker": "AMD"
     },
@@ -995,11 +938,12 @@
       "ret": -7.03,
       "exit_reason": "STOP_LOSS",
       "hold_days": 3,
-      "action": "MEDIUM_NEWS",
+      "action": "STRONG_NEWS",
       "rsi": 19.1,
-      "score": 1.86,
+      "score": 3.78,
       "words": [
-        "intelligence"
+        "intelligence",
+        "term"
       ],
       "ticker": "AMD"
     },
@@ -1010,10 +954,11 @@
       "ret": -9.29,
       "exit_reason": "STOP_LOSS",
       "hold_days": 2,
-      "action": "MEDIUM_NEWS",
+      "action": "STRONG_NEWS",
       "rsi": 30.2,
-      "score": 1.86,
+      "score": 3.39,
       "words": [
+        "states",
         "intelligence"
       ],
       "ticker": "AMD"
@@ -1025,11 +970,30 @@
       "ret": -10.12,
       "exit_reason": "STOP_LOSS",
       "hold_days": 1,
-      "action": "MEDIUM_NEWS",
+      "action": "STRONG_NEWS",
       "rsi": 37.6,
-      "score": 1.59,
+      "score": 6.58,
       "words": [
+        "iran",
+        "bank",
         "monday"
+      ],
+      "ticker": "AMD"
+    },
+    {
+      "date": "2026-10-29",
+      "entry": 511.55,
+      "exit": 488.94,
+      "ret": -4.57,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 1,
+      "action": "STRONG_NEWS",
+      "rsi": 41.1,
+      "score": 4.95,
+      "words": [
+        "states",
+        "bank",
+        "term"
       ],
       "ticker": "AMD"
     },
@@ -1040,10 +1004,12 @@
       "ret": -14.75,
       "exit_reason": "STOP_LOSS",
       "hold_days": 3,
-      "action": "MEDIUM_NEWS",
+      "action": "STRONG_NEWS",
       "rsi": 34.5,
-      "score": 1.86,
+      "score": 6.84,
       "words": [
+        "iran",
+        "states",
         "intelligence"
       ],
       "ticker": "AMD"
@@ -1070,10 +1036,11 @@
       "hold_days": 1,
       "action": "STRONG_NEWS",
       "rsi": 33.3,
-      "score": 3.92,
+      "score": 8.94,
       "words": [
-        "monday",
-        "final"
+        "iran",
+        "states",
+        "monday"
       ],
       "ticker": "AMD"
     },
@@ -1084,10 +1051,12 @@
       "ret": 22.86,
       "exit_reason": "TIME_OUT",
       "hold_days": 5,
-      "action": "MEDIUM_NEWS",
+      "action": "STRONG_NEWS",
       "rsi": 34.7,
-      "score": 2.33,
+      "score": 9.23,
       "words": [
+        "iran",
+        "states",
         "final"
       ],
       "ticker": "AMD"
@@ -1099,10 +1068,14 @@
       "ret": 15.24,
       "exit_reason": "TRAILING",
       "hold_days": 5,
-      "action": "OVERSOLD",
+      "action": "STRONG_NEWS",
       "rsi": 29.8,
-      "score": 0,
-      "words": [],
+      "score": 6.87,
+      "words": [
+        "iran",
+        "bank",
+        "term"
+      ],
       "ticker": "AMD"
     },
     {
@@ -1121,6 +1094,23 @@
       "ticker": "AMD"
     },
     {
+      "date": "2026-11-10",
+      "entry": 542.32,
+      "exit": 531.85,
+      "ret": 2.28,
+      "exit_reason": "TRAILING",
+      "hold_days": 2,
+      "action": "STRONG_NEWS",
+      "rsi": 47.0,
+      "score": 7.98,
+      "words": [
+        "iran",
+        "nvidia",
+        "intelligence"
+      ],
+      "ticker": "AMD"
+    },
+    {
       "date": "2026-09-18",
       "entry": 393.16,
       "exit": 418.13,
@@ -1132,36 +1122,6 @@
       "score": 0,
       "words": [],
       "ticker": "AMGN"
-    },
-    {
-      "date": "2026-08-24",
-      "entry": 260.94,
-      "exit": 254.92,
-      "ret": -2.46,
-      "exit_reason": "TIME_OUT",
-      "hold_days": 5,
-      "action": "MEDIUM_NEWS",
-      "rsi": 31.0,
-      "score": 1.73,
-      "words": [
-        "center"
-      ],
-      "ticker": "AMZN"
-    },
-    {
-      "date": "2026-08-26",
-      "entry": 256.26,
-      "exit": 258.9,
-      "ret": 0.88,
-      "exit_reason": "TIME_OUT",
-      "hold_days": 5,
-      "action": "MEDIUM_NEWS",
-      "rsi": 33.4,
-      "score": 1.73,
-      "words": [
-        "center"
-      ],
-      "ticker": "AMZN"
     },
     {
       "date": "2026-08-27",
@@ -1177,6 +1137,21 @@
       "ticker": "AMZN"
     },
     {
+      "date": "2026-10-23",
+      "entry": 250.02,
+      "exit": 235.92,
+      "ret": -5.79,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 4,
+      "action": "MEDIUM_NEWS",
+      "rsi": 46.7,
+      "score": 2.02,
+      "words": [
+        "concerns"
+      ],
+      "ticker": "AMZN"
+    },
+    {
       "date": "2026-10-30",
       "entry": 251.57,
       "exit": 256.86,
@@ -1185,9 +1160,9 @@
       "hold_days": 3,
       "action": "MEDIUM_NEWS",
       "rsi": 32.2,
-      "score": 1.73,
+      "score": 2.02,
       "words": [
-        "center"
+        "concerns"
       ],
       "ticker": "AMZN"
     },
@@ -1200,7 +1175,7 @@
       "hold_days": 5,
       "action": "OVERSOLD",
       "rsi": 23.4,
-      "score": 0.89,
+      "score": 0.66,
       "words": [],
       "ticker": "AVGO"
     },
@@ -1213,7 +1188,7 @@
       "hold_days": 5,
       "action": "OVERSOLD",
       "rsi": 18.3,
-      "score": 0.89,
+      "score": 0.66,
       "words": [],
       "ticker": "AVGO"
     },
@@ -1330,7 +1305,7 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 45.9,
-      "score": 3.92,
+      "score": 3.69,
       "words": [
         "another",
         "spacex",
@@ -1418,212 +1393,13 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 59.5,
-      "score": 3.44,
+      "score": 3.28,
       "words": [
         "iran",
         "amid",
         "black"
       ],
       "ticker": "BIIB"
-    },
-    {
-      "date": "2026-08-25",
-      "entry": 214.8,
-      "exit": 202.56,
-      "ret": -5.85,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 1,
-      "action": "STRONG_NEWS",
-      "rsi": 59.5,
-      "score": 3.64,
-      "words": [
-        "energy",
-        "last",
-        "nvidia"
-      ],
-      "ticker": "BKNG"
-    },
-    {
-      "date": "2026-08-26",
-      "entry": 202.56,
-      "exit": 195.69,
-      "ret": -3.54,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 3,
-      "action": "STRONG_NEWS",
-      "rsi": 58.9,
-      "score": 2.7,
-      "words": [
-        "last",
-        "nvidia",
-        "users"
-      ],
-      "ticker": "BKNG"
-    },
-    {
-      "date": "2026-09-18",
-      "entry": 168.52,
-      "exit": 155.9,
-      "ret": -7.64,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 2,
-      "action": "OVERSOLD",
-      "rsi": 12.5,
-      "score": 0,
-      "words": [],
-      "ticker": "BKNG"
-    },
-    {
-      "date": "2026-09-21",
-      "entry": 164.22,
-      "exit": 155.9,
-      "ret": -5.22,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 1,
-      "action": "OVERSOLD",
-      "rsi": 15.6,
-      "score": 0,
-      "words": [],
-      "ticker": "BKNG"
-    },
-    {
-      "date": "2026-09-22",
-      "entry": 155.9,
-      "exit": 162.91,
-      "ret": 4.68,
-      "exit_reason": "TIME_OUT",
-      "hold_days": 5,
-      "action": "OVERSOLD",
-      "rsi": 15.3,
-      "score": 0,
-      "words": [],
-      "ticker": "BKNG"
-    },
-    {
-      "date": "2026-09-23",
-      "entry": 157.41,
-      "exit": 160.28,
-      "ret": 1.67,
-      "exit_reason": "TIME_OUT",
-      "hold_days": 5,
-      "action": "OVERSOLD",
-      "rsi": 6.1,
-      "score": 0,
-      "words": [],
-      "ticker": "BKNG"
-    },
-    {
-      "date": "2026-09-24",
-      "entry": 163.95,
-      "exit": 159.02,
-      "ret": -3.16,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 5,
-      "action": "OVERSOLD",
-      "rsi": 9.7,
-      "score": 0,
-      "words": [],
-      "ticker": "BKNG"
-    },
-    {
-      "date": "2026-10-28",
-      "entry": 151.24,
-      "exit": 166.54,
-      "ret": 10.98,
-      "exit_reason": "TIME_OUT",
-      "hold_days": 5,
-      "action": "STRONG_NEWS",
-      "rsi": 37.7,
-      "score": 2.62,
-      "words": [
-        "energy",
-        "strikes",
-        "russian"
-      ],
-      "ticker": "BKNG"
-    },
-    {
-      "date": "2026-10-29",
-      "entry": 149.17,
-      "exit": 164.82,
-      "ret": 11.94,
-      "exit_reason": "TRAILING",
-      "hold_days": 5,
-      "action": "STRONG_NEWS",
-      "rsi": 40.3,
-      "score": 4.66,
-      "words": [
-        "energy",
-        "last",
-        "despite"
-      ],
-      "ticker": "BKNG"
-    },
-    {
-      "date": "2026-10-30",
-      "entry": 154.98,
-      "exit": 164.82,
-      "ret": 7.74,
-      "exit_reason": "TRAILING",
-      "hold_days": 4,
-      "action": "STRONG_NEWS",
-      "rsi": 40.2,
-      "score": 2.89,
-      "words": [
-        "despite",
-        "russian",
-        "ever"
-      ],
-      "ticker": "BKNG"
-    },
-    {
-      "date": "2026-11-03",
-      "entry": 169.6,
-      "exit": 162.44,
-      "ret": -4.37,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 3,
-      "action": "STRONG_NEWS",
-      "rsi": 41.9,
-      "score": 4.42,
-      "words": [
-        "energy",
-        "last",
-        "strikes"
-      ],
-      "ticker": "BKNG"
-    },
-    {
-      "date": "2026-11-04",
-      "entry": 166.54,
-      "exit": 156.79,
-      "ret": -6.0,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 4,
-      "action": "STRONG_NEWS",
-      "rsi": 53.0,
-      "score": 2.64,
-      "words": [
-        "last",
-        "digital"
-      ],
-      "ticker": "BKNG"
-    },
-    {
-      "date": "2026-11-09",
-      "entry": 162.4,
-      "exit": 156.79,
-      "ret": -3.6,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 1,
-      "action": "MEDIUM_NEWS",
-      "rsi": 48.9,
-      "score": 1.52,
-      "words": [
-        "nvidia",
-        "saturday"
-      ],
-      "ticker": "BKNG"
     },
     {
       "date": "2026-09-18",
@@ -1705,7 +1481,7 @@
       "hold_days": 4,
       "action": "OVERSOLD",
       "rsi": 24.7,
-      "score": 0,
+      "score": 0.98,
       "words": [],
       "ticker": "CDNS"
     },
@@ -1742,62 +1518,6 @@
       "ticker": "CDNS"
     },
     {
-      "date": "2026-08-26",
-      "entry": 148.32,
-      "exit": 151.38,
-      "ret": 4.47,
-      "exit_reason": "TRAILING",
-      "hold_days": 5,
-      "action": "STRONG_NEWS",
-      "rsi": 50.4,
-      "score": 2.74,
-      "words": [
-        "demand"
-      ],
-      "ticker": "CHTR"
-    },
-    {
-      "date": "2026-09-23",
-      "entry": 117.55,
-      "exit": 112.91,
-      "ret": -4.1,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 1,
-      "action": "OVERSOLD",
-      "rsi": 18.5,
-      "score": 0,
-      "words": [],
-      "ticker": "CHTR"
-    },
-    {
-      "date": "2026-09-24",
-      "entry": 112.91,
-      "exit": 109.29,
-      "ret": -3.36,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 5,
-      "action": "OVERSOLD",
-      "rsi": 22.1,
-      "score": 0,
-      "words": [],
-      "ticker": "CHTR"
-    },
-    {
-      "date": "2026-10-22",
-      "entry": 109.82,
-      "exit": 105.98,
-      "ret": -3.65,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 1,
-      "action": "STRONG_NEWS",
-      "rsi": 50.1,
-      "score": 2.74,
-      "words": [
-        "demand"
-      ],
-      "ticker": "CHTR"
-    },
-    {
       "date": "2026-08-24",
       "entry": 191.1,
       "exit": 184.78,
@@ -1806,11 +1526,10 @@
       "hold_days": 1,
       "action": "STRONG_NEWS",
       "rsi": 36.8,
-      "score": 5.4,
+      "score": 5.58,
       "words": [
-        "their",
         "tech",
-        "support"
+        "administration"
       ],
       "ticker": "CRWD"
     },
@@ -1823,11 +1542,10 @@
       "hold_days": 2,
       "action": "STRONG_NEWS",
       "rsi": 33.4,
-      "score": 5.25,
+      "score": 3.1,
       "words": [
-        "their",
-        "energy",
-        "tech"
+        "demand",
+        "technology"
       ],
       "ticker": "CRWD"
     },
@@ -1840,11 +1558,27 @@
       "hold_days": 1,
       "action": "STRONG_NEWS",
       "rsi": 33.6,
-      "score": 7.96,
+      "score": 10.41,
       "words": [
-        "energy",
         "power",
-        "tech"
+        "tech",
+        "nvidia"
+      ],
+      "ticker": "CRWD"
+    },
+    {
+      "date": "2026-08-27",
+      "entry": 218.4,
+      "exit": 215.07,
+      "ret": 1.97,
+      "exit_reason": "TRAILING",
+      "hold_days": 2,
+      "action": "STRONG_NEWS",
+      "rsi": 57.0,
+      "score": 3.76,
+      "words": [
+        "nvidia",
+        "administration"
       ],
       "ticker": "CRWD"
     },
@@ -1857,7 +1591,7 @@
       "hold_days": 5,
       "action": "MEDIUM_NEWS",
       "rsi": 29.9,
-      "score": 2.03,
+      "score": 1.68,
       "words": [
         "next"
       ],
@@ -1872,10 +1606,10 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 35.3,
-      "score": 8.34,
+      "score": 7.69,
       "words": [
-        "hormuz",
         "power",
+        "next",
         "next"
       ],
       "ticker": "CRWD"
@@ -1887,27 +1621,13 @@
       "ret": 10.6,
       "exit_reason": "TRAILING",
       "hold_days": 4,
-      "action": "MEDIUM_NEWS",
-      "rsi": 34.9,
-      "score": 2.08,
-      "words": [
-        "next"
-      ],
-      "ticker": "CRWD"
-    },
-    {
-      "date": "2026-10-26",
-      "entry": 265.27,
-      "exit": 253.78,
-      "ret": -4.48,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 3,
       "action": "STRONG_NEWS",
-      "rsi": 42.6,
-      "score": 3.44,
+      "rsi": 34.9,
+      "score": 4.21,
       "words": [
-        "hormuz",
-        "support"
+        "next",
+        "intelligence",
+        "thursday"
       ],
       "ticker": "CRWD"
     },
@@ -1918,11 +1638,12 @@
       "ret": -5.48,
       "exit_reason": "STOP_LOSS",
       "hold_days": 2,
-      "action": "MEDIUM_NEWS",
+      "action": "STRONG_NEWS",
       "rsi": 49.9,
-      "score": 2.03,
+      "score": 2.84,
       "words": [
-        "next"
+        "next",
+        "intelligence"
       ],
       "ticker": "CRWD"
     },
@@ -1935,11 +1656,11 @@
       "hold_days": 2,
       "action": "STRONG_NEWS",
       "rsi": 52.3,
-      "score": 7.9,
+      "score": 5.54,
       "words": [
         "next",
         "next",
-        "tech"
+        "revenue"
       ],
       "ticker": "CRWD"
     },
@@ -1952,11 +1673,11 @@
       "hold_days": 4,
       "action": "STRONG_NEWS",
       "rsi": 43.7,
-      "score": 10.96,
+      "score": 15.07,
       "words": [
-        "energy",
         "next",
-        "next"
+        "next",
+        "growth"
       ],
       "ticker": "CRWD"
     },
@@ -1969,11 +1690,11 @@
       "hold_days": 3,
       "action": "STRONG_NEWS",
       "rsi": 45.5,
-      "score": 14.12,
+      "score": 7.37,
       "words": [
-        "energy",
-        "hormuz",
-        "next"
+        "next",
+        "next",
+        "earnings"
       ],
       "ticker": "CRWD"
     },
@@ -1984,11 +1705,12 @@
       "ret": -11.84,
       "exit_reason": "STOP_LOSS",
       "hold_days": 2,
-      "action": "MEDIUM_NEWS",
+      "action": "STRONG_NEWS",
       "rsi": 44.5,
-      "score": 1.68,
+      "score": 3.7,
       "words": [
-        "power"
+        "power",
+        "technology"
       ],
       "ticker": "CRWD"
     },
@@ -2001,11 +1723,11 @@
       "hold_days": 1,
       "action": "STRONG_NEWS",
       "rsi": 49.9,
-      "score": 8.71,
+      "score": 7.78,
       "words": [
-        "hormuz",
         "next",
-        "growth"
+        "growth",
+        "revenue"
       ],
       "ticker": "CRWD"
     },
@@ -2018,11 +1740,11 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 51.7,
-      "score": 9.94,
+      "score": 7.19,
       "words": [
-        "energy",
         "next",
-        "next"
+        "next",
+        "tech"
       ],
       "ticker": "CRWD"
     },
@@ -2035,11 +1757,11 @@
       "hold_days": 4,
       "action": "STRONG_NEWS",
       "rsi": 46.3,
-      "score": 10.93,
+      "score": 6.42,
       "words": [
-        "their",
-        "hormuz",
-        "power"
+        "power",
+        "next",
+        "next"
       ],
       "ticker": "CRWD"
     },
@@ -2052,13 +1774,30 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 46.5,
-      "score": 10.1,
+      "score": 7.02,
       "words": [
-        "their",
-        "hormuz",
-        "next"
+        "next",
+        "administration",
+        "nasdaq"
       ],
       "ticker": "CRWD"
+    },
+    {
+      "date": "2026-11-04",
+      "entry": 221.04,
+      "exit": 213.29,
+      "ret": -3.65,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 1,
+      "action": "STRONG_NEWS",
+      "rsi": 50.4,
+      "score": 2.61,
+      "words": [
+        "china",
+        "house",
+        "power"
+      ],
+      "ticker": "CVX"
     },
     {
       "date": "2026-11-05",
@@ -2069,10 +1808,11 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 45.4,
-      "score": 2.54,
+      "score": 4.52,
       "words": [
         "house",
-        "white"
+        "house",
+        "next"
       ],
       "ticker": "CVX"
     },
@@ -2085,11 +1825,11 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 39.5,
-      "score": 4.54,
+      "score": 6.46,
       "words": [
         "donald",
         "house",
-        "white"
+        "house"
       ],
       "ticker": "CVX"
     },
@@ -2102,7 +1842,7 @@
       "hold_days": 5,
       "action": "MEDIUM_NEWS",
       "rsi": 38.0,
-      "score": 1.62,
+      "score": 1.57,
       "words": [
         "white"
       ],
@@ -2117,11 +1857,11 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 57.3,
-      "score": 6.32,
+      "score": 5.62,
       "words": [
         "investors",
-        "financial",
-        "demand"
+        "rising",
+        "august"
       ],
       "ticker": "DOCU"
     },
@@ -2134,11 +1874,26 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 52.5,
-      "score": 6.4,
+      "score": 5.15,
       "words": [
         "next",
-        "trade",
-        "higher"
+        "senate",
+        "policy"
+      ],
+      "ticker": "DOCU"
+    },
+    {
+      "date": "2026-11-09",
+      "entry": 76.81,
+      "exit": 80.13,
+      "ret": 4.18,
+      "exit_reason": "TIME_OUT",
+      "hold_days": 5,
+      "action": "MEDIUM_NEWS",
+      "rsi": 45.5,
+      "score": 1.68,
+      "words": [
+        "policy"
       ],
       "ticker": "DOCU"
     },
@@ -2157,107 +1912,6 @@
     },
     {
       "date": "2026-08-24",
-      "entry": 37.16,
-      "exit": 37.25,
-      "ret": 2.78,
-      "exit_reason": "TRAILING",
-      "hold_days": 3,
-      "action": "STRONG_NEWS",
-      "rsi": 34.9,
-      "score": 2.77,
-      "words": [
-        "economy"
-      ],
-      "ticker": "ENPH"
-    },
-    {
-      "date": "2026-08-26",
-      "entry": 39.25,
-      "exit": 37.25,
-      "ret": -5.25,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 1,
-      "action": "STRONG_NEWS",
-      "rsi": 41.1,
-      "score": 3.94,
-      "words": [
-        "nvidia"
-      ],
-      "ticker": "ENPH"
-    },
-    {
-      "date": "2026-08-27",
-      "entry": 37.25,
-      "exit": 35.54,
-      "ret": -4.74,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 2,
-      "action": "STRONG_NEWS",
-      "rsi": 42.7,
-      "score": 3.94,
-      "words": [
-        "nvidia"
-      ],
-      "ticker": "ENPH"
-    },
-    {
-      "date": "2026-09-01",
-      "entry": 35.52,
-      "exit": 36.72,
-      "ret": 6.2,
-      "exit_reason": "TRAILING",
-      "hold_days": 4,
-      "action": "OVERSOLD",
-      "rsi": 28.3,
-      "score": 0,
-      "words": [],
-      "ticker": "ENPH"
-    },
-    {
-      "date": "2026-10-28",
-      "entry": 25.2,
-      "exit": 28.85,
-      "ret": 13.4,
-      "exit_reason": "TRAILING",
-      "hold_days": 5,
-      "action": "OVERSOLD",
-      "rsi": 24.2,
-      "score": 0,
-      "words": [],
-      "ticker": "ENPH"
-    },
-    {
-      "date": "2026-10-29",
-      "entry": 25.28,
-      "exit": 28.85,
-      "ret": 13.04,
-      "exit_reason": "TRAILING",
-      "hold_days": 4,
-      "action": "STRONG_NEWS",
-      "rsi": 26.0,
-      "score": 2.77,
-      "words": [
-        "economy"
-      ],
-      "ticker": "ENPH"
-    },
-    {
-      "date": "2026-10-30",
-      "entry": 28.38,
-      "exit": 28.85,
-      "ret": 8.62,
-      "exit_reason": "TRAILING",
-      "hold_days": 3,
-      "action": "STRONG_NEWS",
-      "rsi": 28.8,
-      "score": 2.77,
-      "words": [
-        "economy"
-      ],
-      "ticker": "ENPH"
-    },
-    {
-      "date": "2026-08-24",
       "entry": 154.16,
       "exit": 166.0,
       "ret": 9.73,
@@ -2265,11 +1919,11 @@
       "hold_days": 3,
       "action": "STRONG_NEWS",
       "rsi": 30.5,
-      "score": 4.9,
+      "score": 2.74,
       "words": [
-        "iran",
         "china",
-        "last"
+        "investors",
+        "down"
       ],
       "ticker": "FTNT"
     },
@@ -2282,11 +1936,11 @@
       "hold_days": 2,
       "action": "STRONG_NEWS",
       "rsi": 31.7,
-      "score": 3.8,
+      "score": 2.63,
       "words": [
-        "iran",
-        "first",
-        "down"
+        "china",
+        "states",
+        "tech"
       ],
       "ticker": "FTNT"
     },
@@ -2307,6 +1961,22 @@
       "ticker": "FTNT"
     },
     {
+      "date": "2026-10-21",
+      "entry": 173.43,
+      "exit": 138.3,
+      "ret": -20.4,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 5,
+      "action": "MEDIUM_NEWS",
+      "rsi": 43.5,
+      "score": 1.87,
+      "words": [
+        "power",
+        "next"
+      ],
+      "ticker": "FTNT"
+    },
+    {
       "date": "2026-10-27",
       "entry": 181.25,
       "exit": 138.3,
@@ -2315,10 +1985,28 @@
       "hold_days": 1,
       "action": "MEDIUM_NEWS",
       "rsi": 44.1,
-      "score": 2.01,
+      "score": 2.26,
       "words": [
         "china",
-        "last"
+        "next",
+        "states"
+      ],
+      "ticker": "FTNT"
+    },
+    {
+      "date": "2026-10-28",
+      "entry": 138.3,
+      "exit": 131.3,
+      "ret": -5.21,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 2,
+      "action": "STRONG_NEWS",
+      "rsi": 42.4,
+      "score": 3.39,
+      "words": [
+        "china",
+        "next",
+        "states"
       ],
       "ticker": "FTNT"
     },
@@ -2331,11 +2019,11 @@
       "hold_days": 2,
       "action": "STRONG_NEWS",
       "rsi": 18.2,
-      "score": 4.16,
+      "score": 5.0,
       "words": [
-        "first",
         "china",
-        "investors"
+        "investors",
+        "down"
       ],
       "ticker": "FTNT"
     },
@@ -2348,11 +2036,11 @@
       "hold_days": 3,
       "action": "STRONG_NEWS",
       "rsi": 17.9,
-      "score": 6.24,
+      "score": 4.98,
       "words": [
-        "iran",
-        "first",
-        "their"
+        "crypto",
+        "down",
+        "next"
       ],
       "ticker": "FTNT"
     },
@@ -2363,12 +2051,11 @@
       "ret": -4.82,
       "exit_reason": "STOP_LOSS",
       "hold_days": 3,
-      "action": "STRONG_NEWS",
+      "action": "MEDIUM_NEWS",
       "rsi": 17.6,
-      "score": 3.12,
+      "score": 2.27,
       "words": [
         "china",
-        "last",
         "power"
       ],
       "ticker": "FTNT"
@@ -2382,11 +2069,11 @@
       "hold_days": 1,
       "action": "STRONG_NEWS",
       "rsi": 18.3,
-      "score": 3.21,
+      "score": 4.8,
       "words": [
-        "iran",
-        "their",
-        "july"
+        "china",
+        "july",
+        "next"
       ],
       "ticker": "FTNT"
     },
@@ -2399,11 +2086,11 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 20.5,
-      "score": 5.41,
+      "score": 3.92,
       "words": [
-        "iran",
-        "first",
-        "their"
+        "china",
+        "july",
+        "next"
       ],
       "ticker": "FTNT"
     },
@@ -2416,11 +2103,11 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 22.5,
-      "score": 5.48,
+      "score": 3.46,
       "words": [
-        "iran",
-        "first",
-        "their"
+        "down",
+        "power",
+        "next"
       ],
       "ticker": "FTNT"
     },
@@ -2431,13 +2118,12 @@
       "ret": 4.1,
       "exit_reason": "TRAILING",
       "hold_days": 4,
-      "action": "STRONG_NEWS",
+      "action": "MEDIUM_NEWS",
       "rsi": 20.5,
-      "score": 3.79,
+      "score": 1.63,
       "words": [
-        "first",
-        "last",
-        "investors"
+        "investors",
+        "tech"
       ],
       "ticker": "FTNT"
     },
@@ -2455,6 +2141,22 @@
       "ticker": "FTNT"
     },
     {
+      "date": "2026-11-10",
+      "entry": 129.26,
+      "exit": 125.91,
+      "ret": -2.74,
+      "exit_reason": "TIME_OUT",
+      "hold_days": 5,
+      "action": "MEDIUM_NEWS",
+      "rsi": 19.2,
+      "score": 1.84,
+      "words": [
+        "china",
+        "down"
+      ],
+      "ticker": "FTNT"
+    },
+    {
       "date": "2026-10-29",
       "entry": 357.72,
       "exit": 371.66,
@@ -2463,7 +2165,7 @@
       "hold_days": 5,
       "action": "OVERSOLD",
       "rsi": 29.3,
-      "score": 0,
+      "score": 1.08,
       "words": [],
       "ticker": "GLD"
     },
@@ -2481,6 +2183,78 @@
       "ticker": "GLD"
     },
     {
+      "date": "2026-11-06",
+      "entry": 375.77,
+      "exit": 354.63,
+      "ret": -5.78,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 3,
+      "action": "MEDIUM_NEWS",
+      "rsi": 43.1,
+      "score": 1.75,
+      "words": [
+        "trump",
+        "future",
+        "european"
+      ],
+      "ticker": "GLD"
+    },
+    {
+      "date": "2026-09-18",
+      "entry": 959.39,
+      "exit": 923.29,
+      "ret": -3.91,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 3,
+      "action": "OVERSOLD",
+      "rsi": 28.1,
+      "score": 0,
+      "words": [],
+      "ticker": "GS"
+    },
+    {
+      "date": "2026-09-24",
+      "entry": 935.45,
+      "exit": 900.36,
+      "ret": -3.9,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 3,
+      "action": "OVERSOLD",
+      "rsi": 20.8,
+      "score": 0,
+      "words": [],
+      "ticker": "GS"
+    },
+    {
+      "date": "2026-11-06",
+      "entry": 219.14,
+      "exit": 208.96,
+      "ret": -4.8,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 3,
+      "action": "MEDIUM_NEWS",
+      "rsi": 35.4,
+      "score": 2.16,
+      "words": [
+        "future",
+        "term"
+      ],
+      "ticker": "ILMN"
+    },
+    {
+      "date": "2026-11-10",
+      "entry": 217.88,
+      "exit": 208.96,
+      "ret": -4.24,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 1,
+      "action": "OVERSOLD",
+      "rsi": 29.3,
+      "score": 0,
+      "words": [],
+      "ticker": "ILMN"
+    },
+    {
       "date": "2026-08-26",
       "entry": 31.88,
       "exit": 32.88,
@@ -2489,11 +2263,11 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 57.7,
-      "score": 6.21,
+      "score": 3.45,
       "words": [
         "down",
         "amid",
-        "demand"
+        "services"
       ],
       "ticker": "KDP"
     },
@@ -2571,7 +2345,7 @@
       "hold_days": 5,
       "action": "OVERSOLD",
       "rsi": 21.2,
-      "score": 1.29,
+      "score": 1.26,
       "words": [],
       "ticker": "KLAC"
     },
@@ -2610,7 +2384,7 @@
       "hold_days": 3,
       "action": "OVERSOLD",
       "rsi": 11.8,
-      "score": 1.29,
+      "score": 1.26,
       "words": [],
       "ticker": "KLAC"
     },
@@ -2641,17 +2415,49 @@
       "ticker": "KLAC"
     },
     {
+      "date": "2026-10-30",
+      "entry": 158.85,
+      "exit": 153.8,
+      "ret": -3.33,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 2,
+      "action": "STRONG_NEWS",
+      "rsi": 33.6,
+      "score": 3.72,
+      "words": [
+        "hormuz",
+        "model"
+      ],
+      "ticker": "KLAC"
+    },
+    {
       "date": "2026-11-04",
       "entry": 136.2,
       "exit": 160.34,
       "ret": 14.02,
       "exit_reason": "TIME_OUT",
       "hold_days": 5,
-      "action": "STRONG_NEWS",
+      "action": "MEDIUM_NEWS",
       "rsi": 37.0,
-      "score": 2.59,
+      "score": 2.4,
       "words": [
         "apple"
+      ],
+      "ticker": "KLAC"
+    },
+    {
+      "date": "2026-11-06",
+      "entry": 150.64,
+      "exit": 149.07,
+      "ret": 2.38,
+      "exit_reason": "TRAILING",
+      "hold_days": 4,
+      "action": "STRONG_NEWS",
+      "rsi": 31.0,
+      "score": 3.72,
+      "words": [
+        "hormuz",
+        "model"
       ],
       "ticker": "KLAC"
     },
@@ -2703,11 +2509,11 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 57.9,
-      "score": 3.25,
+      "score": 3.85,
       "words": [
-        "trade",
-        "plans",
-        "strikes"
+        "iran",
+        "bank",
+        "trade"
       ],
       "ticker": "LYFT"
     },
@@ -2720,7 +2526,7 @@
       "hold_days": 4,
       "action": "STRONG_NEWS",
       "rsi": 49.5,
-      "score": 10.75,
+      "score": 8.31,
       "words": [
         "investors",
         "tech",
@@ -2737,11 +2543,11 @@
       "hold_days": 3,
       "action": "STRONG_NEWS",
       "rsi": 48.3,
-      "score": 6.09,
+      "score": 9.75,
       "words": [
+        "iran",
         "crypto",
-        "revenue",
-        "demand"
+        "revenue"
       ],
       "ticker": "LYFT"
     },
@@ -2754,11 +2560,11 @@
       "hold_days": 2,
       "action": "STRONG_NEWS",
       "rsi": 50.8,
-      "score": 2.93,
+      "score": 3.58,
       "words": [
-        "demand",
-        "tuesday",
-        "strikes"
+        "iran",
+        "reported",
+        "demand"
       ],
       "ticker": "LYFT"
     },
@@ -2769,12 +2575,13 @@
       "ret": -0.57,
       "exit_reason": "TIME_OUT",
       "hold_days": 5,
-      "action": "MEDIUM_NEWS",
+      "action": "STRONG_NEWS",
       "rsi": 47.5,
-      "score": 1.8,
+      "score": 2.99,
       "words": [
         "investors",
-        "tuesday"
+        "court",
+        "thursday"
       ],
       "ticker": "LYFT"
     },
@@ -2787,7 +2594,7 @@
       "hold_days": 3,
       "action": "MEDIUM_NEWS",
       "rsi": 34.1,
-      "score": 1.76,
+      "score": 1.71,
       "words": [
         "despite"
       ],
@@ -2854,7 +2661,7 @@
       "hold_days": 4,
       "action": "MEDIUM_NEWS",
       "rsi": 29.5,
-      "score": 2.07,
+      "score": 2.02,
       "words": [
         "support",
         "despite"
@@ -2870,7 +2677,7 @@
       "hold_days": 3,
       "action": "MEDIUM_NEWS",
       "rsi": 20.5,
-      "score": 1.76,
+      "score": 1.71,
       "words": [
         "despite"
       ],
@@ -2924,7 +2731,7 @@
       "hold_days": 5,
       "action": "MEDIUM_NEWS",
       "rsi": 21.2,
-      "score": 2.07,
+      "score": 2.02,
       "words": [
         "support",
         "despite"
@@ -2940,11 +2747,10 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 53.8,
-      "score": 4.77,
+      "score": 4.01,
       "words": [
         "iran",
-        "live",
-        "plan"
+        "live"
       ],
       "ticker": "MRNA"
     },
@@ -2957,10 +2763,9 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 49.4,
-      "score": 3.69,
+      "score": 2.93,
       "words": [
-        "deal",
-        "plan"
+        "deal"
       ],
       "ticker": "MRNA"
     },
@@ -2973,7 +2778,7 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 51.3,
-      "score": 9.11,
+      "score": 13.08,
       "words": [
         "iran",
         "crypto",
@@ -2990,7 +2795,7 @@
       "hold_days": 4,
       "action": "STRONG_NEWS",
       "rsi": 51.4,
-      "score": 12.03,
+      "score": 12.02,
       "words": [
         "iran",
         "deal",
@@ -3007,7 +2812,7 @@
       "hold_days": 3,
       "action": "STRONG_NEWS",
       "rsi": 51.7,
-      "score": 12.08,
+      "score": 11.73,
       "words": [
         "iran",
         "their",
@@ -3024,7 +2829,7 @@
       "hold_days": 2,
       "action": "STRONG_NEWS",
       "rsi": 57.1,
-      "score": 7.73,
+      "score": 11.5,
       "words": [
         "iran",
         "their",
@@ -3041,11 +2846,27 @@
       "hold_days": 1,
       "action": "STRONG_NEWS",
       "rsi": 58.3,
-      "score": 8.9,
+      "score": 12.68,
       "words": [
         "their",
         "hormuz",
         "down"
+      ],
+      "ticker": "MRNA"
+    },
+    {
+      "date": "2026-11-10",
+      "entry": 248.1,
+      "exit": 239.58,
+      "ret": -3.59,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 1,
+      "action": "STRONG_NEWS",
+      "rsi": 52.4,
+      "score": 3.75,
+      "words": [
+        "iran",
+        "sale"
       ],
       "ticker": "MRNA"
     },
@@ -3058,11 +2879,9 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 45.4,
-      "score": 4.28,
+      "score": 2.54,
       "words": [
-        "economy",
-        "whether",
-        "largest"
+        "whether"
       ],
       "ticker": "MSFT"
     },
@@ -3075,10 +2894,9 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 49.6,
-      "score": 6.14,
+      "score": 4.41,
       "words": [
         "supply",
-        "economy",
         "whether"
       ],
       "ticker": "MSFT"
@@ -3090,9 +2908,9 @@
       "ret": 0.85,
       "exit_reason": "TIME_OUT",
       "hold_days": 5,
-      "action": "MEDIUM_NEWS",
+      "action": "STRONG_NEWS",
       "rsi": 46.3,
-      "score": 1.99,
+      "score": 2.54,
       "words": [
         "whether"
       ],
@@ -3107,9 +2925,8 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 55.2,
-      "score": 4.11,
+      "score": 3.15,
       "words": [
-        "sales",
         "interest"
       ],
       "ticker": "MSFT"
@@ -3123,11 +2940,11 @@
       "hold_days": 4,
       "action": "STRONG_NEWS",
       "rsi": 43.9,
-      "score": 8.42,
+      "score": 6.16,
       "words": [
-        "revenue",
         "supply",
-        "sales"
+        "whether",
+        "profit"
       ],
       "ticker": "MSFT"
     },
@@ -3140,11 +2957,11 @@
       "hold_days": 3,
       "action": "STRONG_NEWS",
       "rsi": 35.7,
-      "score": 8.46,
+      "score": 5.26,
       "words": [
-        "revenue",
-        "economy",
-        "sales"
+        "interest",
+        "profit",
+        "concerns"
       ],
       "ticker": "MSFT"
     },
@@ -3157,9 +2974,8 @@
       "hold_days": 4,
       "action": "STRONG_NEWS",
       "rsi": 56.6,
-      "score": 5.46,
+      "score": 3.86,
       "words": [
-        "revenue",
         "supply",
         "research"
       ],
@@ -3174,42 +2990,12 @@
       "hold_days": 2,
       "action": "STRONG_NEWS",
       "rsi": 49.4,
-      "score": 2.91,
+      "score": 3.46,
       "words": [
         "black",
         "whether"
       ],
       "ticker": "MSFT"
-    },
-    {
-      "date": "2026-08-24",
-      "entry": 222.48,
-      "exit": 222.4,
-      "ret": -0.19,
-      "exit_reason": "TIME_OUT",
-      "hold_days": 5,
-      "action": "MEDIUM_NEWS",
-      "rsi": 30.1,
-      "score": 2.23,
-      "words": [
-        "iran"
-      ],
-      "ticker": "NXPI"
-    },
-    {
-      "date": "2026-08-25",
-      "entry": 224.76,
-      "exit": 228.5,
-      "ret": 1.51,
-      "exit_reason": "TIME_OUT",
-      "hold_days": 5,
-      "action": "MEDIUM_NEWS",
-      "rsi": 38.9,
-      "score": 2.23,
-      "words": [
-        "iran"
-      ],
-      "ticker": "NXPI"
     },
     {
       "date": "2026-08-24",
@@ -3220,11 +3006,11 @@
       "hold_days": 3,
       "action": "STRONG_NEWS",
       "rsi": 29.7,
-      "score": 7.78,
+      "score": 7.22,
       "words": [
-        "their",
-        "last",
-        "administration"
+        "administration",
+        "making",
+        "european"
       ],
       "ticker": "OKTA"
     },
@@ -3235,11 +3021,11 @@
       "ret": 31.1,
       "exit_reason": "TRAILING",
       "hold_days": 2,
-      "action": "MEDIUM_NEWS",
+      "action": "STRONG_NEWS",
       "rsi": 26.0,
-      "score": 2.17,
+      "score": 2.61,
       "words": [
-        "court"
+        "making"
       ],
       "ticker": "OKTA"
     },
@@ -3265,27 +3051,29 @@
       "ret": 8.69,
       "exit_reason": "TIME_OUT",
       "hold_days": 5,
-      "action": "MEDIUM_NEWS",
+      "action": "STRONG_NEWS",
       "rsi": 39.5,
-      "score": 1.71,
+      "score": 3.47,
       "words": [
-        "next"
+        "spacex",
+        "european"
       ],
       "ticker": "OKTA"
     },
     {
-      "date": "2026-10-21",
-      "entry": 204.29,
+      "date": "2026-10-22",
+      "entry": 199.74,
       "exit": 218.73,
-      "ret": 6.97,
+      "ret": 9.41,
       "exit_reason": "TRAILING",
-      "hold_days": 5,
+      "hold_days": 4,
       "action": "STRONG_NEWS",
-      "rsi": 45.1,
-      "score": 3.4,
+      "rsi": 45.7,
+      "score": 9.52,
       "words": [
-        "next",
-        "despite"
+        "real",
+        "spacex",
+        "interest"
       ],
       "ticker": "OKTA"
     },
@@ -3296,44 +3084,12 @@
       "ret": -5.25,
       "exit_reason": "STOP_LOSS",
       "hold_days": 4,
-      "action": "MEDIUM_NEWS",
+      "action": "STRONG_NEWS",
       "rsi": 38.7,
-      "score": 1.69,
+      "score": 2.99,
       "words": [
-        "despite"
-      ],
-      "ticker": "OKTA"
-    },
-    {
-      "date": "2026-10-27",
-      "entry": 225.54,
-      "exit": 218.73,
-      "ret": -3.17,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 1,
-      "action": "STRONG_NEWS",
-      "rsi": 52.2,
-      "score": 2.95,
-      "words": [
-        "last",
-        "next"
-      ],
-      "ticker": "OKTA"
-    },
-    {
-      "date": "2026-10-28",
-      "entry": 218.73,
-      "exit": 207.79,
-      "ret": -5.15,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 1,
-      "action": "STRONG_NEWS",
-      "rsi": 52.6,
-      "score": 6.39,
-      "words": [
-        "next",
-        "court",
-        "despite"
+        "spacex",
+        "case"
       ],
       "ticker": "OKTA"
     },
@@ -3346,11 +3102,11 @@
       "hold_days": 1,
       "action": "STRONG_NEWS",
       "rsi": 43.2,
-      "score": 13.78,
+      "score": 10.6,
       "words": [
-        "next",
-        "revenue",
-        "administration"
+        "administration",
+        "network",
+        "real"
       ],
       "ticker": "OKTA"
     },
@@ -3363,11 +3119,10 @@
       "hold_days": 1,
       "action": "STRONG_NEWS",
       "rsi": 40.8,
-      "score": 9.82,
+      "score": 3.89,
       "words": [
-        "their",
-        "next",
-        "revenue"
+        "interest",
+        "case"
       ],
       "ticker": "OKTA"
     },
@@ -3378,30 +3133,12 @@
       "ret": -8.22,
       "exit_reason": "STOP_LOSS",
       "hold_days": 1,
-      "action": "STRONG_NEWS",
+      "action": "MEDIUM_NEWS",
       "rsi": 39.0,
-      "score": 5.27,
+      "score": 1.69,
       "words": [
-        "their",
-        "next",
-        "network"
-      ],
-      "ticker": "OKTA"
-    },
-    {
-      "date": "2026-11-04",
-      "entry": 174.36,
-      "exit": 178.36,
-      "ret": 4.62,
-      "exit_reason": "TRAILING",
-      "hold_days": 5,
-      "action": "STRONG_NEWS",
-      "rsi": 41.3,
-      "score": 10.21,
-      "words": [
-        "their",
-        "their",
-        "next"
+        "network",
+        "reports"
       ],
       "ticker": "OKTA"
     },
@@ -3414,11 +3151,10 @@
       "hold_days": 4,
       "action": "STRONG_NEWS",
       "rsi": 43.7,
-      "score": 6.31,
+      "score": 3.03,
       "words": [
-        "their",
-        "their",
-        "next"
+        "released",
+        "european"
       ],
       "ticker": "OKTA"
     },
@@ -3431,11 +3167,10 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 40.2,
-      "score": 10.04,
+      "score": 4.61,
       "words": [
-        "their",
-        "last",
-        "friday"
+        "administration",
+        "european"
       ],
       "ticker": "OKTA"
     },
@@ -3446,9 +3181,9 @@
       "ret": 9.35,
       "exit_reason": "TRAILING",
       "hold_days": 5,
-      "action": "STRONG_NEWS",
+      "action": "MEDIUM_NEWS",
       "rsi": 36.7,
-      "score": 2.57,
+      "score": 2.3,
       "words": [
         "sales"
       ],
@@ -3461,9 +3196,9 @@
       "ret": -8.05,
       "exit_reason": "STOP_LOSS",
       "hold_days": 1,
-      "action": "STRONG_NEWS",
+      "action": "MEDIUM_NEWS",
       "rsi": 49.0,
-      "score": 2.57,
+      "score": 2.3,
       "words": [
         "sales"
       ],
@@ -3476,82 +3211,13 @@
       "ret": -5.32,
       "exit_reason": "STOP_LOSS",
       "hold_days": 3,
-      "action": "STRONG_NEWS",
+      "action": "MEDIUM_NEWS",
       "rsi": 46.8,
-      "score": 2.57,
+      "score": 2.3,
       "words": [
         "sales"
       ],
       "ticker": "ORCL"
-    },
-    {
-      "date": "2026-09-18",
-      "entry": 79.29,
-      "exit": 78.49,
-      "ret": -1.17,
-      "exit_reason": "TIME_OUT",
-      "hold_days": 5,
-      "action": "OVERSOLD",
-      "rsi": 27.0,
-      "score": 0,
-      "words": [],
-      "ticker": "PDD"
-    },
-    {
-      "date": "2026-08-31",
-      "entry": 52.4,
-      "exit": 54.96,
-      "ret": 6.51,
-      "exit_reason": "TRAILING",
-      "hold_days": 3,
-      "action": "OVERSOLD",
-      "rsi": 27.6,
-      "score": 0,
-      "words": [],
-      "ticker": "PYPL"
-    },
-    {
-      "date": "2026-09-01",
-      "entry": 54.67,
-      "exit": 52.17,
-      "ret": -4.72,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 4,
-      "action": "OVERSOLD",
-      "rsi": 28.8,
-      "score": 0,
-      "words": [],
-      "ticker": "PYPL"
-    },
-    {
-      "date": "2026-09-24",
-      "entry": 55.04,
-      "exit": 52.53,
-      "ret": -4.71,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 3,
-      "action": "OVERSOLD",
-      "rsi": 27.9,
-      "score": 0,
-      "words": [],
-      "ticker": "PYPL"
-    },
-    {
-      "date": "2026-10-29",
-      "entry": 56.56,
-      "exit": 58.97,
-      "ret": 5.5,
-      "exit_reason": "TRAILING",
-      "hold_days": 4,
-      "action": "STRONG_NEWS",
-      "rsi": 59.9,
-      "score": 4.12,
-      "words": [
-        "washington",
-        "wall",
-        "street"
-      ],
-      "ticker": "PYPL"
     },
     {
       "date": "2026-10-19",
@@ -3622,7 +3288,7 @@
       "hold_days": 3,
       "action": "OVERSOLD",
       "rsi": 10.8,
-      "score": 0,
+      "score": 1.17,
       "words": [],
       "ticker": "RIVN"
     },
@@ -3646,10 +3312,14 @@
       "ret": -4.32,
       "exit_reason": "STOP_LOSS",
       "hold_days": 1,
-      "action": "OVERSOLD",
+      "action": "STRONG_NEWS",
       "rsi": 19.5,
-      "score": 0.84,
-      "words": [],
+      "score": 4.3,
+      "words": [
+        "russia",
+        "supply",
+        "spacex"
+      ],
       "ticker": "RIVN"
     },
     {
@@ -3661,10 +3331,11 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 19.8,
-      "score": 4.65,
+      "score": 5.76,
       "words": [
         "hormuz",
-        "despite"
+        "despite",
+        "spacex"
       ],
       "ticker": "RIVN"
     },
@@ -3677,7 +3348,7 @@
       "hold_days": 5,
       "action": "OVERSOLD",
       "rsi": 10.6,
-      "score": 1.06,
+      "score": 0.44,
       "words": [],
       "ticker": "RIVN"
     },
@@ -3703,7 +3374,7 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 12.2,
-      "score": 7.89,
+      "score": 7.94,
       "words": [
         "last",
         "hormuz",
@@ -3720,7 +3391,7 @@
       "hold_days": 5,
       "action": "OVERSOLD",
       "rsi": 11.7,
-      "score": 0,
+      "score": 0.35,
       "words": [],
       "ticker": "RIVN"
     },
@@ -3733,7 +3404,7 @@
       "hold_days": 4,
       "action": "STRONG_NEWS",
       "rsi": 16.7,
-      "score": 4.38,
+      "score": 5.76,
       "words": [
         "states",
         "reported",
@@ -3750,11 +3421,11 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 28.1,
-      "score": 7.81,
+      "score": 5.62,
       "words": [
         "states",
-        "friday",
-        "reported"
+        "reported",
+        "court"
       ],
       "ticker": "RIVN"
     },
@@ -3767,28 +3438,11 @@
       "hold_days": 1,
       "action": "STRONG_NEWS",
       "rsi": 54.7,
-      "score": 3.16,
+      "score": 2.94,
       "words": [
         "july",
         "states",
         "reported"
-      ],
-      "ticker": "RIVN"
-    },
-    {
-      "date": "2026-11-05",
-      "entry": 13.34,
-      "exit": 12.55,
-      "ret": -6.04,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 5,
-      "action": "STRONG_NEWS",
-      "rsi": 56.0,
-      "score": 4.92,
-      "words": [
-        "their",
-        "despite",
-        "model"
       ],
       "ticker": "RIVN"
     },
@@ -3801,47 +3455,13 @@
       "hold_days": 3,
       "action": "STRONG_NEWS",
       "rsi": 59.5,
-      "score": 10.64,
+      "score": 7.26,
       "words": [
-        "their",
         "last",
-        "hormuz"
+        "hormuz",
+        "issues"
       ],
       "ticker": "RIVN"
-    },
-    {
-      "date": "2026-08-24",
-      "entry": 106.23,
-      "exit": 106.15,
-      "ret": -0.23,
-      "exit_reason": "TIME_OUT",
-      "hold_days": 5,
-      "action": "STRONG_NEWS",
-      "rsi": 56.3,
-      "score": 2.93,
-      "words": [
-        "energy",
-        "help",
-        "help"
-      ],
-      "ticker": "SBUX"
-    },
-    {
-      "date": "2026-08-25",
-      "entry": 106.27,
-      "exit": 106.72,
-      "ret": 0.27,
-      "exit_reason": "TIME_OUT",
-      "hold_days": 5,
-      "action": "STRONG_NEWS",
-      "rsi": 49.9,
-      "score": 2.71,
-      "words": [
-        "energy",
-        "down",
-        "help"
-      ],
-      "ticker": "SBUX"
     },
     {
       "date": "2026-09-18",
@@ -3930,9 +3550,173 @@
       "hold_days": 4,
       "action": "OVERSOLD",
       "rsi": 27.8,
-      "score": 0.26,
+      "score": 0.32,
       "words": [],
       "ticker": "SNPS"
+    },
+    {
+      "date": "2026-10-29",
+      "entry": 468.76,
+      "exit": 446.28,
+      "ret": -4.95,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 4,
+      "action": "MEDIUM_NEWS",
+      "rsi": 43.8,
+      "score": 2.16,
+      "words": [
+        "sales",
+        "ever"
+      ],
+      "ticker": "SNPS"
+    },
+    {
+      "date": "2026-10-30",
+      "entry": 472.83,
+      "exit": 455.92,
+      "ret": -3.73,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 1,
+      "action": "MEDIUM_NEWS",
+      "rsi": 41.5,
+      "score": 2.16,
+      "words": [
+        "sales",
+        "ever"
+      ],
+      "ticker": "SNPS"
+    },
+    {
+      "date": "2026-08-25",
+      "entry": 18.77,
+      "exit": 18.06,
+      "ret": -3.93,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 2,
+      "action": "STRONG_NEWS",
+      "rsi": 50.8,
+      "score": 5.09,
+      "words": [
+        "iran",
+        "court",
+        "fuel"
+      ],
+      "ticker": "SOFI"
+    },
+    {
+      "date": "2026-09-24",
+      "entry": 16.58,
+      "exit": 15.93,
+      "ret": -4.07,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 1,
+      "action": "OVERSOLD",
+      "rsi": 28.4,
+      "score": 0,
+      "words": [],
+      "ticker": "SOFI"
+    },
+    {
+      "date": "2026-10-21",
+      "entry": 14.82,
+      "exit": 14.3,
+      "ret": -3.69,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 1,
+      "action": "STRONG_NEWS",
+      "rsi": 39.0,
+      "score": 6.46,
+      "words": [
+        "intelligence",
+        "fuel",
+        "policy"
+      ],
+      "ticker": "SOFI"
+    },
+    {
+      "date": "2026-10-22",
+      "entry": 14.3,
+      "exit": 16.91,
+      "ret": 15.39,
+      "exit_reason": "TRAILING",
+      "hold_days": 5,
+      "action": "STRONG_NEWS",
+      "rsi": 39.0,
+      "score": 4.59,
+      "words": [
+        "intelligence",
+        "real",
+        "fuel"
+      ],
+      "ticker": "SOFI"
+    },
+    {
+      "date": "2026-10-23",
+      "entry": 14.52,
+      "exit": 16.91,
+      "ret": 13.68,
+      "exit_reason": "TRAILING",
+      "hold_days": 4,
+      "action": "STRONG_NEWS",
+      "rsi": 32.6,
+      "score": 4.85,
+      "words": [
+        "fuel",
+        "case",
+        "concerns"
+      ],
+      "ticker": "SOFI"
+    },
+    {
+      "date": "2026-10-28",
+      "entry": 17.39,
+      "exit": 16.61,
+      "ret": -4.65,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 3,
+      "action": "STRONG_NEWS",
+      "rsi": 59.5,
+      "score": 4.53,
+      "words": [
+        "iran",
+        "court",
+        "intelligence"
+      ],
+      "ticker": "SOFI"
+    },
+    {
+      "date": "2026-11-05",
+      "entry": 16.32,
+      "exit": 15.29,
+      "ret": -6.49,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 5,
+      "action": "STRONG_NEWS",
+      "rsi": 58.6,
+      "score": 5.57,
+      "words": [
+        "iran",
+        "financial",
+        "fuel"
+      ],
+      "ticker": "SOFI"
+    },
+    {
+      "date": "2026-11-10",
+      "entry": 16.38,
+      "exit": 15.29,
+      "ret": -6.85,
+      "exit_reason": "STOP_LOSS",
+      "hold_days": 2,
+      "action": "STRONG_NEWS",
+      "rsi": 56.4,
+      "score": 2.81,
+      "words": [
+        "iran",
+        "last",
+        "concerns"
+      ],
+      "ticker": "SOFI"
     },
     {
       "date": "2026-08-24",
@@ -3943,11 +3727,28 @@
       "hold_days": 5,
       "action": "MEDIUM_NEWS",
       "rsi": 42.1,
-      "score": 1.94,
+      "score": 1.57,
       "words": [
-        "iran",
         "last",
-        "investors"
+        "investors",
+        "administration"
+      ],
+      "ticker": "SPY"
+    },
+    {
+      "date": "2026-10-22",
+      "entry": 759.55,
+      "exit": 757.4,
+      "ret": -0.43,
+      "exit_reason": "TIME_OUT",
+      "hold_days": 5,
+      "action": "MEDIUM_NEWS",
+      "rsi": 45.1,
+      "score": 1.51,
+      "words": [
+        "investors",
+        "bank",
+        "despite"
       ],
       "ticker": "SPY"
     },
@@ -3960,28 +3761,11 @@
       "hold_days": 5,
       "action": "MEDIUM_NEWS",
       "rsi": 41.3,
-      "score": 2.24,
+      "score": 1.59,
       "words": [
         "investors",
         "bank",
-        "reported"
-      ],
-      "ticker": "SPY"
-    },
-    {
-      "date": "2026-10-30",
-      "entry": 759.84,
-      "exit": 752.27,
-      "ret": -1.15,
-      "exit_reason": "TIME_OUT",
-      "hold_days": 5,
-      "action": "MEDIUM_NEWS",
-      "rsi": 33.7,
-      "score": 1.58,
-      "words": [
-        "iran",
-        "crypto",
-        "support"
+        "administration"
       ],
       "ticker": "SPY"
     },
@@ -3994,11 +3778,11 @@
       "hold_days": 4,
       "action": "STRONG_NEWS",
       "rsi": 59.9,
-      "score": 3.4,
+      "score": 3.45,
       "words": [
         "administration",
         "economy",
-        "europe"
+        "term"
       ],
       "ticker": "TSLA"
     },
@@ -4011,64 +3795,67 @@
       "hold_days": 5,
       "action": "MEDIUM_NEWS",
       "rsi": 48.4,
-      "score": 2.42,
+      "score": 1.58,
       "words": [
-        "administration",
-        "europe"
+        "administration"
       ],
       "ticker": "TSLA"
     },
     {
-      "date": "2026-09-18",
-      "entry": 510.72,
-      "exit": 527.67,
-      "ret": 3.17,
+      "date": "2026-08-24",
+      "entry": 258.53,
+      "exit": 253.34,
+      "ret": -2.16,
+      "exit_reason": "TIME_OUT",
+      "hold_days": 5,
+      "action": "MEDIUM_NEWS",
+      "rsi": 26.2,
+      "score": 2.41,
+      "words": [
+        "iran"
+      ],
+      "ticker": "TXN"
+    },
+    {
+      "date": "2026-08-25",
+      "entry": 260.95,
+      "exit": 254.8,
+      "ret": -2.5,
+      "exit_reason": "TIME_OUT",
+      "hold_days": 5,
+      "action": "MEDIUM_NEWS",
+      "rsi": 30.2,
+      "score": 2.41,
+      "words": [
+        "iran"
+      ],
+      "ticker": "TXN"
+    },
+    {
+      "date": "2026-09-01",
+      "entry": 254.8,
+      "exit": 258.82,
+      "ret": 1.43,
       "exit_reason": "TIME_OUT",
       "hold_days": 5,
       "action": "OVERSOLD",
-      "rsi": 29.7,
+      "rsi": 28.2,
       "score": 0,
       "words": [],
-      "ticker": "VRTX"
+      "ticker": "TXN"
     },
     {
-      "date": "2026-09-21",
-      "entry": 514.99,
-      "exit": 526.73,
-      "ret": 2.13,
+      "date": "2026-09-04",
+      "entry": 258.92,
+      "exit": 263.43,
+      "ret": 1.59,
       "exit_reason": "TIME_OUT",
       "hold_days": 5,
       "action": "OVERSOLD",
-      "rsi": 29.3,
+      "rsi": 29.8,
       "score": 0,
       "words": [],
-      "ticker": "VRTX"
-    },
-    {
-      "date": "2026-09-23",
-      "entry": 522.38,
-      "exit": 506.74,
-      "ret": -3.14,
-      "exit_reason": "TIME_OUT",
-      "hold_days": 5,
-      "action": "OVERSOLD",
-      "rsi": 23.0,
-      "score": 0,
-      "words": [],
-      "ticker": "VRTX"
-    },
-    {
-      "date": "2026-09-24",
-      "entry": 526.19,
-      "exit": 506.74,
-      "ret": -3.85,
-      "exit_reason": "STOP_LOSS",
-      "hold_days": 4,
-      "action": "OVERSOLD",
-      "rsi": 27.7,
-      "score": 0,
-      "words": [],
-      "ticker": "VRTX"
+      "ticker": "TXN"
     },
     {
       "date": "2026-11-04",
@@ -4077,13 +3864,12 @@
       "ret": -4.06,
       "exit_reason": "STOP_LOSS",
       "hold_days": 1,
-      "action": "STRONG_NEWS",
+      "action": "MEDIUM_NEWS",
       "rsi": 47.8,
-      "score": 3.39,
+      "score": 1.51,
       "words": [
         "their",
-        "power",
-        "live"
+        "final"
       ],
       "ticker": "XOM"
     },
@@ -4096,11 +3882,11 @@
       "hold_days": 5,
       "action": "STRONG_NEWS",
       "rsi": 41.5,
-      "score": 3.91,
+      "score": 5.83,
       "words": [
         "their",
-        "white",
-        "security"
+        "security",
+        "ukraine"
       ],
       "ticker": "XOM"
     },
@@ -4111,13 +3897,12 @@
       "ret": 3.22,
       "exit_reason": "TIME_OUT",
       "hold_days": 5,
-      "action": "STRONG_NEWS",
+      "action": "MEDIUM_NEWS",
       "rsi": 36.4,
-      "score": 3.05,
+      "score": 1.71,
       "words": [
         "donald",
-        "white",
-        "white"
+        "service"
       ],
       "ticker": "XOM"
     }
