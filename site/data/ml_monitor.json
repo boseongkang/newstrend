@@ -25019,10 +25019,30 @@
       "hash_ok": true,
       "ood": true,
       "unfreeze_ready": false
+    },
+    {
+      "updated": "2026-11-17T04:09:17Z",
+      "n_pred_total": 21060,
+      "n_evaluated": 19606,
+      "models": {
+        "RandomForest": {
+          "alpha": -0.398,
+          "p": 0.008,
+          "n": 6835
+        },
+        "GradientBoosting": {
+          "alpha": -0.418,
+          "p": 0.007,
+          "n": 6835
+        }
+      },
+      "hash_ok": true,
+      "ood": true,
+      "unfreeze_ready": false
     }
   ],
   "latest": {
-    "updated": "2026-11-16T22:25:19Z",
+    "updated": "2026-11-17T04:09:17Z",
     "baseline_date": "2026-05-25",
     "model_hashes": {
       "RandomForest": "a2947618dfbb05bd",
@@ -25034,10 +25054,10 @@
       "n_dates": 25
     },
     "prediction_log": {
-      "total": 20880,
+      "total": 21060,
       "evaluated": 19606,
-      "pending": 1274,
-      "new_today": 0,
+      "pending": 1454,
+      "new_today": 180,
       "newly_evaluated": 0
     },
     "forward": {
@@ -25139,12 +25159,12 @@
       "confidence_note": "UNTESTED REGIME: NEUTRAL was 0.0% of training data. Predictions unreliable."
     },
     "bias_monitor": {
-      "n_total_predictions": 20880,
+      "n_total_predictions": 21060,
       "n_evaluated": 19606,
-      "long_ratio": 0.847,
+      "long_ratio": 0.848,
       "long_bias_warning": true,
       "top_sector": "Technology",
-      "top_sector_pct": 42.4,
+      "top_sector_pct": 42.1,
       "sector_concentration_warning": false,
       "calibration": {
         "accuracy": 0.4966,
@@ -25156,7 +25176,7 @@
     "alerts": [
       "REGIME CHANGE: non-RISK-ON data detected in forward predictions",
       "OOD: UNTESTED REGIME: NEUTRAL was 0.0% of training data. Predictions unreliable.",
-      "BIAS: long_ratio=84.7% \u2014 model may be systematically long"
+      "BIAS: long_ratio=84.8% \u2014 model may be systematically long"
     ],
     "unfreeze_check": {
       "forward_alpha_significant": false,
@@ -25165,5 +25185,5 @@
     },
     "label": "ADVISORY ONLY \u00b7 paper trading \u00b7 unverified \u00b7 single-regime baseline"
   },
-  "updated": "2026-11-16T22:25:19Z"
+  "updated": "2026-11-17T04:09:17Z"
 }
