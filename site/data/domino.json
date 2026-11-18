@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-11-18T04:38:28+00:00",
+  "generated_at": "2026-11-18T14:22:38+00:00",
   "source": {
-    "signal_corr_updated": "2026-11-18T04:37:26Z",
-    "n_pairs_total": 3404,
+    "signal_corr_updated": "2026-11-18T14:21:45Z",
+    "n_pairs_total": 3405,
     "n_dates": 180,
     "prices_tickers": 90,
     "trends_terms": 600
@@ -20,7 +20,11 @@
     },
     "active_z_threshold": 1.5
   },
-  "active_terms": {},
+  "active_terms": {
+    "amazon": 1.9,
+    "australia": 2.242,
+    "geopolitical": 1.963
+  },
   "stock_chains": [
     {
       "term": "china",
@@ -1288,6 +1292,31 @@
         "confidence": 0.473
       },
       "hop2": []
+    },
+    {
+      "term": "anthropic",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "MDB",
+        "sector": "06 Technology",
+        "entity": "MongoDB, Inc.",
+        "corr": -0.3283,
+        "lag": -5,
+        "hit_rate": 0.75,
+        "direction": "bear",
+        "avg_ret_1d": 1.101,
+        "confidence": 0.473
+      },
+      "hop2": [
+        {
+          "ticker": "DDOG",
+          "ticker_corr": 0.523,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Datadog, Inc."
+        }
+      ]
     },
     {
       "term": "june",
@@ -5012,59 +5041,6 @@
           "implied_dir": "bear",
           "sector": null,
           "entity": "INVESCO QQQ TRUST, SERIES 1"
-        }
-      ]
-    },
-    {
-      "term": "rise",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "AMAT",
-        "sector": "04 Manufacturing",
-        "entity": "APPLIED MATERIALS INC /DE",
-        "corr": -0.3248,
-        "lag": -2,
-        "hit_rate": 0.571,
-        "direction": "bear",
-        "avg_ret_1d": 0.732,
-        "confidence": 0.366
-      },
-      "hop2": [
-        {
-          "ticker": "LRCX",
-          "ticker_corr": 0.893,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "LAM RESEARCH CORP"
-        },
-        {
-          "ticker": "ASML",
-          "ticker_corr": 0.806,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "ASML HOLDING NV"
-        },
-        {
-          "ticker": "TSM",
-          "ticker_corr": 0.693,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.678,
-          "implied_dir": "bear",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
-        },
-        {
-          "ticker": "MU",
-          "ticker_corr": 0.677,
-          "implied_dir": "bear",
-          "sector": "04 Manufacturing",
-          "entity": "MICRON TECHNOLOGY INC"
         }
       ]
     },
