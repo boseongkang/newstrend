@@ -4394,7 +4394,7 @@
       "calibration_runs_total": 947
     },
     {
-      "updated": "2026-11-19T22:22:57Z",
+      "updated": "2026-11-20T02:34:39Z",
       "week": "2026-W46",
       "week_summary": {
         "week": "2026-W46",
@@ -4477,16 +4477,6 @@
           "reason": "|gap|=5.46% \u00b7 dir_acc=18%"
         },
         {
-          "dimension": "by_sector",
-          "bucket": "Technology",
-          "n": 5769,
-          "avg_abs_gap_pct": 6.849,
-          "avg_signed_gap_pct": 0.18,
-          "directional_acc": 0.255,
-          "severity": 11.749,
-          "reason": "|gap|=6.85% \u00b7 dir_acc=26%"
-        },
-        {
           "dimension": "by_volatility",
           "bucket": "high",
           "n": 7720,
@@ -4515,6 +4505,16 @@
           "directional_acc": 0.246,
           "severity": 10.307,
           "reason": "|gap|=5.23% \u00b7 dir_acc=25%"
+        },
+        {
+          "dimension": "by_sector",
+          "bucket": "Unknown",
+          "n": 11535,
+          "avg_abs_gap_pct": 5.684,
+          "avg_signed_gap_pct": -0.042,
+          "directional_acc": 0.278,
+          "severity": 10.124,
+          "reason": "|gap|=5.68% \u00b7 dir_acc=28%"
         }
       ],
       "improvement_plan": [
@@ -4524,13 +4524,6 @@
           "issue": "|gap|=5.46% (n=7498); system predicts lower than reality.",
           "suggestion": "Re-check HOLD action mapping to predicted_return heuristic.",
           "severity": 11.937
-        },
-        {
-          "id": "sector_Technology",
-          "target": "sector Technology",
-          "issue": "|gap|=6.85% across this sector (n=5769).",
-          "suggestion": "Audit the pillar that's largest contributor to Technology-sector calls; defer untested signals.",
-          "severity": 11.749
         },
         {
           "id": "vol_high",
@@ -4552,6 +4545,13 @@
           "issue": "|gap|=5.23% in this band (n=6086).",
           "suggestion": "Add confidence-conditional position sizing \u2014 smaller bets in this band.",
           "severity": 10.307
+        },
+        {
+          "id": "sector_Unknown",
+          "target": "sector Unknown",
+          "issue": "|gap|=5.68% across this sector (n=11535).",
+          "suggestion": "Audit the pillar that's largest contributor to Unknown-sector calls; defer untested signals.",
+          "severity": 10.124
         },
         {
           "id": "pillar_grad_health_score",
@@ -4582,8 +4582,8 @@
         "direction": "worsened",
         "improvement_pct": -13.36
       },
-      "calibration_runs_total": 950
+      "calibration_runs_total": 951
     }
   ],
-  "updated": "2026-11-19T22:22:57Z"
+  "updated": "2026-11-20T02:34:39Z"
 }
