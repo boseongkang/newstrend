@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-11-22T16:31:59+00:00",
+  "generated_at": "2026-11-22T22:39:47+00:00",
   "source": {
-    "signal_corr_updated": "2026-11-22T16:30:50Z",
+    "signal_corr_updated": "2026-11-22T22:38:35Z",
     "n_pairs_total": 3423,
     "n_dates": 180,
     "prices_tickers": 90,
@@ -21,19 +21,72 @@
     "active_z_threshold": 1.5
   },
   "active_terms": {
-    "attack": 3.694,
-    "driver": 1.684,
-    "coming": 1.958,
-    "drone": 3.034,
-    "systems": 1.764,
-    "software": 2.841,
-    "agents": 2.491,
-    "critical": 2.08,
-    "gaming": 4.118,
-    "scale": 2.746,
-    "images": 2.081
+    "model": 1.613,
+    "attack": 5.219,
+    "driver": 1.962,
+    "drone": 4.108,
+    "coming": 2.645,
+    "systems": 2.399,
+    "water": 1.733,
+    "target": 1.5,
+    "something": 1.559,
+    "software": 3.705,
+    "agents": 2.94,
+    "critical": 2.775,
+    "gaming": 5.196,
+    "scale": 3.532,
+    "travel": 1.655,
+    "trying": 1.678,
+    "response": 1.716,
+    "images": 2.315
   },
   "stock_chains": [
+    {
+      "term": "model",
+      "is_active_today": true,
+      "today_z": 1.613,
+      "hop1": {
+        "ticker": "COIN",
+        "sector": "09 Crypto Assets",
+        "entity": "Coinbase Global, Inc.",
+        "corr": 0.3103,
+        "lag": -4,
+        "hit_rate": 0.833,
+        "direction": "bull",
+        "avg_ret_1d": 2.523,
+        "confidence": 0.496
+      },
+      "hop2": [
+        {
+          "ticker": "HOOD",
+          "ticker_corr": 0.732,
+          "implied_dir": "bull",
+          "sector": "09 Crypto Assets",
+          "entity": "Robinhood Markets, Inc."
+        },
+        {
+          "ticker": "SOFI",
+          "ticker_corr": 0.542,
+          "implied_dir": "bull",
+          "sector": "02 Finance",
+          "entity": "SoFi Technologies, Inc."
+        },
+        {
+          "ticker": "SPY",
+          "ticker_corr": 0.529,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": null
+        },
+        {
+          "ticker": "QQQ",
+          "ticker_corr": 0.501,
+          "implied_dir": "bull",
+          "sector": null,
+          "entity": "INVESCO QQQ TRUST, SERIES 1"
+        }
+      ]
+    },
     {
       "term": "china",
       "is_active_today": false,
@@ -798,52 +851,6 @@
           "implied_dir": "bull",
           "sector": "03 Life Sciences",
           "entity": "AMGEN INC"
-        }
-      ]
-    },
-    {
-      "term": "model",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "COIN",
-        "sector": "09 Crypto Assets",
-        "entity": "Coinbase Global, Inc.",
-        "corr": 0.3103,
-        "lag": -4,
-        "hit_rate": 0.833,
-        "direction": "bull",
-        "avg_ret_1d": 2.523,
-        "confidence": 0.496
-      },
-      "hop2": [
-        {
-          "ticker": "HOOD",
-          "ticker_corr": 0.732,
-          "implied_dir": "bull",
-          "sector": "09 Crypto Assets",
-          "entity": "Robinhood Markets, Inc."
-        },
-        {
-          "ticker": "SOFI",
-          "ticker_corr": 0.542,
-          "implied_dir": "bull",
-          "sector": "02 Finance",
-          "entity": "SoFi Technologies, Inc."
-        },
-        {
-          "ticker": "SPY",
-          "ticker_corr": 0.529,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": null
-        },
-        {
-          "ticker": "QQQ",
-          "ticker_corr": 0.501,
-          "implied_dir": "bull",
-          "sector": null,
-          "entity": "INVESCO QQQ TRUST, SERIES 1"
         }
       ]
     },
@@ -5416,7 +5423,82 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "COIN",
+      "sector": "09 Crypto Assets",
+      "entity": "Coinbase Global, Inc.",
+      "fund_score": 0.58,
+      "inbound": [
+        {
+          "term": "model",
+          "direction": "bull",
+          "today_z": 1.613,
+          "hit_rate": 0.833
+        }
+      ]
+    },
+    {
+      "ticker": "HOOD",
+      "sector": "09 Crypto Assets",
+      "entity": "Robinhood Markets, Inc.",
+      "fund_score": 0.477,
+      "inbound": [
+        {
+          "term": "model",
+          "via": "COIN",
+          "direction": "bull",
+          "today_z": 1.613,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "SOFI",
+      "sector": "02 Finance",
+      "entity": "SoFi Technologies, Inc.",
+      "fund_score": 0.322,
+      "inbound": [
+        {
+          "term": "model",
+          "via": "COIN",
+          "direction": "bull",
+          "today_z": 1.613,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "SPY",
+      "sector": null,
+      "entity": null,
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "model",
+          "via": "COIN",
+          "direction": "bull",
+          "today_z": 1.613,
+          "indirect": true
+        }
+      ]
+    },
+    {
+      "ticker": "QQQ",
+      "sector": null,
+      "entity": "INVESCO QQQ TRUST, SERIES 1",
+      "fund_score": null,
+      "inbound": [
+        {
+          "term": "model",
+          "via": "COIN",
+          "direction": "bull",
+          "today_z": 1.613,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
     "stock_signals": 181,
