@@ -25779,10 +25779,30 @@
       "hash_ok": true,
       "ood": true,
       "unfreeze_ready": false
+    },
+    {
+      "updated": "2026-11-25T04:31:23Z",
+      "n_pred_total": 22500,
+      "n_evaluated": 21030,
+      "models": {
+        "RandomForest": {
+          "alpha": -0.435,
+          "p": 0.0023,
+          "n": 7369
+        },
+        "GradientBoosting": {
+          "alpha": -0.474,
+          "p": 0.0018,
+          "n": 7369
+        }
+      },
+      "hash_ok": true,
+      "ood": true,
+      "unfreeze_ready": false
     }
   ],
   "latest": {
-    "updated": "2026-11-24T23:11:35Z",
+    "updated": "2026-11-25T04:31:23Z",
     "baseline_date": "2026-05-25",
     "model_hashes": {
       "RandomForest": "a2947618dfbb05bd",
@@ -25794,10 +25814,10 @@
       "n_dates": 25
     },
     "prediction_log": {
-      "total": 22320,
+      "total": 22500,
       "evaluated": 21030,
-      "pending": 1290,
-      "new_today": 0,
+      "pending": 1470,
+      "new_today": 180,
       "newly_evaluated": 0
     },
     "forward": {
@@ -25899,9 +25919,9 @@
       "confidence_note": "UNTESTED REGIME: OVERSOLD-BOUNCE was 0.0% of training data. Predictions unreliable."
     },
     "bias_monitor": {
-      "n_total_predictions": 22320,
+      "n_total_predictions": 22500,
       "n_evaluated": 21030,
-      "long_ratio": 0.852,
+      "long_ratio": 0.853,
       "long_bias_warning": true,
       "top_sector": "Technology",
       "top_sector_pct": 41.9,
@@ -25916,7 +25936,7 @@
     "alerts": [
       "REGIME CHANGE: non-RISK-ON data detected in forward predictions",
       "OOD: UNTESTED REGIME: OVERSOLD-BOUNCE was 0.0% of training data. Predictions unreliable.",
-      "BIAS: long_ratio=85.2% \u2014 model may be systematically long"
+      "BIAS: long_ratio=85.3% \u2014 model may be systematically long"
     ],
     "unfreeze_check": {
       "forward_alpha_significant": false,
@@ -25925,5 +25945,5 @@
     },
     "label": "ADVISORY ONLY \u00b7 paper trading \u00b7 unverified \u00b7 single-regime baseline"
   },
-  "updated": "2026-11-24T23:11:35Z"
+  "updated": "2026-11-25T04:31:23Z"
 }
