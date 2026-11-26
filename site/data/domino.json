@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-11-26T17:50:38+00:00",
+  "generated_at": "2026-11-26T20:21:46+00:00",
   "source": {
-    "signal_corr_updated": "2026-11-26T17:49:47Z",
+    "signal_corr_updated": "2026-11-26T20:20:58Z",
     "n_pairs_total": 3006,
     "n_dates": 180,
     "prices_tickers": 91,
@@ -20,8 +20,48 @@
     },
     "active_z_threshold": 1.5
   },
-  "active_terms": {},
+  "active_terms": {
+    "supply": 1.871,
+    "deals": 1.648,
+    "europe": 1.539,
+    "nuclear": 1.581,
+    "performance": 1.664,
+    "japan": 1.83,
+    "event": 1.7,
+    "looking": 1.682,
+    "shoppers": 3.214,
+    "fresh": 2.698,
+    "james": 1.721,
+    "retail": 2.077,
+    "name": 2.371,
+    "personal": 2.19
+  },
   "stock_chains": [
+    {
+      "term": "europe",
+      "is_active_today": true,
+      "today_z": 1.539,
+      "hop1": {
+        "ticker": "CRWD",
+        "sector": "06 Technology",
+        "entity": "CrowdStrike Holdings, Inc.",
+        "corr": -0.3767,
+        "lag": -4,
+        "hit_rate": 0.615,
+        "direction": "bear",
+        "avg_ret_1d": 0.97,
+        "confidence": 0.449
+      },
+      "hop2": [
+        {
+          "ticker": "PANW",
+          "ticker_corr": 0.512,
+          "implied_dir": "bear",
+          "sector": "06 Technology",
+          "entity": "Palo Alto Networks Inc"
+        }
+      ]
+    },
     {
       "term": "expected",
       "is_active_today": false,
@@ -267,6 +307,23 @@
           "entity": "Datadog, Inc."
         }
       ]
+    },
+    {
+      "term": "rise",
+      "is_active_today": false,
+      "today_z": null,
+      "hop1": {
+        "ticker": "MRNA",
+        "sector": "03 Life Sciences",
+        "entity": "Moderna, Inc.",
+        "corr": 0.3813,
+        "lag": -5,
+        "hit_rate": 0.875,
+        "direction": "bull",
+        "avg_ret_1d": 3.745,
+        "confidence": 0.56
+      },
+      "hop2": []
     },
     {
       "term": "leader",
@@ -1354,31 +1411,6 @@
         "confidence": 0.452
       },
       "hop2": []
-    },
-    {
-      "term": "europe",
-      "is_active_today": false,
-      "today_z": null,
-      "hop1": {
-        "ticker": "CRWD",
-        "sector": "06 Technology",
-        "entity": "CrowdStrike Holdings, Inc.",
-        "corr": -0.3767,
-        "lag": -4,
-        "hit_rate": 0.615,
-        "direction": "bear",
-        "avg_ret_1d": 0.97,
-        "confidence": 0.449
-      },
-      "hop2": [
-        {
-          "ticker": "PANW",
-          "ticker_corr": 0.512,
-          "implied_dir": "bear",
-          "sector": "06 Technology",
-          "entity": "Palo Alto Networks Inc"
-        }
-      ]
     },
     {
       "term": "bond",
@@ -3972,10 +4004,40 @@
       "is_active_today": false
     }
   ],
-  "ticker_pressure": [],
+  "ticker_pressure": [
+    {
+      "ticker": "CRWD",
+      "sector": "06 Technology",
+      "entity": "CrowdStrike Holdings, Inc.",
+      "fund_score": 0.268,
+      "inbound": [
+        {
+          "term": "europe",
+          "direction": "bear",
+          "today_z": 1.539,
+          "hit_rate": 0.615
+        }
+      ]
+    },
+    {
+      "ticker": "PANW",
+      "sector": "06 Technology",
+      "entity": "Palo Alto Networks Inc",
+      "fund_score": 0.269,
+      "inbound": [
+        {
+          "term": "europe",
+          "via": "CRWD",
+          "direction": "bear",
+          "today_z": 1.539,
+          "indirect": true
+        }
+      ]
+    }
+  ],
   "quality": {
     "data_window_days": 180,
-    "stock_signals": 133,
+    "stock_signals": 134,
     "macro_signals": 5,
     "sector_diversity": 9,
     "grade": "B",
