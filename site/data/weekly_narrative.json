@@ -1,46 +1,46 @@
 {
- "week": "2026-W47",
- "generated_at": "2026-11-21T03:09:39Z",
+ "week": "2026-W48",
+ "generated_at": "2026-11-28T03:53:07Z",
  "status": {
-  "forward_alpha_pct": -0.4626,
+  "forward_alpha_pct": -0.4456,
   "forward_alpha_ci95": [
-   -0.962,
-   0.037
+   -0.926,
+   0.035
   ],
-  "forward_alpha_p_nw": 0.0691,
+  "forward_alpha_p_nw": 0.069,
   "live_sentiment": {
    "since": "2026-08-06",
-   "n_folds": 38,
-   "alpha_pct": -0.097
+   "n_folds": 42,
+   "alpha_pct": -0.014
   },
   "gate": {
    "pass": false,
-   "reason": "FAIL: paired (system − always-buy) alpha -0.68pp, NW p=0.0590 (system -0.46%, buy +0.21%)",
-   "paired_diff_pp": -0.6763,
-   "paired_p": 0.059
+   "reason": "FAIL: paired (system − always-buy) alpha -0.67pp, NW p=0.0509 (system -0.45%, buy +0.23%)",
+   "paired_diff_pp": -0.6744,
+   "paired_p": 0.0509
   },
-  "n_folds_total": 106
+  "n_folds_total": 110
  },
  "week_activity": {
-  "n": 623,
-  "directional_acc": 0.189
+  "n": 356,
+  "directional_acc": 0.205
  },
  "power": {
-  "n_folds": 106,
-  "fold_sd_pct": 2.241,
-  "rho1": 0.674,
-  "nw_sd_pct": 3.851,
+  "n_folds": 110,
+  "fold_sd_pct": 2.243,
+  "rho1": 0.67,
+  "nw_sd_pct": 3.84,
   "rows": [
    {
     "effect_pct": 0.2,
     "annualized": "~10%/yr",
-    "folds_needed": 1424,
-    "months_needed": 67.8
+    "folds_needed": 1416,
+    "months_needed": 67.4
    },
    {
     "effect_pct": 0.5,
     "annualized": "~28%/yr",
-    "folds_needed": 228,
+    "folds_needed": 227,
     "months_needed": 10.8
    },
    {
@@ -56,7 +56,7 @@
   "id": "CP-2026-11-01",
   "registered_at": "2026-08-05T22:10:00Z",
   "decision_date": "2026-11-01",
-  "elapsed_folds": 38,
+  "elapsed_folds": 42,
   "expected_folds": 61,
   "mde_pct": 1.26,
   "rule_summary": "2026-11-01에 live-sentiment forward alpha 점추정이 양수가 아니면 → 탐색 중단. 근거: 이 표본으로는 현실적 크기의 엣지 유무를 판정할 수 없고, 무기한 대기의 기대 가치가 음수이므로 중단한다. 이는 '엣지가 없음이 증명됐다'가 아니라 '이 설계로는 알 수 없다'이다."
@@ -65,94 +65,94 @@
   "warning": "벤치마크를 이기지 못하는 것으로 확인된 시스템의 출력. 검증 대상이지 추천이 아님.",
   "items": [
    {
-    "ticker": "NVDA",
-    "action": "BUY",
-    "confidence": 0.944,
-    "count": 6
-   },
-   {
-    "ticker": "SBUX",
+    "ticker": "BMRN",
     "action": "REDUCE",
-    "confidence": 0.308,
+    "confidence": 0.265,
     "count": 6
    },
    {
     "ticker": "CHTR",
     "action": "REDUCE",
-    "confidence": 0.26,
-    "count": 6
-   },
-   {
-    "ticker": "PEP",
-    "action": "REDUCE",
-    "confidence": 0.24,
-    "count": 6
-   },
-   {
-    "ticker": "DIA",
-    "action": "BUY",
-    "confidence": 0.901,
+    "confidence": 0.267,
     "count": 5
    },
    {
     "ticker": "JPM",
     "action": "BUY",
-    "confidence": 0.9,
+    "confidence": 0.839,
     "count": 4
-   },
-   {
-    "ticker": "INTC",
-    "action": "SELL",
-    "confidence": 0.823,
-    "count": 4
-   },
-   {
-    "ticker": "SPY",
-    "action": "BUY",
-    "confidence": 0.901,
-    "count": 3
-   },
-   {
-    "ticker": "META",
-    "action": "BUY",
-    "confidence": 0.863,
-    "count": 3
-   },
-   {
-    "ticker": "NXPI",
-    "action": "REDUCE",
-    "confidence": 0.291,
-    "count": 3
-   },
-   {
-    "ticker": "MSFT",
-    "action": "BUY",
-    "confidence": 0.95,
-    "count": 2
-   },
-   {
-    "ticker": "CRM",
-    "action": "BUY",
-    "confidence": 0.912,
-    "count": 2
-   },
-   {
-    "ticker": "ASML",
-    "action": "SELL",
-    "confidence": 0.9,
-    "count": 2
-   },
-   {
-    "ticker": "USO",
-    "action": "BUY",
-    "confidence": 0.885,
-    "count": 2
    },
    {
     "ticker": "QQQ",
     "action": "BUY",
-    "confidence": 0.879,
+    "confidence": 0.883,
+    "count": 3
+   },
+   {
+    "ticker": "INTC",
+    "action": "SELL",
+    "confidence": 0.772,
+    "count": 3
+   },
+   {
+    "ticker": "DIA",
+    "action": "BUY",
+    "confidence": 0.883,
     "count": 2
+   },
+   {
+    "ticker": "ETSY",
+    "action": "BUY",
+    "confidence": 0.867,
+    "count": 2
+   },
+   {
+    "ticker": "CVX",
+    "action": "BUY",
+    "confidence": 0.847,
+    "count": 2
+   },
+   {
+    "ticker": "HOOD",
+    "action": "BUY",
+    "confidence": 0.837,
+    "count": 2
+   },
+   {
+    "ticker": "PDD",
+    "action": "REDUCE",
+    "confidence": 0.31,
+    "count": 2
+   },
+   {
+    "ticker": "TLT",
+    "action": "REDUCE",
+    "confidence": 0.28,
+    "count": 2
+   },
+   {
+    "ticker": "PEP",
+    "action": "REDUCE",
+    "confidence": 0.24,
+    "count": 2
+   },
+   {
+    "ticker": "EBAY",
+    "action": "BUY",
+    "confidence": 0.908,
+    "count": 1
+   },
+   {
+    "ticker": "ASML",
+    "action": "SELL",
+    "confidence": 0.885,
+    "count": 1
+   },
+   {
+    "ticker": "SPY",
+    "action": "BUY",
+    "confidence": 0.883,
+    "count": 1
    }
   ]
  },
